@@ -1,0 +1,25 @@
+--------- beginning of main
+09-27 00:30:13.116  9887  9887 I BosonTree: BOSON_NODE_CREATE id=2 tag=text
+09-27 00:30:13.116  9887  9887 I BosonTree: BOSON_LAYOUT id=2 x=24 y=24 width=336 height=60
+09-27 00:30:13.117  9887  9887 I BosonTree: BOSON_NODE_CREATE id=3 tag=button
+09-27 00:30:13.117  9887  9887 I BosonTree: BOSON_LAYOUT id=3 x=24 y=100 width=336 height=64
+09-27 00:30:13.117  9887  9887 I BosonTree: BOSON_NODE_CREATE id=6 tag=text
+09-27 00:30:13.117  9887  9887 I BosonTree: BOSON_LAYOUT id=6 x=24 y=180 width=164 height=56
+09-27 00:30:13.117  9887  9887 I BosonTree: BOSON_NODE_CREATE id=7 tag=text
+09-27 00:30:13.117  9887  9887 I BosonTree: BOSON_LAYOUT id=7 x=196 y=180 width=164 height=56
+09-27 00:30:13.117  9887  9887 I BosonTree: BOSON_FRAME nodes=4
+09-27 00:30:14.225  9887  9887 I BosonTree: BOSON_LAYOUT id=2 x=24 y=24 width=336 height=60
+09-27 00:30:14.226  9887  9887 I BosonTree: BOSON_LAYOUT id=3 x=24 y=100 width=336 height=64
+09-27 00:30:14.226  9887  9887 I BosonTree: BOSON_NODE_CREATE id=4 tag=text
+09-27 00:30:14.226  9887  9887 I BosonTree: BOSON_LAYOUT id=4 x=24 y=180 width=336 height=48
+09-27 00:30:14.226  9887  9887 I BosonTree: BOSON_LAYOUT id=6 x=24 y=244 width=164 height=56
+09-27 00:30:14.226  9887  9887 I BosonTree: BOSON_LAYOUT id=7 x=196 y=244 width=164 height=56
+09-27 00:30:14.226  9887  9887 I BosonTree: BOSON_FRAME nodes=5
+09-27 00:30:14.226  9887  9887 I BosonTree: BOSON_TOUCH_RESULT=0 node=3
+09-27 00:30:14.954  9887  9887 I BosonTree: BOSON_LAYOUT id=2 x=24 y=24 width=336 height=60
+09-27 00:30:14.955  9887  9887 I BosonTree: BOSON_LAYOUT id=3 x=24 y=100 width=336 height=64
+09-27 00:30:14.955  9887  9887 I BosonTree: BOSON_LAYOUT id=6 x=24 y=180 width=164 height=56
+09-27 00:30:14.955  9887  9887 I BosonTree: BOSON_LAYOUT id=7 x=196 y=180 width=164 height=56
+09-27 00:30:14.955  9887  9887 I BosonTree: BOSON_NODE_REMOVE id=4
+09-27 00:30:14.955  9887  9887 I BosonTree: BOSON_FRAME nodes=4
+09-27 00:30:14.955  9887  9887 I BosonTree: BOSON_TOUCH_RESULT=0 node=3
