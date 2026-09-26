@@ -2,6 +2,7 @@ package dev.boson.tree;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -20,6 +21,7 @@ public final class TreeActivity extends Activity {
 
     private native long nativeCreate(String source, int widthDp, int heightDp);
     private native int nativeTap(long runtime, int nodeId, int widthDp, int heightDp);
+    private native int nativeRelayout(long runtime, int widthDp, int heightDp);
     private native void nativeDestroy(long runtime);
 
     private final SparseArray<View> views = new SparseArray<>();
@@ -27,6 +29,8 @@ public final class TreeActivity extends Activity {
     private FrameLayout root;
     private float density;
     private long runtime;
+    private boolean detailedLogs = true;
+    private boolean eventFailed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,9 +41,36 @@ public final class TreeActivity extends Activity {
         getWindow().setStatusBarColor(0xfff7f9fc);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         setContentView(root);
+        root.addOnLayoutChangeListener((view, left, top, right, bottom,
+                                        oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (runtime == 0 || right - left == oldRight - oldLeft && bottom - top == oldBottom - oldTop) return;
+            int width = screenWidthDp();
+            int height = screenHeightDp();
+            int result = nativeRelayout(runtime, width, height);
+            Log.i("BosonTree", "BOSON_RESIZE_RESULT=" + result +
+                    " width=" + width + " height=" + height +
+                    " root_px=" + root.getWidth() + "x" + root.getHeight());
+        });
         root.post(() -> {
             try {
-                runtime = nativeCreate(readSource(), screenWidthDp(), screenHeightDp());
+                String scenario = getIntent().getStringExtra("boson_scenario");
+                String asset = "tree.js";
+                String prefix = "";
+                if ("stress".equals(scenario)) {
+                    int count = Math.max(0, Math.min(1000, getIntent().getIntExtra("boson_count", 100)));
+                    asset = "stress.js";
+                    prefix = "const BOSON_COUNT = " + count + ";\n";
+                    detailedLogs = false;
+                } else if ("long_text".equals(scenario)) {
+                    asset = "long_text.js";
+                } else if ("error".equals(scenario)) {
+                    asset = "error.js";
+                }
+                long started = SystemClock.elapsedRealtimeNanos();
+                runtime = nativeCreate(prefix + readSource(asset), screenWidthDp(), screenHeightDp());
+                long elapsedUs = (SystemClock.elapsedRealtimeNanos() - started) / 1000;
+                Log.i("BosonTree", "BOSON_METRIC init_total_us=" + elapsedUs +
+                        " scenario=" + (scenario == null ? "default" : scenario));
                 if (runtime == 0) showError("V8 or tree init failed");
             } catch (IOException error) {
                 Log.e("BosonTree", "BOSON_JS_LOAD_ERROR", error);
@@ -52,8 +83,8 @@ public final class TreeActivity extends Activity {
     private int screenHeightDp() { return Math.round(root.getHeight() / density); }
     private int px(int dp) { return Math.round(dp * density); }
 
-    private String readSource() throws IOException {
-        try (InputStream input = getAssets().open("tree.js");
+    private String readSource(String name) throws IOException {
+        try (InputStream input = getAssets().open(name);
              ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[4096];
             int count;
@@ -81,9 +112,13 @@ public final class TreeActivity extends Activity {
                 button.setAllCaps(false);
                 button.setTextSize(20);
                 button.setOnClickListener(clicked -> {
-                    if (runtime == 0) return;
+                    if (runtime == 0 || eventFailed) return;
                     int result = nativeTap(runtime, id, screenWidthDp(), screenHeightDp());
                     Log.i("BosonTree", "BOSON_TOUCH_RESULT=" + result + " node=" + id);
+                    if (result != 0) {
+                        eventFailed = true;
+                        showError("JS event failed; reopen the app");
+                    }
                 });
                 view = button;
             } else {
@@ -95,7 +130,7 @@ public final class TreeActivity extends Activity {
             }
             views.put(id, view);
             root.addView(view);
-            Log.i("BosonTree", "BOSON_NODE_CREATE id=" + id + " tag=" + tag);
+            if (detailedLogs) Log.i("BosonTree", "BOSON_NODE_CREATE id=" + id + " tag=" + tag);
         }
         ((TextView) view).setText(text);
         view.setContentDescription("boson-node:" + id + ":" + text);
@@ -103,7 +138,7 @@ public final class TreeActivity extends Activity {
         params.leftMargin = px(x);
         params.topMargin = px(y);
         view.setLayoutParams(params);
-        Log.i("BosonTree", "BOSON_LAYOUT id=" + id + " x=" + x + " y=" + y +
+        if (detailedLogs) Log.i("BosonTree", "BOSON_LAYOUT id=" + id + " x=" + x + " y=" + y +
                 " width=" + width + " height=" + height);
     }
 
@@ -114,7 +149,7 @@ public final class TreeActivity extends Activity {
             View view = views.valueAt(index);
             root.removeView(view);
             views.removeAt(index);
-            Log.i("BosonTree", "BOSON_NODE_REMOVE id=" + id);
+            if (detailedLogs) Log.i("BosonTree", "BOSON_NODE_REMOVE id=" + id);
         }
         Log.i("BosonTree", "BOSON_FRAME nodes=" + views.size());
     }

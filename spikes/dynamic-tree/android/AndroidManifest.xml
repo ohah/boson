@@ -4,7 +4,8 @@
     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="36" />
     <application android:label="Boson Dynamic Tree" android:extractNativeLibs="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
-        <activity android:name="dev.boson.tree.TreeActivity" android:exported="true">
+        <activity android:name="dev.boson.tree.TreeActivity" android:exported="true"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

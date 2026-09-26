@@ -1,0 +1,11 @@
+boson.createNode(1, 0, "column", 0);
+boson.setStyle(1, { padding: 24, gap: 12 });
+boson.createNode(2, 1, "text", 0);
+boson.setText(2, "Long text / 긴 텍스트 / العربية / 😀😀😀");
+boson.setStyle(2, { height: 48 });
+boson.createNode(3, 1, "text", 10);
+boson.setText(3, "A very long sentence that should wrap across multiple lines on a narrow phone screen. ".repeat(6));
+boson.setStyle(3, { height: 48 });
+boson.createNode(4, 1, "text", 20);
+boson.setText(4, "This sibling must remain below the long text.");
+boson.setStyle(4, { height: 48 });

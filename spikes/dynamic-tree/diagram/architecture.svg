@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1000 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="boson-architecture-title boson-architecture-desc">
+        <title id="boson-architecture-title">Boson 동적 UI 트리 PoC 구조</title>
+        <desc id="boson-architecture-desc">JavaScript tree.js가 V8 C++ 어댑터를 거쳐 Rust UI 트리를 변경하고, Rust 레이아웃 결과가 iOS UIKit과 Android 네이티브 뷰에 각각 전달되는 구조도.</desc>
+        <defs>
+          <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Sans+KR:wght@400;500;600&amp;display=swap');</style>
+          <marker id="boson-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#4f5d75"/></marker>
+        </defs>
+        <rect x="0" y="0" width="1000" height="520" fill="#f5f5f5"/>
+
+        <!-- Connectors are drawn before nodes. -->
+        <path d="M 228,240 H 268" fill="none" stroke="#4f5d75" stroke-width="2" marker-end="url(#boson-arrow)"/>
+        <path d="M 450,240 H 490" fill="none" stroke="#4f5d75" stroke-width="2" marker-end="url(#boson-arrow)"/>
+        <path d="M 712,214 H 740 Q 748,214 748,206 V 157 Q 748,149 756,149 H 778" fill="none" stroke="#4f5d75" stroke-width="2" marker-end="url(#boson-arrow)"/>
+        <path d="M 712,266 H 740 Q 748,266 748,274 V 351 Q 748,359 756,359 H 778" fill="none" stroke="#4f5d75" stroke-width="2" marker-end="url(#boson-arrow)"/>
+
+        <rect x="48" y="180" width="180" height="120" rx="7" fill="#ffffff" stroke="#2d3142" stroke-opacity=".12"/>
+        <circle cx="70" cy="204" r="4" fill="#4f5d75"/>
+        <text x="82" y="208" fill="#4f5d75" font-family="Geist Mono, monospace" font-size="10" letter-spacing=".12em">SOURCE</text>
+        <text x="68" y="244" fill="#2d3142" font-family="Geist, Noto Sans KR, sans-serif" font-size="18" font-weight="600">tree.js</text>
+        <text x="68" y="270" fill="#4f5d75" font-family="Geist, Noto Sans KR, sans-serif" font-size="12">생성 · 삭제 · 이벤트</text>
+
+        <rect x="270" y="180" width="180" height="120" rx="7" fill="#ffffff" stroke="#2d3142" stroke-opacity=".12"/>
+        <circle cx="292" cy="204" r="4" fill="#4f5d75"/>
+        <text x="304" y="208" fill="#4f5d75" font-family="Geist Mono, monospace" font-size="10" letter-spacing=".12em">RUNTIME</text>
+        <text x="290" y="244" fill="#2d3142" font-family="Geist, Noto Sans KR, sans-serif" font-size="18" font-weight="600">V8 + C++</text>
+        <text x="290" y="270" fill="#4f5d75" font-family="Geist, Noto Sans KR, sans-serif" font-size="12">JS 호출을 C ABI로 전달</text>
+
+        <rect x="492" y="180" width="220" height="120" rx="7" fill="#eb6c36" fill-opacity=".08" stroke="#eb6c36" stroke-width="1.5"/>
+        <circle cx="514" cy="204" r="4" fill="#eb6c36"/>
+        <text x="526" y="208" fill="#4f5d75" font-family="Geist Mono, monospace" font-size="10" letter-spacing=".12em">SHARED CORE</text>
+        <text x="512" y="244" fill="#2d3142" font-family="Geist, Noto Sans KR, sans-serif" font-size="18" font-weight="600">Rust UI 트리</text>
+        <text x="512" y="270" fill="#4f5d75" font-family="Geist, Noto Sans KR, sans-serif" font-size="12">부모·순서·행/열 좌표 계산</text>
+
+        <rect x="780" y="90" width="170" height="118" rx="7" fill="#ffffff" stroke="#2d3142" stroke-opacity=".12"/>
+        <circle cx="802" cy="114" r="4" fill="#4f5d75"/>
+        <text x="814" y="118" fill="#4f5d75" font-family="Geist Mono, monospace" font-size="10" letter-spacing=".12em">IOS HOST</text>
+        <text x="800" y="154" fill="#2d3142" font-family="Geist, Noto Sans KR, sans-serif" font-size="18" font-weight="600">UIKit</text>
+        <text x="800" y="180" fill="#4f5d75" font-family="Geist, Noto Sans KR, sans-serif" font-size="12">UILabel · UIButton</text>
+
+        <rect x="780" y="300" width="170" height="118" rx="7" fill="#ffffff" stroke="#2d3142" stroke-opacity=".12"/>
+        <circle cx="802" cy="324" r="4" fill="#4f5d75"/>
+        <text x="814" y="328" fill="#4f5d75" font-family="Geist Mono, monospace" font-size="10" letter-spacing=".12em">ANDROID HOST</text>
+        <text x="800" y="364" fill="#2d3142" font-family="Geist, Noto Sans KR, sans-serif" font-size="18" font-weight="600">Native Views</text>
+        <text x="800" y="390" fill="#4f5d75" font-family="Geist, Noto Sans KR, sans-serif" font-size="12">TextView · Button</text>
+
+        <line x1="48" y1="462" x2="950" y2="462" stroke="#2d3142" stroke-opacity=".12"/>
+        <circle cx="62" cy="486" r="4" fill="#eb6c36"/>
+        <text x="74" y="490" fill="#4f5d75" font-family="Geist, Noto Sans KR, sans-serif" font-size="12">공통 상태와 레이아웃</text>
+        <circle cx="284" cy="486" r="4" fill="#4f5d75"/>
+        <text x="296" y="490" fill="#4f5d75" font-family="Geist, Noto Sans KR, sans-serif" font-size="12">플랫폼별 실제 화면</text>
+      </svg>

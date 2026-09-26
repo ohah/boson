@@ -33,13 +33,23 @@ mkdir -p "$output_dir/classes" "$output_dir/dex" "$output_dir/stage/assets" \
   -I"$v8_dir/buildtools/third_party/libc++" \
   -isystem "$v8_dir/third_party/libc++/src/include" \
   -isystem "$v8_dir/third_party/libc++abi/src/include" \
-  -I"$v8_dir/include" -c "$spike_dir/android/runtime.cc" -o "$output_dir/runtime.o"
+  -I"$v8_dir/include" -I"$spike_dir/runtime" \
+  -c "$spike_dir/runtime/v8_tree.cc" -o "$output_dir/runtime.o"
+"$v8_cxx" --target=aarch64-linux-android29 "--sysroot=$ndk_root/sysroot" \
+  -std=c++20 -O2 -fPIC -fexperimental-relative-c++-abi-vtables \
+  -nostdinc++ -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE \
+  -I"$v8_dir/buildtools/third_party/libc++" \
+  -isystem "$v8_dir/third_party/libc++/src/include" \
+  -isystem "$v8_dir/third_party/libc++abi/src/include" \
+  -I"$v8_dir/include" -I"$spike_dir/runtime" \
+  -c "$spike_dir/android/jni.cc" -o "$output_dir/jni.o"
 
 rustc --edition=2024 --crate-type staticlib --target aarch64-linux-android \
   -O -C debuginfo=0 -C panic=abort "$spike_dir/rust/tree.rs" \
   -o "$output_dir/libboson_tree_core.a"
 
-"$android_cxx" -shared "$output_dir/runtime.o" "$output_dir/libboson_tree_core.a" \
+"$android_cxx" -shared "$output_dir/runtime.o" "$output_dir/jni.o" \
+  "$output_dir/libboson_tree_core.a" \
   "$v8_archive" "$v8_libcxx" "$v8_libcxxabi" \
   "-fuse-ld=$v8_lld" -Wl,--gc-sections -nostdlib++ -llog -ldl \
   -o "$output_dir/stage/lib/arm64-v8a/libboson_tree.so"
@@ -49,6 +59,9 @@ rustc --edition=2024 --crate-type staticlib --target aarch64-linux-android \
 "$build_tools/d8" --min-api 29 --lib "$android_jar" --output "$output_dir/dex" \
   "$output_dir/classes/dev/boson/tree/TreeActivity.class"
 cp "$spike_dir/tree.js" "$output_dir/stage/assets/tree.js"
+cp "$spike_dir/scenarios/stress.js" "$output_dir/stage/assets/stress.js"
+cp "$spike_dir/scenarios/long_text.js" "$output_dir/stage/assets/long_text.js"
+cp "$spike_dir/scenarios/error.js" "$output_dir/stage/assets/error.js"
 cp "$output_dir/dex/classes.dex" "$output_dir/stage/classes.dex"
 
 keystore="$output_dir/debug.keystore"
@@ -65,7 +78,8 @@ final="$output_dir/boson-dynamic-tree.apk"
 "$build_tools/aapt2" link -o "$unsigned" -I "$android_jar" \
   --manifest "$spike_dir/android/AndroidManifest.xml" \
   --min-sdk-version 29 --target-sdk-version 36
-(cd "$output_dir/stage" && zip -q -u "$unsigned" classes.dex assets/tree.js lib/arm64-v8a/libboson_tree.so)
+(cd "$output_dir/stage" && zip -q -u "$unsigned" classes.dex assets/tree.js \
+  assets/stress.js assets/long_text.js assets/error.js lib/arm64-v8a/libboson_tree.so)
 "$build_tools/zipalign" -f 4 "$unsigned" "$aligned"
 "$build_tools/apksigner" sign --ks "$keystore" --ks-pass pass:android \
   --key-pass pass:android --out "$final" "$aligned"
