@@ -9,8 +9,11 @@ extern "C" {
 
 typedef struct BosonRuntime BosonRuntime;
 typedef void (*BosonNodeCallback)(void *user_data, int32_t node_id, const char *tag);
+typedef void (*BosonTextCallback)(void *user_data, const char *text);
 
 BosonRuntime *boson_runtime_new(BosonNodeCallback callback, void *user_data);
+void boson_runtime_set_text_callback(BosonRuntime *runtime,
+                                     BosonTextCallback callback, void *user_data);
 int32_t boson_runtime_eval(BosonRuntime *runtime, const char *source);
 int32_t boson_runtime_dispatch(BosonRuntime *runtime, int32_t node_id);
 const char *boson_runtime_last_error(BosonRuntime *runtime);
