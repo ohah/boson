@@ -1,0 +1,59 @@
+name: Android V8 정적 라이브러리
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 빌드 도구 준비
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zstd
+          git clone --depth=1 https://chromium.googlesource.com/chromium/tools/depot_tools.git "$RUNNER_TEMP/depot_tools"
+          echo "$RUNNER_TEMP/depot_tools" >> "$GITHUB_PATH"
+
+      - name: 고정된 V8 소스 받기
+        env:
+          V8_COMMIT: 7b50b62cb18f28617959e8452e2cd18195b38bcf
+        run: |
+          export PATH="$RUNNER_TEMP/depot_tools:$PATH"
+          mkdir -p "$RUNNER_TEMP/v8-checkout"
+          cd "$RUNNER_TEMP/v8-checkout"
+          fetch --nohistory --nohooks v8
+          printf "target_os = ['android']\n" >> .gclient
+          cd v8
+          git fetch origin "$V8_COMMIT" --depth=1
+          git checkout "$V8_COMMIT"
+          cd ..
+          gclient sync -D --nohooks
+          gclient runhooks
+
+      - name: Android ARM64 V8 빌드
+        run: |
+          export PATH="$RUNNER_TEMP/depot_tools:$PATH"
+          cd "$RUNNER_TEMP/v8-checkout/v8"
+          mkdir -p out/boson-android
+          cp "$GITHUB_WORKSPACE/spikes/v8-language-bridge/android-v8.args.gn" out/boson-android/args.gn
+          gn gen out/boson-android
+          ninja -C out/boson-android -j "$(nproc)" v8_monolith
+          test -s out/boson-android/obj/libv8_monolith.a
+
+      - name: 빌드 결과 보관
+        run: |
+          cd "$RUNNER_TEMP/v8-checkout/v8/out/boson-android/obj"
+          zstd -T0 -3 libv8_monolith.a -o "$RUNNER_TEMP/libv8_monolith.a.zst"
+          sha256sum libv8_monolith.a > "$RUNNER_TEMP/libv8_monolith.a.sha256"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: boson-v8-android-arm64
+          path: |
+            ${{ runner.temp }}/libv8_monolith.a.zst
+            ${{ runner.temp }}/libv8_monolith.a.sha256
+          retention-days: 3
+          compression-level: 0
