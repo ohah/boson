@@ -10,6 +10,8 @@
 
 [전체 실행 로그](physical-log.txt)에 `BOSON_NODE_CREATE id=4`, `BOSON_NODE_REMOVE id=4`, 위 세 좌표와 `BOSON_TOUCH_RESULT=0` 두 건이 기록됐다. 접근성 덤프에서도 첫 터치 후 `boson-node:4:Detail added on tap 1`이 나타났고 두 번째 터치 후 사라졌다.
 
+[실기기 동작 영상](android-device-demo.mp4)
+
 | 시작 | 추가 | 삭제 |
 | --- | --- | --- |
 | ![시작 화면](physical-before.png) | ![첫 터치 뒤 상세 노드가 추가된 화면](physical-added.png) | ![두 번째 터치 뒤 상세 노드가 삭제된 화면](physical-removed.png) |

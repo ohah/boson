@@ -24,6 +24,7 @@ impl Kind {
     }
 }
 
+#[derive(Clone)]
 struct Node {
     id: i32,
     parent: i32,
@@ -37,7 +38,7 @@ struct Node {
     grow: i32,
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct Tree { nodes: Vec<Node> }
 
 type FrameCallback = extern "C" fn(*mut c_void, i32, *const c_char, *const c_char, i32, i32, i32, i32);
@@ -48,6 +49,19 @@ pub extern "C" fn boson_tree_new() -> *mut Tree { Box::into_raw(Box::new(Tree::d
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn boson_tree_free(tree: *mut Tree) {
     if !tree.is_null() { drop(unsafe { Box::from_raw(tree) }); }
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn boson_tree_clone(tree: *const Tree) -> *mut Tree {
+    let Some(tree) = (unsafe { tree.as_ref() }) else { return std::ptr::null_mut() };
+    Box::into_raw(Box::new(tree.clone()))
+}
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn boson_tree_restore(tree: *mut Tree, snapshot: *mut Tree) -> i32 {
+    let (Some(tree), Some(snapshot)) = (unsafe { tree.as_mut() }, unsafe { snapshot.as_ref() }) else { return -1 };
+    *tree = snapshot.clone();
+    0
 }
 
 #[unsafe(no_mangle)]
@@ -122,10 +136,10 @@ impl Tree {
             else if child.grow > 0 { 0 }
             else if horizontal { 0 }
             else { child.kind.default_height() }
-        }).sum();
+        }).fold(0_i32, i32::saturating_add);
         let free = main.saturating_sub(fixed).saturating_sub(gap_total).max(0);
-        let grow_total: i32 = children.iter().map(|child| child.grow).sum();
-        let mut cursor = if horizontal { x + node.padding } else { y + node.padding };
+        let grow_total: i32 = children.iter().map(|child| child.grow).fold(0_i32, i32::saturating_add);
+        let mut cursor = if horizontal { x.saturating_add(node.padding) } else { y.saturating_add(node.padding) };
         for child in children {
             let requested = if horizontal { child.width } else { child.height };
             let fixed_main = if requested >= 0 { requested }
@@ -138,9 +152,9 @@ impl Tree {
             let cross_size = if cross_requested >= 0 { cross_requested }
                 else if horizontal { inner_height } else { inner_width };
             let (child_x, child_y, child_w, child_h) = if horizontal {
-                (cursor, y + node.padding, main_size, cross_size)
+                (cursor, y.saturating_add(node.padding), main_size, cross_size)
             } else {
-                (x + node.padding, cursor, cross_size, main_size)
+                (x.saturating_add(node.padding), cursor, cross_size, main_size)
             };
             self.layout_node(child.id, child_x, child_y, child_w, child_h, callback, user_data);
             cursor = cursor.saturating_add(main_size).saturating_add(node.gap);
@@ -156,4 +170,126 @@ pub unsafe extern "C" fn boson_tree_layout(tree: *const Tree, width: i32, height
     let root = tree.nodes.iter().find(|node| node.parent == 0).unwrap();
     tree.layout_node(root.id, 0, 0, width, height, callback, user_data);
     0
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[derive(Debug, PartialEq, Eq)]
+    struct Frame { id: i32, x: i32, y: i32, width: i32, height: i32 }
+
+    extern "C" fn collect(user_data: *mut c_void, id: i32, _: *const c_char,
+                          _: *const c_char, x: i32, y: i32, width: i32, height: i32) {
+        let frames = unsafe { &mut *(user_data as *mut Vec<Frame>) };
+        frames.push(Frame { id, x, y, width, height });
+    }
+
+    fn frames(tree: &Tree, width: i32, height: i32) -> Vec<Frame> {
+        let mut result = Vec::new();
+        assert_eq!(unsafe { boson_tree_layout(tree, width, height, collect,
+            (&mut result as *mut Vec<Frame>).cast()) }, 0);
+        result
+    }
+
+    fn create(tree: &mut Tree, id: i32, parent: i32, tag: &str, order: i32) -> i32 {
+        let tag = CString::new(tag).unwrap();
+        unsafe { boson_tree_create(tree, id, parent, tag.as_ptr(), order) }
+    }
+
+    #[test]
+    fn invalid_ids_and_parents_leave_tree_unchanged() {
+        let mut tree = Tree::default();
+        assert_eq!(create(&mut tree, 2, 1, "text", 0), -1);
+        assert_eq!(create(&mut tree, 1, 0, "text", 0), -1);
+        assert_eq!(create(&mut tree, 1, 0, "column", 0), 0);
+        assert_eq!(create(&mut tree, 1, 0, "row", 0), -1);
+        assert_eq!(create(&mut tree, 2, 99, "text", 0), -1);
+        assert_eq!(create(&mut tree, 2, 1, "unsupported", 0), -1);
+        assert_eq!(create(&mut tree, 2, 1, "text", 0), 0);
+        assert_eq!(create(&mut tree, 3, 2, "text", 0), -1);
+        assert_eq!(tree.nodes.len(), 2);
+    }
+
+    #[test]
+    fn subtree_deletion_and_id_reuse() {
+        let mut tree = Tree::default();
+        assert_eq!(create(&mut tree, 1, 0, "column", 0), 0);
+        assert_eq!(create(&mut tree, 2, 1, "row", 0), 0);
+        assert_eq!(create(&mut tree, 3, 2, "text", 0), 0);
+        assert_eq!(create(&mut tree, 4, 1, "text", 1), 0);
+        assert_eq!(unsafe { boson_tree_remove(&mut tree, 2) }, 0);
+        assert_eq!(frames(&tree, 200, 200).iter().map(|frame| frame.id).collect::<Vec<_>>(), vec![1, 4]);
+        assert_eq!(create(&mut tree, 3, 1, "button", 2), 0);
+        assert_eq!(unsafe { boson_tree_remove(&mut tree, 2) }, -1);
+        assert_eq!(unsafe { boson_tree_remove(&mut tree, 1) }, 0);
+        assert!(tree.nodes.is_empty());
+        assert_eq!(create(&mut tree, 1, 0, "row", 0), 0);
+    }
+
+    #[test]
+    fn nested_order_gap_and_flex_layout() {
+        let mut tree = Tree::default();
+        create(&mut tree, 1, 0, "column", 0);
+        create(&mut tree, 2, 1, "text", 0);
+        create(&mut tree, 3, 1, "row", 20);
+        create(&mut tree, 4, 1, "text", 10);
+        create(&mut tree, 5, 3, "text", 0);
+        create(&mut tree, 6, 3, "text", 1);
+        unsafe {
+            boson_tree_set_style(&mut tree, 1, -1, -1, 10, 5, 0);
+            boson_tree_set_style(&mut tree, 2, -1, 20, 0, 0, 0);
+            boson_tree_set_style(&mut tree, 3, -1, 40, 0, 8, 0);
+            boson_tree_set_style(&mut tree, 4, -1, 30, 0, 0, 0);
+            boson_tree_set_style(&mut tree, 5, -1, -1, 0, 0, 1);
+            boson_tree_set_style(&mut tree, 6, -1, -1, 0, 0, 1);
+        }
+        assert_eq!(frames(&tree, 200, 200), vec![
+            Frame { id: 1, x: 0, y: 0, width: 200, height: 200 },
+            Frame { id: 2, x: 10, y: 10, width: 180, height: 20 },
+            Frame { id: 4, x: 10, y: 35, width: 180, height: 30 },
+            Frame { id: 3, x: 10, y: 70, width: 180, height: 40 },
+            Frame { id: 5, x: 10, y: 70, width: 86, height: 40 },
+            Frame { id: 6, x: 104, y: 70, width: 86, height: 40 },
+        ]);
+    }
+
+    #[test]
+    fn overfull_and_extreme_dimensions_do_not_panic() {
+        let mut tree = Tree::default();
+        create(&mut tree, 1, 0, "column", 0);
+        create(&mut tree, 2, 1, "text", 0);
+        create(&mut tree, 3, 1, "text", 1);
+        unsafe {
+            boson_tree_set_style(&mut tree, 1, -1, -1, 100, i32::MAX, 0);
+            boson_tree_set_style(&mut tree, 2, -1, i32::MAX, 0, 0, 0);
+            boson_tree_set_style(&mut tree, 3, -1, i32::MAX, 0, 0, 0);
+        }
+        let result = frames(&tree, 100, 100);
+        assert_eq!(result.len(), 3);
+        assert!(result.iter().all(|frame| frame.width >= 0 && frame.height >= 0));
+    }
+
+    #[test]
+    fn one_thousand_nodes_can_be_laid_out_and_removed() {
+        let mut tree = Tree::default();
+        create(&mut tree, 1, 0, "column", 0);
+        for id in 2..=1001 { assert_eq!(create(&mut tree, id, 1, "text", id), 0); }
+        assert_eq!(frames(&tree, 400, 800).len(), 1001);
+        assert_eq!(unsafe { boson_tree_remove(&mut tree, 1) }, 0);
+        assert!(tree.nodes.is_empty());
+    }
+
+    #[test]
+    fn failed_event_can_restore_tree_snapshot() {
+        let mut tree = Tree::default();
+        create(&mut tree, 1, 0, "column", 0);
+        let snapshot = unsafe { boson_tree_clone(&tree) };
+        create(&mut tree, 2, 1, "text", 0);
+        assert_eq!(tree.nodes.len(), 2);
+        assert_eq!(unsafe { boson_tree_restore(&mut tree, snapshot) }, 0);
+        unsafe { boson_tree_free(snapshot) };
+        assert_eq!(frames(&tree, 100, 100).len(), 1);
+        assert_eq!(create(&mut tree, 2, 1, "text", 0), 0);
+    }
 }

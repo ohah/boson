@@ -1,22 +1,23 @@
-#include <android/log.h>
-#include <jni.h>
+#include "boson_app.h"
 #include <libplatform/libplatform.h>
 #include <v8.h>
 
 #include <memory>
+#include <cstdio>
 #include <string>
 
 extern "C" {
 void *boson_tree_new();
 void boson_tree_free(void *tree);
+void *boson_tree_clone(const void *tree);
+int boson_tree_restore(void *tree, void *snapshot);
 int boson_tree_create(void *tree, int id, int parent, const char *tag, int order);
 int boson_tree_remove(void *tree, int id);
 int boson_tree_set_text(void *tree, int id, const char *text);
 int boson_tree_set_style(void *tree, int id, int width, int height,
                          int padding, int gap, int grow);
-using FrameCallback = void (*)(void *, int, const char *, const char *, int, int, int, int);
 int boson_tree_layout(const void *tree, int width, int height,
-                      FrameCallback callback, void *user_data);
+                      BosonFrameCallback callback, void *user_data);
 }
 
 namespace {
@@ -27,6 +28,7 @@ struct Runtime {
   v8::Global<v8::Context> context;
   v8::Global<v8::Function> handler;
   std::string error;
+  bool failed = false;
 };
 
 std::unique_ptr<v8::Platform> platform;
@@ -159,7 +161,7 @@ Runtime *New(const char *source) {
     if (!success) runtime->error = ErrorText(runtime->isolate, caught);
   }
   if (!success) {
-    __android_log_print(ANDROID_LOG_ERROR, "BosonTree", "BOSON_JS_ERROR=%s", runtime->error.c_str());
+    std::fprintf(stderr, "BOSON_JS_ERROR=%s\n", runtime->error.c_str());
     Free(runtime);
     return nullptr;
   }
@@ -167,7 +169,9 @@ Runtime *New(const char *source) {
 }
 
 int Dispatch(Runtime *runtime, int id) {
-  if (!runtime || runtime->handler.IsEmpty()) return -1;
+  if (!runtime || runtime->failed || runtime->handler.IsEmpty()) return -1;
+  void *snapshot = boson_tree_clone(runtime->tree);
+  if (!snapshot) { runtime->error = "failed to snapshot UI tree"; runtime->failed = true; return -1; }
   v8::Isolate::Scope isolate_scope(runtime->isolate);
   v8::HandleScope scope(runtime->isolate);
   auto context = runtime->context.Get(runtime->isolate);
@@ -177,63 +181,29 @@ int Dispatch(Runtime *runtime, int id) {
   v8::Local<v8::Value> args[] = {v8::Int32::New(runtime->isolate, id)};
   if (handler->Call(context, context->Global(), 1, args).IsEmpty()) {
     runtime->error = ErrorText(runtime->isolate, caught);
+    boson_tree_restore(runtime->tree, snapshot);
+    boson_tree_free(snapshot);
+    runtime->failed = true;
     return -1;
   }
+  boson_tree_free(snapshot);
   runtime->isolate->PerformMicrotaskCheckpoint();
   return 0;
 }
 
-struct RenderContext { JNIEnv *env; jobject activity; jmethodID upsert; };
-
-void OnFrame(void *value, int id, const char *tag, const char *text,
-             int x, int y, int width, int height) {
-  auto *ctx = static_cast<RenderContext *>(value);
-  jstring java_tag = ctx->env->NewStringUTF(tag);
-  jstring java_text = ctx->env->NewStringUTF(text);
-  ctx->env->CallVoidMethod(ctx->activity, ctx->upsert, id, java_tag, java_text,
-                           x, y, width, height);
-  ctx->env->DeleteLocalRef(java_tag);
-  ctx->env->DeleteLocalRef(java_text);
-}
-
-int Render(JNIEnv *env, jobject activity, Runtime *runtime, int width, int height) {
-  jclass cls = env->GetObjectClass(activity);
-  auto begin = env->GetMethodID(cls, "beginFrame", "()V");
-  auto upsert = env->GetMethodID(cls, "upsertNode", "(ILjava/lang/String;Ljava/lang/String;IIII)V");
-  auto end = env->GetMethodID(cls, "endFrame", "()V");
-  env->CallVoidMethod(activity, begin);
-  RenderContext ctx{env, activity, upsert};
-  int result = boson_tree_layout(runtime->tree, width, height, OnFrame, &ctx);
-  env->CallVoidMethod(activity, end);
-  env->DeleteLocalRef(cls);
-  return result;
-}
 }  // namespace
 
-extern "C" JNIEXPORT jlong JNICALL
-Java_dev_boson_tree_TreeActivity_nativeCreate(JNIEnv *env, jobject activity,
-                                               jstring source, jint width, jint height) {
-  if (!source) return 0;
-  const char *code = env->GetStringUTFChars(source, nullptr);
-  Runtime *runtime = New(code);
-  env->ReleaseStringUTFChars(source, code);
-  if (!runtime) return 0;
-  if (Render(env, activity, runtime, width, height) != 0) { Free(runtime); return 0; }
-  return reinterpret_cast<jlong>(runtime);
+extern "C" void *boson_app_new(const char *source) { return New(source); }
+extern "C" int boson_app_dispatch(void *handle, int id) {
+  return Dispatch(static_cast<Runtime *>(handle), id);
 }
-
-extern "C" JNIEXPORT jint JNICALL
-Java_dev_boson_tree_TreeActivity_nativeTap(JNIEnv *env, jobject activity,
-                                            jlong handle, jint id, jint width, jint height) {
-  auto *runtime = reinterpret_cast<Runtime *>(handle);
-  int result = Dispatch(runtime, id);
-  if (result == 0) result = Render(env, activity, runtime, width, height);
-  if (result != 0)
-    __android_log_print(ANDROID_LOG_ERROR, "BosonTree", "BOSON_JS_ERROR=%s", runtime->error.c_str());
-  return result;
+extern "C" int boson_app_layout(void *handle, int width, int height,
+                                BosonFrameCallback callback, void *user_data) {
+  auto *runtime = static_cast<Runtime *>(handle);
+  return runtime ? boson_tree_layout(runtime->tree, width, height, callback, user_data) : -1;
 }
-
-extern "C" JNIEXPORT void JNICALL
-Java_dev_boson_tree_TreeActivity_nativeDestroy(JNIEnv *, jobject, jlong handle) {
-  Free(reinterpret_cast<Runtime *>(handle));
+extern "C" const char *boson_app_last_error(void *handle) {
+  auto *runtime = static_cast<Runtime *>(handle);
+  return runtime ? runtime->error.c_str() : "null runtime";
 }
+extern "C" void boson_app_free(void *handle) { Free(static_cast<Runtime *>(handle)); }
