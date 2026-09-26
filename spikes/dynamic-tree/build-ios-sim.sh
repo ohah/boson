@@ -39,13 +39,14 @@ app_dir="$output_dir/BosonDynamicTree.app"
 mkdir -p "$app_dir"
 cp "$repo_dir/spikes/v8-language-bridge/ios/Info.plist" "$app_dir/Info.plist"
 cp "$spike_dir/tree.js" "$app_dir/tree.js"
+cp "$spike_dir/scenarios/contention.js" "$app_dir/contention.js"
 /usr/libexec/PlistBuddy -c 'Set :CFBundleIdentifier dev.boson.dynamic-tree' "$app_dir/Info.plist"
 /usr/libexec/PlistBuddy -c 'Set :CFBundleDisplayName Boson Dynamic Tree' "$app_dir/Info.plist"
 /usr/libexec/PlistBuddy -c 'Set :CFBundleExecutable BosonDynamicTree' "$app_dir/Info.plist"
 xcrun --sdk iphonesimulator clang++ -target "$target" -isysroot "$sdk" \
   "$output_dir/app.o" "$output_dir/runtime.o" "$output_dir/libboson_tree_core.a" \
   "$v8_archive" "${rust_libs[@]}" \
-  -framework UIKit -framework Foundation -framework CoreFoundation -framework BrowserEngineCore \
+  -framework UIKit -framework Foundation -framework CoreFoundation -framework QuartzCore -framework BrowserEngineCore \
   -Wl,-dead_strip -o "$app_dir/BosonDynamicTree"
 codesign --force --sign - "$app_dir"
 echo "$app_dir"

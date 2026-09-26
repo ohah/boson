@@ -6,6 +6,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Gravity;
+import android.view.Choreographer;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -31,6 +32,21 @@ public final class TreeActivity extends Activity {
     private long runtime;
     private boolean detailedLogs = true;
     private boolean eventFailed;
+    private boolean contentionScenario;
+    private volatile boolean stopWorkers;
+    private volatile long workerSink;
+    private Thread[] workers = new Thread[0];
+    private long previousFrameNs;
+    private final Choreographer.FrameCallback frameProbe = new Choreographer.FrameCallback() {
+        @Override public void doFrame(long frameTimeNanos) {
+            if (previousFrameNs != 0) {
+                Log.i("BosonTree", "BOSON_FRAME_GAP_MS=" +
+                        ((frameTimeNanos - previousFrameNs) / 1_000_000.0));
+            }
+            previousFrameNs = frameTimeNanos;
+            Choreographer.getInstance().postFrameCallback(this);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +77,17 @@ public final class TreeActivity extends Activity {
                     asset = "stress.js";
                     prefix = "const BOSON_COUNT = " + count + ";\n";
                     detailedLogs = false;
+                } else if ("contention".equals(scenario)) {
+                    int busyMs = Math.max(0, Math.min(200, getIntent().getIntExtra("boson_busy_ms", 40)));
+                    asset = "contention.js";
+                    prefix = "const BOSON_BUSY_MS = " + busyMs + ";\n";
+                    contentionScenario = true;
+                    int workerCount = Math.max(0, Math.min(4,
+                            getIntent().getIntExtra("boson_background_workers", 0)));
+                    startWorkers(workerCount);
+                    Log.i("BosonTree", "BOSON_CONTENTION busy_ms=" + busyMs +
+                            " background_workers=" + workerCount +
+                            " refresh_hz=" + getDisplay().getRefreshRate());
                 } else if ("long_text".equals(scenario)) {
                     asset = "long_text.js";
                 } else if ("error".equals(scenario)) {
@@ -72,12 +99,33 @@ public final class TreeActivity extends Activity {
                 Log.i("BosonTree", "BOSON_METRIC init_total_us=" + elapsedUs +
                         " scenario=" + (scenario == null ? "default" : scenario));
                 if (runtime == 0) showError("V8 or tree init failed");
+                else if (contentionScenario) Choreographer.getInstance().postFrameCallback(frameProbe);
             } catch (IOException error) {
                 Log.e("BosonTree", "BOSON_JS_LOAD_ERROR", error);
                 showError("JS load failed");
             }
         });
     }
+
+    private void startWorkers(int count) {
+        workers = new Thread[count];
+        for (int index = 0; index < count; index++) {
+            final int seed = index + 1;
+            workers[index] = new Thread(() -> {
+                long value = seed;
+                while (!stopWorkers) {
+                    for (int step = 0; step < 65536; step++) {
+                        value ^= value << 13;
+                        value ^= value >>> 7;
+                        value ^= value << 17;
+                    }
+                    workerSink = value;
+                }
+            }, "boson-cpu-worker-" + index);
+            workers[index].start();
+        }
+    }
+
 
     private int screenWidthDp() { return Math.round(root.getWidth() / density); }
     private int screenHeightDp() { return Math.round(root.getHeight() / density); }
@@ -156,6 +204,12 @@ public final class TreeActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (contentionScenario) Choreographer.getInstance().removeFrameCallback(frameProbe);
+        stopWorkers = true;
+        for (Thread worker : workers) {
+            try { worker.join(1000); }
+            catch (InterruptedException error) { Thread.currentThread().interrupt(); }
+        }
         if (runtime != 0) {
             nativeDestroy(runtime);
             runtime = 0;
