@@ -1,0 +1,12 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl git python3 python3-venv python3-dev \
+    build-essential pkg-config file xz-utils clang lld llvm-18 libclang-rt-18-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /usr/lib/llvm-18/lib/clang/18/lib/aarch64-unknown-linux-gnu \
+    && ln -s ../linux/libclang_rt.builtins-aarch64.a \
+       /usr/lib/llvm-18/lib/clang/18/lib/aarch64-unknown-linux-gnu/libclang_rt.builtins.a
+
+WORKDIR /work
