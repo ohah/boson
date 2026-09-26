@@ -1,0 +1,16 @@
+=== cpp_direct ===
+node=1 tag=view
+node=2 tag=text
+EXIT_CODE=0
+=== cpp ===
+node=1 tag=view
+node=2 tag=text
+EXIT_CODE=0
+=== rust ===
+node=1 tag=view
+node=2 tag=text
+EXIT_CODE=0
+=== zig ===
+node=1 tag=view
+node=2 tag=text
+EXIT_CODE=0
