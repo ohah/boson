@@ -2,6 +2,11 @@ name: Android V8 정적 라이브러리
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feat/v8-language-bridge-poc
+    paths:
+      - .github/workflows/android-v8-archive.yml
 
 jobs:
   build:
