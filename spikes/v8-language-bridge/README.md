@@ -20,6 +20,8 @@ macOS에서 Homebrew Node 라이브러리를 임시 V8 공급원으로 사용한
 
 `bash spikes/v8-language-bridge/build-target-objects.sh`는 iOS 기기·시뮬레이터·Android ARM64용 C++ 어댑터와 언어별 오브젝트를 컴파일한다. `V8_HEADERS`에 동일 버전의 공식 V8 헤더 경로를 지정할 수 있다. 기본값인 Node 헤더를 사용한 대상별 오브젝트 컴파일은 **모바일 V8 링크나 앱 실행을 증명하지 않는다**.
 
+공식 V8을 `build/v8-source/v8`에 체크아웃하고 `out/boson-ios-sim` 또는 `out/boson-ios-device`에 `v8_monolith`를 빌드한 뒤, 각각 `bash spikes/v8-language-bridge/build-ios-sim.sh` 또는 `bash spikes/v8-language-bridge/build-ios-device.sh`로 앱을 링크한다. 기기 빌드는 JIT 없는 V8 설정을 사용한다.
+
 ## 확인된 결과
 
 2026-09-26, macOS arm64에서 C++ 직접 연동, C++ 공통 경계, Rust+C++, Zig+C++ 네 실행 파일이 위의 동일한 출력으로 종료했다. 공식 V8 소스 커밋은 `7b50b62cb18f28617959e8452e2cd18195b38bcf`다.
@@ -28,7 +30,7 @@ iOS 시뮬레이터에서는 공식 V8 정적 라이브러리와 링크한 네 �
 
 실행 결과와 화면 캡처: [iOS 시뮬레이터 실행 기록](evidence/ios-simulator-results.md).
 
-iOS 기기·시뮬레이터와 Android ARM64에서 세 언어의 오브젝트 컴파일을 확인했다. iOS 기기용 V8 정적 라이브러리와 Android용 V8 정적 라이브러리 빌드 및 최종 실행 결과는 별도로 기록한다.
+iOS 기기용 공식 V8 정적 라이브러리를 빌드하고 네 앱을 최종 링크했다. 연결된 iOS 기기가 없어 설치와 실행은 확인하지 못했다. 현재 V8의 iOS 빌드는 JIT 없는 설정에서도 `BrowserEngineCore` 심볼을 참조하므로 앱 링크에 해당 프레임워크가 필요했다. iOS 기기·시뮬레이터와 Android ARM64에서 세 언어의 오브젝트 컴파일을 확인했다. Android용 V8 정적 라이브러리 빌드 및 최종 실행 결과는 별도로 기록한다.
 
 Android V8 소스 빌드는 V8의 GN 설정이 macOS 호스트를 거부하므로 Linux 빌드 환경이 필요하다. iOS 기기용 V8은 JIT 없는 설정으로 빌드한다. 두 플랫폼에서 **같은 V8 소스 리비전**을 사용해야 비교 가능하다.
 
