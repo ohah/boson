@@ -57,11 +57,12 @@ rustc --edition=2024 --crate-type staticlib --target aarch64-linux-android \
 "$java_home/bin/javac" -source 8 -target 8 -cp "$android_jar" \
   -d "$output_dir/classes" "$spike_dir/android/src/dev/boson/tree/TreeActivity.java"
 "$build_tools/d8" --min-api 29 --lib "$android_jar" --output "$output_dir/dex" \
-  "$output_dir/classes/dev/boson/tree/TreeActivity.class"
+  "$output_dir/classes/dev/boson/tree/"*.class
 cp "$spike_dir/tree.js" "$output_dir/stage/assets/tree.js"
 cp "$spike_dir/scenarios/stress.js" "$output_dir/stage/assets/stress.js"
 cp "$spike_dir/scenarios/long_text.js" "$output_dir/stage/assets/long_text.js"
 cp "$spike_dir/scenarios/error.js" "$output_dir/stage/assets/error.js"
+cp "$spike_dir/scenarios/contention.js" "$output_dir/stage/assets/contention.js"
 cp "$output_dir/dex/classes.dex" "$output_dir/stage/classes.dex"
 
 keystore="$output_dir/debug.keystore"
@@ -79,7 +80,7 @@ final="$output_dir/boson-dynamic-tree.apk"
   --manifest "$spike_dir/android/AndroidManifest.xml" \
   --min-sdk-version 29 --target-sdk-version 36
 (cd "$output_dir/stage" && zip -q -u "$unsigned" classes.dex assets/tree.js \
-  assets/stress.js assets/long_text.js assets/error.js lib/arm64-v8a/libboson_tree.so)
+  assets/stress.js assets/long_text.js assets/error.js assets/contention.js lib/arm64-v8a/libboson_tree.so)
 "$build_tools/zipalign" -f 4 "$unsigned" "$aligned"
 "$build_tools/apksigner" sign --ks "$keystore" --ks-pass pass:android \
   --key-pass pass:android --out "$final" "$aligned"

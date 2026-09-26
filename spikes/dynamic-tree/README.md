@@ -16,6 +16,7 @@ tree.js: createNode / setText / setStyle / removeNode
 `tree.js`는 처음에 세로 컨테이너, 카운터, 버튼, 가로 행과 두 텍스트 노드를 선언한다. 첫 터치에서 상세 텍스트 노드 `4`를 생성한다. 두 번째 터치에서 그 노드를 삭제한다. 아래 행의 위치가 `y=180 → 244 → 180`으로 이동한다. [Android 실기기 기록](evidence/physical-device-results.md)과 [iOS 시뮬레이터 기록](evidence/ios-simulator-results.md)에 화면·로그·영상을 보관했다. [구조도](diagram/architecture.html)는 두 호스트가 공통 코어를 쓰는 관계를 보여 준다.
 
 [추가 검증 결과](evidence/verification-results.md)에는 트리 무결성, 100회 연속 터치, 오류 복원, 회전, 긴 텍스트, 100~1000개 노드의 실기기 시간·메모리 측정을 기록했다.
+[스레드 부하 검증](evidence/contention-results.md)은 Android 실기기와 iOS 시뮬레이터에서 메인 스레드 계산 및 백그라운드 CPU 부하를 함께 측정한다.
 
 ## 빌드와 실행
 
@@ -40,6 +41,8 @@ xcrun simctl launch --console booted dev.boson.dynamic-tree
 화면에서 `Toggle details`를 두 번 누르면 `Taps: 0 → 1 → 2`로 바뀌고 상세 텍스트가 나타났다 사라진다. `boson-node:<ID>:<텍스트>` 접근성 설명으로 현재 노드를 읽을 수 있다. Android 에뮬레이터도 함께 연결된 경우 반드시 `-s`로 대상을 지정한다.
 
 Rust 경계 테스트는 `rustc --edition=2024 --test spikes/dynamic-tree/rust/tree.rs -o build/dynamic-tree/tree-tests && build/dynamic-tree/tree-tests`로 실행한다. 실기기 검증용 JS는 APK에 함께 넣은 `stress.js`, `long_text.js`, `error.js`로 선택할 수 있다. 예를 들어 `adb -s <기기-ID> shell am start -n dev.boson.tree/.TreeActivity --es boson_scenario stress --ei boson_count 1000`을 사용한다. 각 시나리오 전에 앱 프로세스를 종료해 초기 상태로 시작한다.
+
+스레드 부하는 `contention.js`로 재현한다. Android에서는 `--es boson_scenario contention --ei boson_busy_ms 40 --ei boson_background_workers 4` 인텐트 인자를 사용한다. iOS 시뮬레이터에서는 `xcrun simctl launch booted dev.boson.dynamic-tree --boson-scenario contention --boson-busy-ms 40 --boson-background-workers 4`를 사용한다. `boson_busy_ms`는 JS 이벤트가 메인 스레드를 점유하는 시간이며 `boson_background_workers`는 별도 스레드에서 정수 계산을 반복하는 개수다. 둘 다 0으로 지정하면 기준 조건이다. 로그는 `python3 spikes/dynamic-tree/analyze-contention.py spikes/dynamic-tree/evidence/contention-*.log`로 요약한다.
 
 ## 구현 범위
 

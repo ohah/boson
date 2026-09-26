@@ -1,5 +1,9 @@
 #import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
 #include "boson_app.h"
+#include <atomic>
+#include <thread>
+#include <vector>
 
 @interface TreeController : UIViewController
 - (void)upsertNode:(int)nodeId tag:(const char *)tag text:(const char *)text
@@ -19,6 +23,12 @@ static void OnFrame(void *user_data, int node_id, const char *tag, const char *t
   void *_runtime;
   CGSize _lastSize;
   BOOL _failed;
+  CADisplayLink *_frameProbe;
+  CFTimeInterval _previousFrameTime;
+  BOOL _contentionScenario;
+  std::atomic<bool> _stopWorkers;
+  std::atomic<uint64_t> _workerSink;
+  std::vector<std::thread> _workers;
 }
 
 - (void)viewDidLoad {
@@ -36,17 +46,61 @@ static void OnFrame(void *user_data, int node_id, const char *tag, const char *t
   ]];
   _views = [[NSMutableDictionary alloc] init];
   _seen = [[NSMutableSet alloc] init];
-  NSString *path = [[NSBundle mainBundle] pathForResource:@"tree" ofType:@"js"];
+  NSArray<NSString *> *args = NSProcessInfo.processInfo.arguments;
+  NSUInteger scenarioIndex = [args indexOfObject:@"--boson-scenario"];
+  _contentionScenario = scenarioIndex != NSNotFound && scenarioIndex + 1 < args.count &&
+      [args[scenarioIndex + 1] isEqualToString:@"contention"];
+  NSString *script = _contentionScenario ? @"contention" : @"tree";
+  NSString *path = [[NSBundle mainBundle] pathForResource:script ofType:@"js"];
   NSString *source = path ? [NSString stringWithContentsOfFile:path
                                                       encoding:NSUTF8StringEncoding
                                                          error:nil] : nil;
+  if (_contentionScenario && source) {
+    NSUInteger busyIndex = [args indexOfObject:@"--boson-busy-ms"];
+    NSInteger busyMs = busyIndex != NSNotFound && busyIndex + 1 < args.count ?
+        [args[busyIndex + 1] integerValue] : 40;
+    busyMs = MAX(0, MIN(200, busyMs));
+    source = [NSString stringWithFormat:@"const BOSON_BUSY_MS = %ld;\n%@", (long)busyMs, source];
+    NSLog(@"BOSON_CONTENTION busy_ms=%ld max_refresh_hz=%ld", (long)busyMs,
+          (long)UIScreen.mainScreen.maximumFramesPerSecond);
+    NSUInteger workerIndex = [args indexOfObject:@"--boson-background-workers"];
+    NSInteger workerCount = workerIndex != NSNotFound && workerIndex + 1 < args.count ?
+        [args[workerIndex + 1] integerValue] : 0;
+    workerCount = MAX(0, MIN(4, workerCount));
+    _stopWorkers.store(false);
+    for (NSInteger index = 0; index < workerCount; ++index) {
+      _workers.emplace_back([stop = &_stopWorkers, sink = &_workerSink, index] {
+        uint64_t value = (uint64_t)index + 1;
+        while (!stop->load(std::memory_order_relaxed)) {
+          for (int step = 0; step < 65536; ++step) {
+            value ^= value << 13;
+            value ^= value >> 7;
+            value ^= value << 17;
+          }
+          sink->store(value, std::memory_order_relaxed);
+        }
+      });
+    }
+    NSLog(@"BOSON_BACKGROUND_WORKERS=%ld", (long)workerCount);
+  }
   _runtime = source ? boson_app_new(source.UTF8String) : nullptr;
+  if (_contentionScenario && _runtime) {
+    _frameProbe = [CADisplayLink displayLinkWithTarget:self selector:@selector(probeFrame:)];
+    [_frameProbe addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];
+  }
   if (!_runtime) {
     UILabel *error = [[UILabel alloc] initWithFrame:CGRectMake(24, 24, 320, 60)];
     error.text = @"V8 or tree init failed";
     [_surface addSubview:error];
     NSLog(@"BOSON_IOS_INIT_FAILED");
   }
+}
+
+- (void)probeFrame:(CADisplayLink *)link {
+  if (_previousFrameTime != 0) {
+    NSLog(@"BOSON_FRAME_GAP_MS=%.3f", (link.timestamp - _previousFrameTime) * 1000.0);
+  }
+  _previousFrameTime = link.timestamp;
 }
 
 - (void)viewDidLayoutSubviews {
@@ -113,16 +167,27 @@ static void OnFrame(void *user_data, int node_id, const char *tag, const char *t
 
 - (void)tap:(UIButton *)button {
   if (_failed) return;
+  CFTimeInterval started = CACurrentMediaTime();
   int result = boson_app_dispatch(_runtime, (int)button.tag);
+  CFTimeInterval dispatched = CACurrentMediaTime();
   if (result == 0) [self render];
   else {
     _failed = YES;
     NSLog(@"BOSON_JS_ERROR=%s", boson_app_last_error(_runtime));
   }
+  CFTimeInterval rendered = CACurrentMediaTime();
+  if (_contentionScenario) NSLog(@"BOSON_METRIC dispatch_us=%.0f render_us=%.0f",
+                                  (dispatched - started) * 1000000.0,
+                                  (rendered - dispatched) * 1000000.0);
   NSLog(@"BOSON_TOUCH_RESULT=%d node=%ld", result, (long)button.tag);
 }
 
-- (void)dealloc { boson_app_free(_runtime); }
+- (void)dealloc {
+  [_frameProbe invalidate];
+  _stopWorkers.store(true);
+  for (auto &worker : _workers) if (worker.joinable()) worker.join();
+  boson_app_free(_runtime);
+}
 @end
 
 @interface TreeDelegate : UIResponder <UIApplicationDelegate>
