@@ -5,12 +5,12 @@
 <title>스피논 구현 상태와 API 명세 대장 - 스피논 문서</title>
 <script>{;const saved = localStorage.getItem('rspress-theme-appearance');const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;const defaultTheme = 'auto';const theme = saved === 'light' || saved === 'dark' || saved === 'auto' ? saved : defaultTheme;const isDark = theme === 'auto' ? preferDark : theme === 'dark';document.documentElement.classList.toggle('dark', isDark);document.documentElement.classList.toggle('rp-dark', isDark);document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';}</script>
 <link href="/spinon/static/css/styles.8d918fd78e.css" rel="stylesheet">
-<link rel="preload" href="/spinon/static/js/async/route-6c33a3943990.9e1a8fb2a8.js" as="script">
+<link rel="preload" href="/spinon/static/js/async/route-6c33a3943990.48a0ed792b.js" as="script">
 <script defer src="/spinon/static/js/styles.4e67540d02.js"></script>
 <script defer src="/spinon/static/js/lib-react.528e991e8a.js"></script>
 <script defer src="/spinon/static/js/lib-router.46523932bf.js"></script>
 <script defer src="/spinon/static/js/f.138568f997.js"></script>
-<script defer src="/spinon/static/js/index.043d9076fe.js"></script>
+<script defer src="/spinon/static/js/index.f82080771c.js"></script>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="generator" content="Rspress v2.0.22">
 <link rel="icon" href="/spinon/icon.svg" type="image/svg+xml">
@@ -36,7 +36,7 @@
 <p>각 항목의 <code>관련 계약</code>은 현재 제안 명세를 가리킨다. 기능 항목의 <code>API 명세: 미작성</code>은 실제 인터페이스·예제·오류 계약이 아직 게시되지 않았다는 뜻이다.</p>
 <h2 class="rp-toc-include" id="1-위험-검증"><a href="#1-위험-검증" class="rp-header-anchor rp-link" aria-hidden="true">#</a>1. 위험 검증</h2>
 <ul class="contains-task-list">
-<li class="task-list-item"><input type="checkbox" disabled=""/> <strong>R01 웹 호환 범위 명세</strong> — 요소·CSS·이벤트·DOM 유사 API의 첫 수직 구현 목표를 포함·제외·미정으로 정하고, 검증된 현재 적합성 상태와 별도 열에 기록한다. 관련 계약: <a href="/spinon/0001-conformance.html" class="rp-link">0001-conformance.md</a> · API: 해당 없음 · 산출물: 미완료 · 근거: 없음</li>
+<li class="task-list-item"><input type="checkbox" disabled=""/> <strong>R01 웹 호환 범위 명세</strong> — 요소·CSS·이벤트·DOM 유사 API의 첫 수직 구현 목표를 포함·제외·미정으로 정하고, 현재 적합성 판정과 별도 열에 기록한다. 관련 계약: <a href="/spinon/0001-conformance.html" class="rp-link">0001-conformance.md</a> · API: 해당 없음 · 산출물: 미완료 · 근거: 없음</li>
 <li class="task-list-item"><input type="checkbox" disabled=""/> <strong>R02 iOS 실기기 V8 검증</strong> — JIT 없는 V8 앱을 실기기에 설치해 JS 실행·터치·메모리를 확인한다. 관련 계약: <a href="/spinon/0001-conformance.html" class="rp-link">0001-conformance.md</a> · API: 해당 없음 · 산출물: 미완료 · 근거: 없음 · PoC: 시뮬레이터 PoC</li>
 <li class="task-list-item"><input type="checkbox" disabled=""/> <strong>R03 호스트 계약 초안</strong> — 노드 ID, 생성·수정·이동·삭제·이벤트의 공통 의미를 웹과 모바일에 맞춰 정의한다. 관련 계약: <a href="/spinon/0002-ui-tree-events.html" class="rp-link">0002-ui-tree-events.md</a> · API 명세: 미작성 · 근거: 없음 · PoC: 생성·삭제 PoC</li>
 <li class="task-list-item"><input type="checkbox" disabled=""/> <strong>R04 세 비교 기준 앱</strong> — React Native Fabric·ReactLynx·Android Views/UIKit의 같은 카운터 화면을 만든다. 관련 계약: <a href="/spinon/0001-conformance.html" class="rp-link">0001-conformance.md</a> · API: 해당 없음 · 산출물: 미완료 · 근거: 없음</li>

@@ -5,12 +5,12 @@
 <title>0001 · 범위와 적합성 - 스피논 문서</title>
 <script>{;const saved = localStorage.getItem('rspress-theme-appearance');const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;const defaultTheme = 'auto';const theme = saved === 'light' || saved === 'dark' || saved === 'auto' ? saved : defaultTheme;const isDark = theme === 'auto' ? preferDark : theme === 'dark';document.documentElement.classList.toggle('dark', isDark);document.documentElement.classList.toggle('rp-dark', isDark);document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';}</script>
 <link href="/spinon/static/css/styles.8d918fd78e.css" rel="stylesheet">
-<link rel="preload" href="/spinon/static/js/async/route-ecf129b09e78.03b276b00a.js" as="script">
+<link rel="preload" href="/spinon/static/js/async/route-ecf129b09e78.0a495a9b08.js" as="script">
 <script defer src="/spinon/static/js/styles.4e67540d02.js"></script>
 <script defer src="/spinon/static/js/lib-react.528e991e8a.js"></script>
 <script defer src="/spinon/static/js/lib-router.46523932bf.js"></script>
 <script defer src="/spinon/static/js/f.138568f997.js"></script>
-<script defer src="/spinon/static/js/index.043d9076fe.js"></script>
+<script defer src="/spinon/static/js/index.f82080771c.js"></script>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="generator" content="Rspress v2.0.22">
 <link rel="icon" href="/spinon/icon.svg" type="image/svg+xml">
@@ -56,9 +56,13 @@
 
 
 
-<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>표기</th><th>의미</th></tr></thead><tbody><tr><td><code>지원</code></td><td>지정 버전·플랫폼에서 적합성 시나리오와 실기기 또는 브라우저 증거가 있다.</td></tr><tr><td><code>제안</code></td><td>이 명세가 목표 동작을 기술하지만 구현 증거가 없다.</td></tr><tr><td><code>차이</code></td><td>같은 API 이름이나 문법을 쓰되 관찰 가능한 결과가 웹과 다르다.</td></tr><tr><td><code>미지원</code></td><td>해당 버전에서 제공하지 않으며, 빌드 또는 개발 실행에서 위치·항목을 식별할 수 있게 진단한 근거가 있다.</td></tr><tr><td><code>미정</code></td><td>계약 자체가 결정되지 않아 지원을 주장할 수 없다.</td></tr></tbody></table></div>
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>표기</th><th>의미</th></tr></thead><tbody><tr><td><code>지원</code></td><td>지정 버전·플랫폼에서 적합성 시나리오와 실기기 또는 브라우저 증거가 있다.</td></tr><tr><td><code>제안</code></td><td>문서가 목표 동작을 기술하는 단계다. 현재 적합성 판정이 아니다.</td></tr><tr><td><code>미검증</code></td><td>목표 범위는 정했지만 해당 버전의 구현·진단 결과를 아직 확인하지 않았다.</td></tr><tr><td><code>차이</code></td><td>같은 API 이름이나 문법을 쓰되 웹과 다른 관찰 결과가 검증됐다.</td></tr><tr><td><code>미지원</code></td><td>해당 버전에서 제공하지 않으며, 빌드 또는 개발 실행에서 위치·항목을 식별할 수 있게 진단한 근거가 있다.</td></tr><tr><td><code>미정</code></td><td>계약 자체가 결정되지 않아 지원을 주장할 수 없다.</td></tr></tbody></table></div>
 <p>일부 CSS 선언이나 이벤트를 조용히 무시한 화면을 <code>지원</code>으로 표시해서는 안 된다. 지원표에는 최소한 플랫폼, 프레임워크 어댑터, 엔진·번들 형식 버전, 입력, 기대 결과, 오류, 접근성 결과를 기록한다.</p>
-<p>첫 범위 표를 작성할 때는 기능마다 <code>첫 수직 구현 목표: 포함/제외/미정</code>과 <code>현재 적합성: 제안/지원/차이/미지원/미정</code>을 분리한다. 제외하기로 결정했어도 진단이 구현되지 않았다면 현재 상태는 <code>제안</code> 또는 <code>미정</code>으로 남기고, 근거 없는 <code>미지원</code> 판정을 붙이지 않는다.</p>
+<p>첫 범위 표를 작성할 때는 기능마다 <code>첫 수직 구현 목표: 포함/제외/미정</code>과 <code>현재 적합성: 미검증/지원/차이/미지원/미정</code>을 분리한다. 제외하기로 결정했어도 진단이 구현되지 않았다면 현재 상태는 <code>미검증</code>으로 남기고, 근거 없는 <code>미지원</code> 판정을 붙이지 않는다.</p>
 <h2 class="rp-toc-include" id="적합성의-최소-단위"><a href="#적합성의-최소-단위" class="rp-header-anchor rp-link" aria-hidden="true">#</a>적합성의 최소 단위</h2>
 <ul>
 <li><strong>화면:</strong> 텍스트 내용, 노드 순서, 크기·위치, 이미지 실패 표시와 접근성 이름을 확인한다. 웹과 모바일의 폰트 픽셀 차이는 별도로 기록한다.</li>
