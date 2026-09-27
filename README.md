@@ -4,7 +4,7 @@ Spinon은 웹과 유사한 개발 경험으로 모바일 앱을 만드는 멀티
 
 공개 동작의 첫 규범 문서: [스피논 명세 0.1 초안](spec/README.md). 현재 명세는 구현 완료 또는 스토어 배포 가능성을 뜻하지 않습니다.
 
-공식 진행 상태: [75개 구현 항목 체크리스트](spec/STATUS.md) · [지원 완료 API 명세](spec/api/README.md). 완료 항목에는 API/인터페이스 명세와 동작 근거가 필요합니다.
+공식 진행 상태: [78개 구현 항목 체크리스트](spec/STATUS.md) · [지원 완료 API 명세](spec/api/README.md). 완료 항목에는 API/인터페이스 명세와 동작 근거가 필요합니다.
 
 웹 문서: [스피논 API 문서](https://ohah.github.io/spinon/). `spec/` Markdown을 Rspress로 정적 생성하며, 명세·구현 상태와 API 목록을 웹에서 검색할 수 있습니다. 작업 중 미리보기는 [Tailscale 문서 페이지](https://macstudio.tailed42f2.ts.net/spinon/docs/)입니다.
 

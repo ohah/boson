@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-labelledby="title desc">
+  <title id="title">스피논 구현 관문 의존 관계</title>
+  <desc id="desc">위험 검증과 세 플랫폼 수직 구현을 거쳐 첫 앱을 만든다. 이후 렌더러 품질과 프레임워크 도구를 병렬로 진행하고 두 관문을 거쳐 출시한다.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#4f5d75" stroke-width="1.5"/></marker>
+  </defs>
+  <rect x="1" y="1" width="958" height="598" rx="8" fill="#f5f5f5" stroke="#d8d9de"/>
+  <text x="42" y="48" fill="#4f5d75" font-family="Geist, Noto Sans KR, sans-serif" font-size="14" font-weight="600">구현 관문의 선후 관계</text>
+  <text x="918" y="48" text-anchor="end" fill="#7a8399" font-family="Geist Mono, monospace" font-size="12">SPINON / ROADMAP</text>
+  <g fill="none" stroke="#4f5d75" stroke-width="2" marker-end="url(#arrow)">
+    <path d="M480 170 V202"/>
+    <path d="M480 290 V311 Q480 319 472 319 H245 Q237 319 237 327 V342"/>
+    <path d="M480 290 V311 Q480 319 488 319 H715 Q723 319 723 327 V342"/>
+    <path d="M237 430 V454 Q237 462 245 462 H466 Q474 462 474 470 V482"/>
+    <path d="M723 430 V454 Q723 462 715 462 H494 Q486 462 486 470 V482"/>
+  </g>
+  <g font-family="Geist, Noto Sans KR, sans-serif">
+    <rect x="343" y="82" width="274" height="88" rx="7" fill="#fff" stroke="#2d3142"/>
+    <text x="360" y="108" fill="#eb6c36" font-family="Geist Mono, monospace" font-size="12" font-weight="600">R + S</text>
+    <text x="360" y="133" fill="#2d3142" font-size="18" font-weight="700">기초 검증</text>
+    <text x="360" y="152" fill="#4f5d75" font-size="12">위험 확인 · 세 플랫폼 수직 구현</text>
+    <rect x="574" y="95" width="30" height="19" rx="2" fill="#f5f5f5" stroke="#d8d9de"/><text x="589" y="108" text-anchor="middle" fill="#4f5d75" font-family="Geist Mono, monospace" font-size="10">0</text>
+    <rect x="343" y="202" width="274" height="88" rx="7" fill="#fff" stroke="#2d3142"/>
+    <text x="360" y="228" fill="#eb6c36" font-family="Geist Mono, monospace" font-size="12" font-weight="600">U</text>
+    <text x="360" y="253" fill="#2d3142" font-size="18" font-weight="700">첫 사용 가능 앱</text>
+    <text x="360" y="272" fill="#4f5d75" font-size="12">화면 · 입력 · 텍스트 · 목록</text>
+    <rect x="574" y="215" width="30" height="19" rx="2" fill="#f5f5f5" stroke="#d8d9de"/><text x="589" y="228" text-anchor="middle" fill="#4f5d75" font-family="Geist Mono, monospace" font-size="10">1</text>
+    <rect x="100" y="342" width="274" height="88" rx="7" fill="#fff" stroke="#2d3142"/>
+    <text x="117" y="368" fill="#4f5d75" font-family="Geist Mono, monospace" font-size="12" font-weight="600">E</text>
+    <text x="117" y="393" fill="#2d3142" font-size="18" font-weight="700">렌더러와 성능</text>
+    <text x="117" y="412" fill="#4f5d75" font-size="12">실기기 병목 · GPU 품질</text>
+    <rect x="331" y="355" width="30" height="19" rx="2" fill="#f5f5f5" stroke="#d8d9de"/><text x="346" y="368" text-anchor="middle" fill="#4f5d75" font-family="Geist Mono, monospace" font-size="10">1</text>
+    <rect x="586" y="342" width="274" height="88" rx="7" fill="#fff" stroke="#2d3142"/>
+    <text x="603" y="368" fill="#4f5d75" font-family="Geist Mono, monospace" font-size="12" font-weight="600">X</text>
+    <text x="603" y="393" fill="#2d3142" font-size="18" font-weight="700">프레임워크와 도구</text>
+    <text x="603" y="412" fill="#4f5d75" font-size="12">번들러 · DX · 다중 프레임워크</text>
+    <rect x="817" y="355" width="30" height="19" rx="2" fill="#f5f5f5" stroke="#d8d9de"/><text x="832" y="368" text-anchor="middle" fill="#4f5d75" font-family="Geist Mono, monospace" font-size="10">1</text>
+    <rect x="343" y="482" width="274" height="88" rx="7" fill="#fff" stroke="#2d3142"/>
+    <text x="360" y="508" fill="#eb6c36" font-family="Geist Mono, monospace" font-size="12" font-weight="600">D</text>
+    <text x="360" y="533" fill="#2d3142" font-size="18" font-weight="700">배포와 출시</text>
+    <text x="360" y="552" fill="#4f5d75" font-size="12">호환성 · 보안 · OTA · 회귀</text>
+    <rect x="574" y="495" width="30" height="19" rx="2" fill="#f5f5f5" stroke="#d8d9de"/><text x="589" y="508" text-anchor="middle" fill="#4f5d75" font-family="Geist Mono, monospace" font-size="10">2</text>
+  </g>
+</svg>
