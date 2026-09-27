@@ -5,12 +5,12 @@
 <title>0001 · 범위와 적합성 - 스피논 문서</title>
 <script>{;const saved = localStorage.getItem('rspress-theme-appearance');const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;const defaultTheme = 'auto';const theme = saved === 'light' || saved === 'dark' || saved === 'auto' ? saved : defaultTheme;const isDark = theme === 'auto' ? preferDark : theme === 'dark';document.documentElement.classList.toggle('dark', isDark);document.documentElement.classList.toggle('rp-dark', isDark);document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';}</script>
 <link href="/spinon/static/css/styles.8d918fd78e.css" rel="stylesheet">
-<link rel="preload" href="/spinon/static/js/async/route-ecf129b09e78.1b6d9ad968.js" as="script">
+<link rel="preload" href="/spinon/static/js/async/route-ecf129b09e78.03b276b00a.js" as="script">
 <script defer src="/spinon/static/js/styles.4e67540d02.js"></script>
 <script defer src="/spinon/static/js/lib-react.528e991e8a.js"></script>
 <script defer src="/spinon/static/js/lib-router.46523932bf.js"></script>
 <script defer src="/spinon/static/js/f.138568f997.js"></script>
-<script defer src="/spinon/static/js/index.8f2a9ba88f.js"></script>
+<script defer src="/spinon/static/js/index.043d9076fe.js"></script>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="generator" content="Rspress v2.0.22">
 <link rel="icon" href="/spinon/icon.svg" type="image/svg+xml">
@@ -26,6 +26,7 @@
 <p>스피논은 같은 앱 작성 소스를 웹 DOM과 모바일 GPU UI 경로로 빌드하는 프레임워크다. 모바일에서 HTML 이름을 사용해도 브라우저 문서·DOM 전체·Web API 전체를 구현한다고 간주하지 않는다. Android와 iOS의 일반 UI 노드는 각각의 플랫폼 뷰와 1:1로 대응하지 않는다. WebView는 명시적인 별도 컴포넌트다.</p>
 <p>React, Vue, Svelte는 서로 다른 작성 문법과 상태 관리 방식을 가진다. 스피논의 공통 계약은 태그 의미, 지원 CSS, 이벤트, 호스트 명령이다. 첫 적합성 대상은 React·Vite·단일 모바일 번들이다. 다른 프레임워크와 번들러는 각각 별도 적합성 대상이다.</p>
 <h2 class="rp-toc-include" id="지원-표기"><a href="#지원-표기" class="rp-header-anchor rp-link" aria-hidden="true">#</a>지원 표기</h2>
+<p><strong>목표 범위</strong>와 <strong>현재 적합성 상태</strong>는 별도 열로 기록한다. 구현 전에 정하는 첫 수직 구현의 포함·제외·미정 범위는 제품의 <code>지원</code> 판정이 아니다. 아래 표기는 구현 결과를 판정할 때 사용한다.</p>
 
 
 
@@ -55,8 +56,9 @@
 
 
 
-<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>표기</th><th>의미</th></tr></thead><tbody><tr><td><code>지원</code></td><td>지정 버전·플랫폼에서 적합성 시나리오와 실기기 또는 브라우저 증거가 있다.</td></tr><tr><td><code>제안</code></td><td>이 명세가 목표 동작을 기술하지만 구현 증거가 없다.</td></tr><tr><td><code>차이</code></td><td>같은 API 이름이나 문법을 쓰되 관찰 가능한 결과가 웹과 다르다.</td></tr><tr><td><code>미지원</code></td><td>빌드 또는 개발 실행에서 위치·항목을 식별할 수 있게 진단한다.</td></tr><tr><td><code>미정</code></td><td>계약 자체가 결정되지 않아 지원을 주장할 수 없다.</td></tr></tbody></table></div>
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>표기</th><th>의미</th></tr></thead><tbody><tr><td><code>지원</code></td><td>지정 버전·플랫폼에서 적합성 시나리오와 실기기 또는 브라우저 증거가 있다.</td></tr><tr><td><code>제안</code></td><td>이 명세가 목표 동작을 기술하지만 구현 증거가 없다.</td></tr><tr><td><code>차이</code></td><td>같은 API 이름이나 문법을 쓰되 관찰 가능한 결과가 웹과 다르다.</td></tr><tr><td><code>미지원</code></td><td>해당 버전에서 제공하지 않으며, 빌드 또는 개발 실행에서 위치·항목을 식별할 수 있게 진단한 근거가 있다.</td></tr><tr><td><code>미정</code></td><td>계약 자체가 결정되지 않아 지원을 주장할 수 없다.</td></tr></tbody></table></div>
 <p>일부 CSS 선언이나 이벤트를 조용히 무시한 화면을 <code>지원</code>으로 표시해서는 안 된다. 지원표에는 최소한 플랫폼, 프레임워크 어댑터, 엔진·번들 형식 버전, 입력, 기대 결과, 오류, 접근성 결과를 기록한다.</p>
+<p>첫 범위 표를 작성할 때는 기능마다 <code>첫 수직 구현 목표: 포함/제외/미정</code>과 <code>현재 적합성: 제안/지원/차이/미지원/미정</code>을 분리한다. 제외하기로 결정했어도 진단이 구현되지 않았다면 현재 상태는 <code>제안</code> 또는 <code>미정</code>으로 남기고, 근거 없는 <code>미지원</code> 판정을 붙이지 않는다.</p>
 <h2 class="rp-toc-include" id="적합성의-최소-단위"><a href="#적합성의-최소-단위" class="rp-header-anchor rp-link" aria-hidden="true">#</a>적합성의 최소 단위</h2>
 <ul>
 <li><strong>화면:</strong> 텍스트 내용, 노드 순서, 크기·위치, 이미지 실패 표시와 접근성 이름을 확인한다. 웹과 모바일의 폰트 픽셀 차이는 별도로 기록한다.</li>
