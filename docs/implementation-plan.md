@@ -24,9 +24,13 @@ spinon/
 │   └── ios/                   # Xcode 앱, Swift 호스트, Objective-C++ 접착부
 ├── packages/
 │   ├── runtime/               # 작성 코드의 JS 호스트 API
-│   ├── react/                 # React 호스트 어댑터
-│   ├── bundler-vite/          # Vite 통합
-│   ├── bundler-rspack/        # Rspack 통합
+│   ├── frameworks/
+│   │   ├── react/              # React 호스트 어댑터
+│   │   ├── vue/                # Vue 호스트 어댑터
+│   │   └── svelte/             # Svelte 통합
+│   ├── bundlers/
+│   │   ├── vite/               # Vite 통합
+│   │   └── rspack/             # Rspack 통합
 │   └── cli/                   # create/dev/build/doctor 명령
 ├── examples/
 │   └── counter/               # 웹·Android·iOS 공통 예제
@@ -64,7 +68,7 @@ Bun은 저장소의 JS/TS 워크스페이스, 잠금 파일, 스크립트와 테
 ## Cargo와 Bun 워크스페이스
 
 - 루트 `Cargo.toml`이 제품 크레이트를 `[workspace]`로 관리하고 루트 `Cargo.lock` 하나를 사용합니다. 공통 crate 버전은 `workspace.dependencies`에서 고정합니다.
-- 루트 `package.json`에 Bun workspaces를 선언하고 기존 문서 생성 명령과 RSPress `2.0.22` 고정을 유지합니다. `packages/*`와 실제 패키지인 예제만 workspace에 넣습니다.
+- 루트 `package.json`에 Bun workspaces를 선언하고 기존 문서 생성 명령과 RSPress `2.0.22` 고정을 유지합니다. `packages/runtime`, `packages/cli`, `packages/frameworks/*`, `packages/bundlers/*`와 실제 패키지인 예제만 workspace에 넣습니다.
 - Rust 컴파일 결과는 루트 `build/` 또는 Cargo 공통 `target/`에 모읍니다. Gradle 캐시, Xcode 산출물, JS 의존성, 환경 파일은 Git에 넣지 않습니다.
 - 스파이크의 독립 `Cargo.lock`, Bun 잠금 파일, 빌드 명령은 코드를 제품 크레이트로 옮겨 동작이 같음을 확인할 때까지 보존합니다. 잠금 파일을 일괄 삭제하거나 의존성을 최신화하지 않습니다.
 - Taffy, Lightning CSS처럼 외부 의존성은 목적·버전·기능·대체 경계를 검토한 뒤 제품 workspace에 올립니다. Lightning CSS는 빌드 도구이며 모바일 런타임 의존성으로 포함하지 않습니다.
@@ -141,8 +145,8 @@ CLI가 JS 번들 생성 → iOS 기기·시뮬레이터 Rust 정적 라이브러
 | 3. V8·FFI 경계 | 현재 V8 호출을 내부 ABI로 분리하고 수명·예외·JS thread 규칙을 테스트 | `crates/spinon-ffi`, `native/v8` | C ABI 소유권·오류·콜백 해제 테스트와 양 플랫폼 링크 성공 |
 | 4. 모바일 호스트 골격 | Android Gradle/Kotlin/JNI와 iOS Xcode/Swift/Obj-C++ 앱 호스트 | `platforms/android`, `platforms/ios` | 동일한 Rust·V8 런타임이 두 앱에서 실행되고 앱 수명 복구 확인 |
 | 5. GPU 첫 수직 화면 | R08 실험 후 GPU 백엔드와 텍스트·버튼 hit-test·접근성 연결 | `crates/spinon-render`, 플랫폼 surface | Android·iOS에서 같은 카운터 시나리오가 표시·입력·복구됨 |
-| 6. JS workspace와 첫 개발 흐름 | Runtime 패키지, React 어댑터, Vite 우선 통합, 웹 호스트, 다시 로드·오류 위치 | `packages/runtime`, `packages/react`, `packages/bundler-vite`, `examples/counter` | 한 TSX 앱이 웹·Android·iOS에서 빌드되고 공통 fixture 통과 |
-| 7. Rspack·Vue·Svelte·CLI | 코어 호스트 계약을 재사용해 어댑터와 도구 지원 추가. TypeScript CLI를 Node LTS용으로 배포 | `packages/bundler-rspack`, `packages/cli` 등 | 각 조합의 지원표와 통합 테스트가 있음 |
+| 6. JS workspace와 첫 개발 흐름 | Runtime 패키지, React 어댑터, Vite 우선 통합, 웹 호스트, 다시 로드·오류 위치 | `packages/runtime`, `packages/frameworks/react`, `packages/bundlers/vite`, `examples/counter` | 한 TSX 앱이 웹·Android·iOS에서 빌드되고 공통 fixture 통과 |
+| 7. Rspack·Vue·Svelte·CLI | 코어 호스트 계약을 재사용해 어댑터와 도구 지원 추가. TypeScript CLI를 Node LTS용으로 배포 | `packages/bundlers/rspack`, `packages/frameworks/vue`, `packages/frameworks/svelte`, `packages/cli` | 각 조합의 지원표와 통합 테스트가 있음 |
 | 8. 성능·OTA | 같은 fixture·릴리스 빌드에서 비교, 매니페스트·서명·청크·롤백 구현과 호환성 검사 | `tests/`, `packages/cli`, OTA 모듈 | 앱스토어 정책 확인과 대상 플랫폼별 복구·부분 배포 증거 확보 |
 
 단계 0의 설정은 코어 공개 계약을 대신하지 않습니다. 단계 1에서 R03·R06, 레이아웃 단계에서 R10·R11, 렌더러 전에 R08, 성능 전에 R04·R05를 닫습니다. 제품 완료 표시는 해당 단계가 끝났다는 이유만으로 바꾸지 않고, [공식 상태 대장 규칙](../spec/STATUS.md)에 필요한 명세와 실행 근거가 있을 때만 갱신합니다.
