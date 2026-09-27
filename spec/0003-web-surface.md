@@ -35,4 +35,4 @@ V8의 ECMAScript 언어 기능과 스피논이 제공해야 하는 호스트 기
 
 ## 적합성 자료
 
-[HTML·CSS 대응표](https://macstudio.tailed42f2.ts.net/spinon/compatibility.html)와 [JS API 대응표](https://macstudio.tailed42f2.ts.net/spinon/js-api.html)는 기능 후보와 차이를 설명한다. 현재 표의 단계 표시는 구현 증거가 아니다. 기능별 버전·플랫폼 적합성 표는 첫 실제 앱 결과가 생길 때 이 명세에 연결한다.
+[HTML·CSS 대응표](https://macstudio.tailed42f2.ts.net/spinon/compatibility.html)와 [JS API 대응표](https://macstudio.tailed42f2.ts.net/spinon/js-api.html)는 기능 후보를 살펴보는 비규범 미리보기다. 이 사이트의 내용이 `spec/`의 목표 범위·지원 상태를 변경하지 않는다. 현재 표의 단계 표시는 구현 증거가 아니다. R01의 목표 범위와 기능별 버전·플랫폼 적합성 표는 저장소의 `spec/`을 원본으로 작성하고 이 명세에 연결한다.

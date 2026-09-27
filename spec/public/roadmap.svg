@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" role="img" aria-labelledby="title desc">
   <title id="title">스피논 구현 관문 의존 관계</title>
-  <desc id="desc">위험 검증과 세 플랫폼 수직 구현을 거쳐 첫 앱을 만든다. 이후 렌더러 품질과 프레임워크 도구를 병렬로 진행하고 두 관문을 거쳐 출시한다.</desc>
+  <desc id="desc">위험 검증과 세 플랫폼 수직 구현을 거쳐 첫 앱을 만든다. 이후 렌더러 품질과 프레임워크 도구의 독립 작업을 병렬로 진행하며 배포·출시를 준비한다. 첫 공식 릴리스에 포함할 기능 범위는 아직 미정이다.</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#4f5d75" stroke-width="1.5"/></marker>
   </defs>
