@@ -59,4 +59,6 @@ V8 C++ API를 직접 쓰는 현재 접근은 유지하되, C ABI에 V8 객체나
 
 전체 계획에서 발견한 선후 관계와 중단 조건은 [5회 적대적 검증](plan-audit.md)에 정리한다. OTA는 React Native 수준의 JS·스타일·에셋 배포에 기능별 청크 전송과 공개 범위를 더하는 것을 목표로 한다. 실행할 버전은 일관된 릴리스 스냅샷으로 활성화한다. 자세한 계약은 [청크 기반 OTA 설계](ota-design.md)에 둔다. 기술적으로 구현할 수 있다는 이유만으로 대상 앱의 배포 정책 허용을 판정하지 않는다.
 
+Cargo·Bun workspace, iOS·Android 앱 폴더, 테스트 층, TypeScript CLI와 단계별 모듈 승격 계획은 [모노레포 구현 계획](implementation-plan.md)에 둔다. 그 문서는 구현 상태의 별도 원장이 아니며, 완료 여부는 `spec/STATUS.md`를 따른다.
+
 개발 빌드의 전체 리로드·HMR·V8 Inspector·스피논 UI 트리 조사는 [개발 경험 명세](developer-experience.md)에 분리한다. 릴리스 빌드의 OTA와 개발 중 모듈 교체는 서로 다른 경로다.

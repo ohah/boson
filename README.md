@@ -22,6 +22,8 @@ bun run docs:build
 
 구현 경계와 순서: [Rust 코어 아키텍처 결정](docs/architecture.md)
 
+Cargo·Bun 모노레포, 플랫폼 앱 폴더, CLI 언어와 테스트 단계: [모노레포 구현 계획](docs/implementation-plan.md)
+
 저장 후 리로드·HMR·V8 Inspector·UI 조사 계획: [개발 경험 명세](docs/developer-experience.md)
 변경된 청크·에셋만 전송하는 기능별 OTA 목표: [청크 기반 OTA 설계](docs/ota-design.md)
 
