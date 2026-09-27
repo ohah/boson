@@ -9,7 +9,8 @@ export default defineConfig({
   title: '스피논 문서',
   description: '스피논의 구현 상태와 버전별 API 명세',
   icon: '/icon.svg',
-  logo: '/icon.svg',
+  logo: '/logo.svg',
+  logoText: '스피논',
   globalStyles: path.join(import.meta.dirname, 'spec/styles.css'),
   themeConfig: {
     socialLinks: [
