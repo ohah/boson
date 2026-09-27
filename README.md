@@ -6,6 +6,16 @@ Spinon은 웹과 유사한 개발 경험으로 모바일 앱을 만드는 멀티
 
 공식 진행 상태: [75개 구현 항목 체크리스트](spec/STATUS.md) · [지원 완료 API 명세](spec/api/README.md). 완료 항목에는 API/인터페이스 명세와 동작 근거가 필요합니다.
 
+웹 문서: [스피논 API 문서](https://ohah.github.io/spinon/). `spec/` Markdown을 Rspress로 정적 생성하며, 명세·구현 상태와 API 목록을 웹에서 검색할 수 있습니다. 작업 중 미리보기는 [Tailscale 문서 페이지](https://macstudio.tailed42f2.ts.net/spinon/docs/)입니다.
+
+```sh
+bun install --frozen-lockfile
+bun run docs:dev
+bun run docs:build
+```
+
+정식 사이트는 GitHub Pages에 배포합니다. `main`에 문서 변경이 반영되면 GitHub Actions가 새 HTML을 생성해 게시합니다. `rspress.config.ts`의 기본 경로는 `/spinon/`입니다.
+
 화면 이동과 딥링크의 공통 의미: [라우팅 명세](spec/0006-routing.md)
 
 구현 경계와 순서: [Rust 코어 아키텍처 결정](docs/architecture.md)

@@ -1,4 +1,6 @@
 /build/
+/node_modules/
+/.rspress/
 /.env
 /spikes/style-layout/node_modules/
 /spikes/style-layout/target/

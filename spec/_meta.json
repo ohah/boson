@@ -1,0 +1,12 @@
+[
+  "index",
+  { "type": "file", "name": "STATUS", "label": "구현 상태 · 75개 항목" },
+  { "type": "dir", "name": "api", "label": "지원 완료 API" },
+  { "type": "file", "name": "README", "label": "명세 인덱스" },
+  "0001-conformance",
+  "0002-ui-tree-events",
+  "0003-web-surface",
+  "0004-runtime-build",
+  "0005-developer-tools",
+  "0006-routing"
+]

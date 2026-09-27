@@ -103,4 +103,4 @@
 
 ## 기존 PoC의 위치
 
-[V8 연동 비교](../spikes/v8-language-bridge/README.md), [동적 UI 트리](../spikes/dynamic-tree/README.md), [스타일·레이아웃 실험](../spikes/style-layout/README.md)은 위 항목을 구현할 때 참고하는 증거다. 현재 공개 스피논 API의 세 플랫폼 적합성 완료를 증명하지 않는다.
+[V8 연동 비교](https://github.com/ohah/spinon/tree/main/spikes/v8-language-bridge), [동적 UI 트리](https://github.com/ohah/spinon/tree/main/spikes/dynamic-tree), [스타일·레이아웃 실험](https://github.com/ohah/spinon/tree/main/spikes/style-layout)은 위 항목을 구현할 때 참고하는 증거다. 현재 공개 스피논 API의 세 플랫폼 적합성 완료를 증명하지 않는다.
