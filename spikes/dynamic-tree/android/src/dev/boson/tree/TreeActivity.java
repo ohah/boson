@@ -21,7 +21,7 @@ public final class TreeActivity extends Activity {
     static { System.loadLibrary("boson_tree"); }
 
     private native long nativeCreate(String source, int widthDp, int heightDp);
-    private native int nativeTap(long runtime, int nodeId, int widthDp, int heightDp);
+    private native int nativeTap(long runtime, int nodeId, int widthDp, int heightDp, boolean probeLayout);
     private native int nativeRelayout(long runtime, int widthDp, int heightDp);
     private native void nativeDestroy(long runtime);
 
@@ -33,6 +33,7 @@ public final class TreeActivity extends Activity {
     private boolean detailedLogs = true;
     private boolean eventFailed;
     private boolean contentionScenario;
+    private boolean stressScenario;
     private volatile boolean stopWorkers;
     private volatile long workerSink;
     private Thread[] workers = new Thread[0];
@@ -73,7 +74,8 @@ public final class TreeActivity extends Activity {
                 String asset = "tree.js";
                 String prefix = "";
                 if ("stress".equals(scenario)) {
-                    int count = Math.max(0, Math.min(1000, getIntent().getIntExtra("boson_count", 100)));
+                    stressScenario = true;
+                    int count = Math.max(0, Math.min(5000, getIntent().getIntExtra("boson_count", 100)));
                     asset = "stress.js";
                     prefix = "const BOSON_COUNT = " + count + ";\n";
                     detailedLogs = false;
@@ -161,7 +163,7 @@ public final class TreeActivity extends Activity {
                 button.setTextSize(20);
                 button.setOnClickListener(clicked -> {
                     if (runtime == 0 || eventFailed) return;
-                    int result = nativeTap(runtime, id, screenWidthDp(), screenHeightDp());
+                    int result = nativeTap(runtime, id, screenWidthDp(), screenHeightDp(), stressScenario);
                     Log.i("BosonTree", "BOSON_TOUCH_RESULT=" + result + " node=" + id);
                     if (result != 0) {
                         eventFailed = true;

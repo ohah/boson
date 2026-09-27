@@ -44,7 +44,10 @@ mkdir -p "$output_dir/classes" "$output_dir/dex" "$output_dir/stage/assets" \
   -I"$v8_dir/include" -I"$spike_dir/runtime" \
   -c "$spike_dir/android/jni.cc" -o "$output_dir/jni.o"
 
+tree_flags=(--cfg boson_scan)
+if [[ "${BOSON_TREE_INDEXED:-0}" == 1 ]]; then tree_flags=(--cfg boson_indexed); fi
 rustc --edition=2024 --crate-type staticlib --target aarch64-linux-android \
+  "${tree_flags[@]}" \
   -O -C debuginfo=0 -C panic=abort "$spike_dir/rust/tree.rs" \
   -o "$output_dir/libboson_tree_core.a"
 
