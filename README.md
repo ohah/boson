@@ -9,6 +9,7 @@ Spinon은 웹과 유사한 개발 경험으로 모바일 앱을 만드는 멀티
 구현 경계와 순서: [Rust 코어 아키텍처 결정](docs/architecture.md)
 
 저장 후 리로드·HMR·V8 Inspector·UI 조사 계획: [개발 경험 명세](docs/developer-experience.md)
+변경된 청크·에셋만 전송하는 기능별 OTA 목표: [청크 기반 OTA 설계](docs/ota-design.md)
 
 프로젝트 명령과 에이전트용 진단 인터페이스: [CLI·MCP 설계](docs/cli-mcp.md)
 
