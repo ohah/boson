@@ -9,6 +9,7 @@
 - [공식 명세 인덱스](spec/README.md)
 - [구현 상태와 완료 판정](spec/STATUS.md)
 - [코어 아키텍처](docs/architecture.md)
+- [모노레포 구현 계획](docs/implementation-plan.md)
 - [웹 호환 범위와 적합성](spec/0001-conformance.md)
 - [UI 트리·이벤트 계약](spec/0002-ui-tree-events.md)
 - [개발 경험 계획](docs/developer-experience.md)
