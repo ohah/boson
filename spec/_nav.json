@@ -1,0 +1,6 @@
+[
+  { "text": "문서 홈", "link": "/" },
+  { "text": "구현 상태", "link": "/STATUS" },
+  { "text": "API 명세", "link": "/api/" },
+  { "text": "GitHub", "link": "https://github.com/ohah/spinon" }
+]
