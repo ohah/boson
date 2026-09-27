@@ -22,9 +22,6 @@ bun run docs:build
 
 구현 경계와 순서: [Rust 코어 아키텍처 결정](docs/architecture.md)
 
-Cargo·Bun 모노레포, 플랫폼 앱 폴더, CLI 언어와 테스트 단계: [모노레포 구현 계획](docs/plans/implementation.md)
-
-저장 후 리로드·HMR·V8 Inspector·UI 조사 계획: [개발 경험 명세](docs/plans/developer-experience.md)
 변경된 청크·에셋만 전송하는 기능별 OTA 목표: [청크 기반 OTA 설계](docs/ota-design.md)
 
 프로젝트 명령과 에이전트용 진단 인터페이스: [CLI·MCP 설계](docs/cli-mcp.md)
@@ -34,7 +31,5 @@ Cargo·Bun 모노레포, 플랫폼 앱 폴더, CLI 언어와 테스트 단계: [
 웹 태그·CSS와 JavaScript API 대응표: [HTML·CSS 명세](https://macstudio.tailed42f2.ts.net/spinon/compatibility.html), [JS API 명세](https://macstudio.tailed42f2.ts.net/spinon/js-api.html)
 
 첫 번째 언어 선택 실험: [V8 연동 비교](spikes/v8-language-bridge/README.md)
-
-구현 단계의 비교 기준: [React Native·ReactLynx·네이티브 벤치마크 계획](docs/plans/benchmark.md)
 
 CSS 빌드 변환과 Taffy 레이아웃의 최소 연결: [스타일·레이아웃 실험](spikes/style-layout/README.md)
