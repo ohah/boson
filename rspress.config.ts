@@ -10,6 +10,7 @@ export default defineConfig({
   description: '스피논의 구현 상태와 버전별 API 명세',
   icon: '/icon.svg',
   logo: '/icon.svg',
+  globalStyles: path.join(import.meta.dirname, 'spec/styles.css'),
   themeConfig: {
     socialLinks: [
       { icon: 'github', mode: 'link', content: 'https://github.com/ohah/spinon' },
