@@ -1,0 +1,15 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  height: 240px;
+  padding: 16px;
+  gap: 8px;
+}
+
+.card {
+  display: flex;
+  flex-direction: row;
+  height: 64px;
+  flex-grow: 1;
+}

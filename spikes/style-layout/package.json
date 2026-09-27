@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:styles": "node compile-css.mjs",
+    "verify": "node verify.mjs"
+  },
+  "dependencies": {
+    "lightningcss": "1.33.0"
+  }
+}

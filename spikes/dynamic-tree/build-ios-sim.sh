@@ -42,11 +42,12 @@ rustc --edition=2024 --crate-type staticlib --target aarch64-apple-ios-sim \
 app_dir="$output_dir/BosonDynamicTree.app"
 mkdir -p "$app_dir"
 cp "$repo_dir/spikes/v8-language-bridge/ios/Info.plist" "$app_dir/Info.plist"
+cp "$repo_dir/assets/spinon-icon-1024.png" "$app_dir/SpinonIcon.png"
 cp "$spike_dir/tree.js" "$app_dir/tree.js"
 cp "$spike_dir/scenarios/contention.js" "$app_dir/contention.js"
 cp "$spike_dir/scenarios/stress.js" "$app_dir/stress.js"
 /usr/libexec/PlistBuddy -c 'Set :CFBundleIdentifier dev.boson.dynamic-tree' "$app_dir/Info.plist"
-/usr/libexec/PlistBuddy -c 'Set :CFBundleDisplayName Boson Dynamic Tree' "$app_dir/Info.plist"
+/usr/libexec/PlistBuddy -c 'Set :CFBundleDisplayName Spinon Dynamic Tree' "$app_dir/Info.plist"
 /usr/libexec/PlistBuddy -c 'Set :CFBundleExecutable BosonDynamicTree' "$app_dir/Info.plist"
 xcrun --sdk iphonesimulator clang++ -target "$target" -isysroot "$sdk" \
   "$output_dir/app.o" "$output_dir/runtime.o" "$output_dir/libboson_tree_core.a" \

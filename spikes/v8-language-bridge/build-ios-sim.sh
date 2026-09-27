@@ -43,6 +43,7 @@ for language in cpp_direct cpp rust zig; do
   app_dir="$output_dir/$language.app"
   mkdir -p "$app_dir"
   cp "$spike_dir/ios/Info.plist" "$app_dir/Info.plist"
+  cp "$repo_dir/assets/spinon-icon-1024.png" "$app_dir/SpinonIcon.png"
   /usr/libexec/PlistBuddy -c \
     "Set :CFBundleIdentifier dev.boson.v8spike.$language" "$app_dir/Info.plist"
   case "$language" in

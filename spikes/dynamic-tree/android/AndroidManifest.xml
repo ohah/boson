@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="dev.boson.tree">
     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="36" />
-    <application android:label="Boson Dynamic Tree" android:extractNativeLibs="true"
+    <application android:label="Spinon Dynamic Tree" android:icon="@drawable/spinon_icon" android:extractNativeLibs="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <activity android:name="dev.boson.tree.TreeActivity" android:exported="true"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize">

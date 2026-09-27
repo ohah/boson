@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "styles": {
+    "screen": {
+      "display": "flex",
+      "flexDirection": "column",
+      "width": 320,
+      "height": 240,
+      "padding": {
+        "top": 16,
+        "right": 16,
+        "bottom": 16,
+        "left": 16
+      },
+      "gap": {
+        "row": 8,
+        "column": 8
+      }
+    },
+    "card": {
+      "display": "flex",
+      "flexDirection": "row",
+      "height": 64,
+      "flexGrow": 1
+    }
+  }
+}
