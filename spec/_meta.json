@@ -1,6 +1,6 @@
 [
   "index",
-  { "type": "file", "name": "STATUS", "label": "구현 상태 · 75개 항목" },
+  { "type": "file", "name": "STATUS", "label": "구현 상태" },
   { "type": "dir", "name": "api", "label": "지원 완료 API" },
   { "type": "file", "name": "README", "label": "명세 인덱스" },
   "0001-conformance",
