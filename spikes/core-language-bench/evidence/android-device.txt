@@ -1,0 +1,45 @@
+language=rust
+nodes=100 mode=indexed events=10000 median_us=0.382 min_us=0.343 max_us=0.407 checksum=13537786810060252048
+nodes=100 mode=scan events=1000 median_us=2.740 min_us=2.637 max_us=2.887 checksum=13538410249438586688
+nodes=1000 mode=indexed events=10000 median_us=2.015 min_us=2.014 max_us=2.569 checksum=2562196457406329792
+nodes=1000 mode=scan events=100 median_us=166.546 min_us=166.315 max_us=192.465 checksum=5830002678994411648
+language=cpp
+nodes=100 mode=indexed events=10000 median_us=0.407 min_us=0.357 max_us=0.456 checksum=13537786810060252048
+nodes=100 mode=scan events=1000 median_us=2.981 min_us=2.650 max_us=3.532 checksum=13538410249438586688
+nodes=1000 mode=indexed events=10000 median_us=1.596 min_us=1.593 max_us=2.058 checksum=2562196457406329792
+nodes=1000 mode=scan events=100 median_us=166.420 min_us=166.351 max_us=166.570 checksum=5830002678994411648
+language=zig
+nodes=100 mode=indexed events=10000 median_us=0.447 min_us=0.414 max_us=0.484 checksum=13537786810060252048
+nodes=100 mode=scan events=1000 median_us=3.047 min_us=2.816 max_us=3.311 checksum=13538410249438586688
+nodes=1000 mode=indexed events=10000 median_us=1.538 min_us=1.538 max_us=2.064 checksum=2562196457406329792
+nodes=1000 mode=scan events=100 median_us=172.587 min_us=172.448 max_us=172.964 checksum=5830002678994411648
+language=zig
+nodes=100 mode=indexed events=10000 median_us=0.512 min_us=0.400 max_us=0.621 checksum=13537786810060252048
+nodes=100 mode=scan events=1000 median_us=2.755 min_us=2.646 max_us=3.444 checksum=13538410249438586688
+nodes=1000 mode=indexed events=10000 median_us=1.536 min_us=1.533 max_us=2.029 checksum=2562196457406329792
+nodes=1000 mode=scan events=100 median_us=174.846 min_us=173.773 max_us=177.031 checksum=5830002678994411648
+language=rust
+nodes=100 mode=indexed events=10000 median_us=0.512 min_us=0.422 max_us=0.727 checksum=13537786810060252048
+nodes=100 mode=scan events=1000 median_us=2.855 min_us=2.637 max_us=3.613 checksum=13538410249438586688
+nodes=1000 mode=indexed events=10000 median_us=2.018 min_us=2.014 max_us=2.549 checksum=2562196457406329792
+nodes=1000 mode=scan events=100 median_us=166.604 min_us=166.496 max_us=166.891 checksum=5830002678994411648
+language=cpp
+nodes=100 mode=indexed events=10000 median_us=0.497 min_us=0.397 max_us=0.642 checksum=13537786810060252048
+nodes=100 mode=scan events=1000 median_us=3.080 min_us=2.740 max_us=3.698 checksum=13538410249438586688
+nodes=1000 mode=indexed events=10000 median_us=1.598 min_us=1.597 max_us=1.933 checksum=2562196457406329792
+nodes=1000 mode=scan events=100 median_us=166.589 min_us=166.451 max_us=167.202 checksum=5830002678994411648
+language=cpp
+nodes=100 mode=indexed events=10000 median_us=0.466 min_us=0.378 max_us=0.600 checksum=13537786810060252048
+nodes=100 mode=scan events=1000 median_us=3.175 min_us=2.681 max_us=3.921 checksum=13538410249438586688
+nodes=1000 mode=indexed events=10000 median_us=1.599 min_us=1.598 max_us=1.934 checksum=2562196457406329792
+nodes=1000 mode=scan events=100 median_us=166.512 min_us=166.371 max_us=167.035 checksum=5830002678994411648
+language=zig
+nodes=100 mode=indexed events=10000 median_us=0.493 min_us=0.392 max_us=0.642 checksum=13537786810060252048
+nodes=100 mode=scan events=1000 median_us=3.046 min_us=2.523 max_us=3.851 checksum=13538410249438586688
+nodes=1000 mode=indexed events=10000 median_us=1.530 min_us=1.527 max_us=2.022 checksum=2562196457406329792
+nodes=1000 mode=scan events=100 median_us=172.703 min_us=172.612 max_us=173.134 checksum=5830002678994411648
+language=rust
+nodes=100 mode=indexed events=10000 median_us=0.524 min_us=0.419 max_us=0.706 checksum=13537786810060252048
+nodes=100 mode=scan events=1000 median_us=3.147 min_us=2.515 max_us=3.729 checksum=13538410249438586688
+nodes=1000 mode=indexed events=10000 median_us=2.000 min_us=1.999 max_us=2.464 checksum=2562196457406329792
+nodes=1000 mode=scan events=100 median_us=166.559 min_us=166.375 max_us=167.328 checksum=5830002678994411648
