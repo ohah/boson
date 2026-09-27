@@ -2,12 +2,12 @@
   "name": "spinon-docs",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "packages/docs"
+  ],
   "scripts": {
-    "docs:dev": "rspress dev",
-    "docs:build": "RSPRESS_PERSISTENT_CACHE=false rspress build",
-    "docs:preview": "rspress preview"
-  },
-  "devDependencies": {
-    "@rspress/core": "2.0.22"
+    "docs:dev": "bun run --filter @spinon/docs docs:dev",
+    "docs:build": "bun run --filter @spinon/docs docs:build",
+    "docs:preview": "bun run --filter @spinon/docs docs:preview"
   }
 }
