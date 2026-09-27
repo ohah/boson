@@ -1,0 +1,168 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		100000000000000000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* AppDelegate.swift */; };
+		100000000000000000000002 /* SpinonRunner.mm in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000002 /* SpinonRunner.mm */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		200000000000000000000001 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		200000000000000000000002 /* SpinonRunner.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SpinonRunner.mm; sourceTree = "<group>"; };
+		200000000000000000000003 /* SpinonRunner.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpinonRunner.h; sourceTree = "<group>"; };
+		200000000000000000000004 /* SpinonBootstrap-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SpinonBootstrap-Bridging-Header.h"; sourceTree = "<group>"; };
+		200000000000000000000005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		200000000000000000000006 /* SpinonBootstrap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpinonBootstrap.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		300000000000000000000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		400000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				400000000000000000000002 /* Sources */,
+				400000000000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		400000000000000000000002 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000001 /* AppDelegate.swift */,
+				200000000000000000000002 /* SpinonRunner.mm */,
+				200000000000000000000003 /* SpinonRunner.h */,
+				200000000000000000000004 /* SpinonBootstrap-Bridging-Header.h */,
+				200000000000000000000005 /* Info.plist */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		400000000000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (200000000000000000000006 /* SpinonBootstrap.app */,);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		500000000000000000000001 /* SpinonBootstrap */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 600000000000000000000002 /* Build configuration list for PBXNativeTarget */;
+			buildPhases = (
+				500000000000000000000004 /* Prepare Rust, V8 and JavaScript */,
+				500000000000000000000002 /* Sources */,
+				300000000000000000000001 /* Frameworks */,
+				300000000000000000000002 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = SpinonBootstrap;
+			productName = SpinonBootstrap;
+			productReference = 200000000000000000000006 /* SpinonBootstrap.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		500000000000000000000003 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 2620; TargetAttributes = {500000000000000000000001 = {CreatedOnToolsVersion = 26.2; }; }; };
+			buildConfigurationList = 600000000000000000000001 /* Build configuration list for PBXProject */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base,);
+			mainGroup = 400000000000000000000001;
+			productRefGroup = 400000000000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (500000000000000000000001 /* SpinonBootstrap */,);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		300000000000000000000002 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		500000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000001 /* AppDelegate.swift in Sources */, 100000000000000000000002 /* SpinonRunner.mm in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		500000000000000000000004 /* Prepare Rust, V8 and JavaScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = ();
+			inputPaths = ();
+			name = "Prepare Rust, V8 and JavaScript";
+			outputPaths = ();
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "set -euo pipefail\n\"$SRCROOT/../../tools/build-ios-native.sh\"\n\"$SRCROOT/../../tools/copy-ios-bootstrap-asset.sh\" \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		600000000000000000000001 /* Project configuration list */ = {isa = XCConfigurationList; buildConfigurations = (600000000000000000000003 /* Debug */, 600000000000000000000004 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		600000000000000000000002 /* Target configuration list */ = {isa = XCConfigurationList; buildConfigurations = (600000000000000000000005 /* Debug */, 600000000000000000000006 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		600000000000000000000003 /* Project Debug */ = {isa = XCBuildConfiguration; buildSettings = {CLANG_CXX_LANGUAGE_STANDARD = "gnu++20"; CLANG_ENABLE_MODULES = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Debug; };
+		600000000000000000000004 /* Project Release */ = {isa = XCBuildConfiguration; buildSettings = {CLANG_CXX_LANGUAGE_STANDARD = "gnu++20"; CLANG_ENABLE_MODULES = YES; IPHONEOS_DEPLOYMENT_TARGET = 18.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Release; };
+		600000000000000000000005 /* Target Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = ("$(SRCROOT)/../../crates/spinon-ffi/include",);
+				INFOPLIST_FILE = Sources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks",);
+				OTHER_LDFLAGS = ("$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/libspinon_ffi.a", "$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/spinon_v8.o", "$(SRCROOT)/../../build/v8-source/v8/out/$(SPINON_V8_OUT)/obj/libv8_monolith.a", "-framework", UIKit, "-framework", Foundation, "-framework", CoreFoundation, "-framework", BrowserEngineCore, "-Wl,-dead_strip",);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.spinon.bootstrap;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				"SPINON_V8_OUT[sdk=iphonesimulator*]" = boson-ios-sim;
+				"SPINON_V8_OUT[sdk=iphoneos*]" = boson-ios-device;
+				SWIFT_OBJC_BRIDGING_HEADER = Sources/SpinonBootstrap-Bridging-Header.h;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		600000000000000000000006 /* Target Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = NO;
+				HEADER_SEARCH_PATHS = ("$(SRCROOT)/../../crates/spinon-ffi/include",);
+				INFOPLIST_FILE = Sources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks",);
+				OTHER_LDFLAGS = ("$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/libspinon_ffi.a", "$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/spinon_v8.o", "$(SRCROOT)/../../build/v8-source/v8/out/$(SPINON_V8_OUT)/obj/libv8_monolith.a", "-framework", UIKit, "-framework", Foundation, "-framework", CoreFoundation, "-framework", BrowserEngineCore, "-Wl,-dead_strip",);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.spinon.bootstrap;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				"SPINON_V8_OUT[sdk=iphonesimulator*]" = boson-ios-sim;
+				"SPINON_V8_OUT[sdk=iphoneos*]" = boson-ios-device;
+				SWIFT_OBJC_BRIDGING_HEADER = Sources/SpinonBootstrap-Bridging-Header.h;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin PBXVariantGroup section */
+/* End PBXVariantGroup section */
+
+/* Begin XCConfigurationList section */
+/* End XCConfigurationList section */
+	};
+	rootObject = 500000000000000000000003 /* Project object */;
+}
