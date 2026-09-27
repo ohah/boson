@@ -12,41 +12,42 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: spinon-pages
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 저장소 가져오기
+      - name: 문서 원본 가져오기
         uses: actions/checkout@v4
+        with:
+          path: source
+      - name: Pages 브랜치 가져오기
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: site
       - name: Bun 준비
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.4.0'
       - name: 의존성 설치
+        working-directory: source
         run: bun install --frozen-lockfile
       - name: 문서 생성
+        working-directory: source
         run: bun run docs:build
-      - name: Pages 준비
-        uses: actions/configure-pages@v5
-      - name: 정적 파일 올리기
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: build/docs-site
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Pages 배포
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Pages 브랜치 갱신
+        run: |
+          touch source/build/docs-site/.nojekyll
+          rsync -a --delete --exclude=.git source/build/docs-site/ site/
+          cd site
+          git add -A
+          if ! git diff --cached --quiet; then
+            git -c user.name='spinon-docs[bot]' -c user.email='spinon-docs@users.noreply.github.com' commit -m '스피논 공식 API 문서 갱신'
+            git push origin HEAD:gh-pages
+          fi
