@@ -18,6 +18,7 @@ tree.js: createNode / setText / setStyle / removeNode
 [추가 검증 결과](evidence/verification-results.md)에는 트리 무결성, 100회 연속 터치, 오류 복원, 회전, 긴 텍스트, 100~1000개 노드의 실기기 시간·메모리 측정을 기록했다.
 [스레드 부하 검증](evidence/contention-results.md)은 Android 실기기와 iOS 시뮬레이터에서 메인 스레드 계산 및 백그라운드 CPU 부하를 함께 측정한다.
 [Rust·C++·Zig 코어 비교](../core-language-bench/README.md)는 동일한 합성 트리 작업을 세 언어로 구현해 Mac, Android 실기기, iOS 시뮬레이터에서 실행한 결과다.
+[실제 보손 코어 A/B 측정](evidence/ab-results.md)은 Rust ID 선형 검색과 인덱스 조회를 같은 V8·네이티브 호스트에서 비교한다.
 
 ## 빌드와 실행
 

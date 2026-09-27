@@ -3,6 +3,7 @@
 #include <v8.h>
 
 #include <memory>
+#include <chrono>
 #include <cstdio>
 #include <string>
 
@@ -10,6 +11,7 @@ extern "C" {
 void *boson_tree_new();
 void boson_tree_free(void *tree);
 void *boson_tree_clone(const void *tree);
+int boson_tree_variant();
 int boson_tree_restore(void *tree, void *snapshot);
 int boson_tree_create(void *tree, int id, int parent, const char *tag, int order);
 int boson_tree_remove(void *tree, int id);
@@ -21,6 +23,7 @@ int boson_tree_layout(const void *tree, int width, int height,
 }
 
 namespace {
+void DiscardFrame(void *, int, const char *, const char *, int, int, int, int) {}
 struct Runtime {
   void *tree = nullptr;
   v8::Isolate *isolate = nullptr;
@@ -29,6 +32,7 @@ struct Runtime {
   v8::Global<v8::Function> handler;
   std::string error;
   bool failed = false;
+  long long snapshot_us = 0;
 };
 
 std::unique_ptr<v8::Platform> platform;
@@ -170,7 +174,10 @@ Runtime *New(const char *source) {
 
 int Dispatch(Runtime *runtime, int id) {
   if (!runtime || runtime->failed || runtime->handler.IsEmpty()) return -1;
+  auto snapshot_start = std::chrono::steady_clock::now();
   void *snapshot = boson_tree_clone(runtime->tree);
+  runtime->snapshot_us = std::chrono::duration_cast<std::chrono::microseconds>(
+      std::chrono::steady_clock::now() - snapshot_start).count();
   if (!snapshot) { runtime->error = "failed to snapshot UI tree"; runtime->failed = true; return -1; }
   v8::Isolate::Scope isolate_scope(runtime->isolate);
   v8::HandleScope scope(runtime->isolate);
@@ -202,8 +209,21 @@ extern "C" int boson_app_layout(void *handle, int width, int height,
   auto *runtime = static_cast<Runtime *>(handle);
   return runtime ? boson_tree_layout(runtime->tree, width, height, callback, user_data) : -1;
 }
+extern "C" long long boson_app_probe_layout_us(void *handle, int width, int height) {
+  auto *runtime = static_cast<Runtime *>(handle);
+  if (!runtime) return -1;
+  auto start = std::chrono::steady_clock::now();
+  if (boson_tree_layout(runtime->tree, width, height, DiscardFrame, nullptr) != 0) return -1;
+  return std::chrono::duration_cast<std::chrono::microseconds>(
+      std::chrono::steady_clock::now() - start).count();
+}
 extern "C" const char *boson_app_last_error(void *handle) {
   auto *runtime = static_cast<Runtime *>(handle);
   return runtime ? runtime->error.c_str() : "null runtime";
 }
+extern "C" long long boson_app_last_snapshot_us(void *handle) {
+  auto *runtime = static_cast<Runtime *>(handle);
+  return runtime ? runtime->snapshot_us : -1;
+}
+extern "C" int boson_app_tree_variant(void) { return boson_tree_variant(); }
 extern "C" void boson_app_free(void *handle) { Free(static_cast<Runtime *>(handle)); }

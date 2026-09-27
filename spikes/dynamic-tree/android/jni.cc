@@ -39,23 +39,28 @@ Java_dev_boson_tree_TreeActivity_nativeCreate(JNIEnv *env, jobject activity,
   void *runtime = boson_app_new(code);
   env->ReleaseStringUTFChars(source, code);
   if (!runtime) return 0;
+  __android_log_print(ANDROID_LOG_INFO, "BosonTree", "BOSON_TREE_VARIANT=%d",
+                      boson_app_tree_variant());
   if (Render(env, activity, runtime, width, height) != 0) { boson_app_free(runtime); return 0; }
   return reinterpret_cast<jlong>(runtime);
 }
 
 extern "C" JNIEXPORT jint JNICALL
 Java_dev_boson_tree_TreeActivity_nativeTap(JNIEnv *env, jobject activity,
-                                            jlong handle, jint id, jint width, jint height) {
+                                            jlong handle, jint id, jint width, jint height,
+                                            jboolean probe_layout) {
   auto *runtime = reinterpret_cast<void *>(handle);
   auto start = std::chrono::steady_clock::now();
   int result = boson_app_dispatch(runtime, id);
   auto dispatched = std::chrono::steady_clock::now();
   if (result == 0) result = Render(env, activity, runtime, width, height);
   auto rendered = std::chrono::steady_clock::now();
+  auto core_layout_us = probe_layout ? boson_app_probe_layout_us(runtime, width, height) : -1;
   auto dispatch_us = std::chrono::duration_cast<std::chrono::microseconds>(dispatched - start).count();
   auto render_us = std::chrono::duration_cast<std::chrono::microseconds>(rendered - dispatched).count();
-  __android_log_print(ANDROID_LOG_INFO, "BosonTree", "BOSON_METRIC dispatch_us=%lld render_us=%lld",
-                      static_cast<long long>(dispatch_us), static_cast<long long>(render_us));
+  __android_log_print(ANDROID_LOG_INFO, "BosonTree", "BOSON_METRIC snapshot_us=%lld dispatch_us=%lld render_us=%lld core_layout_us=%lld",
+                      boson_app_last_snapshot_us(runtime), static_cast<long long>(dispatch_us),
+                      static_cast<long long>(render_us), core_layout_us);
   if (result != 0)
     __android_log_print(ANDROID_LOG_ERROR, "BosonTree", "BOSON_JS_ERROR=%s", boson_app_last_error(runtime));
   return result;

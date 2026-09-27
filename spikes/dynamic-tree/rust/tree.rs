@@ -1,4 +1,6 @@
 use std::ffi::{CStr, CString, c_char, c_void};
+#[cfg(boson_indexed)]
+use std::collections::HashMap;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Kind { Column, Row, Text, Button }
@@ -39,9 +41,35 @@ struct Node {
 }
 
 #[derive(Clone, Default)]
-pub struct Tree { nodes: Vec<Node> }
+pub struct Tree {
+    nodes: Vec<Node>,
+    #[cfg(boson_indexed)]
+    index: HashMap<i32, usize>,
+}
+
+impl Tree {
+    fn position(&self, id: i32) -> Option<usize> {
+        #[cfg(boson_indexed)]
+        { self.index.get(&id).copied() }
+        #[cfg(not(boson_indexed))]
+        { self.nodes.iter().position(|node| node.id == id) }
+    }
+
+    fn get(&self, id: i32) -> Option<&Node> { self.position(id).map(|index| &self.nodes[index]) }
+    fn get_mut(&mut self, id: i32) -> Option<&mut Node> {
+        self.position(id).map(|index| &mut self.nodes[index])
+    }
+    #[cfg(boson_indexed)]
+    fn rebuild_index(&mut self) {
+        self.index.clear();
+        for (index, node) in self.nodes.iter().enumerate() { self.index.insert(node.id, index); }
+    }
+}
 
 type FrameCallback = extern "C" fn(*mut c_void, i32, *const c_char, *const c_char, i32, i32, i32, i32);
+
+#[unsafe(no_mangle)]
+pub extern "C" fn boson_tree_variant() -> i32 { if cfg!(boson_indexed) { 1 } else { 0 } }
 
 #[unsafe(no_mangle)]
 pub extern "C" fn boson_tree_new() -> *mut Tree { Box::into_raw(Box::new(Tree::default())) }
@@ -67,23 +95,25 @@ pub unsafe extern "C" fn boson_tree_restore(tree: *mut Tree, snapshot: *mut Tree
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn boson_tree_create(tree: *mut Tree, id: i32, parent: i32, tag: *const c_char, order: i32) -> i32 {
     let Some(tree) = (unsafe { tree.as_mut() }) else { return -1 };
-    if tag.is_null() || id <= 0 || tree.nodes.iter().any(|node| node.id == id) { return -1 }
+    if tag.is_null() || id <= 0 || tree.position(id).is_some() { return -1 }
     let Ok(tag) = (unsafe { CStr::from_ptr(tag) }).to_str() else { return -1 };
     let Some(kind) = Kind::parse(tag) else { return -1 };
     if parent == 0 {
         if !tree.nodes.is_empty() || !matches!(kind, Kind::Row | Kind::Column) { return -1 }
-    } else if !tree.nodes.iter().any(|node| node.id == parent && matches!(node.kind, Kind::Row | Kind::Column)) {
+    } else if !tree.get(parent).is_some_and(|node| matches!(node.kind, Kind::Row | Kind::Column)) {
         return -1;
     }
     tree.nodes.push(Node { id, parent, order, kind, text: CString::default(), width: -1,
         height: -1, padding: 0, gap: 0, grow: 0 });
+    #[cfg(boson_indexed)]
+    tree.index.insert(id, tree.nodes.len() - 1);
     0
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn boson_tree_remove(tree: *mut Tree, id: i32) -> i32 {
     let Some(tree) = (unsafe { tree.as_mut() }) else { return -1 };
-    if id <= 0 || !tree.nodes.iter().any(|node| node.id == id) { return -1 }
+    if id <= 0 || tree.position(id).is_none() { return -1 }
     let mut removed = vec![id];
     let mut index = 0;
     while index < removed.len() {
@@ -92,6 +122,8 @@ pub unsafe extern "C" fn boson_tree_remove(tree: *mut Tree, id: i32) -> i32 {
         index += 1;
     }
     tree.nodes.retain(|node| !removed.contains(&node.id));
+    #[cfg(boson_indexed)]
+    tree.rebuild_index();
     0
 }
 
@@ -99,7 +131,7 @@ pub unsafe extern "C" fn boson_tree_remove(tree: *mut Tree, id: i32) -> i32 {
 pub unsafe extern "C" fn boson_tree_set_text(tree: *mut Tree, id: i32, text: *const c_char) -> i32 {
     let Some(tree) = (unsafe { tree.as_mut() }) else { return -1 };
     if text.is_null() { return -1 }
-    let Some(node) = tree.nodes.iter_mut().find(|node| node.id == id) else { return -1 };
+    let Some(node) = tree.get_mut(id) else { return -1 };
     node.text = (unsafe { CStr::from_ptr(text) }).to_owned();
     0
 }
@@ -108,7 +140,7 @@ pub unsafe extern "C" fn boson_tree_set_text(tree: *mut Tree, id: i32, text: *co
 pub unsafe extern "C" fn boson_tree_set_style(tree: *mut Tree, id: i32, width: i32, height: i32,
     padding: i32, gap: i32, grow: i32) -> i32 {
     let Some(tree) = (unsafe { tree.as_mut() }) else { return -1 };
-    let Some(node) = tree.nodes.iter_mut().find(|node| node.id == id) else { return -1 };
+    let Some(node) = tree.get_mut(id) else { return -1 };
     if width < -1 || height < -1 || padding < 0 || gap < 0 || grow < 0 { return -1 }
     node.width = width; node.height = height; node.padding = padding; node.gap = gap; node.grow = grow;
     0
@@ -117,7 +149,7 @@ pub unsafe extern "C" fn boson_tree_set_style(tree: *mut Tree, id: i32, width: i
 impl Tree {
     fn layout_node(&self, id: i32, x: i32, y: i32, width: i32, height: i32,
         callback: FrameCallback, user_data: *mut c_void) {
-        let Some(node) = self.nodes.iter().find(|node| node.id == id) else { return };
+        let Some(node) = self.get(id) else { return };
         let tag = CString::new(node.kind.as_str()).unwrap();
         callback(user_data, id, tag.as_ptr(), node.text.as_ptr(), x, y, width, height);
         if !matches!(node.kind, Kind::Row | Kind::Column) { return }

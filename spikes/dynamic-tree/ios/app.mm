@@ -26,6 +26,8 @@ static void OnFrame(void *user_data, int node_id, const char *tag, const char *t
   CADisplayLink *_frameProbe;
   CFTimeInterval _previousFrameTime;
   BOOL _contentionScenario;
+  BOOL _stressScenario;
+  BOOL _detailedLogs;
   std::atomic<bool> _stopWorkers;
   std::atomic<uint64_t> _workerSink;
   std::vector<std::thread> _workers;
@@ -50,7 +52,10 @@ static void OnFrame(void *user_data, int node_id, const char *tag, const char *t
   NSUInteger scenarioIndex = [args indexOfObject:@"--boson-scenario"];
   _contentionScenario = scenarioIndex != NSNotFound && scenarioIndex + 1 < args.count &&
       [args[scenarioIndex + 1] isEqualToString:@"contention"];
-  NSString *script = _contentionScenario ? @"contention" : @"tree";
+  _stressScenario = scenarioIndex != NSNotFound && scenarioIndex + 1 < args.count &&
+      [args[scenarioIndex + 1] isEqualToString:@"stress"];
+  _detailedLogs = !_stressScenario;
+  NSString *script = _contentionScenario ? @"contention" : (_stressScenario ? @"stress" : @"tree");
   NSString *path = [[NSBundle mainBundle] pathForResource:script ofType:@"js"];
   NSString *source = path ? [NSString stringWithContentsOfFile:path
                                                       encoding:NSUTF8StringEncoding
@@ -83,7 +88,16 @@ static void OnFrame(void *user_data, int node_id, const char *tag, const char *t
     }
     NSLog(@"BOSON_BACKGROUND_WORKERS=%ld", (long)workerCount);
   }
+  if (_stressScenario && source) {
+    NSUInteger countIndex = [args indexOfObject:@"--boson-count"];
+    NSInteger count = countIndex != NSNotFound && countIndex + 1 < args.count ?
+        [args[countIndex + 1] integerValue] : 100;
+    count = MAX(0, MIN(5000, count));
+    source = [NSString stringWithFormat:@"const BOSON_COUNT = %ld;\n%@", (long)count, source];
+    NSLog(@"BOSON_STRESS count=%ld", (long)count);
+  }
   _runtime = source ? boson_app_new(source.UTF8String) : nullptr;
+  if (_runtime) NSLog(@"BOSON_TREE_VARIANT=%d", boson_app_tree_variant());
   if (_contentionScenario && _runtime) {
     _frameProbe = [CADisplayLink displayLinkWithTarget:self selector:@selector(probeFrame:)];
     [_frameProbe addToRunLoop:NSRunLoop.mainRunLoop forMode:NSRunLoopCommonModes];
@@ -123,7 +137,7 @@ static void OnFrame(void *user_data, int node_id, const char *tag, const char *t
     if ([_seen containsObject:nodeId]) continue;
     [_views[nodeId] removeFromSuperview];
     [_views removeObjectForKey:nodeId];
-    NSLog(@"BOSON_NODE_REMOVE id=%d", nodeId.intValue);
+    if (_detailedLogs) NSLog(@"BOSON_NODE_REMOVE id=%d", nodeId.intValue);
   }
   NSLog(@"BOSON_FRAME result=%d nodes=%lu", result, (unsigned long)_views.count);
 }
@@ -151,7 +165,7 @@ static void OnFrame(void *user_data, int node_id, const char *tag, const char *t
     }
     _views[key] = view;
     [_surface addSubview:view];
-    NSLog(@"BOSON_NODE_CREATE id=%d tag=%@", nodeId, kind);
+    if (_detailedLogs) NSLog(@"BOSON_NODE_CREATE id=%d tag=%@", nodeId, kind);
   }
   NSString *value = [NSString stringWithUTF8String:text];
   if ([view isKindOfClass:UIButton.class]) {
@@ -162,7 +176,7 @@ static void OnFrame(void *user_data, int node_id, const char *tag, const char *t
   view.accessibilityIdentifier = [NSString stringWithFormat:@"boson-node-%d", nodeId];
   view.accessibilityLabel = [NSString stringWithFormat:@"boson-node:%d:%@", nodeId, value];
   view.frame = CGRectMake(x, y, width, height);
-  NSLog(@"BOSON_LAYOUT id=%d x=%d y=%d width=%d height=%d", nodeId, x, y, width, height);
+  if (_detailedLogs) NSLog(@"BOSON_LAYOUT id=%d x=%d y=%d width=%d height=%d", nodeId, x, y, width, height);
 }
 
 - (void)tap:(UIButton *)button {
@@ -176,9 +190,14 @@ static void OnFrame(void *user_data, int node_id, const char *tag, const char *t
     NSLog(@"BOSON_JS_ERROR=%s", boson_app_last_error(_runtime));
   }
   CFTimeInterval rendered = CACurrentMediaTime();
-  if (_contentionScenario) NSLog(@"BOSON_METRIC dispatch_us=%.0f render_us=%.0f",
-                                  (dispatched - started) * 1000000.0,
-                                  (rendered - dispatched) * 1000000.0);
+  if (_contentionScenario || _stressScenario) {
+    CGSize size = _surface.bounds.size;
+    long long core = _stressScenario ? boson_app_probe_layout_us(
+        _runtime, (int)round(size.width), (int)round(size.height)) : -1;
+    NSLog(@"BOSON_METRIC snapshot_us=%lld dispatch_us=%.0f render_us=%.0f core_layout_us=%lld",
+          boson_app_last_snapshot_us(_runtime), (dispatched - started) * 1000000.0,
+          (rendered - dispatched) * 1000000.0, core);
+  }
   NSLog(@"BOSON_TOUCH_RESULT=%d node=%ld", result, (long)button.tag);
 }
 

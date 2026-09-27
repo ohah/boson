@@ -31,7 +31,10 @@ xcrun --sdk iphonesimulator clang++ -std=c++20 -target "$target" -isysroot "$sdk
 xcrun --sdk iphonesimulator clang++ -std=c++20 -target "$target" -isysroot "$sdk" \
   -I"$spike_dir/runtime" -fPIC -fobjc-arc \
   -c "$spike_dir/ios/app.mm" -o "$output_dir/app.o"
+tree_flags=(--cfg boson_scan)
+if [[ "${BOSON_TREE_INDEXED:-0}" == 1 ]]; then tree_flags=(--cfg boson_indexed); fi
 rustc --edition=2024 --crate-type staticlib --target aarch64-apple-ios-sim \
+  "${tree_flags[@]}" \
   -O -C debuginfo=0 -C panic=abort "$spike_dir/rust/tree.rs" \
   -o "$output_dir/libboson_tree_core.a"
 
@@ -40,6 +43,7 @@ mkdir -p "$app_dir"
 cp "$repo_dir/spikes/v8-language-bridge/ios/Info.plist" "$app_dir/Info.plist"
 cp "$spike_dir/tree.js" "$app_dir/tree.js"
 cp "$spike_dir/scenarios/contention.js" "$app_dir/contention.js"
+cp "$spike_dir/scenarios/stress.js" "$app_dir/stress.js"
 /usr/libexec/PlistBuddy -c 'Set :CFBundleIdentifier dev.boson.dynamic-tree' "$app_dir/Info.plist"
 /usr/libexec/PlistBuddy -c 'Set :CFBundleDisplayName Boson Dynamic Tree' "$app_dir/Info.plist"
 /usr/libexec/PlistBuddy -c 'Set :CFBundleExecutable BosonDynamicTree' "$app_dir/Info.plist"

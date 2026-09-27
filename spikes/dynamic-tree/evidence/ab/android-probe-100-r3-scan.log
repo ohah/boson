@@ -1,0 +1,64 @@
+--------- beginning of main
+09-27 12:14:35.020 10743 10743 I BosonTree: BOSON_TREE_VARIANT=0
+09-27 12:14:35.024 10743 10743 I BosonTree: BOSON_FRAME nodes=101
+09-27 12:14:35.024 10743 10743 I BosonTree: BOSON_METRIC init_total_us=12514 scenario=stress
+09-27 12:14:35.680 10743 10743 I BosonTree: BOSON_FRAME nodes=102
+09-27 12:14:35.680 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=36 dispatch_us=430 render_us=1476 core_layout_us=16
+09-27 12:14:35.680 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:35.939 10743 10743 I BosonTree: BOSON_FRAME nodes=101
+09-27 12:14:35.939 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=32 dispatch_us=106 render_us=1961 core_layout_us=25
+09-27 12:14:35.939 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:36.219 10743 10743 I BosonTree: BOSON_FRAME nodes=102
+09-27 12:14:36.219 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=62 dispatch_us=220 render_us=3868 core_layout_us=49
+09-27 12:14:36.219 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:36.488 10743 10743 I BosonTree: BOSON_FRAME nodes=101
+09-27 12:14:36.488 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=17 dispatch_us=132 render_us=1772 core_layout_us=39
+09-27 12:14:36.488 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:36.790 10743 10743 I BosonTree: BOSON_FRAME nodes=102
+09-27 12:14:36.790 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=24 dispatch_us=158 render_us=3812 core_layout_us=53
+09-27 12:14:36.790 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:37.085 10743 10743 I BosonTree: BOSON_FRAME nodes=101
+09-27 12:14:37.085 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=29 dispatch_us=90 render_us=1404 core_layout_us=17
+09-27 12:14:37.085 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:37.371 10743 10743 I BosonTree: BOSON_FRAME nodes=102
+09-27 12:14:37.371 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=38 dispatch_us=450 render_us=3738 core_layout_us=18
+09-27 12:14:37.371 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:37.662 10743 10743 I BosonTree: BOSON_FRAME nodes=101
+09-27 12:14:37.662 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=43 dispatch_us=225 render_us=5029 core_layout_us=52
+09-27 12:14:37.662 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:37.930 10743 10743 I BosonTree: BOSON_FRAME nodes=102
+09-27 12:14:37.930 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=28 dispatch_us=213 render_us=7039 core_layout_us=70
+09-27 12:14:37.930 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:38.196 10743 10743 I BosonTree: BOSON_FRAME nodes=101
+09-27 12:14:38.196 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=13 dispatch_us=76 render_us=1847 core_layout_us=49
+09-27 12:14:38.196 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:38.486 10743 10743 I BosonTree: BOSON_FRAME nodes=102
+09-27 12:14:38.486 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=32 dispatch_us=282 render_us=4655 core_layout_us=74
+09-27 12:14:38.486 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:38.765 10743 10743 I BosonTree: BOSON_FRAME nodes=101
+09-27 12:14:38.765 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=14 dispatch_us=61 render_us=1198 core_layout_us=15
+09-27 12:14:38.765 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:39.054 10743 10743 I BosonTree: BOSON_FRAME nodes=102
+09-27 12:14:39.054 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=31 dispatch_us=206 render_us=4311 core_layout_us=55
+09-27 12:14:39.054 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:39.341 10743 10743 I BosonTree: BOSON_FRAME nodes=101
+09-27 12:14:39.341 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=31 dispatch_us=148 render_us=2272 core_layout_us=29
+09-27 12:14:39.341 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:39.668 10743 10743 I BosonTree: BOSON_FRAME nodes=102
+09-27 12:14:39.668 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=30 dispatch_us=222 render_us=4350 core_layout_us=54
+09-27 12:14:39.668 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:39.938 10743 10743 I BosonTree: BOSON_FRAME nodes=101
+09-27 12:14:39.938 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=19 dispatch_us=84 render_us=1902 core_layout_us=22
+09-27 12:14:39.938 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:40.243 10743 10743 I BosonTree: BOSON_FRAME nodes=102
+09-27 12:14:40.243 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=36 dispatch_us=412 render_us=4648 core_layout_us=57
+09-27 12:14:40.243 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:40.533 10743 10743 I BosonTree: BOSON_FRAME nodes=101
+09-27 12:14:40.533 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=32 dispatch_us=146 render_us=2216 core_layout_us=26
+09-27 12:14:40.533 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:40.836 10743 10743 I BosonTree: BOSON_FRAME nodes=102
+09-27 12:14:40.836 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=37 dispatch_us=235 render_us=4693 core_layout_us=55
+09-27 12:14:40.836 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
+09-27 12:14:41.113 10743 10743 I BosonTree: BOSON_FRAME nodes=101
+09-27 12:14:41.114 10743 10743 I BosonTree: BOSON_METRIC snapshot_us=17 dispatch_us=72 render_us=2718 core_layout_us=45
+09-27 12:14:41.114 10743 10743 I BosonTree: BOSON_TOUCH_RESULT=0 node=2
