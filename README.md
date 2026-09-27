@@ -11,10 +11,25 @@ Spinon은 웹과 유사한 개발 경험으로 모바일 앱을 만드는 멀티
 문서 생성기의 `@rspress/core`는 `2.0.22`에 고정합니다. 스피논의 첫 공식 릴리스 전에는 RSPress를 업데이트하지 않습니다.
 
 ```sh
-bun install --frozen-lockfile
-bun run docs:dev
-bun run docs:build
+mise install
+mise exec -- bun install --frozen-lockfile
+mise exec -- bun run docs:dev
+mise exec -- bun run docs:build
+mise exec -- bun run test
 ```
+
+## 네이티브 빌드 부트스트랩
+
+Android 앱과 iOS 시뮬레이터 앱은 고정된 V8 소스, Rust FFI, Bun으로 만든 JavaScript를 함께 묶어 시작 smoke를 실행합니다. 먼저 `mise install`과 Android SDK·Xcode 설치를 마친 뒤 [V8 소스와 플랫폼별 빌드 준비](native/v8/VERSION.md)를 따릅니다. 자세한 SDK 패키지와 로그 확인법은 [Android](platforms/android/README.md), [iOS](platforms/ios/README.md), [내부 V8 인터페이스](spec/internal/0001-v8-bootstrap.md)를 참고하세요.
+
+```sh
+mise exec -- bun run build:android
+mise exec -- bun run build:ios-sim
+```
+
+이 부트스트랩은 앱 빌드 연결을 검증합니다. GPU 렌더링, 제품 UI, OTA, 공개 API 지원 완료를 의미하지 않습니다.
+
+현재 Android 실기기와 iOS 시뮬레이터에서 확인한 부팅 결과 및 검증 범위는 [네이티브 부트스트랩 기록](docs/evidence/native-bootstrap-2026-09-28.md)에 있습니다.
 
 정식 사이트는 GitHub Pages에 배포합니다. `main`에 문서 변경이 반영되면 GitHub Actions가 새 HTML을 생성해 게시합니다. `packages/docs/rspress.config.ts`의 기본 경로는 `/spinon/`입니다.
 

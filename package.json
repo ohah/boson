@@ -8,6 +8,12 @@
   "scripts": {
     "docs:dev": "bun run --filter @spinon/docs docs:dev",
     "docs:build": "bun run --filter @spinon/docs docs:build",
-    "docs:preview": "bun run --filter @spinon/docs docs:preview"
+    "docs:preview": "bun run --filter @spinon/docs docs:preview",
+    "bundle:bootstrap": "mkdir -p build/spinon/bootstrap && bun build examples/bootstrap/app.js --target=browser --outfile build/spinon/bootstrap/app.js",
+    "test:js": "cd examples/bootstrap && bun test",
+    "test:rust": "cargo test --locked --workspace",
+    "test": "bun run test:js && cargo test --locked --workspace",
+    "build:android": "bash tools/build-android-app.sh",
+    "build:ios-sim": "bash tools/build-ios-sim.sh"
   }
 }

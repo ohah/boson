@@ -68,22 +68,24 @@ Bun은 저장소의 JS/TS 워크스페이스, 잠금 파일, 스크립트와 테
 
 ## Cargo와 Bun 워크스페이스
 
-- 루트 `Cargo.toml`이 제품 크레이트를 `[workspace]`로 관리하고 루트 `Cargo.lock` 하나를 사용합니다. 공통 crate 버전은 `workspace.dependencies`에서 고정합니다.
-- 루트 `package.json`은 Bun workspace와 문서 명령 진입점만 관리합니다. 실제 패키지는 준비될 때 구성원으로 추가하고, 존재하지 않는 패키지 경로를 미리 workspace에 나열하지 않습니다. 문서 생성기는 `packages/docs`에 두고 RSPress를 `2.0.22`에 고정합니다.
+- 루트 `Cargo.toml`이 제품·내부 crate를 `[workspace]`로 관리하고 루트 `Cargo.lock` 하나를 사용합니다. 현재 `crates/spinon-ffi`는 부팅 smoke만 잇는 내부 crate이며 제품 API를 제공하지 않습니다. 공통 crate 버전은 `workspace.dependencies`에서 고정합니다.
+- 루트 `package.json`은 Bun workspace와 문서·저장소 명령 진입점만 관리합니다. 실제 패키지는 준비될 때 구성원으로 추가하고, 존재하지 않는 패키지 경로를 미리 workspace에 나열하지 않습니다. 문서 생성기는 `packages/docs`에 두고 RSPress를 `2.0.22`에 고정합니다. `examples/bootstrap/app.js`는 프레임워크 API 확정 전의 번들 입력입니다.
 - Rust 컴파일 결과는 루트 `build/` 또는 Cargo 공통 `target/`에 모읍니다. Gradle 캐시, Xcode 산출물, JS 의존성, 환경 파일은 Git에 넣지 않습니다.
 - 스파이크의 독립 `Cargo.lock`, Bun 잠금 파일, 빌드 명령은 코드를 제품 크레이트로 옮겨 동작이 같음을 확인할 때까지 보존합니다. 잠금 파일을 일괄 삭제하거나 의존성을 최신화하지 않습니다.
 - Taffy, Lightning CSS처럼 외부 의존성은 목적·버전·기능·대체 경계를 검토한 뒤 제품 workspace에 올립니다. Lightning CSS는 빌드 도구이며 모바일 런타임 의존성으로 포함하지 않습니다.
 
-예상 루트 명령은 구현 중 확정합니다.
+현재 루트 명령은 저장소 개발과 플랫폼 부팅 smoke에 한정합니다.
 
 ```sh
-cargo test --workspace
+cargo test --locked --workspace
 bun run test:js
-bun run test:conformance
+bun run bundle:bootstrap
 bun run test
+bun run build:android
+bun run build:ios-sim
 ```
 
-`bun run test`는 Rust workspace 테스트, Bun JS/TS 테스트, 공통 적합성 테스트를 한 번에 호출합니다. Android·iOS XCTest와 기기 테스트는 로컬 SDK·시뮬레이터·실기기 환경을 사용하고 Rust/JS 단위 테스트와 결과를 구분합니다.
+`bun run test`는 Rust workspace 테스트와 Bun JS 예제 테스트를 실행합니다. 아직 공통 적합성 스위트나 앱 통합 XCTest는 만들지 않았습니다. 플랫폼 빌드는 각 OS SDK와 고정 V8 checkout이 필요한 로컬 명령이며 JS/Rust 단위 테스트 결과와 구분합니다.
 
 ## 플랫폼 빌드 디렉터리
 
@@ -93,41 +95,39 @@ bun run test
 platforms/android/
 ├── settings.gradle.kts
 ├── build.gradle.kts
-├── gradlew
+├── gradlew                       # Gradle 8.13 Wrapper
 └── app/
     ├── build.gradle.kts
     └── src/
         ├── main/AndroidManifest.xml
-        ├── main/kotlin/dev/spinon/host/   # Activity, surface, lifecycle
+        ├── main/java/dev/spinon/bootstrap/ # 빌드 smoke Activity
         ├── main/cpp/                      # JNI와 V8/Rust 연결 설정
-        ├── main/assets/                   # 번들된 JS/CSS/에셋
-        └── androidTest/                   # 기기·에뮬레이터 연결 검사
+        └── build/                         # 무시되는 번들·JNI 산출물
 ```
 
-CLI가 JS 번들 생성 → Rust Android 대상 빌드 → JNI/V8 네이티브 라이브러리 패키징 → Gradle APK/AAB 빌드 순으로 조정합니다. JNI 입력 이벤트와 GPU surface 소유자는 Android 호스트가 관리합니다.
+현재 Gradle `preBuild`는 JS 번들 → Rust ARM64 정적 라이브러리 → JNI/V8 공유 라이브러리 → APK 순서로 부팅 smoke를 빌드합니다. 이는 실제 CLI, GPU surface, 입력·IME·접근성 연결이 아닙니다.
 
 ### iOS
 
 ```text
 platforms/ios/
-├── Spinon.xcodeproj/
-├── Sources/
-│   ├── Host/                             # Swift 앱·수명주기·surface
-│   ├── Bridge/                           # Objective-C++ V8/Rust 연결
-│   └── Resources/                        # 번들된 JS/CSS/에셋
-└── Tests/                                # XCTest와 호스트 통합 검사
+├── SpinonBootstrap.xcodeproj/
+└── Sources/
+    ├── AppDelegate.swift                 # 빈 호스트 창과 시작 로그
+    ├── SpinonRunner.mm                    # 내부 C ABI 호출
+    └── SpinonBootstrap-Bridging-Header.h
 ```
 
-CLI가 JS 번들 생성 → iOS 기기·시뮬레이터 Rust 정적 라이브러리 빌드 → V8 연결 → Xcode 앱 빌드 순으로 조정합니다. 시뮬레이터와 실기기는 별도 대상·증거로 관리합니다.
+Xcode build phase가 Bun 번들 → Rust 정적 라이브러리 → V8 C++ 어댑터 → 앱 연결 순서로 수행합니다. 현재 재현 명령은 Apple Silicon 시뮬레이터입니다. 실기기 JIT 없는 앱 빌드는 별도 대상으로 남아 있습니다.
 
-구체적인 Cargo target, V8 산출물, Xcode build phase, Gradle/CMake 연결 방식은 R02·R08 위험 실험과 호스트 ABI가 정해진 뒤 구현 계획의 하위 설계로 확정합니다. 계획 단계에서 검증되지 않은 플러그인이나 네이티브 빌드 도구를 고정하지 않습니다.
+부팅에 필요한 Cargo target, V8 리비전, iOS/Android 빌드 입력은 [내부 V8 인터페이스](../../spec/internal/0001-v8-bootstrap.md)에 고정했습니다. 이것은 R02의 실기기·JIT 정책 검증, R06의 동시 호출·스레드 계약, R08의 GPU 렌더러 실험을 통과했다는 뜻이 아닙니다. 제품 ABI와 네이티브 런타임 모듈은 그 계약이 정해진 뒤 별도 설계합니다.
 
 ## 테스트 스위트 구성
 
 | 테스트 층 | 위치·실행기 | 확인 대상 |
 | --- | --- | --- |
-| Rust 단위·통합 | 각 crate의 `tests/`, `cargo test --workspace` | ID·트리 불변식, 변경 배치, 복구, 레이아웃, FFI 입력 검증 |
-| JS/TS 패키지 | 패키지별 `*.test.ts`, `bun test` | Runtime API, React 어댑터, 번들 플러그인, CLI 인자·오류 |
+| Rust 단위·통합 | 각 crate의 `tests/`, `cargo test --locked --workspace` | 현재는 FFI 보고 문자열·버퍼 규칙만 검사하며, 트리·레이아웃 테스트는 승격 단계에서 추가 |
+| JS/TS 패키지 | `examples/bootstrap/*.test.ts`, `bun test` | 현재 예제 JS의 호스트 콜백과 역방향 이벤트 호출 |
 | 공통 적합성 | `tests/conformance/`, Bun 실행기와 Rust fixture 소비 | 동일 앱 시나리오의 트리 revision, 이벤트, 프레임 기대값 |
 | 웹 통합 | Playwright 브라우저 테스트 | DOM 호스트, Vite/Rspack 번들, 웹 기준 출력 |
 | Android 통합 | Gradle instrumentation | APK 실행, surface 수명, 터치·접근성 이벤트, Rust/V8 연결 |
@@ -140,11 +140,11 @@ CLI가 JS 번들 생성 → iOS 기기·시뮬레이터 Rust 정적 라이브러
 
 | 단계 | 구현·선행 결정 | 대상 위치 | 다음 단계로 가는 기준 |
 | --- | --- | --- | --- |
-| 0. 워크스페이스 기초 | 루트 Cargo/Bun workspace, 공통 명령, 무시 경로, 테스트 실행기 | 루트 설정, `tools/`, `tests/` | 깨끗한 checkout에서 Rust·JS 스위트가 재현됨 |
+| 0. 워크스페이스와 빌드 부트스트랩 | Cargo·Bun 기초, 고정 V8 소스 입력, Rust FFI·Android Gradle·iOS Xcode 빌드 smoke와 JS/Rust 단위 검사 | 루트 설정, `crates/spinon-ffi`, `native/v8`, `platforms/`, `tools/` | V8 연결 앱이 각 플랫폼에서 실행되고 결과 문자열이 맞음. 제품 API 완료는 아님 |
 | 1. 런타임 계약과 코어 승격 | 실패한 변경 배치 복구, revision·ID, 지연 이벤트·콜백 수명·소유권을 먼저 결정. 동적 트리 PoC의 순수 Rust 코어를 테스트와 함께 이동 | `crates/spinon-core` | Android/iOS 호스트가 공유할 타입·오류·revision 계약과 단위 테스트 확보 |
 | 2. 레이아웃 모듈 | Taffy 적합성·비용을 검증하고 작은 PoC와 비교 | `crates/spinon-layout` | 공통 fixture의 웹 기준 좌표와 허용 차이가 정의됨 |
-| 3. V8·FFI 경계 | 현재 V8 호출을 내부 ABI로 분리하고 수명·예외·JS thread 규칙을 테스트 | `crates/spinon-ffi`, `native/v8` | C ABI 소유권·오류·콜백 해제 테스트와 양 플랫폼 링크 성공 |
-| 4. 모바일 호스트 골격 | Android Gradle/Kotlin/JNI와 iOS Xcode/Swift/Obj-C++ 앱 호스트 | `platforms/android`, `platforms/ios` | 동일한 Rust·V8 런타임이 두 앱에서 실행되고 앱 수명 복구 확인 |
+| 3. 제품 V8·FFI 경계 | smoke 경계를 제품 런타임으로 승격하고 격리·예외·콜백 수명·스레드 규칙을 정해 검증 | `crates/spinon-ffi`, `native/v8` | 버전 있는 내부 계약·오류 복구·실기기 검증 |
+| 4. 모바일 호스트 골격 | 현재 부팅 앱을 GPU surface·입력·수명주기·복구 검증으로 확장 | `platforms/android`, `platforms/ios` | 같은 런타임이 두 앱에서 실행되고 앱 수명 복구 확인 |
 | 5. GPU 첫 수직 화면 | R08 실험 후 GPU 백엔드와 텍스트·버튼 hit-test·접근성 연결 | `crates/spinon-render`, 플랫폼 surface | Android·iOS에서 같은 카운터 시나리오가 표시·입력·복구됨 |
 | 6. JS workspace와 첫 개발 흐름 | Runtime 패키지, React 어댑터, Vite 우선 통합, 웹 호스트, 다시 로드·오류 위치 | `packages/runtime`, `packages/frameworks/react`, `packages/bundlers/vite`, `examples/counter` | 한 TSX 앱이 웹·Android·iOS에서 빌드되고 공통 fixture 통과 |
 | 7. Rspack·Vue·Svelte·CLI | 코어 호스트 계약을 재사용해 어댑터와 도구 지원 추가. TypeScript CLI를 Node LTS용으로 배포 | `packages/bundlers/rspack`, `packages/frameworks/vue`, `packages/frameworks/svelte`, `packages/cli` | 각 조합의 지원표와 통합 테스트가 있음 |
