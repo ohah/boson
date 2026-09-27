@@ -11,9 +11,7 @@
 - [코어 아키텍처](docs/architecture.md)
 - [웹 호환 범위와 적합성](spec/0001-conformance.md)
 - [UI 트리·이벤트 계약](spec/0002-ui-tree-events.md)
-- [개발 경험 계획](docs/developer-experience.md)
 - [OTA 설계](docs/ota-design.md)
-- [성능 비교 계획](docs/benchmark-plan.md)
 - [PR 본문 양식](.github/pull_request_template.md)
 
 ## 핵심 원칙

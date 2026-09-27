@@ -47,4 +47,4 @@
 
 ## 현재 상태
 
-[동적 UI 트리 PoC](../spikes/dynamic-tree/README.md)는 Android 실기기와 iOS 시뮬레이터에서 스피논 단독으로 노드 추가·삭제, 레이아웃, 터치, 계산 경합을 확인했다. 기존 [A/B 결과](../spikes/dynamic-tree/evidence/ab-results.md)는 스피논 내부의 검색 방식 비교이며, [경합 결과](../spikes/dynamic-tree/evidence/contention-results.md)는 프레임 콜백 간격 측정이다. 둘 다 이 문서의 네 구현 간 성능 순위로 사용하지 않는다. 첫 비교 결과는 네 구현의 작은 화면 앱과 동일 계측 경로가 갖춰진 뒤 작성한다.
+[동적 UI 트리 PoC](../../spikes/dynamic-tree/README.md)는 Android 실기기와 iOS 시뮬레이터에서 스피논 단독으로 노드 추가·삭제, 레이아웃, 터치, 계산 경합을 확인했다. 기존 [A/B 결과](../../spikes/dynamic-tree/evidence/ab-results.md)는 스피논 내부의 검색 방식 비교이며, [경합 결과](../../spikes/dynamic-tree/evidence/contention-results.md)는 프레임 콜백 간격 측정이다. 둘 다 이 문서의 네 구현 간 성능 순위로 사용하지 않는다. 첫 비교 결과는 네 구현의 작은 화면 앱과 동일 계측 경로가 갖춰진 뒤 작성한다.

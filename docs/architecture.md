@@ -50,15 +50,15 @@ Tailwind CSS는 별도 모바일 런타임이 아니라 빌드 도구로 취급�
 
 ## 다음 구현 단계
 
-1. iOS 실기기에서 JIT 없는 V8 실행을 확인하고, 웹 호스트 계약 초안과 [네 구현 비교](benchmark-plan.md)의 작은 기준 화면·계측 조건을 먼저 준비한다. GPU 표면·텍스트·입력·접근성 연결의 최소 성립 조건과 Vue·Svelte, Taffy, Lightning CSS 경계를 작은 실험으로 확인한다.
+1. iOS 실기기에서 JIT 없는 V8 실행을 확인하고, 웹 호스트 계약 초안과 [네 구현 비교](plans/benchmark.md)의 작은 기준 화면·계측 조건을 먼저 준비한다. GPU 표면·텍스트·입력·접근성 연결의 최소 성립 조건과 Vue·Svelte, Taffy, Lightning CSS 경계를 작은 실험으로 확인한다.
 2. 현재 [동적 트리 PoC](../spikes/dynamic-tree/README.md)의 Rust 파일에서 트리·커밋·FFI 책임을 분리하고, 변경된 노드에 대한 명령 배치를 만든다. PoC 결과와 코드는 비교 기준으로 보존한다.
 3. 이벤트 ID와 JS 콜백의 등록·해제 수명을 명시하고 React 어댑터를 Android·iOS의 GPU 표면 및 최소 웹 호스트에 연결한다. 같은 카운터 화면이 세 플랫폼에서 동작하면 네 구현을 처음 비교한다.
 4. 스타일·텍스트·입력·목록 기능을 추가할 때마다 같은 사용자 시나리오로 다시 비교한다. 그 결과를 토대로 부분 갱신, 스레드 스케줄러, GPU 프레임 제출 방식을 개선한다.
 
 V8 C++ API를 직접 쓰는 현재 접근은 유지하되, C ABI에 V8 객체나 Rust 내부 포인터의 장기 소유권을 노출하지 않는다.
 
-전체 계획에서 발견한 선후 관계와 중단 조건은 [5회 적대적 검증](plan-audit.md)에 정리한다. OTA는 React Native 수준의 JS·스타일·에셋 배포에 기능별 청크 전송과 공개 범위를 더하는 것을 목표로 한다. 실행할 버전은 일관된 릴리스 스냅샷으로 활성화한다. 자세한 계약은 [청크 기반 OTA 설계](ota-design.md)에 둔다. 기술적으로 구현할 수 있다는 이유만으로 대상 앱의 배포 정책 허용을 판정하지 않는다.
+전체 계획에서 발견한 선후 관계와 중단 조건은 [5회 적대적 검증](plans/audit.md)에 정리한다. OTA는 React Native 수준의 JS·스타일·에셋 배포에 기능별 청크 전송과 공개 범위를 더하는 것을 목표로 한다. 실행할 버전은 일관된 릴리스 스냅샷으로 활성화한다. 자세한 계약은 [청크 기반 OTA 설계](ota-design.md)에 둔다. 기술적으로 구현할 수 있다는 이유만으로 대상 앱의 배포 정책 허용을 판정하지 않는다.
 
-Cargo·Bun workspace, iOS·Android 앱 폴더, 테스트 층, TypeScript CLI와 단계별 모듈 승격 계획은 [모노레포 구현 계획](implementation-plan.md)에 둔다. 그 문서는 구현 상태의 별도 원장이 아니며, 완료 여부는 `spec/STATUS.md`를 따른다.
+Cargo·Bun workspace, iOS·Android 앱 폴더, 테스트 층, TypeScript CLI와 단계별 모듈 승격 계획은 [모노레포 구현 계획](plans/implementation.md)에 둔다. 그 문서는 구현 상태의 별도 원장이 아니며, 완료 여부는 `spec/STATUS.md`를 따른다.
 
-개발 빌드의 전체 리로드·HMR·V8 Inspector·스피논 UI 트리 조사는 [개발 경험 명세](developer-experience.md)에 분리한다. 릴리스 빌드의 OTA와 개발 중 모듈 교체는 서로 다른 경로다.
+개발 빌드의 전체 리로드·HMR·V8 Inspector·스피논 UI 트리 조사는 [개발 경험 명세](plans/developer-experience.md)에 분리한다. 릴리스 빌드의 OTA와 개발 중 모듈 교체는 서로 다른 경로다.
