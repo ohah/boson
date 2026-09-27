@@ -24,4 +24,4 @@ UI 조사 도구는 화면 노드와 원본 TSX/JS 위치를 소스맵·빌드 �
 
 로컬 `stdio` 서버가 CLI·개발 서비스와 같은 진단 모델을 읽기 가능한 resource/tool로 제공한다. 첫 범위는 프로젝트·기기 상태, 로그, UI 트리, 성능 스냅샷이다. 공개 미리보기 서버와 연결하지 않는다. 쓰기 작업, 원격 MCP, 임의 JS 평가·셸 실행은 별도 설계와 명시적 범위가 필요하다.
 
-참고: [개발 경험](https://github.com/ohah/spinon/blob/ea3167fcfc8fdd2a346ce13c1ffad7ac63f7813c/docs/developer-experience.md), [CLI·MCP 설계](https://github.com/ohah/spinon/blob/ea3167fcfc8fdd2a346ce13c1ffad7ac63f7813c/docs/cli-mcp.md).
+참고: [개발 경험](https://github.com/ohah/spinon/blob/e8ad710712ceb7244afabb55aa7bf24db4aa6952/docs/plans/developer-experience.md), [CLI·MCP 설계](https://github.com/ohah/spinon/blob/e8ad710712ceb7244afabb55aa7bf24db4aa6952/docs/cli-mcp.md).
