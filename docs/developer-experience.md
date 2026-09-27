@@ -35,6 +35,12 @@ V8 Inspector는 JS 디버깅을 위한 프로토콜 연결 지점을 제공한�
 
 Chrome DevTools에서 JS를 디버깅할 수 있다는 것이 브라우저 전체 CDP 지원을 뜻하지 않는다. 스피논에는 DOM·브라우저 문서가 없으므로 `DOM`, `CSS`, `Page`, `Network` 도메인의 브라우저 동작을 자동으로 제공하지 않는다. UI 계층을 보려면 스피논 노드 ID, 계산된 스타일, 레이아웃, 접근성 의미, 프레임 시간을 노출하는 별도 조사 도구가 필요하다. 네트워크 요청 표시는 스피논 `fetch` 구현과 별도 계측을 연결한 뒤 지원 여부를 명시한다.
 
+## 후속 도구 · 개발용 미리보기와 분석
+
+Lynx Explorer와 같은 개발용 미리보기 앱은 HMR과 다른 항목이다. Android·iOS에 미리 설치한 스피논 개발 호스트가 QR 코드나 번들 URL로 개발 서버에 연결해 화면을 열고, 리로드와 오류를 보여준다. S12의 개발 연결과 S13의 CLI가 먼저 필요하다. 호스트는 런타임·네이티브 API 버전과 번들 매니페스트를 확인하며, 네이티브 코드나 호스트 ABI가 바뀌면 앱을 새로 빌드해야 한다. 이 앱은 릴리스 OTA의 배포 수단이 아니다.
+
+UI 조사는 X13의 노드 조회를 화면 선택·강조 표시·원본 TSX/JS 위치 연결로 확장한다. 소스 위치는 Vite·Rspack 빌드 메타데이터와 소스맵에서 가져오고, 계산된 스타일·박스 모델·적용되지 않은 규칙을 스피논 스타일 엔진의 결과로 보여준다. 브라우저 Elements 패널을 그대로 지원한다는 뜻은 아니다. 빌드 분석은 별도로 청크·CSS·에셋 크기와 빌드 단계 시간을 Vite·Rspack에서 비교 가능한 형식으로 출력한다. 런타임 프레임 계측과 빌드 시간 계측을 섞지 않는다.
+
 ## 완료 판정
 
 | 기능 | 확인할 결과 |
@@ -45,5 +51,8 @@ Chrome DevTools에서 JS를 디버깅할 수 있다는 것이 브라우저 전�
 | CSS·에셋 갱신 | 스타일 변경이 전체 앱 재설치 없이 보이며 이전 GPU 자원과 캐시가 해제된다. |
 | JS 디버깅 | Chrome DevTools에서 두 모바일 플랫폼의 원본 TSX/JS 위치에 중단점이 걸리고 스택·예외·콘솔·프로파일이 맞게 보인다. |
 | UI 조사 | 스피논 노드와 스타일·레이아웃·접근성 값을 선택해 확인할 수 있다. 브라우저 Elements와 혼동하지 않도록 별도 표시한다. |
+| 개발용 미리보기 앱 | Android·iOS의 사전 빌드된 호스트에서 호환되는 번들을 QR 코드나 URL로 열고 리로드·오류를 확인한다. 호환되지 않는 ABI는 실행 전에 거부한다. |
+| 소스 연결 UI 조사 | 기기에서 고른 노드가 원본 TSX/JS 위치와 연결되고, 계산된 스타일·박스 모델·적용되지 않은 규칙을 확인할 수 있다. |
+| 빌드·번들 분석 | Vite·Rspack 빌드에서 청크·CSS·에셋 크기와 빌드 단계 시간을 같은 단위로 출력한다. |
 
-공식 기준: [V8 Inspector](https://v8.dev/docs/inspector), [Vite HMR API](https://vite.dev/guide/api-hmr), [Vite 플러그인 변경 처리](https://vite.dev/guide/api-plugin), [Rspack HMR](https://www.rspack.dev/plugins/hot-module-replacement-plugin).
+공식 기준: [V8 Inspector](https://v8.dev/docs/inspector), [Vite HMR API](https://vite.dev/guide/api-hmr), [Vite 플러그인 변경 처리](https://vite.dev/guide/api-plugin), [Rspack HMR](https://www.rspack.dev/plugins/hot-module-replacement-plugin), [Lynx Explorer](https://lynxjs.org/guide/start/quick-start.html), [Lynx DevTool Elements](https://lynxjs.org/4.0/guide/devtool/panels/elements-panel.html), [Rspeedy 빌드 프로파일링](https://lynxjs.org/rspeedy/build-profiling.html).
