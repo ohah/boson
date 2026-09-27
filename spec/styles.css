@@ -73,6 +73,7 @@
 .spinon-hero h1 { margin: 30px 0 22px; font-size: clamp(40px, 4.2vw, 64px); line-height: 1.16; letter-spacing: -.062em; font-weight: 800; }
 .spinon-hero h1 span { background: linear-gradient(94deg, #ffab79 0%, #e66b50 46%, #bd91d7 100%); color: transparent; background-clip: text; }
 .spinon-hero__lead { max-width: 560px; margin: 0; color: #aeb2bf; font-size: 17px; line-height: 1.75; word-break: keep-all; }
+.spinon-hero__lead strong { color: #eceef3; }
 .spinon-hero__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
 .spinon-button { display: inline-flex; align-items: center; justify-content: center; gap: 28px; min-height: 48px; padding: 0 21px; border-radius: 10px; font-size: 14px; font-weight: 700; text-decoration: none !important; transition: transform .2s, border-color .2s, background .2s; }
 .spinon-button:hover { transform: translateY(-2px); }
@@ -94,41 +95,31 @@
 .spinon-orbit__node--web { top: 17%; left: 3%; }
 .spinon-orbit__node--android { top: 30%; right: 0; }
 .spinon-orbit__node--ios { bottom: 17%; left: 10%; }
-.spinon-orbit__caption { position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%); color: #777c8c; font-size: 11px; white-space: nowrap; letter-spacing: .06em; }
-.spinon-progress { display: flex; align-items: center; justify-content: space-between; gap: 30px; padding: 35px 0; border-top: 1px solid #2c2f39; border-bottom: 1px solid #2c2f39; }
-.spinon-progress h2, .spinon-section h2, .spinon-principle h2 { margin: 8px 0 6px; color: #f1f2f5; letter-spacing: -.045em; font-size: clamp(23px, 2vw, 30px); }
-.spinon-progress p { margin: 0; color: #8e929f; font-size: 14px; }
-.spinon-progress__figures { display: flex; gap: clamp(24px, 3.5vw, 58px); }
-.spinon-progress__figures div { display: flex; flex-direction: column; gap: 2px; }
-.spinon-progress__figures strong { font-size: 35px; line-height: 1; color: #f5a078; font-weight: 750; letter-spacing: -.05em; }
-.spinon-progress__figures span { color: #9297a5; font-size: 11px; white-space: nowrap; }
-.spinon-section { padding: 75px 0 90px; }
+.spinon-section h2, .spinon-reading h2 { margin: 8px 0 6px; color: #f1f2f5; letter-spacing: -.045em; font-size: clamp(23px, 2vw, 30px); }
+.spinon-section { padding: 55px 0 75px; border-top: 1px solid #2c2f39; }
 .spinon-section__head { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 25px; }
-.spinon-section__hint { color: #777c8b; font-size: 12px; }
 .spinon-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .spinon-card { position: relative; display: flex; flex-direction: column; min-height: 230px; padding: 22px; border: 1px solid #30333e; border-radius: 16px; background: linear-gradient(145deg, #1b1e26, #17191e); color: #f1f2f5 !important; text-decoration: none !important; transition: transform .2s, border-color .2s, box-shadow .2s; }
 .spinon-card:hover { transform: translateY(-4px); border-color: #a8634b; box-shadow: 0 20px 35px #0003; }
 .spinon-card__icon { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border: 1px solid #4a3431; border-radius: 10px; background: #322723; color: #f3a37b; font-size: 13px; font-weight: 800; }
-.spinon-card__label { margin-top: 23px; color: #f19971; font-size: 11px; font-weight: 700; letter-spacing: .08em; }
-.spinon-card strong { margin-top: 4px; font-size: 22px; letter-spacing: -.035em; }
+.spinon-card strong { margin-top: 26px; font-size: 22px; letter-spacing: -.035em; }
 .spinon-card__description { margin-top: 11px; max-width: 260px; color: #989dab; font-size: 13px; line-height: 1.65; word-break: keep-all; }
 .spinon-card__arrow { position: absolute; top: 24px; right: 23px; color: #7d8493; font-size: 20px; }
-.spinon-principle { display: flex; align-items: center; gap: 27px; padding: 27px 32px; margin-bottom: 85px; border: 1px solid #3b3435; border-radius: 15px; background: radial-gradient(circle at 0% 50%, #3a2927, #1b1b20 55%); }
-.spinon-principle__mark { font-size: 38px; color: #ec8661; }
-.spinon-principle h2 { margin: 4px 0 7px; font-size: 21px; }
-.spinon-principle p { margin: 0; max-width: 700px; color: #a9adba; font-size: 13px; line-height: 1.7; word-break: keep-all; }
-.spinon-principle code { color: #ffc29d; }
-.spinon-principle a { margin-left: auto; flex: none; color: #f5a47e !important; font-size: 13px; font-weight: 700; text-decoration: none !important; }
-.spinon-principle a:hover { text-decoration: underline !important; }
+.spinon-reading { display: grid; grid-template-columns: .8fr 1.2fr; gap: 15px 60px; padding: 40px 0 100px; border-top: 1px solid #2c2f39; }
+.spinon-reading ol { margin: 0; padding-left: 26px; color: #c0c4cf; font-size: 15px; line-height: 2; }
+.spinon-reading li { padding-left: 4px; }
+.spinon-reading li::marker { color: #f19971; font-weight: 700; }
+.spinon-reading p { grid-column: 2; margin: 0; color: #9297a5; font-size: 13px; line-height: 1.7; }
 
 @media (max-width: 900px) {
   .spinon-home { padding: 0 28px; }
   .spinon-hero { grid-template-columns: 1fr; gap: 0; }
   .spinon-hero__content { padding: 75px 0 15px; }
   .spinon-orbit { width: min(100%, 410px); margin-bottom: 45px; }
-  .spinon-progress { align-items: flex-start; flex-direction: column; }
   .spinon-card-grid { grid-template-columns: 1fr; }
   .spinon-card { min-height: 200px; }
+  .spinon-reading { grid-template-columns: 1fr; gap: 20px; }
+  .spinon-reading p { grid-column: 1; }
 }
 
 @media (max-width: 600px) {
@@ -140,10 +131,6 @@
   .spinon-orbit__core { width: 120px; height: 120px; border-radius: 23px; }
   .spinon-orbit__core img { width: 43px; height: 43px; }
   .spinon-orbit__node { font-size: 9px; padding: 8px; }
-  .spinon-progress__figures { width: 100%; justify-content: space-between; gap: 8px; }
-  .spinon-progress__figures strong { font-size: 29px; }
   .spinon-section { padding: 58px 0 65px; }
-  .spinon-section__hint { display: none; }
-  .spinon-principle { align-items: flex-start; flex-direction: column; gap: 10px; padding: 22px; }
-  .spinon-principle a { margin-left: 0; }
+  .spinon-reading { padding: 40px 0 70px; }
 }
