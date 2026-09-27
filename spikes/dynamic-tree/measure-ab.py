@@ -5,13 +5,14 @@ from __future__ import annotations
 import argparse
 from functools import lru_cache
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
 import time
 
 BASE = Path(__file__).resolve().parents[2]
-BUILD = BASE / "build/dynamic-tree/ab"
+BUILD = Path(os.environ.get("BOSON_AB_OUTPUT", BASE / "build/dynamic-tree/ab"))
 EVIDENCE = Path(__file__).resolve().parent / "evidence/ab"
 SIMULATOR = "booted"
 
