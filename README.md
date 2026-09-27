@@ -8,6 +8,8 @@ Spinon은 웹과 유사한 개발 경험으로 모바일 앱을 만드는 멀티
 
 웹 문서: [스피논 API 문서](https://ohah.github.io/spinon/). `spec/` Markdown을 Rspress로 정적 생성하며, 명세·구현 상태와 API 목록을 웹에서 검색할 수 있습니다. 작업 중 미리보기는 [Tailscale 문서 페이지](https://macstudio.tailed42f2.ts.net/spinon/docs/)입니다.
 
+문서 생성기의 `@rspress/core`는 `2.0.22`에 고정합니다. 스피논의 첫 공식 릴리스 전에는 RSPress를 업데이트하지 않습니다.
+
 ```sh
 bun install --frozen-lockfile
 bun run docs:dev
