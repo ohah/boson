@@ -6,7 +6,7 @@ on:
     paths:
       - 'spec/**'
       - 'theme/**'
-      - 'rspress.config.ts'
+      - 'packages/docs/**'
       - 'package.json'
       - 'bun.lock'
       - '.github/workflows/docs-pages.yml'
@@ -44,8 +44,8 @@ jobs:
         run: bun run docs:build
       - name: Pages 브랜치 갱신
         run: |
-          touch source/build/docs-site/.nojekyll
-          rsync -a --delete --exclude=.git source/build/docs-site/ site/
+          touch source/packages/docs/build/site/.nojekyll
+          rsync -a --delete --exclude=.git source/packages/docs/build/site/ site/
           cd site
           git add -A
           if ! git diff --cached --quiet; then

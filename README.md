@@ -16,7 +16,7 @@ bun run docs:dev
 bun run docs:build
 ```
 
-정식 사이트는 GitHub Pages에 배포합니다. `main`에 문서 변경이 반영되면 GitHub Actions가 새 HTML을 생성해 게시합니다. `rspress.config.ts`의 기본 경로는 `/spinon/`입니다.
+정식 사이트는 GitHub Pages에 배포합니다. `main`에 문서 변경이 반영되면 GitHub Actions가 새 HTML을 생성해 게시합니다. `packages/docs/rspress.config.ts`의 기본 경로는 `/spinon/`입니다.
 
 화면 이동과 딥링크의 공통 의미: [라우팅 명세](spec/0006-routing.md)
 

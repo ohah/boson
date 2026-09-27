@@ -23,6 +23,7 @@ spinon/
 │   ├── android/               # Gradle 앱, Kotlin 호스트, JNI/C++ 접착부
 │   └── ios/                   # Xcode 앱, Swift 호스트, Objective-C++ 접착부
 ├── packages/
+│   ├── docs/                  # spec/을 만드는 내부 @spinon/docs 패키지
 │   ├── runtime/               # 작성 코드의 JS 호스트 API
 │   ├── frameworks/
 │   │   ├── react/              # React 호스트 어댑터
@@ -68,7 +69,7 @@ Bun은 저장소의 JS/TS 워크스페이스, 잠금 파일, 스크립트와 테
 ## Cargo와 Bun 워크스페이스
 
 - 루트 `Cargo.toml`이 제품 크레이트를 `[workspace]`로 관리하고 루트 `Cargo.lock` 하나를 사용합니다. 공통 crate 버전은 `workspace.dependencies`에서 고정합니다.
-- 루트 `package.json`에 Bun workspaces를 선언하고 기존 문서 생성 명령과 RSPress `2.0.22` 고정을 유지합니다. `packages/runtime`, `packages/cli`, `packages/frameworks/*`, `packages/bundlers/*`와 실제 패키지인 예제만 workspace에 넣습니다.
+- 루트 `package.json`은 Bun workspace와 문서 명령 진입점만 관리합니다. 실제 패키지는 준비될 때 구성원으로 추가하고, 존재하지 않는 패키지 경로를 미리 workspace에 나열하지 않습니다. 문서 생성기는 `packages/docs`에 두고 RSPress를 `2.0.22`에 고정합니다.
 - Rust 컴파일 결과는 루트 `build/` 또는 Cargo 공통 `target/`에 모읍니다. Gradle 캐시, Xcode 산출물, JS 의존성, 환경 파일은 Git에 넣지 않습니다.
 - 스파이크의 독립 `Cargo.lock`, Bun 잠금 파일, 빌드 명령은 코드를 제품 크레이트로 옮겨 동작이 같음을 확인할 때까지 보존합니다. 잠금 파일을 일괄 삭제하거나 의존성을 최신화하지 않습니다.
 - Taffy, Lightning CSS처럼 외부 의존성은 목적·버전·기능·대체 경계를 검토한 뒤 제품 workspace에 올립니다. Lightning CSS는 빌드 도구이며 모바일 런타임 의존성으로 포함하지 않습니다.
