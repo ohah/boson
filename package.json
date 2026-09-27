@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "docs:dev": "rspress dev",
-    "docs:build": "rspress build",
+    "docs:build": "RSPRESS_PERSISTENT_CACHE=false rspress build",
     "docs:preview": "rspress preview"
   },
   "devDependencies": {
