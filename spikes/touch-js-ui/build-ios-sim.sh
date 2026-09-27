@@ -44,11 +44,12 @@ for language in cpp_direct cpp rust zig; do
   app_dir="$output_dir/$language.app"
   mkdir -p "$app_dir"
   cp "$bridge_dir/ios/Info.plist" "$app_dir/Info.plist"
+  cp "$repo_dir/assets/spinon-icon-1024.png" "$app_dir/SpinonIcon.png"
   cp "$spike_dir/touch.js" "$app_dir/touch.js"
   /usr/libexec/PlistBuddy -c \
     "Set :CFBundleIdentifier dev.boson.touch.$language" "$app_dir/Info.plist"
   /usr/libexec/PlistBuddy -c \
-    "Set :CFBundleDisplayName Boson Touch $language" "$app_dir/Info.plist"
+    "Set :CFBundleDisplayName Spinon Touch $language" "$app_dir/Info.plist"
   /usr/libexec/PlistBuddy -c \
     "Set :CFBundleExecutable BosonTouch" "$app_dir/Info.plist"
   case "$language" in

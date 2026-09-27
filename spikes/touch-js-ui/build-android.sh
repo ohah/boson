@@ -78,10 +78,14 @@ for language in cpp_direct cpp rust zig; do
     -o "$library"
 
   stage="$output_dir/stage-$language"
-  mkdir -p "$stage/assets" "$stage/lib/arm64-v8a"
+  mkdir -p "$stage/assets" "$stage/lib/arm64-v8a" "$stage/res/drawable-nodpi" \
+    "$output_dir/res-compiled-$language"
   cp "$spike_dir/touch.js" "$stage/assets/touch.js"
   cp "$output_dir/dex/classes.dex" "$stage/classes.dex"
   cp "$library" "$stage/lib/arm64-v8a/libboson_touch.so"
+  cp "$repo_dir/assets/spinon-icon-192.png" "$stage/res/drawable-nodpi/spinon_icon.png"
+  "$build_tools/aapt2" compile -o "$output_dir/res-compiled-$language" \
+    "$stage/res/drawable-nodpi/spinon_icon.png"
   manifest="$output_dir/AndroidManifest-$language.xml"
   sed "s/@BOSON_PACKAGE@/dev.boson.touch.$language/" \
     "$spike_dir/android/AndroidManifest.xml.in" > "$manifest"
@@ -90,6 +94,7 @@ for language in cpp_direct cpp rust zig; do
   aligned="$output_dir/$language-aligned.apk"
   final="$output_dir/$language.apk"
   "$build_tools/aapt2" link -o "$unsigned" -I "$android_jar" \
+    -R "$output_dir/res-compiled-$language/drawable-nodpi_spinon_icon.png.flat" \
     --manifest "$manifest" --min-sdk-version 29 --target-sdk-version 36
   (cd "$stage" && zip -q -u "$unsigned" classes.dex assets/touch.js lib/arm64-v8a/libboson_touch.so)
   "$build_tools/zipalign" -f 4 "$unsigned" "$aligned"

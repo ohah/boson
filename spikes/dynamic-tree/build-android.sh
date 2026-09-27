@@ -26,7 +26,8 @@ for required in "$v8_archive" "$v8_libcxx" "$v8_libcxxabi" "$android_jar" "$java
 done
 
 mkdir -p "$output_dir/classes" "$output_dir/dex" "$output_dir/stage/assets" \
-  "$output_dir/stage/lib/arm64-v8a"
+  "$output_dir/stage/lib/arm64-v8a" "$output_dir/stage/res/drawable-nodpi" \
+  "$output_dir/res-compiled"
 "$v8_cxx" --target=aarch64-linux-android29 "--sysroot=$ndk_root/sysroot" \
   -std=c++20 -O2 -fPIC -fexperimental-relative-c++-abi-vtables \
   -nostdinc++ -D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE \
@@ -67,6 +68,9 @@ cp "$spike_dir/scenarios/long_text.js" "$output_dir/stage/assets/long_text.js"
 cp "$spike_dir/scenarios/error.js" "$output_dir/stage/assets/error.js"
 cp "$spike_dir/scenarios/contention.js" "$output_dir/stage/assets/contention.js"
 cp "$output_dir/dex/classes.dex" "$output_dir/stage/classes.dex"
+cp "$repo_dir/assets/spinon-icon-192.png" "$output_dir/stage/res/drawable-nodpi/spinon_icon.png"
+"$build_tools/aapt2" compile -o "$output_dir/res-compiled" \
+  "$output_dir/stage/res/drawable-nodpi/spinon_icon.png"
 
 keystore="$output_dir/debug.keystore"
 if [[ ! -f "$keystore" ]]; then
@@ -81,6 +85,7 @@ aligned="$output_dir/aligned.apk"
 final="$output_dir/boson-dynamic-tree.apk"
 "$build_tools/aapt2" link -o "$unsigned" -I "$android_jar" \
   --manifest "$spike_dir/android/AndroidManifest.xml" \
+  -R "$output_dir/res-compiled/drawable-nodpi_spinon_icon.png.flat" \
   --min-sdk-version 29 --target-sdk-version 36
 (cd "$output_dir/stage" && zip -q -u "$unsigned" classes.dex assets/tree.js \
   assets/stress.js assets/long_text.js assets/error.js assets/contention.js lib/arm64-v8a/libboson_tree.so)
