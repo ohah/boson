@@ -6,6 +6,8 @@
 
 Android 16 실기기 Samsung `SM-S731N`과 iPhone 17 Pro iOS 26.2 시뮬레이터에서 버튼 1개와 텍스트 100·1000·5000개를 만들었다. 각 조건은 앱을 새로 설치·시작한 뒤 버튼이 텍스트 1개와 동적 노드 1개를 바꾸도록 20회 성공 터치했다. A/B 순서를 바꿔 3회 반복했다. 표의 값은 **각 실행에서 20개 이벤트의 중앙값을 구한 뒤, 3개 실행 중앙값을 다시 취한 값**이다. 단위는 ms다.
 
+이 문서의 iOS 시뮬레이터용 V8은 `v8_jitless = false`로 빌드했다. [JIT 없는 시뮬레이터 재측정](ios-jitless-results.md)은 별도 결과로 보관한다.
+
 `snapshot`은 Rust 트리 전체 복제, `dispatch`는 그 복제를 포함한 V8 이벤트 처리, `render`는 실제 Rust 레이아웃 순회와 JNI/Android 또는 UIKit 뷰 적용을 포함한다. `core`는 실제 렌더 **후** 같은 트리에 대해 빈 콜백으로 레이아웃을 한 번 더 실행한 독립 계측이다. 따라서 `render - core`를 정확한 뷰 적용 시간으로 해석할 수 없다. Android PSS는 이벤트 20회 뒤 프로세스에서 기록했다.
 
 | 환경·노드 수 | 검색 | `core` | `render` | `snapshot` | `dispatch` | PSS |

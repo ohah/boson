@@ -19,6 +19,7 @@ tree.js: createNode / setText / setStyle / removeNode
 [스레드 부하 검증](evidence/contention-results.md)은 Android 실기기와 iOS 시뮬레이터에서 메인 스레드 계산 및 백그라운드 CPU 부하를 함께 측정한다.
 [Rust·C++·Zig 코어 비교](../core-language-bench/README.md)는 동일한 합성 트리 작업을 세 언어로 구현해 Mac, Android 실기기, iOS 시뮬레이터에서 실행한 결과다.
 [실제 보손 코어 A/B 측정](evidence/ab-results.md)은 Rust ID 선형 검색과 인덱스 조회를 같은 V8·네이티브 호스트에서 비교한다.
+[iOS 시뮬레이터 JIT 없는 V8 재측정](evidence/ios-jitless-results.md)은 실기기용 V8 실행 모드에 맞춘 A/B 결과와 기존 JIT 가능 빌드의 차이를 기록한다.
 
 ## 빌드와 실행
 

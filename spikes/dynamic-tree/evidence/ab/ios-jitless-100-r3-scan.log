@@ -1,0 +1,65 @@
+Timestamp               Ty Process[PID:TID]
+2026-09-27 14:26:08.617 Df BosonDynamicTree[23532:1cd1bd0] BOSON_STRESS count=100
+2026-09-27 14:26:08.618 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TREE_VARIANT=0
+2026-09-27 14:26:08.633 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=101
+2026-09-27 14:26:08.633 Df BosonDynamicTree[23532:1cd1bd0] BOSON_RESIZE width=402 height=778
+2026-09-27 14:26:08.800 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=102
+2026-09-27 14:26:08.800 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=4 dispatch_us=86 render_us=498 core_layout_us=10
+2026-09-27 14:26:08.800 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:09.103 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=101
+2026-09-27 14:26:09.103 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=2 dispatch_us=27 render_us=387 core_layout_us=8
+2026-09-27 14:26:09.103 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:09.416 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=102
+2026-09-27 14:26:09.416 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=2 dispatch_us=36 render_us=581 core_layout_us=9
+2026-09-27 14:26:09.416 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:09.717 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=101
+2026-09-27 14:26:09.717 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=3 dispatch_us=39 render_us=1043 core_layout_us=15
+2026-09-27 14:26:09.717 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:10.018 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=102
+2026-09-27 14:26:10.019 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=6 dispatch_us=74 render_us=1663 core_layout_us=16
+2026-09-27 14:26:10.019 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:10.333 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=101
+2026-09-27 14:26:10.333 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=3 dispatch_us=36 render_us=889 core_layout_us=22
+2026-09-27 14:26:10.334 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:10.633 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=102
+2026-09-27 14:26:10.634 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=3 dispatch_us=50 render_us=1033 core_layout_us=14
+2026-09-27 14:26:10.634 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:10.951 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=101
+2026-09-27 14:26:10.951 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=5 dispatch_us=45 render_us=1508 core_layout_us=24
+2026-09-27 14:26:10.951 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:11.251 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=102
+2026-09-27 14:26:11.251 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=4 dispatch_us=63 render_us=1404 core_layout_us=18
+2026-09-27 14:26:11.251 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:11.566 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=101
+2026-09-27 14:26:11.566 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=1 dispatch_us=33 render_us=337 core_layout_us=9
+2026-09-27 14:26:11.566 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:11.868 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=102
+2026-09-27 14:26:11.868 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=6 dispatch_us=78 render_us=2263 core_layout_us=31
+2026-09-27 14:26:11.869 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:12.167 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=101
+2026-09-27 14:26:12.167 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=3 dispatch_us=31 render_us=941 core_layout_us=14
+2026-09-27 14:26:12.167 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:12.483 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=102
+2026-09-27 14:26:12.483 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=12 dispatch_us=45 render_us=475 core_layout_us=9
+2026-09-27 14:26:12.483 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:12.784 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=101
+2026-09-27 14:26:12.784 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=4 dispatch_us=34 render_us=1083 core_layout_us=20
+2026-09-27 14:26:12.784 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:13.084 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=102
+2026-09-27 14:26:13.084 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=4 dispatch_us=49 render_us=1210 core_layout_us=14
+2026-09-27 14:26:13.084 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:13.400 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=101
+2026-09-27 14:26:13.400 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=3 dispatch_us=30 render_us=914 core_layout_us=11
+2026-09-27 14:26:13.400 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:13.701 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=102
+2026-09-27 14:26:13.701 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=5 dispatch_us=56 render_us=1619 core_layout_us=25
+2026-09-27 14:26:13.701 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:14.000 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=101
+2026-09-27 14:26:14.000 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=4 dispatch_us=34 render_us=1109 core_layout_us=15
+2026-09-27 14:26:14.000 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:14.302 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=102
+2026-09-27 14:26:14.302 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=4 dispatch_us=48 render_us=1249 core_layout_us=14
+2026-09-27 14:26:14.302 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
+2026-09-27 14:26:14.617 Df BosonDynamicTree[23532:1cd1bd0] BOSON_FRAME result=0 nodes=101
+2026-09-27 14:26:14.617 Df BosonDynamicTree[23532:1cd1bd0] BOSON_METRIC snapshot_us=4 dispatch_us=36 render_us=1214 core_layout_us=17
+2026-09-27 14:26:14.617 Df BosonDynamicTree[23532:1cd1bd0] BOSON_TOUCH_RESULT=0 node=2
