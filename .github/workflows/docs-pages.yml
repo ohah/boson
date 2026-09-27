@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'spec/**'
+      - 'theme/**'
       - 'rspress.config.ts'
       - 'package.json'
       - 'bun.lock'
