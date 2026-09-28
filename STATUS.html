@@ -5,12 +5,12 @@
 <title>스피논 구현 상태와 API 명세 대장 - 스피논 문서</title>
 <script>{;const saved = localStorage.getItem('rspress-theme-appearance');const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;const defaultTheme = 'auto';const theme = saved === 'light' || saved === 'dark' || saved === 'auto' ? saved : defaultTheme;const isDark = theme === 'auto' ? preferDark : theme === 'dark';document.documentElement.classList.toggle('dark', isDark);document.documentElement.classList.toggle('rp-dark', isDark);document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';}</script>
 <link href="/spinon/static/css/styles.8d918fd78e.css" rel="stylesheet">
-<link rel="preload" href="/spinon/static/js/async/route-6c33a3943990.a0e3c507d4.js" as="script">
+<link rel="preload" href="/spinon/static/js/async/route-6c33a3943990.b1e3ceb227.js" as="script">
 <script defer src="/spinon/static/js/styles.d2a6dfa6a0.js"></script>
 <script defer src="/spinon/static/js/lib-react.9cdf8f49ce.js"></script>
 <script defer src="/spinon/static/js/lib-router.1e14e568cb.js"></script>
 <script defer src="/spinon/static/js/a.705d619e1f.js"></script>
-<script defer src="/spinon/static/js/index.700778cc33.js"></script>
+<script defer src="/spinon/static/js/index.f75a9d605f.js"></script>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="generator" content="Rspress v2.0.22">
 <link rel="icon" href="/spinon/icon.svg" type="image/svg+xml">
@@ -46,7 +46,7 @@
 <li class="task-list-item"><input type="checkbox" disabled=""/> <strong>R07 Vue·Svelte 호스트 가능성</strong> — React 전용 가정이 공통 노드 계약에 새지 않는지 작은 어댑터 실험으로 확인한다. 관련 계약: <a href="/spinon/0001-conformance.html" class="rp-link">0001-conformance.md</a> · API: 해당 없음 · 산출물: 미완료 · 근거: 없음</li>
 <li class="task-list-item"><input type="checkbox" disabled=""/> <strong>R08 GPU 출력 위험 실험</strong> — Android·iOS에서 최소 GPU 화면과 텍스트·터치·IME·접근성 연결 가능성을 실험하고 제약을 기록한다. 관련 계약: <a href="/spinon/0001-conformance.html" class="rp-link">0001-conformance.md</a> · API: 해당 없음 · 산출물: 미완료 · 근거: 없음</li>
 <li class="task-list-item"><input type="checkbox" disabled=""/> <strong>R09 iOS 배포·OTA 정책 범위</strong> — V8·CSS 해석·원격 JS 업데이트에 적용될 지침과 기능 변경 한계를 공식 문서로 검토한다. 관련 계약: <a href="/spinon/0004-runtime-build.html" class="rp-link">0004-runtime-build.md</a> · API: 해당 없음 · 산출물: 미완료 · 근거: 없음</li>
-<li class="task-list-item"><input type="checkbox" disabled=""/> <strong>R10 Taffy 적합성 실험</strong> — 노드 ID·텍스트 측정·좌표 반올림·RTL·갱신 비용을 작은 화면에서 확인한다. 관련 계약: <a href="/spinon/0001-conformance.html" class="rp-link">0001-conformance.md</a> · API: 해당 없음 · 산출물: 미완료 · 근거: 없음</li>
+<li class="task-list-item"><input type="checkbox" disabled="" checked=""/> <strong>R10 Taffy 적합성 실험</strong> — 25개 노드 fixture에서 외부 노드 ID 유지, 합성 텍스트 측정, RTL 방향, 반올림, 부분 갱신과 전체 재생성을 확인했다. API: 해당 없음(조사 실험) · 산출물·근거: <a href="/spinon/internal/evidence/taffy-r10-2026-09-28.html" class="rp-link">R10 검증 기록</a>. 이 완료 표시는 Taffy 제품 통합, GPU 렌더링, 실제 글꼴 측정 또는 실기기 성능을 뜻하지 않는다.</li>
 <li class="task-list-item"><input type="checkbox" disabled=""/> <strong>R11 CSS 빌드 경로 실험</strong> — Lightning CSS의 AST를 지원 문법만 담은 모바일 스타일 데이터로 변환할 수 있는지 확인한다. 관련 계약: <a href="/spinon/0003-web-surface.html" class="rp-link">0003-web-surface.md</a> · API: 해당 없음 · 산출물: 미완료 · 근거: 없음</li>
 <li class="task-list-item"><input type="checkbox" disabled=""/> <strong>R12 JS 라이브러리 호환 표</strong> — V8의 ECMAScript 기능과 별도 호스트 API를 구분하고, 첫 React·Vite 조합의 전이 의존 API를 조사한다. Fetch를 선택하면 <code>NetworkHost</code>·전송 계층의 요청·응답·오류·취소·출처 경계와 Promise 완료를 Isolate 소유 실행 경로에 전달하는 규칙을 정한다. 관련 계약: <a href="/spinon/0003-web-surface.html" class="rp-link">0003-web-surface.md</a> · 세부 작업: <a href="#javascript-api-%EA%B5%AC%ED%98%84-%EC%B2%B4%ED%81%AC%EB%A6%AC%EC%8A%A4%ED%8A%B8" class="rp-link">JS API 구현 체크리스트</a> · 산출물: 미완료 · 근거: 없음</li>
 <li class="task-list-item"><input type="checkbox" disabled=""/> <strong>R13 플랫폼 생명주기·GPU 복구 실험</strong> — 화면 회전·백그라운드 복귀·표면 재생성·GPU 자원 손실에서 최소 화면과 입력을 복구할 수 있는지 확인한다. 관련 계약: <a href="/spinon/0001-conformance.html" class="rp-link">0001-conformance.md</a> · API: 해당 없음 · 산출물: 미완료 · 근거: 없음</li>
