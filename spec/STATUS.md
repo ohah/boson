@@ -30,7 +30,7 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 - [ ] **R07 Vue·Svelte 호스트 가능성** — React 전용 가정이 공통 노드 계약에 새지 않는지 작은 어댑터 실험으로 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R08 GPU 출력 위험 실험** — Android·iOS에서 최소 GPU 화면과 텍스트·터치·IME·접근성 연결 가능성을 실험하고 제약을 기록한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R09 iOS 배포·OTA 정책 범위** — V8·CSS 해석·원격 JS 업데이트에 적용될 지침과 기능 변경 한계를 공식 문서로 검토한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
-- [ ] **R10 Taffy 적합성 실험** — 노드 ID·텍스트 측정·좌표 반올림·RTL·갱신 비용을 작은 화면에서 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
+- [x] **R10 Taffy 적합성 실험** — 25개 노드 fixture에서 외부 노드 ID 유지, 합성 텍스트 측정, RTL 방향, 반올림, 부분 갱신과 전체 재생성을 확인했다. API: 해당 없음(조사 실험) · 산출물·근거: [R10 검증 기록](internal/evidence/taffy-r10-2026-09-28.md). 이 완료 표시는 Taffy 제품 통합, GPU 렌더링, 실제 글꼴 측정 또는 실기기 성능을 뜻하지 않는다.
 - [ ] **R11 CSS 빌드 경로 실험** — Lightning CSS의 AST를 지원 문법만 담은 모바일 스타일 데이터로 변환할 수 있는지 확인한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R12 JS 라이브러리 호환 표** — V8의 ECMAScript 기능과 별도 호스트 API를 구분하고, 첫 React·Vite 조합의 전이 의존 API를 조사한다. Fetch를 선택하면 `NetworkHost`·전송 계층의 요청·응답·오류·취소·출처 경계와 Promise 완료를 Isolate 소유 실행 경로에 전달하는 규칙을 정한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · 세부 작업: [JS API 구현 체크리스트](#javascript-api-구현-체크리스트) · 산출물: 미완료 · 근거: 없음
 - [ ] **R13 플랫폼 생명주기·GPU 복구 실험** — 화면 회전·백그라운드 복귀·표면 재생성·GPU 자원 손실에서 최소 화면과 입력을 복구할 수 있는지 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음

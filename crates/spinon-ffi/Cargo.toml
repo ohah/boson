@@ -7,5 +7,11 @@ publish = false
 [lib]
 crate-type = ["staticlib", "rlib"]
 
+[features]
+r10-experiment = ["dep:spinon-style-layout-spike"]
+
+[dependencies]
+spinon-style-layout-spike = { path = "../../spikes/style-layout", optional = true }
+
 [lints.rust]
 unsafe_op_in_unsafe_fn = "deny"

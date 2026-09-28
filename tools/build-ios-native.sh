@@ -6,6 +6,14 @@ v8_dir="${SPINON_V8_DIR:-$repo_root/build/v8-source/v8}"
 v8_revision="$(cat "$repo_root/tools/v8/v8-revision.txt")"
 platform_name="${PLATFORM_NAME:-iphonesimulator}"
 
+case "${SPINON_ENABLE_R10_EXPERIMENT:-0}" in
+  0|1) ;;
+  *)
+    echo "SPINON_ENABLE_R10_EXPERIMENT은 0 또는 1이어야 합니다." >&2
+    exit 2
+    ;;
+esac
+
 case "$platform_name" in
   iphonesimulator)
     v8_out="out/boson-ios-sim"
@@ -41,11 +49,19 @@ fi
 if command -v mise >/dev/null 2>&1; then
   mise exec -- bun run bundle:bootstrap
   mise exec -- rustup target add "$rustup_target"
-  mise exec -- env CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target "$rust_target" -p spinon-ffi
+  if [[ "${SPINON_ENABLE_R10_EXPERIMENT:-0}" == "1" ]]; then
+    mise exec -- env CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target "$rust_target" -p spinon-ffi --features r10-experiment
+  else
+    mise exec -- env CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target "$rust_target" -p spinon-ffi
+  fi
 else
   bun run bundle:bootstrap
   rustup target add "$rustup_target"
-  CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target "$rust_target" -p spinon-ffi
+  if [[ "${SPINON_ENABLE_R10_EXPERIMENT:-0}" == "1" ]]; then
+    CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target "$rust_target" -p spinon-ffi --features r10-experiment
+  else
+    CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target "$rust_target" -p spinon-ffi
+  fi
 fi
 
 output_dir="$repo_root/build/spinon/$platform_name"

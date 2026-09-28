@@ -184,8 +184,30 @@ impl LayoutEngine for TaffyLayout {
 }
 
 fn run() -> Result<(), String> {
-    let path = std::env::args()
-        .nth(1)
+    let args = std::env::args().skip(1).collect::<Vec<_>>();
+    if args.first().is_some_and(|argument| argument == "--r10") {
+        let width = args
+            .get(1)
+            .map_or(Ok(402.0), |value| value.parse::<f32>())
+            .map_err(|error| error.to_string())?;
+        let height = args
+            .get(2)
+            .map_or(Ok(874.0), |value| value.parse::<f32>())
+            .map_err(|error| error.to_string())?;
+        let scale = args
+            .get(3)
+            .map_or(Ok(3.0), |value| value.parse::<f32>())
+            .map_err(|error| error.to_string())?;
+        println!(
+            "SPINON_TAFFY_R10={}",
+            spinon_style_layout_spike::r10::run_report(width, height, scale)?
+        );
+        return Ok(());
+    }
+
+    let path = args
+        .first()
+        .cloned()
         .unwrap_or_else(|| "styles.json".into());
     let source = fs::read_to_string(path).map_err(|e| e.to_string())?;
     let compiled: CompiledStyles = serde_json::from_str(&source).map_err(|e| e.to_string())?;
