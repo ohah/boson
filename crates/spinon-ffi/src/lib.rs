@@ -131,9 +131,74 @@ pub unsafe extern "C" fn spinon_app_run(
     if v8_result == 0 { 0 } else { -4 }
 }
 
+/// 명시적으로 실행된 개발용 Taffy 실험의 결과를 호출자 버퍼에 씁니다.
+#[cfg(feature = "r10-experiment")]
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn spinon_taffy_r10_run(
+    width: f32,
+    height: f32,
+    scale: f32,
+    output: *mut c_char,
+    output_capacity: usize,
+) -> i32 {
+    if output.is_null() || output_capacity == 0 {
+        return -1;
+    }
+
+    let report = match spinon_style_layout_spike::r10::run_report(width, height, scale) {
+        Ok(report) => report,
+        Err(error) => {
+            let report = CString::new(error).expect("오류 메시지에 NUL 바이트가 없습니다");
+            let output_slice =
+                unsafe { std::slice::from_raw_parts_mut(output.cast::<u8>(), output_capacity) };
+            if !copy_report(
+                report.to_str().unwrap_or("R10 오류 인코딩 실패"),
+                output_slice,
+            ) {
+                return -3;
+            }
+            return -2;
+        }
+    };
+
+    let output_slice =
+        unsafe { std::slice::from_raw_parts_mut(output.cast::<u8>(), output_capacity) };
+    if copy_report(&report, output_slice) {
+        0
+    } else {
+        -3
+    }
+}
+
+/// 일반 빌드에서는 Taffy 실험 코드를 연결하지 않고, 명시 실행 요청에 비활성 이유를 돌려줍니다.
+#[cfg(not(feature = "r10-experiment"))]
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn spinon_taffy_r10_run(
+    _width: f32,
+    _height: f32,
+    _scale: f32,
+    output: *mut c_char,
+    output_capacity: usize,
+) -> i32 {
+    if output.is_null() || output_capacity == 0 {
+        return -1;
+    }
+    let output_slice =
+        unsafe { std::slice::from_raw_parts_mut(output.cast::<u8>(), output_capacity) };
+    if copy_report(
+        "R10 실험이 꺼져 있습니다. SPINON_ENABLE_R10_EXPERIMENT=1로 다시 빌드하세요.",
+        output_slice,
+    ) {
+        -4
+    } else {
+        -3
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{CallbackState, copy_report};
+    use std::ffi::CStr;
 
     #[test]
     fn report_includes_callbacks_from_javascript() {
@@ -155,5 +220,30 @@ mod tests {
         let mut output = [0_u8; 5];
         assert!(copy_report("done", &mut output));
         assert_eq!(&output, b"done\0");
+    }
+
+    #[cfg(feature = "r10-experiment")]
+    #[test]
+    fn taffy_experiment_writes_a_machine_readable_success_report() {
+        let mut output = [0_i8; 2048];
+        let result = unsafe {
+            super::spinon_taffy_r10_run(402.0, 874.0, 3.0, output.as_mut_ptr(), output.len())
+        };
+        assert_eq!(result, 0);
+        let report = unsafe { CStr::from_ptr(output.as_ptr()) }.to_string_lossy();
+        assert!(report.contains("rtl=PASS"));
+        assert!(report.contains("text-metrics=synthetic"));
+    }
+
+    #[cfg(not(feature = "r10-experiment"))]
+    #[test]
+    fn taffy_experiment_is_excluded_from_default_builds() {
+        let mut output = [0_i8; 128];
+        let result = unsafe {
+            super::spinon_taffy_r10_run(402.0, 874.0, 3.0, output.as_mut_ptr(), output.len())
+        };
+        assert_eq!(result, -4);
+        let report = unsafe { CStr::from_ptr(output.as_ptr()) }.to_string_lossy();
+        assert!(report.contains("SPINON_ENABLE_R10_EXPERIMENT=1"));
     }
 }

@@ -1,7 +1,15 @@
 [package]
-name = "boson-style-layout-spike"
+name = "spinon-style-layout-spike"
 version = "0.1.0"
 edition = "2021"
+
+[lib]
+name = "spinon_style_layout_spike"
+path = "src/lib.rs"
+
+[[bin]]
+name = "spinon-style-layout-spike"
+path = "src/main.rs"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }

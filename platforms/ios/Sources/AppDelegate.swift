@@ -28,6 +28,34 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         window.backgroundColor = .white
         window.makeKeyAndVisible()
         self.window = window
+
+        if ProcessInfo.processInfo.arguments.contains("--spinon-r10") {
+            let screen = UIScreen.main
+            let report = SpinonRunner.runTaffyR10(
+                withWidth: Float(window.bounds.width),
+                height: Float(window.bounds.height),
+                scale: Float(screen.scale)
+            ) ?? "empty R10 report"
+            logger.notice("SPINON_TAFFY_R10_RESULT=\(report, privacy: .public)")
+
+            let reportView = UITextView()
+            reportView.translatesAutoresizingMaskIntoConstraints = false
+            reportView.backgroundColor = UIColor(red: 0.055, green: 0.075, blue: 0.12, alpha: 1)
+            reportView.textColor = UIColor(red: 0.90, green: 0.93, blue: 0.98, alpha: 1)
+            reportView.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
+            reportView.textContainerInset = UIEdgeInsets(top: 24, left: 18, bottom: 24, right: 18)
+            reportView.isEditable = false
+            reportView.text = "SPINON · R10 TAFFY 실험\n\niOS 시뮬레이터 · 개발 전용\n\n\(report)"
+            if let rootView = window.rootViewController?.view {
+                rootView.addSubview(reportView)
+                NSLayoutConstraint.activate([
+                    reportView.topAnchor.constraint(equalTo: rootView.safeAreaLayoutGuide.topAnchor),
+                    reportView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor),
+                    reportView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor),
+                    reportView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor)
+                ])
+            }
+        }
         return true
     }
 }

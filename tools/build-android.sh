@@ -11,6 +11,14 @@ v8_libcxx="$v8_dir/$v8_out/obj/buildtools/third_party/libc++/libc++.a"
 v8_libcxxabi="$v8_dir/$v8_out/obj/buildtools/third_party/libc++abi/libc++abi.a"
 ndk_dir="$(spinon_android_ndk_dir "$repo_root")"
 
+case "${SPINON_ENABLE_R10_EXPERIMENT:-0}" in
+  0|1) ;;
+  *)
+    echo "SPINON_ENABLE_R10_EXPERIMENT은 0 또는 1이어야 합니다." >&2
+    exit 2
+    ;;
+esac
+
 if [[ ! -d "$v8_dir" ]] || [[ "$(git -C "$v8_dir" rev-parse HEAD 2>/dev/null || true)" != "$v8_revision" ]]; then
   echo "V8 소스가 고정 커밋과 다릅니다. 먼저 bash tools/v8/checkout.sh를 실행하세요." >&2
   exit 1
@@ -32,10 +40,18 @@ fi
 
 if command -v mise >/dev/null 2>&1; then
   mise exec -- bun run bundle:bootstrap
-  mise exec -- env CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target aarch64-linux-android -p spinon-ffi
+  if [[ "${SPINON_ENABLE_R10_EXPERIMENT:-0}" == "1" ]]; then
+    mise exec -- env CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target aarch64-linux-android -p spinon-ffi --features r10-experiment
+  else
+    mise exec -- env CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target aarch64-linux-android -p spinon-ffi
+  fi
 else
   bun run bundle:bootstrap
-  CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target aarch64-linux-android -p spinon-ffi
+  if [[ "${SPINON_ENABLE_R10_EXPERIMENT:-0}" == "1" ]]; then
+    CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target aarch64-linux-android -p spinon-ffi --features r10-experiment
+  else
+    CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target aarch64-linux-android -p spinon-ffi
+  fi
 fi
 
 output_dir="$repo_root/build/spinon/android"

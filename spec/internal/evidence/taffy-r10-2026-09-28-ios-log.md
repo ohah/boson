@@ -1,0 +1,10 @@
+# iOS R10 원본 로그
+
+```text
+기기: iPhone 17 Pro · iOS 26.2 · 402×874 pt · 배율 3 · SPINON_ENABLE_R10_EXPERIMENT=1
+실행 1: viewport=402.00x874.00 logical scale=3.000 nodes=25 text-id=100 measured=298x40 calls=48 rtl=PASS ltr-button-offset=306.00 rtl-text-offset=72.00 update=equivalent rounding=[taffy=51.000/50.000/51.000,physical-pixel=50.667/50.333/50.667,float=50.500/50.500/50.500] update-us-p50=1.88 update-us-p95=1.92 rebuild-us-p50=9.83 rebuild-us-p95=10.04 iterations=240 text-metrics=synthetic
+실행 2: viewport=402.00x874.00 logical scale=3.000 nodes=25 text-id=100 measured=298x40 calls=48 rtl=PASS ltr-button-offset=306.00 rtl-text-offset=72.00 update=equivalent rounding=[taffy=51.000/50.000/51.000,physical-pixel=50.667/50.333/50.667,float=50.500/50.500/50.500] update-us-p50=1.88 update-us-p95=1.96 rebuild-us-p50=9.79 rebuild-us-p95=10.00 iterations=240 text-metrics=synthetic
+실행 3: viewport=402.00x874.00 logical scale=3.000 nodes=25 text-id=100 measured=298x40 calls=48 rtl=PASS ltr-button-offset=306.00 rtl-text-offset=72.00 update=equivalent rounding=[taffy=51.000/50.000/51.000,physical-pixel=50.667/50.333/50.667,float=50.500/50.500/50.500] update-us-p50=1.92 update-us-p95=1.96 rebuild-us-p50=9.96 rebuild-us-p95=10.12 iterations=240 text-metrics=synthetic
+실행 4: viewport=402.00x874.00 logical scale=3.000 nodes=25 text-id=100 measured=298x40 calls=48 rtl=PASS ltr-button-offset=306.00 rtl-text-offset=72.00 update=equivalent rounding=[taffy=51.000/50.000/51.000,physical-pixel=50.667/50.333/50.667,float=50.500/50.500/50.500] update-us-p50=1.88 update-us-p95=2.38 rebuild-us-p50=9.79 rebuild-us-p95=12.12 iterations=240 text-metrics=synthetic
+실행 5: viewport=402.00x874.00 logical scale=3.000 nodes=25 text-id=100 measured=298x40 calls=48 rtl=PASS ltr-button-offset=306.00 rtl-text-offset=72.00 update=equivalent rounding=[taffy=51.000/50.000/51.000,physical-pixel=50.667/50.333/50.667,float=50.500/50.500/50.500] update-us-p50=1.67 update-us-p95=1.92 rebuild-us-p50=8.71 rebuild-us-p95=9.75 iterations=240 text-metrics=synthetic
+```

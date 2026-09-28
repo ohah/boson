@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
-const directory = mkdtempSync(join(tmpdir(), 'boson-style-layout-'));
+const directory = mkdtempSync(join(tmpdir(), 'spinon-style-layout-'));
 const input = join(directory, 'input.css');
 const output = join(directory, 'output.json');
 
