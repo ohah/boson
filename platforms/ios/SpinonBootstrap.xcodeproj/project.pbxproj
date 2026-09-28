@@ -8,6 +8,7 @@
 /* Begin PBXBuildFile section */
 		100000000000000000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* AppDelegate.swift */; };
 		100000000000000000000002 /* SpinonRunner.mm in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000002 /* SpinonRunner.mm */; };
+		100000000000000000000003 /* R08GpuDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000007 /* R08GpuDemo.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -17,6 +18,7 @@
 		200000000000000000000004 /* SpinonBootstrap-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SpinonBootstrap-Bridging-Header.h"; sourceTree = "<group>"; };
 		200000000000000000000005 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		200000000000000000000006 /* SpinonBootstrap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpinonBootstrap.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		200000000000000000000007 /* R08GpuDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = R08GpuDemo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -36,6 +38,7 @@
 			isa = PBXGroup;
 			children = (
 				200000000000000000000001 /* AppDelegate.swift */,
+				200000000000000000000007 /* R08GpuDemo.swift */,
 				200000000000000000000002 /* SpinonRunner.mm */,
 				200000000000000000000003 /* SpinonRunner.h */,
 				200000000000000000000004 /* SpinonBootstrap-Bridging-Header.h */,
@@ -93,7 +96,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		500000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000001 /* AppDelegate.swift in Sources */, 100000000000000000000002 /* SpinonRunner.mm in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+		500000000000000000000002 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (100000000000000000000001 /* AppDelegate.swift in Sources */, 100000000000000000000002 /* SpinonRunner.mm in Sources */, 100000000000000000000003 /* R08GpuDemo.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -125,7 +128,7 @@
 				HEADER_SEARCH_PATHS = ("$(SRCROOT)/../../crates/spinon-ffi/include",);
 				INFOPLIST_FILE = Sources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks",);
-				OTHER_LDFLAGS = ("$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/libspinon_ffi.a", "$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/spinon_v8.o", "$(SRCROOT)/../../build/v8-source/v8/out/$(SPINON_V8_OUT)/obj/libv8_monolith.a", "-framework", UIKit, "-framework", Foundation, "-framework", CoreFoundation, "-framework", BrowserEngineCore, "-Wl,-dead_strip",);
+				OTHER_LDFLAGS = ("$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/libspinon_ffi.a", "$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/spinon_v8.o", "$(SRCROOT)/../../build/v8-source/v8/out/$(SPINON_V8_OUT)/obj/libv8_monolith.a", "-framework", UIKit, "-framework", Foundation, "-framework", CoreFoundation, "-framework", BrowserEngineCore, "-framework", Metal, "-framework", MetalKit, "-Wl,-dead_strip",);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.spinon.bootstrap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				"SPINON_V8_OUT[sdk=iphonesimulator*]" = boson-ios-sim;
@@ -145,7 +148,7 @@
 				HEADER_SEARCH_PATHS = ("$(SRCROOT)/../../crates/spinon-ffi/include",);
 				INFOPLIST_FILE = Sources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks",);
-				OTHER_LDFLAGS = ("$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/libspinon_ffi.a", "$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/spinon_v8.o", "$(SRCROOT)/../../build/v8-source/v8/out/$(SPINON_V8_OUT)/obj/libv8_monolith.a", "-framework", UIKit, "-framework", Foundation, "-framework", CoreFoundation, "-framework", BrowserEngineCore, "-Wl,-dead_strip",);
+				OTHER_LDFLAGS = ("$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/libspinon_ffi.a", "$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/spinon_v8.o", "$(SRCROOT)/../../build/v8-source/v8/out/$(SPINON_V8_OUT)/obj/libv8_monolith.a", "-framework", UIKit, "-framework", Foundation, "-framework", CoreFoundation, "-framework", BrowserEngineCore, "-framework", Metal, "-framework", MetalKit, "-Wl,-dead_strip",);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.spinon.bootstrap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				"SPINON_V8_OUT[sdk=iphonesimulator*]" = boson-ios-sim;
