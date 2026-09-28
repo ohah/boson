@@ -3,5 +3,9 @@
 version = 4
 
 [[package]]
+name = "spinon-core"
+version = "0.1.0"
+
+[[package]]
 name = "spinon-ffi"
 version = "0.1.0"

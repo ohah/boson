@@ -141,7 +141,7 @@ Xcode build phase가 Bun 번들 → Rust 정적 라이브러리 → V8 C++ 어�
 | 단계 | 구현·선행 결정 | 대상 위치 | 다음 단계로 가는 기준 |
 | --- | --- | --- | --- |
 | 0. 워크스페이스와 빌드 부트스트랩 | Cargo·Bun 기초, 고정 V8 소스 입력, Rust FFI·Android Gradle·iOS Xcode 빌드 smoke와 JS/Rust 단위 검사 | 루트 설정, `crates/spinon-ffi`, `native/v8`, `platforms/`, `tools/` | V8 연결 앱이 각 플랫폼에서 실행되고 결과 문자열이 맞음. 제품 API 완료는 아님 |
-| 1. 런타임 계약과 코어 승격 | 실패한 변경 배치 복구, revision·ID, 지연 이벤트·콜백 수명·소유권을 먼저 결정. 동적 트리 PoC의 순수 Rust 코어를 테스트와 함께 이동 | `crates/spinon-core` | Android/iOS 호스트가 공유할 타입·오류·revision 계약과 단위 테스트 확보 |
+| 1. Rust 트리 코어 | 노드 ID·revision·create/insert/update/move/remove와 원자 커밋 의미를 고정하고, 동적 트리 PoC에서 트리 자료 모델만 분리 | `crates/spinon-core` | 실패 묶음이 상태를 바꾸지 않고 ID·순서·오류 규칙 단위 테스트 통과 |
 | 2. 레이아웃 모듈 | Taffy 적합성·비용을 검증하고 작은 PoC와 비교 | `crates/spinon-layout` | 공통 fixture의 웹 기준 좌표와 허용 차이가 정의됨 |
 | 3. 제품 V8·FFI 경계 | smoke 경계를 제품 런타임으로 승격하고 격리·예외·콜백 수명·스레드 규칙을 정해 검증 | `crates/spinon-ffi`, `native/v8` | 버전 있는 내부 계약·오류 복구·실기기 검증 |
 | 4. 모바일 호스트 골격 | 현재 부팅 앱을 GPU surface·입력·수명주기·복구 검증으로 확장 | `platforms/android`, `platforms/ios` | 같은 런타임이 두 앱에서 실행되고 앱 수명 복구 확인 |
@@ -150,7 +150,7 @@ Xcode build phase가 Bun 번들 → Rust 정적 라이브러리 → V8 C++ 어�
 | 7. Rspack·Vue·Svelte·CLI | 코어 호스트 계약을 재사용해 어댑터와 도구 지원 추가. TypeScript CLI를 Node LTS용으로 배포 | `packages/bundlers/rspack`, `packages/frameworks/vue`, `packages/frameworks/svelte`, `packages/cli` | 각 조합의 지원표와 통합 테스트가 있음 |
 | 8. 성능·OTA | 같은 fixture·릴리스 빌드에서 비교, 매니페스트·서명·청크·롤백 구현과 호환성 검사 | `tests/`, `packages/cli`, OTA 모듈 | 앱스토어 정책 확인과 대상 플랫폼별 복구·부분 배포 증거 확보 |
 
-단계 0의 설정은 코어 공개 계약을 대신하지 않습니다. 단계 1에서 R03·R06, 레이아웃 단계에서 R10·R11, 렌더러 전에 R08, 성능 전에 R04·R05를 닫습니다. 제품 완료 표시는 해당 단계가 끝났다는 이유만으로 바꾸지 않고, [공식 상태 대장 규칙](../../spec/STATUS.md)에 필요한 명세와 실행 근거가 있을 때만 갱신합니다.
+단계 0의 설정은 코어 공개 계약을 대신하지 않습니다. S01은 R03의 Rust 트리 작업과 R06의 Rust 커밋 원자성만 닫습니다. 웹·모바일 공통 이벤트·프레임워크 매핑은 R03에, V8·UI thread affinity·취소·경계 수명은 R06에 남깁니다. 레이아웃에는 R10, GPU 렌더러에는 R08, CSS 빌드 변환에는 R11, 성능 비교에는 R04·R05 근거를 요구합니다. 제품 완료 표시는 단계가 끝났다는 이유만으로 바꾸지 않고, [공식 상태 대장 규칙](../../spec/STATUS.md)에 필요한 명세와 실행 근거가 있을 때만 갱신합니다.
 
 ## 단계별 병렬 작업 경계
 
