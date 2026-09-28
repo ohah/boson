@@ -45,7 +45,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             reportView.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
             reportView.textContainerInset = UIEdgeInsets(top: 24, left: 18, bottom: 24, right: 18)
             reportView.isEditable = false
-            reportView.text = "SPINON · R10 TAFFY 실험\n\niOS 시뮬레이터 · 개발 전용\n\n\(report)"
+            reportView.text = "SPINON · R10 TAFFY 실험\n\niOS 시뮬레이터 · 개발 전용\n\n\(formatR10Report(report))"
             if let rootView = window.rootViewController?.view {
                 rootView.addSubview(reportView)
                 NSLayoutConstraint.activate([
@@ -57,5 +57,24 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         return true
+    }
+
+    private func formatR10Report(_ report: String) -> String {
+        report
+            .replacingOccurrences(of: " nodes=", with: "\nnodes=")
+            .replacingOccurrences(of: " text-id=", with: "\ntext-id=")
+            .replacingOccurrences(of: " measured=", with: "\nmeasured=")
+            .replacingOccurrences(of: " rtl=", with: "\nrtl=")
+            .replacingOccurrences(of: " ltr-button-offset=", with: "\nltr-button-offset=")
+            .replacingOccurrences(of: " rtl-text-offset=", with: "\nrtl-text-offset=")
+            .replacingOccurrences(of: " update=equivalent", with: "\nupdate=equivalent")
+            .replacingOccurrences(of: " rounding=[", with: "\nrounding:\n  ")
+            .replacingOccurrences(of: ",physical-pixel=", with: "\n  physical-pixel=")
+            .replacingOccurrences(of: ",float=", with: "\n  float=")
+            .replacingOccurrences(of: "] update-us-p50=", with: "\nupdate-us: p50=")
+            .replacingOccurrences(of: " update-us-p95=", with: " p95=")
+            .replacingOccurrences(of: " rebuild-us-p50=", with: "\nrebuild-us: p50=")
+            .replacingOccurrences(of: " rebuild-us-p95=", with: " p95=")
+            .replacingOccurrences(of: " iterations=", with: "\niterations=")
     }
 }
