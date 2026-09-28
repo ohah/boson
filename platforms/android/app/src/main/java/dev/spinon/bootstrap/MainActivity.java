@@ -27,6 +27,11 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getIntent().getBooleanExtra("spinon_r08", false)) {
+            R08GpuDemo.show(this);
+            return;
+        }
+
         try {
             String source = readAsset("app.js");
             DisplayMetrics metrics = getResources().getDisplayMetrics();

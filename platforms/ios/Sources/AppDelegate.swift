@@ -10,6 +10,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        if ProcessInfo.processInfo.arguments.contains("--spinon-r08") {
+            let window = UIWindow(frame: UIScreen.main.bounds)
+            window.rootViewController = R08GpuDemoViewController()
+            window.makeKeyAndVisible()
+            self.window = window
+            return true
+        }
+
         let sourceURL = Bundle.main.url(forResource: "app", withExtension: "js")
         do {
             guard let sourceURL else {
