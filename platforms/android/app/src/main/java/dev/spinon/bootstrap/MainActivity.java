@@ -42,7 +42,7 @@ public final class MainActivity extends Activity {
                     : new String(outputUtf8, StandardCharsets.UTF_8);
             Log.i(TAG, "SPINON_BOOTSTRAP_RESULT=" + output);
             if (runR10) {
-                showR10Report(output, metrics.density);
+                showR10Report(r10Report(output), metrics.density);
             }
         } catch (IOException error) {
             Log.e(TAG, "SPINON_BOOTSTRAP_ASSET_ERROR", error);
@@ -69,7 +69,6 @@ public final class MainActivity extends Activity {
         text.setTextColor(Color.rgb(230, 237, 248));
         text.setTextSize(12);
         text.setTypeface(Typeface.MONOSPACE);
-        text.setTextIsSelectable(true);
         int inset = Math.round(18 * density);
         text.setPadding(inset, Math.round(24 * density), inset, Math.round(24 * density));
 
@@ -77,5 +76,36 @@ public final class MainActivity extends Activity {
         scroll.setBackgroundColor(Color.rgb(14, 19, 31));
         scroll.addView(text);
         setContentView(scroll);
+        scroll.post(() -> scroll.scrollTo(0, 0));
+    }
+
+    private String r10Report(String output) {
+        String[] markers = {"SPINON_TAFFY_R10_RESULT=", "SPINON_TAFFY_R10_ERROR="};
+        for (String marker : markers) {
+            int start = output.indexOf(marker);
+            if (start >= 0) {
+                return formatR10Report(output.substring(start + marker.length()).trim());
+            }
+        }
+        return formatR10Report(output);
+    }
+
+    private String formatR10Report(String report) {
+        return report
+                .replace(" nodes=", "\nnodes=")
+                .replace(" text-id=", "\ntext-id=")
+                .replace(" measured=", "\nmeasured=")
+                .replace(" rtl=", "\nrtl=")
+                .replace(" ltr-button-offset=", "\nltr-button-offset=")
+                .replace(" rtl-text-offset=", "\nrtl-text-offset=")
+                .replace(" update=equivalent", "\nupdate=equivalent")
+                .replace(" rounding=[", "\nrounding:\n  ")
+                .replace(",physical-pixel=", "\n  physical-pixel=")
+                .replace(",float=", "\n  float=")
+                .replace("] update-us-p50=", "\nupdate-us: p50=")
+                .replace(" update-us-p95=", " p95=")
+                .replace(" rebuild-us-p50=", "\nrebuild-us: p50=")
+                .replace(" rebuild-us-p95=", " p95=")
+                .replace(" iterations=", "\niterations=");
     }
 }
