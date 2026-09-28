@@ -21,9 +21,9 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 각 항목의 `관련 계약`은 현재 제안 명세를 가리킨다. 기능 항목의 `API 명세: 미작성`은 실제 인터페이스·예제·오류 계약이 아직 게시되지 않았다는 뜻이다.
 
 ## 1. 위험 검증
-- [ ] **R01 웹 호환 범위 명세** — 요소·CSS·이벤트·DOM 유사 API의 첫 수직 구현 목표를 포함·제외·미정으로 정하고, 현재 적합성 판정과 별도 열에 기록한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
+- [ ] **R01 웹 호환 범위 명세** — 요소·CSS·이벤트·제한된 DOM API의 첫 수직 구현 후보를 [0007 DOM 호환 제안](0007-dom-compatibility.md)에 정리했다. 첫 목표 범위와 현재 적합성 판정은 아직 확정되지 않았다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 제안 문서만 있음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R02 iOS 실기기 V8 검증** — JIT 없는 V8 앱을 실기기에 설치해 JS 실행·터치·메모리를 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음 · PoC: 시뮬레이터 PoC
-- [ ] **R03 호스트 계약 초안** — 노드 생성·수정·이동·삭제의 Rust 내부 초안은 [S01 인터페이스](internal/0002-rust-tree-core.md)에 있다. 웹·모바일 공통 의미, 이벤트와 프레임워크 매핑은 미완료다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 부분 초안 · 근거: 없음 · PoC: 생성·삭제 PoC
+- [ ] **R03 호스트 계약 초안** — 노드 생성·수정·이동·삭제의 Rust 내부 초안은 [S01 인터페이스](internal/0002-rust-tree-core.md)에 있다. DOM façade와 프레임워크 어댑터가 공유할 문서 트리 의미, 동기 조회·변경, 이벤트 및 소유권 규칙은 미완료다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · [0007-dom-compatibility.md](0007-dom-compatibility.md) · API 명세: 부분 제안 · 근거: 없음 · PoC: 생성·삭제 PoC
 - [ ] **R04 세 비교 기준 앱** — React Native Fabric·ReactLynx·Android Views/UIKit의 같은 카운터 화면을 만든다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R05 계측 계약과 원본 수집** — 실기기 전경·입력 성공·첫 유효 화면·프레임·메모리의 수집과 제외 조건을 고정한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R06 스레드·소유권 위험 표** — Rust 트리의 동기·원자 커밋만 [S01 내부 명세](internal/0002-rust-tree-core.md)에 고정했다. V8·UI 경계의 객체 수명, thread affinity, 취소, 교차 경계 오류 복원과 실기기 경합은 미완료다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 부분 초안 · 산출물: 미완료 · 근거: 없음
@@ -32,7 +32,7 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 - [ ] **R09 iOS 배포·OTA 정책 범위** — V8·CSS 해석·원격 JS 업데이트에 적용될 지침과 기능 변경 한계를 공식 문서로 검토한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R10 Taffy 적합성 실험** — 노드 ID·텍스트 측정·좌표 반올림·RTL·갱신 비용을 작은 화면에서 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R11 CSS 빌드 경로 실험** — Lightning CSS의 AST를 지원 문법만 담은 모바일 스타일 데이터로 변환할 수 있는지 확인한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
-- [ ] **R12 JS 라이브러리 호환 표** — V8의 ECMAScript 기능과 스피논이 별도로 제공할 타이머·네트워크·URL 등 호스트 API를 구분한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
+- [ ] **R12 JS 라이브러리 호환 표** — V8의 ECMAScript 기능과 별도 호스트 API를 구분하고, Fetch를 선택하면 `NetworkHost`와 전송 계층의 계약·오류·취소·출처 경계를 정한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R13 플랫폼 생명주기·GPU 복구 실험** — 화면 회전·백그라운드 복귀·표면 재생성·GPU 자원 손실에서 최소 화면과 입력을 복구할 수 있는지 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R14 Tailwind 생성 CSS 실험** — 작은 유틸리티 묶음을 빌드해 생성 CSS의 선택자·변수·계층·Preflight를 모바일 변환기로 판정한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R15 청크 OTA 호환 모델 초안** — 바이너리 런타임 ID, 기능별 진입점과 청크 의존성, JS·CSS·에셋 해시, 서명·롤백·기능 변경 경계를 OTA 구현 전에 정의한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
@@ -41,10 +41,10 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 ## 2. 세 플랫폼 수직 구현
 - [x] **S01 Rust 코어의 최소 모듈** — `spinon-core`에 노드 ID·트리·원자 변경 묶음·revision을 분리하고 실패 시 이전 상태 보존을 구현했다. V8 부팅 FFI는 별도 crate다. 내부 인터페이스: [0002 Rust 트리 코어](internal/0002-rust-tree-core.md) · 실행 근거: [Rust 코어 검증 기록](internal/0002-rust-tree-core-evidence.md) · 범위: Rust 라이브러리만. 이벤트·V8 연결은 R03/R06 후속 범위다.
 - [ ] **S02 Taffy 레이아웃 연결** — Rust 코어의 LayoutEngine 경계 뒤에 Taffy를 연결하고 기존 작은 엔진을 비교 기준으로 보존한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API 명세: 미작성 · 근거: 없음
-- [ ] **S03 V8 호스트 바인딩** — Isolate·Context 수명, JS 노드 명령·이벤트 콜백·타이머·마이크로태스크·예외를 C++↔Rust에 연결한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음 · PoC: 연결 PoC
+- [ ] **S03 V8 호스트 바인딩** — Isolate·Context 수명, JS 노드 명령·이벤트 콜백·타이머·마이크로태스크·예외를 C++↔Rust에 연결한다. DOM façade를 진행할 때 JS `Document`·`Node`·`Element` API도 이 경계를 통해 같은 Rust 문서 트리에 연결한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · [0007-dom-compatibility.md](0007-dom-compatibility.md) · API 명세: 미작성 · 근거: 없음 · PoC: 연결 PoC
 - [ ] **S04 Android·iOS GPU 적용기** — 같은 변경 배치를 GPU 장면에 반영하고 플랫폼 입력을 노드 이벤트로 돌려준다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음 · PoC: 네이티브 뷰 연결 PoC
-- [ ] **S05 React 첫 어댑터** — React 호스트 작업을 스피논 명령으로 변환해 상태 변경·이벤트 해제를 확인한다. 완료 전에 제거된 노드를 가리키는 지연 이벤트의 처리 규칙을 확정한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음
-- [ ] **S06 최소 웹 호스트·단일 번들** — 같은 앱 코드가 브라우저 DOM과 모바일의 단일 JS 번들에서 표시되도록 Vite 개발 빌드를 연결한다. 이 단계의 단일 번들은 동적 import·청크 로더 지원을 뜻하지 않는다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API 명세: 미작성 · 근거: 없음
+- [ ] **S05 React 첫 어댑터** — React 호스트 작업을 스피논 명령으로 변환해 상태 변경·이벤트 해제를 확인한다. DOM façade와 트리를 공유할 때의 렌더러 소유권 규칙도 정한다. 완료 전에 제거된 노드를 가리키는 지연 이벤트의 처리 규칙을 확정한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · [0007-dom-compatibility.md](0007-dom-compatibility.md) · API 명세: 미작성 · 근거: 없음
+- [ ] **S06 최소 웹 호스트·단일 번들** — 같은 앱 코드가 웹에서는 브라우저 DOM, 모바일에서는 스피논의 GPU 트리와 제안된 DOM façade를 사용하도록 Vite 개발 빌드를 연결한다. 이 단계의 단일 번들은 동적 import·청크 로더 지원을 뜻하지 않는다. DOM façade는 별도 적합성 기준을 통과하기 전까지 지원 완료로 보지 않는다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · [0007-dom-compatibility.md](0007-dom-compatibility.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **S07 GPU 텍스트·터치·화면 완료** — 플랫폼 폰트 측정과 GPU 글자 표시, 탭 히트 테스트, 접근성 이름과 실제 화면 결과를 맞춘다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **S08 초기 빌드 자동화** — Android·iOS·웹의 재현 가능한 빌드와 R16에서 정한 작은 화면의 최소 적합성 시나리오를 반복 확인한다. X16은 이 묶음을 전체 지원 범위로 확장한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **S09 첫 네 구현 비교** — 릴리스 빌드와 같은 실기기로 터치·첫 화면·자원 사용을 측정하고, 아직 없는 지표는 미측정으로 남긴다. 앱·입력·화면이 동등하지 않으면 순위를 내지 않는다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
@@ -84,11 +84,11 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 - [ ] **X03 Rspack 플러그인** — Vite와 같은 산출물 계약을 Rspack에서도 검증한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **X04 Vue 어댑터** — Vue 반응성 결과를 스피논 호스트 명령에 연결한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **X05 Svelte 어댑터** — 컴파일된 UI 갱신을 같은 호스트 명령에 연결한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음
-- [ ] **X06 웹 호환 확장** — 웹 호스트와 모바일의 지원 요소·스타일·이벤트 차이를 줄이고 문서화한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API 명세: 미작성 · 근거: 없음
+- [ ] **X06 웹 호환 확장** — 웹 호스트와 모바일의 지원 요소·스타일·이벤트·DOM API 차이를 줄이고 문서화한다. 전체 브라우저 DOM을 뜻하지 않는다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · [0007-dom-compatibility.md](0007-dom-compatibility.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **X07 개발 진단 기본** — 오류 화면·로그·소스맵·리로드와 모듈 교체 실패 시 전체 리로드를 제공한다. 관련 계약: [0005-developer-tools.md](0005-developer-tools.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **X08 네이티브 모듈 계약** — 저장소·네트워크·카메라 등 권한, 호출, 콜백과 수명을 정의한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **X09 Grid 레이아웃** — Taffy Grid의 트랙·간격·배치와 Flex/텍스트 측정의 상호작용을 검증한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API 명세: 미작성 · 근거: 없음
-- [ ] **X10 JS 호스트 API 호환** — fetch·URL·TextEncoder·스토리지 등 지원하기로 정한 API와 비동기 오류를 구현한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API 명세: 미작성 · 근거: 없음
+- [ ] **X10 JS 호스트 API 호환** — Fetch를 포함해 지원하기로 정한 API의 `NetworkHost`·URL·비동기 오류·취소·백그라운드 동작을 구현한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **X11 모바일 HMR·Fast Refresh** — Vite·Rspack 변경 통지를 모바일 개발 연결로 전달하고 JS 모듈 수락·정리, React 상태 보존, CSS·에셋 갱신과 실패 시 전체 리로드를 검증한다. 관련 계약: [0005-developer-tools.md](0005-developer-tools.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **X12 V8 Inspector 연결** — 개발 빌드에만 Inspector 전송 경로를 열어 Chrome DevTools의 JS 중단점·스택·소스맵·콘솔·프로파일링을 Android·iOS에서 확인한다. 관련 계약: [0005-developer-tools.md](0005-developer-tools.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **X13 스피논 UI 트리 조사** — 노드 ID·계산된 스타일·레이아웃·접근성 의미·프레임 시간을 개발 도구에서 조회한다. 브라우저 DOM/Elements 자동 지원으로 표시하지 않는다. 관련 계약: [0005-developer-tools.md](0005-developer-tools.md) · API 명세: 미작성 · 근거: 없음

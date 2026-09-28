@@ -13,7 +13,7 @@ spinon/
 ├── package.json               # Bun workspaces와 저장소 명령
 ├── bun.lock                   # JS/TS workspace 잠금 파일
 ├── crates/
-│   ├── spinon-core/           # UI 트리, ID, 변경 배치, 오류 계약
+│   ├── spinon-core/           # 문서·UI 트리, ID, 변경, 오류 계약
 │   ├── spinon-layout/         # LayoutEngine 경계와 Taffy 어댑터
 │   ├── spinon-render/         # 플랫폼에 무관한 장면·그리기 명령
 │   └── spinon-ffi/            # 좁은 C ABI: Rust와 호스트 연결
@@ -25,6 +25,8 @@ spinon/
 ├── packages/
 │   ├── docs/                  # spec/을 만드는 내부 @spinon/docs 패키지
 │   ├── runtime/               # 작성 코드의 JS 호스트 API
+│   │   ├── dom/                # 제한된 DOM façade와 JS 노드 wrapper
+│   │   └── network/            # Fetch 표면과 전송 호스트 계약
 │   ├── frameworks/
 │   │   ├── react/              # React 호스트 어댑터
 │   │   ├── vue/                # Vue 호스트 어댑터
@@ -49,16 +51,21 @@ spinon/
 
 | 경계 | 경로 | 책임 |
 | --- | --- | --- |
-| 공통 런타임 코어 | `crates/spinon-core` | 안정적 노드 ID, UI 트리, 변경 배치, revision, 오류·복구 의미 |
+| 공통 런타임 코어 | `crates/spinon-core` | 안정적 노드 ID, 문서·UI 트리, 혼합 요소/텍스트 자식 순서, 변경, revision, 오류·복구 의미 |
 | 레이아웃 | `crates/spinon-layout` | 코어 노드와 레이아웃 엔진 사이 어댑터, Taffy 적용·검증 |
 | 렌더 명령 | `crates/spinon-render` | 장면 변경, 그리기 명령, hit-test 입력·결과 모델 |
 | 언어 경계 | `crates/spinon-ffi`, `native/v8` | Rust C ABI와 V8 C++ API를 제한된 값·핸들로 연결 |
 | Android | `platforms/android` | Gradle 빌드, 앱 수명주기, 표면·입력·IME·접근성·JNI 연결 |
 | iOS | `platforms/ios` | Xcode 빌드, 앱 수명주기, 표면·입력·IME·접근성·Objective-C++ 연결 |
-| JS 패키지 | `packages/*` | 공개 JS 호스트 API, 프레임워크·번들러 어댑터, CLI |
+| JS 호스트 API | `packages/runtime` | 공개 호스트 API, DOM façade, Fetch 표면과 버전 있는 호스트 계약 |
+| 네트워크 전송 | 구현 위치 미정 | 플랫폼 또는 공통 전송 구현을 `NetworkHost` 뒤에서 비교; Rust UI 코어와 분리 |
+| 프레임워크·번들러 | `packages/frameworks/*`, `packages/bundlers/*` | 공통 Rust 문서 트리에 작업을 제출하는 프레임워크 어댑터와 Vite/Rspack 연결 |
+| CLI | `packages/cli` | 앱 생성·실행·빌드·진단 명령 |
 | 공통 적합성 | `tests/conformance` | 플랫폼·프레임워크별로 공유할 시나리오와 기대 결과 |
 
 Rust 코어와 C ABI는 분리합니다. `spinon-core`의 공개 Rust API는 안전한 타입 중심으로 두고, 포인터 수명·버퍼 복사·콜백 ABI는 `spinon-ffi`에 둡니다. V8 객체와 Rust 내부 포인터를 경계 밖에 보관하지 않습니다.
+
+현재 S01 코어의 트리 모델은 DOM 노드 모델이 아닙니다. DOM façade 구현을 시작하기 전에 요소·텍스트가 순서대로 섞이는 자식 모델, 앱 문서의 표시 루트, 동기 DOM 변경·조회와 프레임 단위 GPU 적용의 분리를 설계하고 상태 대장 계약을 갱신합니다. 상세 후보와 미정 항목은 [DOM 호환 명세](../../spec/0007-dom-compatibility.md)에 둡니다.
 
 ## CLI 언어 결정 제안
 
