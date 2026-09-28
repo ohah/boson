@@ -54,6 +54,7 @@ if command -v mise >/dev/null 2>&1; then
   else
     mise exec -- env CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target "$rust_target" -p spinon-ffi
   fi
+  mise exec -- cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target "$rust_target"
 else
   bun run bundle:bootstrap
   rustup target add "$rustup_target"
@@ -62,6 +63,7 @@ else
   else
     CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target "$rust_target" -p spinon-ffi
   fi
+  cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target "$rust_target"
 fi
 
 output_dir="$repo_root/build/spinon/$platform_name"
@@ -74,4 +76,6 @@ xcrun --sdk "$sdk" clang++ -std=c++20 -O2 -fPIC -target "$target" \
   -o "$output_dir/spinon_v8.o"
 cp "$repo_root/target/$rust_target/release/libspinon_ffi.a" \
   "$output_dir/libspinon_ffi.a"
+cp "$repo_root/spikes/wgpu-backend/target/$rust_target/release/libspinon_wgpu_r08_spike.a" \
+  "$output_dir/libspinon_wgpu_r08_spike.a"
 echo "iOS $platform_name 네이티브 입력 준비 완료: $output_dir"

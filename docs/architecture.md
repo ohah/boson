@@ -2,7 +2,9 @@
 
 ## 결정
 
-공통 UI 코어의 기준 언어는 Rust로 한다. 모바일 주 화면의 출력 경로는 GPU 렌더러로 확정한다. 코어는 Android와 iOS에서 같은 트리·스타일·레이아웃·장면 변경 명령을 계산한다. JavaScript 엔진, 프레임워크 어댑터, GPU 렌더러, 플랫폼 호스트는 별도 모듈로 둔다. 이 결정은 출력 구조에 관한 것이며 Rust나 GPU의 성능 우위를 입증한 결과는 아니다.
+공통 UI 코어의 기준 언어는 Rust로 한다. 모바일 주 화면은 GPU로 출력하며, Android·iOS의 공통 GPU API로 `wgpu`를 채택한다. Android 실험에서는 Vulkan을 기본 경로로 두고 OpenGL ES 3.0 이상을 별도 비교 경로로 둔다. iOS에서는 Metal 백엔드를 사용한다. 현재 고정한 `wgpu` 30.0.1 지원표는 Android Vulkan을 우선 지원, OpenGL ES 3.0 이상을 최선 노력 지원으로 분류한다([버전별 지원 플랫폼](https://docs.rs/crate/wgpu/30.0.1)). 코어는 두 플랫폼에서 같은 트리·스타일·레이아웃·장면 변경 명령을 계산한다. JavaScript 엔진, 프레임워크 어댑터, GPU 렌더러, 플랫폼 호스트는 별도 모듈로 둔다. 이 결정은 렌더링 API 선택이며 성능 우위를 입증한 결과는 아니다.
+
+R08 실험은 Android 기본 실행에서 Vulkan을 선택하고 OpenGL ES 백엔드는 실험 인수로 강제해 비교하며, iOS에서 Metal을 사용한다. Android의 제품 자동 선택·실패 시 대체 순서, 지원 최소 기기와 GPU 기능표, 색상 관리, 실제 표시 시각, 표면 복구 계약은 아직 정하지 않았다. OpenGL ES 2.0은 wgpu GLES 백엔드의 대상이 아니므로, Android 최소 지원 기기 결정에 이 제약을 반영한다. 현재 실험은 단색 사각형만 출력하며 제품 렌더러 구현 완료를 뜻하지 않는다.
 
 ```text
 React / Vue / Svelte 어댑터 · DOM façade · Fetch API

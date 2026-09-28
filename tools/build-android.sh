@@ -45,6 +45,7 @@ if command -v mise >/dev/null 2>&1; then
   else
     mise exec -- env CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target aarch64-linux-android -p spinon-ffi
   fi
+  mise exec -- cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target aarch64-linux-android
 else
   bun run bundle:bootstrap
   if [[ "${SPINON_ENABLE_R10_EXPERIMENT:-0}" == "1" ]]; then
@@ -52,6 +53,7 @@ else
   else
     CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target aarch64-linux-android -p spinon-ffi
   fi
+  cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target aarch64-linux-android
 fi
 
 output_dir="$repo_root/build/spinon/android"
@@ -66,7 +68,8 @@ common=("$target" "$sysroot" -std=c++20 -O2 -fPIC
   -isystem "$v8_dir/third_party/libc++abi/src/include"
   -I"$v8_dir/include"
   -I"$repo_root/native/v8/include"
-  -I"$repo_root/crates/spinon-ffi/include")
+  -I"$repo_root/crates/spinon-ffi/include"
+  -I"$repo_root/spikes/wgpu-backend/include")
 
 "$v8_cxx" "${common[@]}" -c "$repo_root/native/v8/src/spinon_v8.cc" \
   -o "$output_dir/obj/spinon_v8.o"
@@ -78,8 +81,9 @@ common=("$target" "$sysroot" -std=c++20 -O2 -fPIC
   "$output_dir/obj/spinon_jni.o" \
   "$output_dir/obj/spinon_v8.o" \
   "$repo_root/target/aarch64-linux-android/release/libspinon_ffi.a" \
+  "$repo_root/spikes/wgpu-backend/target/aarch64-linux-android/release/libspinon_wgpu_r08_spike.a" \
   "$v8_archive" "$v8_libcxx" "$v8_libcxxabi" \
-  "-fuse-ld=$v8_lld" -Wl,--gc-sections -nostdlib++ --unwindlib=none -llog -ldl \
+  "-fuse-ld=$v8_lld" -Wl,--gc-sections -nostdlib++ --unwindlib=none -landroid -llog -ldl \
   -o "$output_dir/jniLibs/arm64-v8a/libspinon_bootstrap.so"
 
 echo "Android ARM64 V8 smoke 라이브러리 준비 완료: $output_dir/jniLibs/arm64-v8a/libspinon_bootstrap.so"

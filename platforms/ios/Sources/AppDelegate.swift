@@ -10,9 +10,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
-        if ProcessInfo.processInfo.arguments.contains("--spinon-r08") {
+        let arguments = ProcessInfo.processInfo.arguments
+        let isR08 = arguments.contains("--spinon-r08")
+            || arguments.contains("--spinon-r08-wgpu")
+            || arguments.contains("--spinon-r08-native")
+        if isR08 {
+            let useWgpu = !arguments.contains("--spinon-r08-native")
             let window = UIWindow(frame: UIScreen.main.bounds)
-            window.rootViewController = R08GpuDemoViewController()
+            window.rootViewController = R08GpuDemoViewController(useWgpu: useWgpu)
             window.makeKeyAndVisible()
             self.window = window
             return true

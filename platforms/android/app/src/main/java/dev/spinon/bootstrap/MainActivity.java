@@ -28,7 +28,9 @@ public final class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getIntent().getBooleanExtra("spinon_r08", false)) {
-            R08GpuDemo.show(this);
+            int backend = getIntent().getIntExtra("spinon_r08_backend", 1);
+            boolean useWgpu = !getIntent().getBooleanExtra("spinon_r08_native", false);
+            R08GpuDemo.show(this, useWgpu, backend);
             return;
         }
 
