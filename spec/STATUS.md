@@ -23,10 +23,10 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 ## 1. 위험 검증
 - [ ] **R01 웹 호환 범위 명세** — 요소·CSS·이벤트·DOM 유사 API의 첫 수직 구현 목표를 포함·제외·미정으로 정하고, 현재 적합성 판정과 별도 열에 기록한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R02 iOS 실기기 V8 검증** — JIT 없는 V8 앱을 실기기에 설치해 JS 실행·터치·메모리를 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음 · PoC: 시뮬레이터 PoC
-- [ ] **R03 호스트 계약 초안** — 노드 ID, 생성·수정·이동·삭제·이벤트의 공통 의미를 웹과 모바일에 맞춰 정의한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음 · PoC: 생성·삭제 PoC
+- [ ] **R03 호스트 계약 초안** — 노드 생성·수정·이동·삭제의 Rust 내부 초안은 [S01 인터페이스](internal/0002-rust-tree-core.md)에 있다. 웹·모바일 공통 의미, 이벤트와 프레임워크 매핑은 미완료다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 부분 초안 · 근거: 없음 · PoC: 생성·삭제 PoC
 - [ ] **R04 세 비교 기준 앱** — React Native Fabric·ReactLynx·Android Views/UIKit의 같은 카운터 화면을 만든다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R05 계측 계약과 원본 수집** — 실기기 전경·입력 성공·첫 유효 화면·프레임·메모리의 수집과 제외 조건을 고정한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
-- [ ] **R06 스레드·소유권 위험 표** — V8·Rust·UI 경계의 객체 수명, 동기 호출, 취소와 오류 복원 범위를 기록한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
+- [ ] **R06 스레드·소유권 위험 표** — Rust 트리의 동기·원자 커밋만 [S01 내부 명세](internal/0002-rust-tree-core.md)에 고정했다. V8·UI 경계의 객체 수명, thread affinity, 취소, 교차 경계 오류 복원과 실기기 경합은 미완료다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 부분 초안 · 산출물: 미완료 · 근거: 없음
 - [ ] **R07 Vue·Svelte 호스트 가능성** — React 전용 가정이 공통 노드 계약에 새지 않는지 작은 어댑터 실험으로 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R08 GPU 출력 위험 실험** — Android·iOS에서 최소 GPU 화면과 텍스트·터치·IME·접근성 연결 가능성을 실험하고 제약을 기록한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R09 iOS 배포·OTA 정책 범위** — V8·CSS 해석·원격 JS 업데이트에 적용될 지침과 기능 변경 한계를 공식 문서로 검토한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
@@ -39,7 +39,7 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 - [ ] **R16 스피논 명세 초안** — UI 트리·이벤트·HTML/CSS/JS API·빌드·도구의 버전별 계약과 미정 항목을 공개하고 첫 적합성 시나리오를 정한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 
 ## 2. 세 플랫폼 수직 구현
-- [ ] **S01 Rust 코어의 최소 모듈** — 트리·커밋·FFI를 분리하고 노드 ID 및 변경 배치 규칙을 구현한다. 완료 전에 실패한 커밋의 부분 적용·복구 규칙을 확정한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음
+- [x] **S01 Rust 코어의 최소 모듈** — `spinon-core`에 노드 ID·트리·원자 변경 묶음·revision을 분리하고 실패 시 이전 상태 보존을 구현했다. V8 부팅 FFI는 별도 crate다. 내부 인터페이스: [0002 Rust 트리 코어](internal/0002-rust-tree-core.md) · 실행 근거: [Rust 코어 검증 기록](internal/0002-rust-tree-core-evidence.md) · 범위: Rust 라이브러리만. 이벤트·V8 연결은 R03/R06 후속 범위다.
 - [ ] **S02 Taffy 레이아웃 연결** — Rust 코어의 LayoutEngine 경계 뒤에 Taffy를 연결하고 기존 작은 엔진을 비교 기준으로 보존한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **S03 V8 호스트 바인딩** — Isolate·Context 수명, JS 노드 명령·이벤트 콜백·타이머·마이크로태스크·예외를 C++↔Rust에 연결한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음 · PoC: 연결 PoC
 - [ ] **S04 Android·iOS GPU 적용기** — 같은 변경 배치를 GPU 장면에 반영하고 플랫폼 입력을 노드 이벤트로 돌려준다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음 · PoC: 네이티브 뷰 연결 PoC
