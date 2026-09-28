@@ -40,8 +40,8 @@ DOM façade만으로 `react-dom`이나 브라우저 DOM을 직접 호출하는 R
 | --- | --- | --- |
 | 노드 생성 | `document.createElement()`, `document.createTextNode()` | 지원 태그·노드 종류, HTML 이름의 대소문자 처리, 잘못된 이름의 예외와 문서 소속 규칙 |
 | 자식 변경 | `appendChild()`, `insertBefore()`, `removeChild()` | 기존 부모에서 이동, `insertBefore(node, null)`의 끝 삽입, 삽입한/제거한 노드 반환, 순환·잘못된 참조의 동기 `DOMException`, 실패 시 기존 트리 보존 |
-| 트리 읽기 | `nodeType`, `nodeName`, `parentNode`, `firstChild`, `nextSibling`, `textContent`, `Text.data`/`nodeValue` | 요소와 텍스트가 섞인 순서, 노드 종류 상수·이름 대소문자, 분리된 노드의 수명, 변경 직후 읽기 |
-| 기본 속성 | `getAttribute()`, `setAttribute()`, `removeAttribute()`, `id`, `className` | 속성 이름·값의 변환, 속성과 프로퍼티의 반영 관계 |
+| 트리 읽기·쓰기 | `nodeType`, `nodeName`, `parentNode`, `firstChild`, `nextSibling`, `textContent`, `Text.data`/`nodeValue` | `textContent`의 getter·setter와 자식 교체 의미, `Text.data`의 getter·setter, 노드 종류별 `nodeValue`, 요소와 텍스트가 섞인 순서, 노드 이름·종류 상수, 분리된 노드의 수명, 변경 직후 읽기 |
+| 기본 속성 | `getAttribute()`, `setAttribute()`, `removeAttribute()`, `id`, `className` | JavaScript 문자열 인수의 변환, 속성 이름의 대소문자, `id`·`className`과 `id`·`class` 속성의 반영 관계, 지원 CSS 선택자에 미치는 효과 |
 
 다음 항목은 첫 단계에 자동 포함하지 않는다. 각 항목은 별도 동작 계약과 적합성 시나리오가 필요하다.
 
@@ -58,6 +58,8 @@ DOM façade만으로 `react-dom`이나 브라우저 DOM을 직접 호출하는 R
 
 `fetch`, 타이머, `URL`, 스토리지, 네트워크, 서비스 워커, Canvas/WebGL/WebGPU는 DOM 트리 API가 아니다. 각 기능은 [웹 표면 명세](0003-web-surface.md)의 별도 호스트 API 계약으로 판정한다.
 
+일반 속성 메서드가 있다고 해서 `style` 속성이나 CSSOM이 자동 지원되는 것은 아니다. `style` 속성의 설정·조회와 렌더링 반영은 CSS 선언 파싱·무효화 규칙을 정하기 전까지 지원으로 표시하지 않는다. `Element.style`/`CSSStyleDeclaration`은 별도 계약이 필요하다. 지원하는 `id`·`class` 속성을 바꾸면 그 값에 의존하는 지원 선택자와 화면을 언제 다시 계산하는지도 명시해야 한다.
+
 ## Rust 트리와 DOM 모델의 차이
 
 현재 S01의 `spinon-core`는 안정적 ID와 원자 변경 묶음을 검증하는 최소 실험이다. 현재 `Node`는 노드마다 태그와 선택적 텍스트를 보관하고 자식 목록에는 다른 노드 ID를 둔다. 따라서 요소의 자식 위치마다 텍스트 노드가 끼어드는 DOM의 순서, `Element`와 `Text`의 서로 다른 노드 종류, 노드 객체의 연결·분리 수명을 표현하지 못한다. 또한 S01의 전체 변경 묶음 커밋은 개별 DOM 메서드의 동기 성공·오류 결과를 정의하지 않는다.
@@ -68,10 +70,11 @@ DOM 호환 계층에 연결하기 전 Rust 모델은 최소한 문서·요소·�
 
 1. **루트 연결:** 앱별 `document`가 GPU 표면의 어느 루트를 가리키는지, 직접 DOM 작성 코드가 첫 표시 컨테이너를 어떻게 얻는지 정한다. 전체 브라우저 페이지 모델을 몰래 만들지 않는다.
 2. **소유권 충돌:** React·Vue·Svelte가 관리하는 하위 트리에 앱 코드가 `appendChild()` 등으로 직접 쓰기할 수 있는지 정한다. 첫 제안은 서로 다른 렌더러가 같은 하위 트리를 동시에 쓰지 못하게 하는 것이다. 이를 택하면 제약과 진단을 API 문서에 공개한다.
-3. **동기 의미와 스레드:** 성공한 트리 변경은 같은 JavaScript 실행 흐름의 후속 조회에서 보여야 한다. GPU 장면 반영은 프레임 경계에서 비동기로 처리할 수 있다. JS·Rust 트리의 소유 스레드와 변경 직렬화 방법을 정하고 OS 입력 스레드를 불필요하게 기다리게 하지 않는다. 레이아웃 측정 API는 별도 동기화 계약 없이는 노출하지 않는다.
+3. **동기 의미와 스레드:** 성공한 트리 변경은 같은 JavaScript 실행 흐름의 후속 조회에서 보여야 한다. GPU 장면 반영은 프레임 경계에서 비동기로 처리할 수 있으며, 레이아웃·렌더러는 부분 변경이 아닌 일관된 커밋 revision만 읽어야 한다. JS·Rust 트리의 소유 스레드, 변경 직렬화와 렌더러로의 revision 전달을 정하고 OS 입력 스레드를 불필요하게 기다리게 하지 않는다. 레이아웃 측정 API는 별도 동기화 계약 없이는 노출하지 않는다.
 4. **객체 수명:** 삭제되거나 분리된 노드의 JavaScript wrapper가 언제까지 유효한지, 같은 Rust 노드 ID가 wrapper 정체성에 어떻게 대응하는지, GC·앱 재시작·OTA 뒤 ID가 재사용되는지 정한다.
-5. **컬렉션·오류:** NodeList 계열의 라이브 여부, 잘못된 계층 변경의 예외 종류·이름, 잘못된 태그·속성 진단을 명세한다.
-6. **프레임워크 경로:** 프레임워크 host adapter와 직접 DOM 호출의 변경이 한 문서 트리로 수렴하는 적합성 사례를 만든다.
+5. **값 변환·컬렉션·오류:** JavaScript 문자열의 DOMString 변환, NodeList 계열의 라이브 여부, 잘못된 계층 변경의 예외 종류·이름, 잘못된 태그·속성 진단을 명세한다.
+6. **CSS 연동:** `id`·`class` 변경의 선택자 재평가와 화면 무효화, `style` 속성의 지원 범위, CSSOM 제외 여부를 명세한다.
+7. **프레임워크 경로:** 프레임워크 host adapter와 직접 DOM 호출의 변경이 한 문서 트리로 수렴하는 적합성 사례를 만든다.
 
 이 관문이 닫히기 전에는 DOM 지원 API를 `지원`으로 등록하지 않는다. 첫 목표 범위와 구현 상태는 [범위·적합성 명세](0001-conformance.md) 및 [공식 상태 대장](STATUS.md)에서 따로 관리한다.
 
@@ -80,6 +83,8 @@ DOM 호환 계층에 연결하기 전 Rust 모델은 최소한 문서·요소·�
 - `<div>` 아래에 텍스트와 다른 요소를 번갈아 넣고, 웹과 모바일에서 자식 순서와 `textContent`를 비교한다.
 - 부모가 있는 노드를 다른 부모로 옮기고, 같은 노드를 자기 자신 또는 자손 아래에 넣으려는 잘못된 변경을 비교한다.
 - `appendChild()` 직후 `parentNode`, `firstChild`, `nextSibling`, `textContent`를 읽어 논리 트리가 동기화돼 있는지 확인한다.
+- `textContent`와 `Text.data`를 읽고 쓸 때 문자열 변환, 하위 텍스트 순서와 화면 갱신을 확인한다.
+- 지원하는 `id`·`class` 값을 바꿨을 때 선택자 결과와 다음 GPU 프레임의 스타일이 갱신되는지 확인한다. `style` 속성은 별도 지원 판정이 있기 전까지 이 시나리오에 포함하지 않는다.
 - 잘못된 `removeChild()`에 다른 부모의 자식을 전달했을 때 웹과 모바일의 오류 종류·이전 트리 보존을 비교한다. 여러 앱 문서나 크로스 문서 노드를 지원한다면 채택 동작도 별도 사례로 추가한다.
 - 프레임워크 어댑터로 만든 노드와 DOM façade로 만든 노드가 같은 트리에서 충돌 없이 조회·표시되는지 확인한다.
 
