@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ko">
+  <head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>0007 · 모바일 DOM 호환 계층 - 스피논 문서</title>
+<script>{;const saved = localStorage.getItem('rspress-theme-appearance');const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;const defaultTheme = 'auto';const theme = saved === 'light' || saved === 'dark' || saved === 'auto' ? saved : defaultTheme;const isDark = theme === 'auto' ? preferDark : theme === 'dark';document.documentElement.classList.toggle('dark', isDark);document.documentElement.classList.toggle('rp-dark', isDark);document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';}</script>
+<link href="/spinon/static/css/styles.8d918fd78e.css" rel="stylesheet">
+<link rel="preload" href="/spinon/static/js/async/route-367f2927ddca.7609b483dc.js" as="script">
+<script defer src="/spinon/static/js/styles.d8c833403a.js"></script>
+<script defer src="/spinon/static/js/lib-react.9cdf8f49ce.js"></script>
+<script defer src="/spinon/static/js/lib-router.1e14e568cb.js"></script>
+<script defer src="/spinon/static/js/a.5566e14afe.js"></script>
+<script defer src="/spinon/static/js/index.2e5f054b9d.js"></script>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Rspress v2.0.22">
+<link rel="icon" href="/spinon/icon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="0007 · 모바일 DOM 호환 계층 - 스피논 문서">
+<meta name="description" content="상태: 제안 · 명세 버전: 0.1.0-draft">
+<meta property="og:description" content="상태: 제안 · 명세 버전: 0.1.0-draft"></head>
+
+  <body>
+    <div id="__rspress_root"><link rel="preload" as="image" href="/spinon/logo.svg"/><header class="rp-nav"><div class="rp-nav__left"><div class="rp-nav__title"><a href="/spinon/" class="rp-nav__title__link rp-link"><div class="rp-nav__title__logo"><img src="/spinon/logo.svg" alt="logo" id="logo" class="rspress-logo rp-nav__title__logo-image"/></div><span>스피논</span></a></div><span class="spinon-version" aria-label="현재 문서 버전">0.1.0-draft</span></div><div class="rp-nav__right"><button class="rp-search-button"><div class="rp-search-button__content"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" viewBox="0 0 20 21" class="rp-search-button__icon"><path fill="currentColor" d="M8.333 1.913A6.667 6.667 0 0 1 15 8.58c0 1.54-.525 2.957-1.402 4.085l4.49 4.492a.834.834 0 0 1-1.177 1.178l-4.491-4.49a6.64 6.64 0 0 1-4.087 1.402 6.667 6.667 0 0 1 0-13.334m0 1.667a5 5 0 1 0 0 10 5 5 0 0 0 0-10"></path></svg><span class="rp-search-button__word">검색</span></div><div class="rp-search-button__hotkey" style="opacity:0"><span></span><span>K</span></div></button><div class="rp-search-button--mobile"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="none" viewBox="0 0 20 21"><path fill="currentColor" d="M8.333 1.913A6.667 6.667 0 0 1 15 8.58c0 1.54-.525 2.957-1.402 4.085l4.49 4.492a.834.834 0 0 1-1.177 1.178l-4.491-4.49a6.64 6.64 0 0 1-4.087 1.402 6.667 6.667 0 0 1 0-13.334m0 1.667a5 5 0 1 0 0 10 5 5 0 0 0 0-10"></path></svg></div><ul class="rp-nav-menu rp-nav-menu--right"><li class="rp-nav-menu__item rp-nav-menu__item--active"><a href="/spinon/index.html" class="rp-nav-menu__item__container rp-link">문서 홈</a></li><li class="rp-nav-menu__item"><a href="/spinon/STATUS.html" class="rp-nav-menu__item__container rp-link">구현 상태</a></li><li class="rp-nav-menu__item"><a href="/spinon/api/index.html" class="rp-nav-menu__item__container rp-link">API 명세</a></li><li class="rp-nav-menu__item"><a href="https://github.com/ohah/spinon" target="_blank" class="rp-nav-menu__item__container rp-link">GitHub</a></li></ul><div class="rp-nav__others"><div class="rp-nav-menu__divider"></div><div class="rp-switch-appearance"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24" class="rp-switch-appearance__icon rp-switch-appearance__icon--sun"><path fill="currentColor" d="m7.001 15.848-1.226 1.226a.58.58 0 0 0 0 .818.58.58 0 0 0 .818 0l1.226-1.226a.58.58 0 0 0 0-.818.58.58 0 0 0-.818 0m-.352-8.735a.584.584 0 0 0 .825-.825L6.237 5.051a.584.584 0 0 0-.825.825zM5.011 11.07h-1.75a.584.584 0 0 0 0 1.167h1.75c.324 0 .584-.26.584-.583a.585.585 0 0 0-.584-.584m7.003-5.835c.324 0 .584-.26.584-.584V2.9a.58.58 0 0 0-.584-.584.58.58 0 0 0-.583.583V4.65c0 .323.262.584.583.584m5.616 1.621 1.226-1.225a.58.58 0 0 0 0-.818.58.58 0 0 0-.818 0l-1.226 1.225a.58.58 0 0 0 0 .818.576.576 0 0 0 .818 0m3.138 4.214h-1.75a.58.58 0 0 0-.584.584c0 .324.26.584.583.584h1.751a.584.584 0 1 0 0-1.167m-3.389 5.124a.584.584 0 0 0-.825.825l1.238 1.238a.584.584 0 0 0 .825-.826zm-5.365-9.795a5.256 5.256 0 0 0-5.257 5.258 5.256 5.256 0 0 0 5.257 5.257 5.256 5.256 0 0 0 5.257-5.257 5.256 5.256 0 0 0-5.257-5.258m0 11.675a.58.58 0 0 0-.583.583v1.751a.582.582 0 1 0 1.167 0v-1.75a.584.584 0 0 0-.584-.584"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" viewBox="0 0 19 19" class="rp-switch-appearance__icon rp-switch-appearance__icon--moon"><path fill="currentColor" d="M9.166 0a9.2 9.2 0 0 1 1.857.188.834.834 0 0 1 .042 1.623 4.47 4.47 0 1 0 5.457 5.457l.048-.135a.834.834 0 0 1 1.575.177q.186.902.188 1.856A9.168 9.168 0 1 1 9.166 0"></path></svg></div><div class="rp-social-links"><a href="https://github.com/ohah/spinon" target="_blank" rel="noopener noreferrer" class="rp-social-links__item"><div class="rp-social-links__icon"><div class="rp-social-links__icon"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12c0 5.303 3.438 9.8 8.205 11.385c.6.113.82-.258.82-.577c0-.285-.01-1.04-.015-2.04c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729c1.205.084 1.838 1.236 1.838 1.236c1.07 1.835 2.809 1.305 3.495.998c.108-.776.417-1.305.76-1.605c-2.665-.3-5.466-1.332-5.466-5.93c0-1.31.465-2.38 1.235-3.22c-.135-.303-.54-1.523.105-3.176c0 0 1.005-.322 3.3 1.23c.96-.267 1.98-.399 3-.405c1.02.006 2.04.138 3 .405c2.28-1.552 3.285-1.23 3.285-1.23c.645 1.653.24 2.873.12 3.176c.765.84 1.23 1.91 1.23 3.22c0 4.61-2.805 5.625-5.475 5.92c.42.36.81 1.096.81 2.22c0 1.606-.015 2.896-.015 3.286c0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></div></div></a><ul class="rp-hover-group rp-hover-group--hidden rp-hover-group--right"></ul></div></div><button aria-label="mobile hamburger" class="rp-nav-hamburger rp-nav-hamburger__sm"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 21 21"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.667" d="M3.645 5.225h13.333M3.645 10.225h13.333M3.645 15.225h13.333"></path></svg></button><button aria-label="mobile hamburger" class="rp-nav-hamburger rp-nav-hamburger__md"><svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" fill="none" viewBox="0 0 21 21"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.667" d="M3.645 5.225h13.333M3.645 10.225h13.333M3.645 15.225h13.333"></path></svg><ul class="rp-hover-group rp-hover-group--hidden rp-hover-group--right"><div class="rp-nav-menu__others-mobile__container"><div class="rp-nav-hamburger__md__hover-group"><div class="rp-nav-screen-appearance"><div class="rp-nav-screen-appearance__left">테마</div><div class="rp-nav-screen-appearance__right"></div></div><div class="rp-nav-screen-divider"></div><div class="rp-social-links"><a href="https://github.com/ohah/spinon" target="_blank" rel="noopener noreferrer" class="rp-social-links__item"><div class="rp-social-links__icon"><div class="rp-social-links__icon"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12c0 5.303 3.438 9.8 8.205 11.385c.6.113.82-.258.82-.577c0-.285-.01-1.04-.015-2.04c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729c1.205.084 1.838 1.236 1.838 1.236c1.07 1.835 2.809 1.305 3.495.998c.108-.776.417-1.305.76-1.605c-2.665-.3-5.466-1.332-5.466-5.93c0-1.31.465-2.38 1.235-3.22c-.135-.303-.54-1.523.105-3.176c0 0 1.005-.322 3.3 1.23c.96-.267 1.98-.399 3-.405c1.02.006 2.04.138 3 .405c2.28-1.552 3.285-1.23 3.285-1.23c.645 1.653.24 2.873.12 3.176c.765.84 1.23 1.91 1.23 3.22c0 4.61-2.805 5.625-5.475 5.92c.42.36.81 1.096.81 2.22c0 1.606-.015 2.896-.015 3.286c0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></div></div></a><ul class="rp-hover-group rp-hover-group--hidden rp-hover-group--right"></ul></div></div></div></ul></button></div></header><div class="rp-doc-layout__menu"><div class="rp-sidebar-menu"><button type="button" class="rp-sidebar-menu__left"><svg width="1em" height="1em" viewBox="0 0 32 32"><path fill="currentColor" d="M4 6h24v2H4zm0 18h24v2H4zm0-12h24v2H4zm0 6h24v2H4z"></path></svg><span>사이드바 메뉴</span></button><button type="button" class="rp-sidebar-menu__right"><span class="rp-sidebar-menu__right__text">이 페이지 목차</span><svg width="14" height="14" class="rp-progress-circle"><circle cx="7" cy="7" r="6" stroke-linecap="round" fill="none" stroke="var(--rp-c-divider-light)" stroke-width="2"></circle><circle cx="7" cy="7" r="6" stroke-linecap="round" fill="none" stroke="var(--rp-c-brand)" stroke-width="2" stroke-dasharray="37.69911184307752" stroke-dashoffset="37.69911184307752" transform="rotate(-90 7 7)" style="transition:stroke-dashoffset 0.3s"></circle></svg><svg width="1em" height="1em" viewBox="0 0 32 32" class="rp-sidebar-menu__right__icon" style="transform:rotate(0deg);transition:transform 0.2s ease-out"><path fill="currentColor" d="M22 16 12 26l-1.4-1.4 8.6-8.6-8.6-8.6L12 6z"></path></svg></button></div></div><div class="rp-doc-layout__container"><aside class="rp-doc-layout__sidebar rp-scrollbar"><a href="/spinon/index.html" class="rp-sidebar-item rp-link" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span class="rp-doc">스피논 API 문서</span></div><div class="rp-sidebar-item__right"></div></a><a href="/spinon/STATUS.html" class="rp-sidebar-item rp-link" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span class="rp-doc">구현 상태 · 78개 항목</span></div><div class="rp-sidebar-item__right"></div></a><div class="rp-sidebar-item rp-sidebar-group" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span class="rp-doc">지원 완료 API</span></div><div class="rp-sidebar-item__right"><div style="cursor:pointer;transition:transform 0.2s ease-out;transform:rotate(90deg)"><svg width="1em" height="1em" viewBox="0 0 32 32"><path fill="currentColor" d="M22 16 12 26l-1.4-1.4 8.6-8.6-8.6-8.6L12 6z"></path></svg></div></div></div><div style="display:grid;grid-template-rows:1fr;transition:grid-template-rows 0.2s ease-out"><div style="overflow:hidden"><a href="/spinon/api/index.html" class="rp-sidebar-item rp-sidebar-item--group-item rp-link" style="padding-left:calc(12px * 1 + 12px)" data-depth="1"><div class="rp-sidebar-item__left"><span class="rp-doc">지원 완료 API</span></div><div class="rp-sidebar-item__right"></div></a><a href="/spinon/api/README.html" class="rp-sidebar-item rp-sidebar-item--group-item rp-link" style="padding-left:calc(12px * 1 + 12px)" data-depth="1"><div class="rp-sidebar-item__left"><span class="rp-doc">스피논 API 명세 목록</span></div><div class="rp-sidebar-item__right"></div></a></div></div><a href="/spinon/README.html" class="rp-sidebar-item rp-link" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span class="rp-doc">명세 인덱스</span></div><div class="rp-sidebar-item__right"></div></a><a href="/spinon/0001-conformance.html" class="rp-sidebar-item rp-link" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span class="rp-doc">0001 · 범위와 적합성</span></div><div class="rp-sidebar-item__right"></div></a><a href="/spinon/0002-ui-tree-events.html" class="rp-sidebar-item rp-link" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span class="rp-doc">0002 · UI 트리와 이벤트</span></div><div class="rp-sidebar-item__right"></div></a><a href="/spinon/0003-web-surface.html" class="rp-sidebar-item rp-link" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span class="rp-doc">0003 · HTML·CSS·JavaScript API 표면</span></div><div class="rp-sidebar-item__right"></div></a><a href="/spinon/0004-runtime-build.html" class="rp-sidebar-item rp-link" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span class="rp-doc">0004 · 실행·빌드·배포</span></div><div class="rp-sidebar-item__right"></div></a><a href="/spinon/0005-developer-tools.html" class="rp-sidebar-item rp-link" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span class="rp-doc">0005 · 개발 도구</span></div><div class="rp-sidebar-item__right"></div></a><a href="/spinon/0006-routing.html" class="rp-sidebar-item rp-link" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span class="rp-doc">0006 · 라우팅과 화면 이동</span></div><div class="rp-sidebar-item__right"></div></a><a href="/spinon/0007-dom-compatibility.html" class="rp-sidebar-item rp-sidebar-item--active rp-link" style="padding-left:12px" data-depth="0"><div class="rp-sidebar-item__left"><span class="rp-doc">0007 · 모바일 DOM 호환 계층</span></div><div class="rp-sidebar-item__right"></div></a></aside><div class="rp-doc-layout__doc"><main class="rp-doc-layout__doc-container"><div class="rp-doc rspress-doc"><!--$--><h1 class="rp-toc-include" id="0007--모바일-dom-호환-계층"><a href="#0007--모바일-dom-호환-계층" class="rp-header-anchor rp-link" aria-hidden="true">#</a>0007 · 모바일 DOM 호환 계층<!-- --> </h1>
+<p><strong>상태:</strong> 제안 · <strong>명세 버전:</strong> <code>0.1.0-draft</code></p>
+<h2 class="rp-toc-include" id="목표와-경계"><a href="#목표와-경계" class="rp-header-anchor rp-link" aria-hidden="true">#</a>목표와 경계</h2>
+<p>모바일 앱에서 일부 웹 DOM API와 같은 이름·호출 형태를 사용할 수 있도록, JavaScript 호환 계층을 Rust가 소유하는 스피논 UI 트리에 연결하는 것이 목표다. 이 문서는 후보 API와 선행 결정을 정리한다. 구현이나 웹 호환성 완료를 뜻하지 않는다.</p>
+<p>웹 빌드는 실제 브라우저 DOM을 사용한다. Android·iOS의 모바일 DOM 호환 계층은 스피논 문서 트리의 API façade다. Blink·WebKit 전체, HTML 문서 파서, 브라우저 창 모델이나 Web API 전체를 앱에 넣는 계획은 아니다. 모바일의 주 화면은 계속 GPU로 그리며 DOM API를 제공한다고 해서 WebView가 주 렌더러가 되지 않는다.</p>
+<p>동일한 이름을 쓰는 API는 이 명세에 적힌 시그니처와 관찰 동작만 호환 목표로 삼는다. <code>document</code>가 있다는 이유로 전체 브라우저 DOM, CSSOM, <code>window</code>, 웹 라이브러리 전반의 호환성을 주장하지 않는다.</p>
+<p>DOM façade만으로 <code>react-dom</code>이나 브라우저 DOM을 직접 호출하는 React/Vue/Svelte 라이브러리가 동작한다고 보장하지 않는다. 스피논 프레임워크 어댑터와 실제로 필요한 라이브러리 API 조합을 각각 검증한다.</p>
+<h2 class="rp-toc-include" id="제안-구조"><a href="#제안-구조" class="rp-header-anchor rp-link" aria-hidden="true">#</a>제안 구조</h2>
+<div class="rp-codeblock language-text"><div class="rp-codeblock__content"><div class="rp-codeblock__content__scroll-container rp-scrollbar rp-scrollbar--always"><pre class="shiki css-variables" style="background-color:var(--shiki-background);color:var(--shiki-foreground)" tabindex="0" data-lang="text"><code><span class="line"><span>앱 JavaScript</span></span>
+<span class="line"><span>  ├─ React / Vue / Svelte 어댑터 ─┐</span></span>
+<span class="line"><span>  └─ 제한된 DOM 호환 façade ──────┴─ 공통 호스트 작업</span></span>
+<span class="line"><span>                                      ↓</span></span>
+<span class="line"><span>                               V8 호스트 바인딩</span></span>
+<span class="line"><span>                                      ↓ 제한된 FFI</span></span>
+<span class="line"><span>                               Rust 문서·UI 트리</span></span>
+<span class="line"><span>                                      ↓</span></span>
+<span class="line"><span>                       스타일 계산 → 레이아웃 → GPU 장면</span></span></code></pre></div><div class="rp-code-button-group"><button class="rp-code-button-group__button rp-code-wrap-button" title="코드 줄바꿈 전환" aria-label="코드 줄바꿈 전환"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrapped"><path fill="currentColor" d="M21 5H3v2h18zM3 19h7v-2H3zm0-6h15c1 0 2 .43 2 2s-1 2-2 2h-2v-2l-4 3 4 3v-2h2c2.95 0 4-1.27 4-4 0-2.72-1-4-4-4H3z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-button-group__icon--wrap"><path fill="currentColor" d="M16 7H3V5h13zM3 19h13v-2H3zm19-7-4-3v2H3v2h15v2z"></path></svg></button><button class="rp-code-button-group__button rp-code-copy-button" title="코드 복사"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--copy"><path fill="currentColor" d="M20 8v12H8V8zm0-2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2"></path><path fill="currentColor" d="M4 16H2V4a2 2 0 0 1 2-2h12v2H4Z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" class="rp-code-button-group__icon rp-code-copy-button__icon rp-code-copy-button__icon--success"><path fill="currentColor" d="m9.55 18-5.7-5.7 1.425-1.425L9.55 15.15l9.175-9.175L20.15 7.4z"></path></svg></button></div></div></div>
+<ul>
+<li>Rust 문서 트리가 모바일 UI의 정본이다. DOM façade와 프레임워크 어댑터가 서로 다른 UI 트리를 따로 소유하지 않는다.</li>
+<li>DOM façade는 JavaScript의 <code>Document</code>·<code>Node</code>·<code>Element</code>·<code>Text</code> 모양을 제공하고 호스트 작업을 Rust에 전달한다. V8은 ECMAScript 실행만으로 이 객체나 브라우저 API를 자동 제공하지 않는다.</li>
+<li>프레임워크 어댑터와 DOM façade는 같은 논리 트리에 변경을 반영한다. 단, 한 프레임워크가 관리하는 하위 트리를 직접 DOM 변경과 어떻게 공유할지는 미정이며, 구현 전에 소유권 규칙을 정해야 한다.</li>
+<li>DOM 호출의 논리 결과와 화면 출력 시점은 분리한다. 같은 JavaScript 실행 흐름에서 뒤따르는 트리 조회는 앞선 성공한 변경을 관찰해야 한다. GPU 그리기는 다음 프레임에 반영될 수 있으며 DOM 변경 성공이 픽셀 표시 완료를 뜻하지 않는다.</li>
+<li>앱별 <code>document</code> 객체와 GPU 표면의 루트 연결 방법은 미정이다. 브라우저의 <code>document.body</code>를 그대로 가정할 수 없으므로, 앱 작성 코드가 표시 트리에 붙일 컨테이너를 어떻게 얻는지 API 범위 결정에 포함해야 한다.</li>
+</ul>
+<h2 class="rp-toc-include" id="첫-단계-api-후보"><a href="#첫-단계-api-후보" class="rp-header-anchor rp-link" aria-hidden="true">#</a>첫 단계 API 후보</h2>
+<p>아래는 호환 계층의 작은 시작점으로 제안하는 후보이며 현재 지원 API가 아니다. 세부 타입·예외 이름·수명·적합성 사례를 정하기 전에는 공개 지원으로 표시하지 않는다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>API 영역</th><th>첫 단계 후보</th><th>계약에 필요한 조건</th></tr></thead><tbody><tr><td>노드 생성</td><td><code>document.createElement()</code>, <code>document.createTextNode()</code></td><td>지원 태그·노드 종류, HTML 이름의 대소문자 처리, 잘못된 이름의 예외와 문서 소속 규칙</td></tr><tr><td>자식 변경</td><td><code>appendChild()</code>, <code>insertBefore()</code>, <code>removeChild()</code></td><td>기존 부모에서 이동, <code>insertBefore(node, null)</code>의 끝 삽입, 삽입한/제거한 노드 반환, 순환·잘못된 참조의 동기 <code>DOMException</code>, 실패 시 기존 트리 보존</td></tr><tr><td>트리 읽기·쓰기</td><td><code>nodeType</code>, <code>nodeName</code>, <code>parentNode</code>, <code>firstChild</code>, <code>nextSibling</code>, <code>textContent</code>, <code>Text.data</code>/<code>nodeValue</code></td><td><code>textContent</code>의 getter·setter와 자식 교체 의미, <code>Text.data</code>의 getter·setter, 노드 종류별 <code>nodeValue</code>, 요소와 텍스트가 섞인 순서, 노드 이름·종류 상수, 분리된 노드의 수명, 변경 직후 읽기</td></tr><tr><td>기본 속성</td><td><code>getAttribute()</code>, <code>setAttribute()</code>, <code>removeAttribute()</code>, <code>id</code>, <code>className</code></td><td>JavaScript 문자열 인수의 변환, 속성 이름의 대소문자, <code>id</code>·<code>className</code>과 <code>id</code>·<code>class</code> 속성의 반영 관계, 지원 CSS 선택자에 미치는 효과</td></tr></tbody></table></div>
+<p>다음 항목은 첫 단계에 자동 포함하지 않는다. 각 항목은 별도 동작 계약과 적합성 시나리오가 필요하다.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>항목</th><th>현재 제안 경계</th></tr></thead><tbody><tr><td><code>childNodes</code>, <code>children</code>, <code>NodeList</code>, <code>HTMLCollection</code></td><td>라이브/정적 컬렉션, 인덱스와 반복 동작을 정하기 전까지 미정</td></tr><tr><td><code>classList</code></td><td>토큰 규칙, <code>toggle()</code> 인자·반환값을 정한 뒤 추가 검토</td></tr><tr><td><code>getElementById()</code>, <code>querySelector(All)</code></td><td>선택자 문법·검색 범위·결과 컬렉션을 별도로 정하기 전까지 미정</td></tr><tr><td><code>addEventListener()</code> 등 DOM 이벤트</td><td>전파·캡처·취소·기본 동작·포인터와 접근성 입력을 <a href="/spinon/0002-ui-tree-events.html" class="rp-link">이벤트 계약</a>에서 정하기 전까지 미정</td></tr><tr><td><code>getBoundingClientRect()</code>, <code>getComputedStyle()</code></td><td>레이아웃 동기화, 캐시된 값, 읽기 비용과 값의 유효 시점을 정하기 전까지 미정</td></tr><tr><td><code>innerHTML</code>, <code>outerHTML</code>, <code>DOMParser</code></td><td>HTML 문자열 파싱과 보안 계약이 없으므로 첫 단계에서 제외 제안</td></tr><tr><td><code>document.body</code>, <code>document.documentElement</code>, 전체 <code>window</code></td><td>브라우저 페이지 모델을 제공하지 않으므로 첫 단계에서 제외 제안</td></tr><tr><td>Shadow DOM, Custom Elements, MutationObserver, Range/Selection, iframe</td><td>별도 제품 범위가 정해지기 전까지 약속하지 않음</td></tr></tbody></table></div>
+<p><code>fetch</code>, 타이머, <code>URL</code>, 스토리지, 네트워크, 서비스 워커, Canvas/WebGL/WebGPU는 DOM 트리 API가 아니다. 각 기능은 <a href="/spinon/0003-web-surface.html" class="rp-link">웹 표면 명세</a>의 별도 호스트 API 계약으로 판정한다.</p>
+<p>일반 속성 메서드가 있다고 해서 <code>style</code> 속성이나 CSSOM이 자동 지원되는 것은 아니다. <code>style</code> 속성의 설정·조회와 렌더링 반영은 CSS 선언 파싱·무효화 규칙을 정하기 전까지 지원으로 표시하지 않는다. <code>Element.style</code>/<code>CSSStyleDeclaration</code>은 별도 계약이 필요하다. 지원하는 <code>id</code>·<code>class</code> 속성을 바꾸면 그 값에 의존하는 지원 선택자와 화면을 언제 다시 계산하는지도 명시해야 한다.</p>
+<h2 class="rp-toc-include" id="rust-트리와-dom-모델의-차이"><a href="#rust-트리와-dom-모델의-차이" class="rp-header-anchor rp-link" aria-hidden="true">#</a>Rust 트리와 DOM 모델의 차이</h2>
+<p>현재 S01의 <code>spinon-core</code>는 안정적 ID와 원자 변경 묶음을 검증하는 최소 실험이다. 현재 <code>Node</code>는 노드마다 태그와 선택적 텍스트를 보관하고 자식 목록에는 다른 노드 ID를 둔다. 따라서 요소의 자식 위치마다 텍스트 노드가 끼어드는 DOM의 순서, <code>Element</code>와 <code>Text</code>의 서로 다른 노드 종류, 노드 객체의 연결·분리 수명을 표현하지 못한다. 또한 S01의 전체 변경 묶음 커밋은 개별 DOM 메서드의 동기 성공·오류 결과를 정의하지 않는다.</p>
+<p>DOM 호환 계층에 연결하기 전 Rust 모델은 최소한 문서·요소·텍스트 노드 종류와 순서가 보존되는 혼합 자식 목록을 표현해야 한다. 노드 ID의 문서 범위, 분리 노드의 존속, wrapper 객체 정체성, 속성 저장, 동기 읽기·쓰기, 오류 매핑도 정의해야 한다. S01의 내부 배치 API가 DOM 의미를 이미 구현했다고 간주하지 않는다.</p>
+<h2 class="rp-toc-include" id="구현-전-결정과-검증-관문"><a href="#구현-전-결정과-검증-관문" class="rp-header-anchor rp-link" aria-hidden="true">#</a>구현 전 결정과 검증 관문</h2>
+<ol>
+<li><strong>루트 연결:</strong> 앱별 <code>document</code>가 GPU 표면의 어느 루트를 가리키는지, 직접 DOM 작성 코드가 첫 표시 컨테이너를 어떻게 얻는지 정한다. 전체 브라우저 페이지 모델을 몰래 만들지 않는다.</li>
+<li><strong>소유권 충돌:</strong> React·Vue·Svelte가 관리하는 하위 트리에 앱 코드가 <code>appendChild()</code> 등으로 직접 쓰기할 수 있는지 정한다. 첫 제안은 서로 다른 렌더러가 같은 하위 트리를 동시에 쓰지 못하게 하는 것이다. 이를 택하면 제약과 진단을 API 문서에 공개한다.</li>
+<li><strong>동기 의미와 스레드:</strong> 성공한 트리 변경은 같은 JavaScript 실행 흐름의 후속 조회에서 보여야 한다. GPU 장면 반영은 프레임 경계에서 비동기로 처리할 수 있으며, 레이아웃·렌더러는 부분 변경이 아닌 일관된 커밋 revision만 읽어야 한다. JS·Rust 트리의 소유 스레드, 변경 직렬화와 렌더러로의 revision 전달을 정하고 OS 입력 스레드를 불필요하게 기다리게 하지 않는다. 레이아웃 측정 API는 별도 동기화 계약 없이는 노출하지 않는다.</li>
+<li><strong>객체 수명:</strong> 삭제되거나 분리된 노드의 JavaScript wrapper가 언제까지 유효한지, 같은 Rust 노드 ID가 wrapper 정체성에 어떻게 대응하는지, GC·앱 재시작·OTA 뒤 ID가 재사용되는지 정한다.</li>
+<li><strong>값 변환·컬렉션·오류:</strong> JavaScript 문자열의 DOMString 변환, NodeList 계열의 라이브 여부, 잘못된 계층 변경의 예외 종류·이름, 잘못된 태그·속성 진단을 명세한다.</li>
+<li><strong>CSS 연동:</strong> <code>id</code>·<code>class</code> 변경의 선택자 재평가와 화면 무효화, <code>style</code> 속성의 지원 범위, CSSOM 제외 여부를 명세한다.</li>
+<li><strong>프레임워크 경로:</strong> 프레임워크 host adapter와 직접 DOM 호출의 변경이 한 문서 트리로 수렴하는 적합성 사례를 만든다.</li>
+</ol>
+<p>이 관문이 닫히기 전에는 DOM 지원 API를 <code>지원</code>으로 등록하지 않는다. 첫 목표 범위와 구현 상태는 <a href="/spinon/0001-conformance.html" class="rp-link">범위·적합성 명세</a> 및 <a href="/spinon/STATUS.html" class="rp-link">공식 상태 대장</a>에서 따로 관리한다.</p>
+<h2 class="rp-toc-include" id="최소-적합성-시나리오-후보"><a href="#최소-적합성-시나리오-후보" class="rp-header-anchor rp-link" aria-hidden="true">#</a>최소 적합성 시나리오 후보</h2>
+<ul>
+<li><code>&lt;div&gt;</code> 아래에 텍스트와 다른 요소를 번갈아 넣고, 웹과 모바일에서 자식 순서와 <code>textContent</code>를 비교한다.</li>
+<li>부모가 있는 노드를 다른 부모로 옮기고, 같은 노드를 자기 자신 또는 자손 아래에 넣으려는 잘못된 변경을 비교한다.</li>
+<li><code>appendChild()</code> 직후 <code>parentNode</code>, <code>firstChild</code>, <code>nextSibling</code>, <code>textContent</code>를 읽어 논리 트리가 동기화돼 있는지 확인한다.</li>
+<li><code>textContent</code>와 <code>Text.data</code>를 읽고 쓸 때 문자열 변환, 하위 텍스트 순서와 화면 갱신을 확인한다.</li>
+<li>지원하는 <code>id</code>·<code>class</code> 값을 바꿨을 때 선택자 결과와 다음 GPU 프레임의 스타일이 갱신되는지 확인한다. <code>style</code> 속성은 별도 지원 판정이 있기 전까지 이 시나리오에 포함하지 않는다.</li>
+<li>잘못된 <code>removeChild()</code>에 다른 부모의 자식을 전달했을 때 웹과 모바일의 오류 종류·이전 트리 보존을 비교한다. 여러 앱 문서나 크로스 문서 노드를 지원한다면 채택 동작도 별도 사례로 추가한다.</li>
+<li>프레임워크 어댑터로 만든 노드와 DOM façade로 만든 노드가 같은 트리에서 충돌 없이 조회·표시되는지 확인한다.</li>
+</ul>
+<p>이 시나리오의 예상 결과와 웹·Android·iOS 원본 실행 근거가 생긴 뒤에만 버전별 지원 표에 적합성 판정을 추가한다.</p>
+<p>동작 기준은 <a href="https://dom.spec.whatwg.org/" target="_blank" rel="noopener noreferrer" class="rp-link">WHATWG DOM Standard</a>에서 선택한 API와 노드 트리 동작으로 삼는다. 이 참조는 표준 전체 구현을 목표로 한다는 뜻이 아니다.</p><!--/$--></div><footer class="rp-doc-footer"><div class="rp-doc-footer__edit"></div><div class="rp-doc-footer__divider"></div><div class="rp-prev-next-page"><a href="/spinon/0006-routing.html" class="rp-prev-next-page__item rp-prev-next-page__prev rp-link"><span class="rp-prev-next-page__item__desc">이전 페이지</span><span class="rp-prev-next-page__item__title"><svg width="1em" height="1em" viewBox="0 0 32 32" class="rp-prev-next-page__icon rp-prev-next-page__rotate_180"><path fill="currentColor" d="M22 16 12 26l-1.4-1.4 8.6-8.6-8.6-8.6L12 6z"></path></svg><span>0006 · 라우팅과 화면 이동</span></span></a><div class="rp-prev-next-page__placeholder"></div></div></footer></main></div><aside class="rp-doc-layout__outline rp-scrollbar"><div class="rp-outline"><div class="rp-outline__title">이 페이지 목차<svg width="14" height="14" class="rp-progress-circle"><circle cx="7" cy="7" r="6" stroke-linecap="round" fill="none" stroke="var(--rp-c-divider-light)" stroke-width="2"></circle><circle cx="7" cy="7" r="6" stroke-linecap="round" fill="none" stroke="var(--rp-c-brand)" stroke-width="2" stroke-dasharray="37.69911184307752" stroke-dashoffset="37.69911184307752" transform="rotate(-90 7 7)" style="transition:stroke-dashoffset 0.3s"></circle></svg></div><nav class="rp-outline__toc rp-scrollbar"><a href="#목표와-경계" class="rp-toc-item rp-link" title="목표와 경계" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc">목표와 경계</span></a><a href="#제안-구조" class="rp-toc-item rp-link" title="제안 구조" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc">제안 구조</span></a><a href="#첫-단계-api-후보" class="rp-toc-item rp-link" title="첫 단계 API 후보" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc">첫 단계 API 후보</span></a><a href="#rust-트리와-dom-모델의-차이" class="rp-toc-item rp-link" title="Rust 트리와 DOM 모델의 차이" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc">Rust 트리와 DOM 모델의 차이</span></a><a href="#구현-전-결정과-검증-관문" class="rp-toc-item rp-link" title="구현 전 결정과 검증 관문" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc">구현 전 결정과 검증 관문</span></a><a href="#최소-적합성-시나리오-후보" class="rp-toc-item rp-link" title="최소 적합성 시나리오 후보" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc">최소 적합성 시나리오 후보</span></a></nav><div class="rp-outline__divider"></div><div class="rp-outline__bottom"></div></div></aside></div></div>
+    <div id="__rspress_modal_container"></div>
+  </body>
+</html>
