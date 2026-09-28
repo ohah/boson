@@ -10,7 +10,7 @@ export default defineConfig({
     ? path.resolve(repositoryRoot, configuredOutDir)
     : path.join(import.meta.dirname, 'build/site'),
   base: process.env.SPINON_DOC_BASE ?? '/spinon/',
-  themeDir: path.join(repositoryRoot, 'theme'),
+  themeDir: path.join(import.meta.dirname, 'theme'),
   lang: 'ko',
   title: '스피논 문서',
   description: '스피논의 구현 상태와 버전별 API 명세',
