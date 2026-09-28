@@ -17,8 +17,9 @@ title: 지원 완료 API
 | 분류 | 앞으로 게시할 명세 | 현재 상태 |
 | --- | --- | --- |
 | HTML 요소·이벤트 | 태그, 속성, 기본 동작, 입력·접근성 의미 | 제안 |
+| DOM 호환 API | `Document`·`Node`·`Element`의 제한된 호출 표면과 웹 차이 | 제안 · [명세](../0007-dom-compatibility.md) |
 | CSS | 선택자, 속성, 값, 단위, 웹과 다른 점 | 제안 |
-| JavaScript 호스트 API | 타이머, 네트워크, 저장소 등 V8 밖에서 제공하는 기능 | 제안 |
+| JavaScript 호스트 API | `fetch`·`Request`·`Response`, 타이머, 저장소 등 V8 밖에서 제공하는 기능 | 제안 · [웹 표면 명세](../0003-web-surface.md) |
 | 프레임워크 어댑터 | React·Vue·Svelte 연결과 지원 버전 | 제안 |
 | CLI·개발 도구 | 명령, 인자, 출력, 종료 코드, Inspector·MCP | 제안 |
 | 라우팅·OTA | 화면 이동, 번들 호환성, 릴리스 매니페스트와 업데이트 동작 | 제안 |

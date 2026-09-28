@@ -8,5 +8,6 @@
   "0003-web-surface",
   "0004-runtime-build",
   "0005-developer-tools",
-  "0006-routing"
+  "0006-routing",
+  "0007-dom-compatibility"
 ]

@@ -18,6 +18,7 @@
 | 0004 | [실행·빌드·배포](0004-runtime-build.md) | JS 런타임, 웹/모바일 산출물, OTA 경계 |
 | 0005 | [개발 도구](0005-developer-tools.md) | CLI, HMR, Inspector, MCP의 역할 |
 | 0006 | [라우팅과 화면 이동](0006-routing.md) | 웹 URL·모바일 화면 스택·딥링크·뒤로 가기 |
+| 0007 | [모바일 DOM 호환 계층](0007-dom-compatibility.md) | 모바일 DOM façade, Rust 문서 트리, 첫 API 후보와 미정 계약 |
 
 ## 읽는 법
 
