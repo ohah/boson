@@ -23,16 +23,16 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 ## 1. 위험 검증
 - [ ] **R01 웹 호환 범위 명세** — 요소·CSS·이벤트·제한된 DOM API의 첫 수직 구현 후보를 [0007 DOM 호환 제안](0007-dom-compatibility.md)에 정리했다. 첫 목표 범위와 현재 적합성 판정은 아직 확정되지 않았다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 제안 문서만 있음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R02 iOS 실기기 V8 검증** — JIT 없는 V8 앱을 실기기에 설치해 JS 실행·터치·메모리를 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음 · PoC: 시뮬레이터 PoC
-- [ ] **R03 호스트 계약 초안** — 노드 생성·수정·이동·삭제의 Rust 내부 초안은 [S01 인터페이스](internal/0002-rust-tree-core.md)에 있다. DOM façade와 프레임워크 어댑터가 공유할 문서 트리 의미, 동기 조회·변경, 이벤트 및 소유권 규칙은 미완료다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · [0007-dom-compatibility.md](0007-dom-compatibility.md) · API 명세: 부분 제안 · 근거: 없음 · PoC: 생성·삭제 PoC
+- [ ] **R03 호스트 계약 초안** — 노드 생성·수정·이동·삭제의 Rust 내부 초안은 [S01 인터페이스](internal/0002-rust-tree-core.md)에 있다. DOM façade와 프레임워크 어댑터가 공유할 문서 루트, 혼합 요소·텍스트 순서, JavaScript 값 변환, 동기 조회·변경, CSS 무효화, 이벤트 및 소유권 규칙은 미완료다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · [0007-dom-compatibility.md](0007-dom-compatibility.md) · API 명세: 부분 제안 · 근거: 없음 · PoC: 생성·삭제 PoC
 - [ ] **R04 세 비교 기준 앱** — React Native Fabric·ReactLynx·Android Views/UIKit의 같은 카운터 화면을 만든다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R05 계측 계약과 원본 수집** — 실기기 전경·입력 성공·첫 유효 화면·프레임·메모리의 수집과 제외 조건을 고정한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
-- [ ] **R06 스레드·소유권 위험 표** — Rust 트리의 동기·원자 커밋만 [S01 내부 명세](internal/0002-rust-tree-core.md)에 고정했다. V8·UI 경계의 객체 수명, thread affinity, 취소, 교차 경계 오류 복원과 실기기 경합은 미완료다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 부분 초안 · 산출물: 미완료 · 근거: 없음
+- [ ] **R06 스레드·소유권 위험 표** — Rust 트리의 동기·원자 커밋만 [S01 내부 명세](internal/0002-rust-tree-core.md)에 고정했다. V8·UI 경계의 객체 수명, thread affinity, 부분 변경을 배제하는 revision 전달, 비동기 Fetch 완료의 Isolate 전달, 취소, 교차 경계 오류 복원과 실기기 경합은 미완료다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 부분 초안 · 산출물: 미완료 · 근거: 없음
 - [ ] **R07 Vue·Svelte 호스트 가능성** — React 전용 가정이 공통 노드 계약에 새지 않는지 작은 어댑터 실험으로 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R08 GPU 출력 위험 실험** — Android·iOS에서 최소 GPU 화면과 텍스트·터치·IME·접근성 연결 가능성을 실험하고 제약을 기록한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R09 iOS 배포·OTA 정책 범위** — V8·CSS 해석·원격 JS 업데이트에 적용될 지침과 기능 변경 한계를 공식 문서로 검토한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R10 Taffy 적합성 실험** — 노드 ID·텍스트 측정·좌표 반올림·RTL·갱신 비용을 작은 화면에서 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R11 CSS 빌드 경로 실험** — Lightning CSS의 AST를 지원 문법만 담은 모바일 스타일 데이터로 변환할 수 있는지 확인한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
-- [ ] **R12 JS 라이브러리 호환 표** — V8의 ECMAScript 기능과 별도 호스트 API를 구분하고, Fetch를 선택하면 `NetworkHost`와 전송 계층의 계약·오류·취소·출처 경계를 정한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
+- [ ] **R12 JS 라이브러리 호환 표** — V8의 ECMAScript 기능과 별도 호스트 API를 구분한다. Fetch를 선택하면 `NetworkHost`·전송 계층의 요청·응답·오류·취소·출처 경계와 Promise 완료를 Isolate 소유 실행 경로에 전달하는 규칙을 정한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R13 플랫폼 생명주기·GPU 복구 실험** — 화면 회전·백그라운드 복귀·표면 재생성·GPU 자원 손실에서 최소 화면과 입력을 복구할 수 있는지 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R14 Tailwind 생성 CSS 실험** — 작은 유틸리티 묶음을 빌드해 생성 CSS의 선택자·변수·계층·Preflight를 모바일 변환기로 판정한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R15 청크 OTA 호환 모델 초안** — 바이너리 런타임 ID, 기능별 진입점과 청크 의존성, JS·CSS·에셋 해시, 서명·롤백·기능 변경 경계를 OTA 구현 전에 정의한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
