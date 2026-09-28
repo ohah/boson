@@ -4,10 +4,25 @@ import UIKit
 
 final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
     private let logger = Logger(subsystem: "dev.spinon.bootstrap", category: "r08")
-    private let canvas = R08MetalCanvasView(frame: .zero, device: MTLCreateSystemDefaultDevice())
+    private let canvas: UIView
+    private let useWgpu: Bool
     private let titleLabel = UILabel()
     private let statusLabel = UILabel()
     private let inputField = UITextField()
+
+    init(useWgpu: Bool = false) {
+        self.useWgpu = useWgpu
+        self.canvas = useWgpu
+            ? R08WgpuCanvasView(frame: .zero)
+            : R08MetalCanvasView(frame: .zero, device: MTLCreateSystemDefaultDevice())
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        self.useWgpu = false
+        self.canvas = R08MetalCanvasView(frame: .zero, device: MTLCreateSystemDefaultDevice())
+        super.init(coder: coder)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -17,7 +32,9 @@ final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
         view.addSubview(canvas)
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "SPINON · R08 GPU 표면\niOS · Metal"
+        titleLabel.text = useWgpu
+            ? "SPINON · R08 GPU 표면\niOS · wgpu / Metal"
+            : "SPINON · R08 GPU 표면\niOS · Metal"
         titleLabel.textColor = UIColor(red: 0.92, green: 0.95, blue: 0.99, alpha: 1)
         titleLabel.font = .systemFont(ofSize: 22, weight: .bold)
         titleLabel.numberOfLines = 0
@@ -47,9 +64,11 @@ final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
         inputField.addTarget(self, action: #selector(textDidChange(_:)), for: .editingChanged)
         view.addSubview(inputField)
 
-        canvas.onActivate = { [weak self] count in
+        let onActivate: (Int) -> Void = { [weak self] count in
             self?.statusLabel.text = "GPU 도형 활성화 \(count)회 · 텍스트 입력은 네이티브 오버레이"
         }
+        (canvas as? R08MetalCanvasView)?.onActivate = onActivate
+        (canvas as? R08WgpuCanvasView)?.onActivate = onActivate
 
         NSLayoutConstraint.activate([
             canvas.topAnchor.constraint(equalTo: view.topAnchor),
@@ -73,7 +92,8 @@ final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        canvas.draw()
+        (canvas as? R08MetalCanvasView)?.draw()
+        (canvas as? R08WgpuCanvasView)?.draw()
     }
 
     @objc private func textDidChange(_ textField: UITextField) {
@@ -87,6 +107,123 @@ final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
         logger.notice("SPINON_R08_IME_ACTION=done")
         textField.resignFirstResponder()
         return true
+    }
+}
+
+private final class R08WgpuCanvasView: UIView {
+    private let logger = Logger(subsystem: "dev.spinon.bootstrap", category: "r08")
+    private var renderer: UnsafeMutableRawPointer?
+    private var activationCount: UInt32 = 0
+    private var firstFrameLogged = false
+    private var configuredSize = CGSize.zero
+    var onActivate: ((Int) -> Void)?
+
+    override class var layerClass: AnyClass { CAMetalLayer.self }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        configure()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        configure()
+    }
+
+    private func configure() {
+        isOpaque = true
+        backgroundColor = UIColor(red: 0.055, green: 0.075, blue: 0.12, alpha: 1)
+        isAccessibilityElement = true
+        accessibilityLabel = "R08 GPU 도형"
+        accessibilityValue = "활성화 0회"
+        accessibilityHint = "중앙 도형을 두 번 탭하면 색이 바뀝니다."
+        accessibilityTraits = .button
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        setNeedsLayout()
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        guard window != nil, bounds.width > 0, bounds.height > 0 else { return }
+        let scale = window?.screen.scale ?? UIScreen.main.scale
+        let width = UInt32(max(1, Int((bounds.width * scale).rounded())))
+        let height = UInt32(max(1, Int((bounds.height * scale).rounded())))
+        layer.contentsScale = scale
+        (layer as? CAMetalLayer)?.drawableSize = CGSize(width: CGFloat(width), height: CGFloat(height))
+
+        if renderer == nil {
+            renderer = SpinonRunner.createR08Wgpu(
+                withUIKitView: Unmanaged.passUnretained(self).toOpaque(),
+                width: width,
+                height: height)
+            guard renderer != nil else { return }
+            logger.notice("SPINON_R08_WGPU_SURFACE=size \(width)x\(height)")
+        } else if configuredSize != CGSize(width: CGFloat(width), height: CGFloat(height)) {
+            let result = SpinonRunner.resizeR08Wgpu(renderer, width: width, height: height)
+            guard result == 0 else {
+                logger.error("SPINON_R08_WGPU_RESIZE_ERROR code=\(result)")
+                return
+            }
+        }
+        configuredSize = CGSize(width: CGFloat(width), height: CGFloat(height))
+        draw()
+    }
+
+    func draw() {
+        guard let renderer else { return }
+        let result = SpinonRunner.drawR08Wgpu(renderer, activationCount: activationCount)
+        if result == 0, !firstFrameLogged {
+            firstFrameLogged = true
+            logger.notice("SPINON_R08_WGPU_FRAME=first_draw_submitted")
+        }
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let point = touches.first?.location(in: self),
+              point.x >= bounds.width * 0.11,
+              point.x <= bounds.width * 0.89,
+              point.y >= bounds.height * 0.40,
+              point.y <= bounds.height * 0.60 else {
+            super.touchesEnded(touches, with: event)
+            return
+        }
+        activate()
+    }
+
+    override func accessibilityActivate() -> Bool {
+        activate()
+        return true
+    }
+
+    override var accessibilityFrame: CGRect {
+        get {
+            guard let window else { return .zero }
+            let visibleBounds = CGRect(
+                x: bounds.width * 0.11,
+                y: bounds.height * 0.40,
+                width: bounds.width * 0.78,
+                height: bounds.height * 0.20)
+            let windowBounds = convert(visibleBounds, to: window)
+            return window.screen.coordinateSpace.convert(windowBounds, from: window)
+        }
+        set {}
+    }
+
+    private func activate() {
+        activationCount += 1
+        accessibilityValue = "활성화 \(activationCount)회"
+        onActivate?(Int(activationCount))
+        logger.notice("SPINON_R08_WGPU_TOUCH count=\(self.activationCount)")
+        draw()
+    }
+
+    deinit {
+        if let renderer {
+            SpinonRunner.destroyR08Wgpu(renderer)
+        }
     }
 }
 

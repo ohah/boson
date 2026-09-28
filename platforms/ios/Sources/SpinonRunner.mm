@@ -1,6 +1,7 @@
 #import "SpinonRunner.h"
 
 #include "spinon_ffi.h"
+#include "spinon_wgpu_r08.h"
 
 #import <os/log.h>
 
@@ -31,6 +32,38 @@
                  result, message);
   }
   return message ?: @"empty R10 report";
+}
+
++ (void *)createR08WgpuWithUIKitView:(void *)view width:(uint32_t)width height:(uint32_t)height {
+  char output[512] = {};
+  void *renderer = spinon_wgpu_create_uikit(
+      view, width, height, SPINON_WGPU_R08_METAL, output, sizeof(output));
+  NSString *message = [NSString stringWithUTF8String:output];
+  if (renderer == nullptr) {
+    os_log_error(OS_LOG_DEFAULT, "SPINON_R08_WGPU_ERROR=%{public}@", message);
+    return nullptr;
+  }
+  os_log(OS_LOG_DEFAULT, "SPINON_R08_WGPU=ready %{public}@", message);
+  return renderer;
+}
+
++ (int32_t)drawR08Wgpu:(void *)renderer activationCount:(uint32_t)activationCount {
+  char output[512] = {};
+  const int32_t result = spinon_wgpu_draw(renderer, activationCount, output, sizeof(output));
+  if (result != 0) {
+    NSString *message = [NSString stringWithUTF8String:output];
+    os_log_error(OS_LOG_DEFAULT, "SPINON_R08_WGPU_DRAW_ERROR code=%{public}d detail=%{public}@",
+                 result, message);
+  }
+  return result;
+}
+
++ (int32_t)resizeR08Wgpu:(void *)renderer width:(uint32_t)width height:(uint32_t)height {
+  return spinon_wgpu_resize(renderer, width, height);
+}
+
++ (void)destroyR08Wgpu:(void *)renderer {
+  spinon_wgpu_destroy(renderer);
 }
 
 @end

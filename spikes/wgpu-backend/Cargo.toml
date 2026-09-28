@@ -1,0 +1,16 @@
+[package]
+name = "spinon-wgpu-r08-spike"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[workspace]
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+bytemuck = "1.23"
+pollster = "0.4"
+raw-window-handle = "0.6.2"
+wgpu = { version = "30.0.1", default-features = false, features = ["std", "parking_lot", "metal", "vulkan", "gles", "wgsl"] }

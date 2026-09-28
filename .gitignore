@@ -10,6 +10,7 @@ node_modules/
 /.env
 /spikes/style-layout/node_modules/
 /spikes/style-layout/target/
+/spikes/wgpu-backend/target/
 /platforms/android/**/build/
 /platforms/ios/DerivedData/
 /platforms/ios/.build/

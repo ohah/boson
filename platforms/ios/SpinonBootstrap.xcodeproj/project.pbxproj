@@ -125,10 +125,10 @@
 				ARCHS = arm64;
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = NO;
-				HEADER_SEARCH_PATHS = ("$(SRCROOT)/../../crates/spinon-ffi/include",);
+				HEADER_SEARCH_PATHS = ("$(SRCROOT)/../../crates/spinon-ffi/include", "$(SRCROOT)/../../spikes/wgpu-backend/include",);
 				INFOPLIST_FILE = Sources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks",);
-				OTHER_LDFLAGS = ("$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/libspinon_ffi.a", "$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/spinon_v8.o", "$(SRCROOT)/../../build/v8-source/v8/out/$(SPINON_V8_OUT)/obj/libv8_monolith.a", "-framework", UIKit, "-framework", Foundation, "-framework", CoreFoundation, "-framework", BrowserEngineCore, "-framework", Metal, "-framework", MetalKit, "-Wl,-dead_strip",);
+				OTHER_LDFLAGS = ("$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/libspinon_ffi.a", "$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/libspinon_wgpu_r08_spike.a", "$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/spinon_v8.o", "$(SRCROOT)/../../build/v8-source/v8/out/$(SPINON_V8_OUT)/obj/libv8_monolith.a", "-framework", UIKit, "-framework", Foundation, "-framework", CoreFoundation, "-framework", BrowserEngineCore, "-framework", Metal, "-framework", MetalKit, "-framework", QuartzCore, "-Wl,-dead_strip",);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.spinon.bootstrap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				"SPINON_V8_OUT[sdk=iphonesimulator*]" = boson-ios-sim;
@@ -145,10 +145,10 @@
 				ARCHS = arm64;
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = NO;
-				HEADER_SEARCH_PATHS = ("$(SRCROOT)/../../crates/spinon-ffi/include",);
+				HEADER_SEARCH_PATHS = ("$(SRCROOT)/../../crates/spinon-ffi/include", "$(SRCROOT)/../../spikes/wgpu-backend/include",);
 				INFOPLIST_FILE = Sources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks",);
-				OTHER_LDFLAGS = ("$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/libspinon_ffi.a", "$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/spinon_v8.o", "$(SRCROOT)/../../build/v8-source/v8/out/$(SPINON_V8_OUT)/obj/libv8_monolith.a", "-framework", UIKit, "-framework", Foundation, "-framework", CoreFoundation, "-framework", BrowserEngineCore, "-framework", Metal, "-framework", MetalKit, "-Wl,-dead_strip",);
+				OTHER_LDFLAGS = ("$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/libspinon_ffi.a", "$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/libspinon_wgpu_r08_spike.a", "$(SRCROOT)/../../build/spinon/$(PLATFORM_NAME)/spinon_v8.o", "$(SRCROOT)/../../build/v8-source/v8/out/$(SPINON_V8_OUT)/obj/libv8_monolith.a", "-framework", UIKit, "-framework", Foundation, "-framework", CoreFoundation, "-framework", BrowserEngineCore, "-framework", Metal, "-framework", MetalKit, "-framework", QuartzCore, "-Wl,-dead_strip",);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.spinon.bootstrap;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				"SPINON_V8_OUT[sdk=iphonesimulator*]" = boson-ios-sim;
