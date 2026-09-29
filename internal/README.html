@@ -5,12 +5,12 @@
 <title>내부 인터페이스 명세 - 스피논 문서</title>
 <script>{;const saved = localStorage.getItem('rspress-theme-appearance');const preferDark = window.matchMedia('(prefers-color-scheme: dark)').matches;const defaultTheme = 'auto';const theme = saved === 'light' || saved === 'dark' || saved === 'auto' ? saved : defaultTheme;const isDark = theme === 'auto' ? preferDark : theme === 'dark';document.documentElement.classList.toggle('dark', isDark);document.documentElement.classList.toggle('rp-dark', isDark);document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';}</script>
 <link href="/spinon/static/css/styles.8d918fd78e.css" rel="stylesheet">
-<link rel="preload" href="/spinon/static/js/async/route-a1017bdf23ca.8746684760.js" as="script">
+<link rel="preload" href="/spinon/static/js/async/route-a1017bdf23ca.08835db9ad.js" as="script">
 <script defer src="/spinon/static/js/styles.d2a6dfa6a0.js"></script>
 <script defer src="/spinon/static/js/lib-react.9cdf8f49ce.js"></script>
 <script defer src="/spinon/static/js/lib-router.1e14e568cb.js"></script>
 <script defer src="/spinon/static/js/a.705d619e1f.js"></script>
-<script defer src="/spinon/static/js/index.fbbe6ca885.js"></script>
+<script defer src="/spinon/static/js/index.05699fd2fe.js"></script>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="generator" content="Rspress v2.0.22">
 <link rel="icon" href="/spinon/icon.svg" type="image/svg+xml">
@@ -42,10 +42,22 @@
 
 
 
-<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>문서</th><th>범위</th><th>상태</th></tr></thead><tbody><tr><td><a href="/spinon/internal/0001-v8-bootstrap.html" class="rp-link">0001 · V8 부팅 실험</a></td><td>Bun 번들, Rust FFI, V8 C++ 어댑터와 Android/iOS 빌드 smoke</td><td>실험 전용</td></tr><tr><td><a href="/spinon/internal/0002-rust-tree-core.html" class="rp-link">0002 · Rust 트리 코어</a></td><td>노드 ID, 트리 구조, 원자적 변경 묶음과 revision</td><td>실험 전용</td></tr></tbody></table></div>
+
+
+
+
+
+
+
+
+
+
+<div class="rp-table-scroll-container rp-scrollbar"><table><thead><tr><th>문서</th><th>범위</th><th>상태</th></tr></thead><tbody><tr><td><a href="/spinon/internal/0001-v8-bootstrap.html" class="rp-link">0001 · V8 부팅 실험</a></td><td>Bun 번들, Rust FFI, V8 C++ 어댑터와 Android/iOS 빌드 smoke</td><td>실험 전용</td></tr><tr><td><a href="/spinon/internal/0002-rust-tree-core.html" class="rp-link">0002 · Rust 트리 코어</a></td><td>노드 ID, 트리 구조, 원자적 변경 묶음과 revision</td><td>실험 전용</td></tr><tr><td><a href="/spinon/internal/0003-shared-host-contract.html" class="rp-link">0003 · 공통 문서·호스트 계약</a></td><td>DOM 호환 계층과 프레임워크 어댑터의 문서 모델, 소유권, 동기 변경과 이벤트 경계</td><td>제안 초안</td></tr><tr><td><a href="/spinon/internal/r13-platform-gpu-recovery.html" class="rp-link">R13 · 플랫폼 생명주기·GPU 복구</a></td><td>wgpu 실험 ABI, 플랫폼 표면 수명과 복구 경계</td><td>실험 전용</td></tr></tbody></table></div>
 <h2 class="rp-toc-include" id="검증-기록"><a href="#검증-기록" class="rp-header-anchor rp-link" aria-hidden="true">#</a>검증 기록</h2>
 <ul>
 <li><a href="/spinon/internal/evidence/taffy-r10-2026-09-28.html" class="rp-link">R10 · Taffy 적합성 실험</a> — 시뮬레이터·에뮬레이터 로그, 화면 캡처, fixture 범위와 해석 한계.</li>
+<li><a href="/spinon/internal/evidence/r03-host-contract-review-2026-09-29.html" class="rp-link">R03 · 공통 호스트 계약 검토</a> — 제안 계약을 기존 DOM·Rust 트리·렌더러 계획과 대조한 문서 검토 기록.</li>
+<li><a href="/spinon/internal/evidence/r13-platform-gpu-recovery-2026-09-29.html" class="rp-link">R13 · 플랫폼 생명주기·GPU 복구</a> — 회전·백그라운드·오류 주입·입력 복구의 로그와 화면 캡처.</li>
 </ul><!--/$--></div><footer class="rp-doc-footer"><div class="rp-doc-footer__edit"></div><div class="rp-doc-footer__divider"></div><div class="rp-prev-next-page"><div class="rp-prev-next-page__placeholder"></div><a href="/spinon/index.html" class="rp-prev-next-page__item rp-prev-next-page__next rp-link"><span class="rp-prev-next-page__item__desc">다음 페이지</span><span class="rp-prev-next-page__item__title"><span>스피논 API 문서</span><svg width="1em" height="1em" viewBox="0 0 32 32" class="rp-prev-next-page__icon"><path fill="currentColor" d="M22 16 12 26l-1.4-1.4 8.6-8.6-8.6-8.6L12 6z"></path></svg></span></a></div></footer></main></div><aside class="rp-doc-layout__outline rp-scrollbar"><div class="rp-outline"><div class="rp-outline__title">이 페이지 목차<svg width="14" height="14" class="rp-progress-circle"><circle cx="7" cy="7" r="6" stroke-linecap="round" fill="none" stroke="var(--rp-c-divider-light)" stroke-width="2"></circle><circle cx="7" cy="7" r="6" stroke-linecap="round" fill="none" stroke="var(--rp-c-brand)" stroke-width="2" stroke-dasharray="37.69911184307752" stroke-dashoffset="37.69911184307752" transform="rotate(-90 7 7)" style="transition:stroke-dashoffset 0.3s"></circle></svg></div><nav class="rp-outline__toc rp-scrollbar"><a href="#검증-기록" class="rp-toc-item rp-link" title="검증 기록" style="padding-left:0" data-depth="0"><span class="rp-toc-item__text rp-doc">검증 기록</span></a></nav><div class="rp-outline__divider"></div><div class="rp-outline__bottom"></div></div></aside></div></div>
     <div id="__rspress_modal_container"></div>
   </body>
