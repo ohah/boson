@@ -153,4 +153,4 @@ frame_id, sequence, event_kind, coordinates
 - 표준 참고: [Web IDL DOMString](https://webidl.spec.whatwg.org/#idl-DOMString), [WHATWG DOM의 pre-insert 알고리즘](https://dom.spec.whatwg.org/#concept-node-pre-insert), [WHATWG DOM의 removeChild 알고리즘](https://dom.spec.whatwg.org/#concept-node-pre-remove), [Selectors Level 4 편집자 초안](https://drafts.csswg.org/selectors-4/#the-empty-pseudo)
 - 현재 실험과 차이: [0002 Rust 트리 코어](0002-rust-tree-core.md)
 - 제품 작업 상태: [공식 상태 대장 R03](../STATUS.md#1-위험-검증)
-- 다음 구현 관문: [모노레포 구현 계획](../../docs/plans/implementation.md), [GPU 렌더러 구현 계획](../../docs/plans/renderer.md)
+- 다음 구현 관문: [모노레포 구현 계획](https://github.com/ohah/spinon/blob/main/docs/plans/implementation.md), [GPU 렌더러 구현 계획](https://github.com/ohah/spinon/blob/main/docs/plans/renderer.md)
