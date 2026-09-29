@@ -9,9 +9,9 @@
 ```text
 React / Vue / Svelte 어댑터 ─┐
 제한된 모바일 DOM 호환 계층 ─┴─ HostDocument 변경 묶음
-                                  ├─ 논리 조회: 동기
-                                  ├─ 스타일 무효화: revision에 연결
-                                  └─ 연결된 노드 스냅샷: 프레임 경계에서 소비
+                                  ├─ 논리 조회: 동기, DocumentRevision
+                                  ├─ 연결 표시 트리: RenderTreeRevision
+                                  └─ 스타일·레이아웃·GPU 스냅샷: 프레임 경계에서 소비
 ```
 
 - 앱 런타임 세대마다 Rust `HostDocument` 하나를 두고, DOM 호환 계층과 프레임워크 어댑터는 그 모델을 함께 사용합니다. 각 프레임워크의 상태 관리와 차이 계산은 해당 어댑터가 계속 소유합니다.
@@ -47,12 +47,16 @@ React / Vue / Svelte 어댑터 ─┐
 
 S01의 현재 `Tree`는 연결된 트리와 단일 루트를 검증하는 실험 모델입니다. `Operation::Remove`는 하위 노드를 활성 맵에서 삭제합니다. 그러므로 이를 DOM의 `removeChild()` 구현으로 곧장 노출하면 분리 노드 재삽입과 JS 래퍼 객체 정체성 요구를 깨뜨립니다. J10 구현 범위에서 `HostDocument`의 수명과 분리 노드를 모델링하거나, 그 전에 S01 코어를 명시적으로 확장해 이 차이를 해소해야 합니다.
 
+DOM `insertBefore(node, referenceChild)` 경로에서는 `referenceChild`가 null이거나 지정 부모의 직접 자식인지 먼저 검증합니다. `referenceChild`가 이동할 `node` 자신이면 기존 다음 형제를 기준 위치로 삼아 같은 위치 삽입이 순서를 바꾸지 않게 합니다. 같은 부모 안에서 이동할 때 최종 인덱스는 이동할 노드를 뺀 자식 목록을 기준으로 계산합니다. 검증과 위치 계산이 끝나기 전에 기존 연결을 끊지 않습니다. 어댑터가 내부 위치 삽입을 호출할 때는 이미 검증된 최종 위치를 전달합니다. 실질 상태가 바뀌지 않는 호출은 문서·표시 revision을 올리지 않습니다.
+
 ## 동기 조회, revision과 오류 복구
 
 - DOM 호환 계층이 성공을 반환한 뒤 같은 JavaScript 실행 흐름의 `parentNode`, `firstChild`, 형제 순서, 텍스트·속성 조회는 방금 확정한 논리 상태를 관찰합니다. 조회는 JS `Isolate`와 문서 소유자 경계에서 동기 완료합니다.
 - 레이아웃·GPU 제출은 DOM 메서드 안에서 기다리지 않습니다. 성공한 변경은 불변 연결 노드 스냅샷으로 다음 렌더 기회에 소비할 수 있습니다. 논리 변경의 확정은 레이아웃 측정이나 픽셀 표시 완료를 뜻하지 않습니다.
-- `DocumentRevision`은 0에서 시작해 상태를 바꾼 작업 묶음마다 한 번 증가합니다. 비어 있거나 상태를 바꾸지 않은 묶음은 그대로 둡니다. 스냅샷과 스타일 무효화 기록은 입력 revision을 보유합니다. 비동기 계산이 더 새 revision 뒤에 늦게 끝나면 표시·대상 판정용 결과로 수락하지 않습니다.
-- 기준 revision이 오래된 작업 묶음, 잘못된 참조, 순환, 소유권 위반 또는 잘못된 최종 연결은 전체를 거부하고 이전 문서와 revision을 보존합니다. 호스트가 임의로 작업을 부분 적용하거나 같은 묶음을 자동 재실행하지 않습니다.
+- `DocumentRevision`은 논리 문서 상태를 식별합니다. 0에서 시작해 분리 노드 생성·수정까지 포함하여 상태를 바꾼 작업 묶음마다 한 번 증가합니다. 비어 있거나 상태를 바꾸지 않은 묶음은 그대로 둡니다.
+- `RenderTreeRevision`은 `HostRoot`에 연결된 표시 투영을 식별합니다. 연결 트리·속성·텍스트 중 스타일·레이아웃·페인트·hit-test·접근성에 영향을 주는 커밋마다 한 번 증가합니다. 분리된 하위 트리만 바뀐 경우에는 증가하지 않습니다.
+- 각 렌더 스냅샷은 출처 `DocumentRevision`과 `RenderTreeRevision`을 함께 기록합니다. 스타일·레이아웃·페인트·hit-test·접근성 결과의 최신성 판정에는 `RenderTreeRevision`과 해당 계산 단계 revision을 사용합니다. 분리 노드만 변경되어 `DocumentRevision`이 앞서더라도 동일한 `RenderTreeRevision`의 계산과 표시 스냅샷은 계속 유효합니다. 연결 표시 트리가 바뀌면 새 `RenderTreeRevision`이 이전 계산 결과를 무효화합니다.
+- 변경 묶음의 기대 기준은 `DocumentRevision`입니다. 오래된 기준 revision, 잘못된 참조, 순환, 소유권 위반 또는 잘못된 최종 연결은 전체를 거부하고 두 revision과 이전 문서를 보존합니다. 호스트가 임의로 작업을 부분 적용하거나 같은 묶음을 자동 재실행하지 않습니다.
 - JS DOM 메서드의 인수는 Rust에 도달하기 전에 API의 Web IDL 타입 규칙으로 변환합니다. 제안된 `DOMString` 입력은 UTF-16 코드 단위 그대로 보존하며, `null`·`undefined`·`Symbol` 변환 동작을 시그니처별로 적용합니다. Rust의 UTF-8 `String`으로 바꾸면서 단독 서로게이트를 잃지 않도록 경계 표현을 둡니다. 속성·텍스트를 그릴 때 유효하지 않은 서로게이트를 치환하는 처리는 DOM 읽기 값과 분리합니다.
 - 스피논이 같은 문서의 노드 래퍼로 만든 객체만 노드 인수로 받습니다. 임의 객체를 문자열로 바꾸어 Node로 취급하지 않습니다. 이 초안에서는 여러 `Document` 사이 채택·이동을 지원하지 않습니다.
 - Rust `HostError`는 안정된 종류와 제한된 진단 값을 사용합니다. V8 경계는 이를 JS `TypeError` 또는 표준 DOMException 계열로 변환하고, C ABI 밖으로 Rust panic을 전달하지 않습니다. 개별 API의 정확한 예외 이름·메시지는 공개 적합성 표를 만들 때 고정합니다.
@@ -61,13 +65,13 @@ S01의 현재 `Tree`는 연결된 트리와 단일 루트를 검증하는 실험
 
 ## CSS·레이아웃 무효화
 
-호스트 변경은 노드 값만 저장하지 않고, 새 `DocumentRevision`과 영향을 받는 계산 단계 집합을 함께 내보냅니다. 보수적인 첫 제안은 결과가 안전하게 구분될 때까지 넓게 무효화하고 부분 갱신의 비용 최적화는 U02 이후로 미루는 것입니다.
+호스트 변경은 새 `DocumentRevision`을 내보냅니다. 연결 표시 트리에 영향을 주는 변경은 `RenderTreeRevision`과 영향을 받는 계산 단계도 갱신합니다. 분리 노드만 바뀐 경우 스타일·레이아웃 계산을 무효화하지 않습니다. 보수적인 첫 제안은 연결 트리 변경의 의존 범위를 안전하게 구분할 때까지 넓게 무효화하고 부분 갱신의 비용 최적화는 U02 이후로 미루는 것입니다.
 
 | 변경 | 스타일 | 레이아웃·텍스트 측정 | 페인트·대상 판정·접근성 |
 | --- | --- | --- | --- |
 | 연결 노드의 지원 속성 변경 | 지원 선택자 결과를 다시 계산합니다. 선택자 의존 범위가 불명확하면 연결된 문서 전체를 다시 계산합니다. | 계산된 스타일이 기하·글꼴에 영향을 주면 다시 계산합니다. | 스타일·상자·접근성 값 차이를 비교해 영향 범위를 무효화합니다. |
 | 자식 삽입·분리·이동 | 지원하는 자식·형제 관계 선택자와 영향을 받는 조상·형제를 다시 계산합니다. 첫 구현에서 관계를 좁힐 수 없으면 문서 전체 스타일을 무효화합니다. | 이전·새 조상 경로와 연결된 영향 하위 트리를 무효화합니다. | 이전·새 상자 영역과 접근성 경계 상자를 다시 생성한 뒤 대상 판정 스냅샷을 교체합니다. |
-| Text 데이터 변경 | 지원하는 `:empty` 등 자식 내용 의존 선택자의 결과가 달라질 수 있습니다. 선택자 범위가 정해지기 전에는 연결 문서의 스타일을 보수적으로 무효화합니다. | 문자 조형·고유 크기·줄바꿈과 영향 조상의 레이아웃을 다시 계산합니다. | 새 글리프·상자·대상 판정·접근성 텍스트가 준비될 때까지 같은 revision의 결과만 수락합니다. |
+| 연결된 Text 데이터 변경 | 지원하는 `:empty` 등 자식 내용 의존 선택자의 결과가 달라질 수 있습니다. 선택자 범위가 정해지기 전에는 연결 문서의 스타일을 보수적으로 무효화합니다. | 문자 조형·고유 크기·줄바꿈과 영향 조상의 레이아웃을 다시 계산합니다. | 새 글리프·상자·대상 판정·접근성 텍스트가 준비될 때까지 같은 표시 트리 revision의 결과만 수락합니다. |
 | 분리된 노드 변경 | 표시 문서의 스타일시트 결과는 무효화하지 않습니다. | 연결할 때 필요한 계산이 수행됩니다. | 현재 표시 스냅샷은 그대로 둡니다. |
 
 일반 `setAttribute("style", ...)` 호출, `Element.style`, `CSSStyleDeclaration`, CSS 우선순위 계산, 동적 스타일시트 교체와 계산 스타일 조회는 이 표가 지원하지 않습니다. 속성 저장과 CSSOM 지원을 같은 것으로 표시하지 않습니다. 최종 속성·선택자 의존 규칙은 [웹 표면 명세](../0003-web-surface.md)와 U02가 정의해야 합니다.
@@ -78,11 +82,12 @@ S01의 현재 `Tree`는 연결된 트리와 단일 루트를 검증하는 실험
 
 ```text
 document_generation, owner_id, node_id,
-presented_document_revision, frame_id, sequence, event_kind, coordinates
+presented_document_revision, presented_render_tree_revision,
+frame_id, sequence, event_kind, coordinates
 ```
 
 - 이벤트 전달은 대상 Isolate의 작업 큐에서 순서대로 실행합니다. Android/iOS OS 입력 스레드는 JS 콜백 완료를 동기 대기하지 않습니다.
-- 전달 직전에 문서 세대, 노드 연결 상태, OwnerId를 재검증합니다. 노드가 분리·폐기됐거나 세대·소유자가 달라졌으면 이벤트를 버리고 진단합니다. 다른 아래 노드로 조용히 재대상화하지 않습니다.
+- 전달 직전에 문서 세대, 노드 연결 상태, OwnerId를 재검증합니다. 노드가 분리·폐기됐거나 세대·소유자가 달라졌으면 이벤트를 버리고 진단합니다. 입력은 `presented_render_tree_revision`을 가진 실제 표시 프레임에서 대상을 판정한 것으로 기록하며, 다른 아래 노드로 조용히 재대상화하지 않습니다. 현재 트리 변경과 이벤트가 경합할 때의 정확한 전달·폐기 정책은 S05에서 확정합니다.
 - JS 콜백은 V8 호스트의 등록부가 `(문서 세대, OwnerId, NodeId, 이벤트 종류)` 키로 소유합니다. Rust UI 트리는 V8 콜백 핸들을 보관하지 않습니다. 프레임워크 루트 분리와 DOM 이벤트 수신기 해제는 각자 소유한 등록만 제거합니다.
 - DOM 노드 분리는 곧 래퍼 객체 폐기를 뜻하지 않습니다. 살아 있는 분리 래퍼 객체는 다시 삽입될 수 있습니다. 콜백 참조 회수와 GC 연결은 노드 `dispose`·`Isolate` 종료 규칙이 확정될 때까지 공개 계약이 아닙니다.
 - 이 내부 전달 데이터는 이벤트 전달 경계만 정의합니다. 캡처·버블링, `stopPropagation()`, `preventDefault()`, 포인터 취소·키보드 순서·접근성 활성화의 웹 동등 동작은 [0002 제안](../0002-ui-tree-events.md)과 S05에서 별도 확정합니다.
@@ -96,7 +101,7 @@ presented_document_revision, frame_id, sequence, event_kind, coordinates
 | `NotFound` | 지정 부모의 자식이 아님 | `removeChild`라면 `NotFoundError` 제안 |
 | `Hierarchy` | 순환 또는 허용되지 않는 부모·자식 관계 | `HierarchyRequestError` 제안 |
 | `OwnershipConflict` | 다른 어댑터 소유의 트리 수정 시도 | 제한된 호스트 진단과 JS 오류 |
-| `StaleRevision` | 변경 묶음 기준 revision이 현재와 다름 | 전체 거부. 어댑터 복구 규칙은 R06에서 정함 |
+| `StaleRevision` | 변경 묶음의 기준 `DocumentRevision`이 현재와 다름 | 전체 거부. 어댑터 복구 규칙은 R06에서 정함 |
 | `InvalidName` / `UnsupportedNode` | 문법상 잘못된 이름 또는 미지원 종류 | 공개 DOM의 표준 오류 이름과 범위에서 결정 |
 
 오류 이름·메시지는 표준 대응과 공개 API 적합성 시험 전에 최종화하지 않습니다. 플랫폼 오류 문구를 파싱해 JS 오류 종류를 추정하지 않습니다.
@@ -112,6 +117,7 @@ presented_document_revision, frame_id, sequence, event_kind, coordinates
 5. 연결·분리 요소의 `id`·`class` 변경과 자식 구조·Text 변경이 선언된 계산 단계만큼 무효화하는지 확인합니다. 생성된 결과는 입력 revision으로 판별합니다.
 6. 입력 큐에 있는 노드가 이벤트 전달 전에 분리되면 콜백이 호출되지 않고 다른 표시 노드로 이벤트가 옮겨가지 않는지 확인합니다.
 7. 서로 다른 `OwnerId`의 형제 하위 트리는 함께 스냅샷에 포함되지만, 서로의 자식·속성·이벤트를 수정하는 요청은 원자적으로 거부되는지 확인합니다.
+8. `insertBefore` 기준 노드가 다른 부모에 있을 때 변경이 없는지, 기준 노드와 이동 노드가 같을 때 순서·revision이 그대로인지, 같은 부모 안 이동의 최종 순서가 DOM 알고리즘과 맞는지 확인합니다.
 
 ## 아직 확정하지 않은 제품·구현 결정
 
@@ -124,6 +130,8 @@ presented_document_revision, frame_id, sequence, event_kind, coordinates
 - 한 어댑터의 여러 루트와 React 포털 등 소유권 경계를 넘는 연결을 지원할지 여부
 - 첫 단계 HTML 태그·속성·CSS 선택자 허용 목록과 이름 대소문자 규칙
 - `DOMException`의 정확한 이름·메시지, `DOMString` 각 메서드 인수 시그니처와 적합성 시험 사례
+- `insertBefore`의 참조 자식 검증, 자기 자신 삽입, 같은 부모 내 이동 위치와 revision 기대값의 적합성 사례
+- `DocumentRevision`과 `RenderTreeRevision`을 코어·렌더러 API 및 fixture에 반영하는 구체 자료형·전달 계약
 - 프레임워크 어댑터가 소유한 하위 트리 안에서 직접 DOM 쓰기를 허용할지 여부; 현재 제안은 금지
 - JS 래퍼 객체·분리 노드·이벤트 수신기를 회수하는 V8 GC 정리 콜백과 메모리 상한
 - 이벤트 수신기의 캡처·버블·취소·기본 동작과 OS 접근성 입력 순서
@@ -134,7 +142,7 @@ presented_document_revision, frame_id, sequence, event_kind, coordinates
 ## 연결 문서
 
 - 공개 의미 제안: [0002 UI 트리·이벤트](../0002-ui-tree-events.md), [0007 모바일 DOM 호환](../0007-dom-compatibility.md)
-- 표준 참고: [Web IDL DOMString](https://webidl.spec.whatwg.org/#idl-DOMString), [WHATWG DOM의 removeChild 알고리즘](https://dom.spec.whatwg.org/#concept-node-pre-remove), [Selectors Level 4 편집자 초안](https://drafts.csswg.org/selectors/)
+- 표준 참고: [Web IDL DOMString](https://webidl.spec.whatwg.org/#idl-DOMString), [WHATWG DOM의 pre-insert 알고리즘](https://dom.spec.whatwg.org/#concept-node-pre-insert), [WHATWG DOM의 removeChild 알고리즘](https://dom.spec.whatwg.org/#concept-node-pre-remove), [Selectors Level 4 편집자 초안](https://drafts.csswg.org/selectors-4/#the-empty-pseudo)
 - 현재 실험과 차이: [0002 Rust 트리 코어](0002-rust-tree-core.md)
 - 제품 작업 상태: [공식 상태 대장 R03](../STATUS.md#1-위험-검증)
 - 다음 구현 관문: [모노레포 구현 계획](../../docs/plans/implementation.md), [GPU 렌더러 구현 계획](../../docs/plans/renderer.md)

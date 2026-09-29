@@ -51,7 +51,7 @@ spinon/
 
 | 경계 | 경로 | 책임 |
 | --- | --- | --- |
-| 공통 런타임 코어 | `crates/spinon-core` | 안정적 노드 ID, 문서·UI 트리, 혼합 요소/텍스트 자식 순서, 변경, revision, 오류·복구 의미 |
+| 공통 런타임 코어 | `crates/spinon-core` | 안정적 노드 ID, 문서·UI 트리, 혼합 요소/텍스트 자식 순서, 논리 문서·연결 표시 트리 revision, 변경, 오류·복구 의미 |
 | 레이아웃 | `crates/spinon-layout` | 코어 노드와 레이아웃 엔진 사이 어댑터, Taffy 적용·검증 |
 | 렌더 명령 | `crates/spinon-render` | 장면 변경, 그리기 명령, hit-test 입력·결과 모델 |
 | 언어 경계 | `crates/spinon-ffi`, `native/v8` | Rust C ABI와 V8 C++ API를 제한된 값·핸들로 연결 |
