@@ -16,6 +16,8 @@ import java.nio.charset.StandardCharsets;
 
 public final class MainActivity extends Activity {
     private static final String TAG = "SpinonBootstrap";
+    private R08WgpuSurface r13Surface;
+    private boolean r13WasPaused;
 
     static {
         System.loadLibrary("spinon_bootstrap");
@@ -27,10 +29,14 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getIntent().getBooleanExtra("spinon_r08", false)) {
+        boolean runR13 = getIntent().getBooleanExtra("spinon_r13", false);
+        if (runR13 || getIntent().getBooleanExtra("spinon_r08", false)) {
             int backend = getIntent().getIntExtra("spinon_r08_backend", 1);
-            boolean useWgpu = !getIntent().getBooleanExtra("spinon_r08_native", false);
-            R08GpuDemo.show(this, useWgpu, backend);
+            boolean useWgpu = runR13 || !getIntent().getBooleanExtra("spinon_r08_native", false);
+            int failureInjection = getIntent().getIntExtra("spinon_r13_failure", 0);
+            R08WgpuSurface surface = R08GpuDemo.show(
+                    this, useWgpu, backend, runR13, failureInjection);
+            r13Surface = runR13 ? surface : null;
             return;
         }
 
@@ -55,6 +61,24 @@ public final class MainActivity extends Activity {
             Log.e(TAG, "SPINON_BOOTSTRAP_ASSET_ERROR", error);
         } catch (RuntimeException error) {
             Log.e(TAG, "SPINON_BOOTSTRAP_RUNTIME_ERROR", error);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        if (r13Surface != null) {
+            r13Surface.onHostPaused();
+            r13WasPaused = true;
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (r13Surface != null && r13WasPaused) {
+            r13WasPaused = false;
+            r13Surface.onHostResumed();
         }
     }
 

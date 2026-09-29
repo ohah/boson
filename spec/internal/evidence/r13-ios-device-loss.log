@@ -1,0 +1,6 @@
+2026-09-29 10:37:54.270 Df SpinonBootstrap[64479:23fce82] [dev.spinon.bootstrap:r08] SPINON_R13_RENDERER=created generation=1 reason=layout
+2026-09-29 10:37:54.270 Df SpinonBootstrap[64479:23fce82] [dev.spinon.bootstrap:r08] SPINON_R13_FAULT=injected kind=2
+2026-09-29 10:37:54.333 Df SpinonBootstrap[64479:23fce82] [dev.spinon.bootstrap:r08] SPINON_R13_HOST=active
+2026-09-29 10:37:54.333 Df SpinonBootstrap[64479:23fce82] [dev.spinon.bootstrap:r08] SPINON_R13_RECOVERY=started reason=device_lost generation=1
+2026-09-29 10:37:54.335 Df SpinonBootstrap[64479:23fce82] [dev.spinon.bootstrap:r08] SPINON_R13_RENDERER=created generation=2 reason=recover_device_lost
+2026-09-29 10:37:54.337 Df SpinonBootstrap[64479:23fce82] [dev.spinon.bootstrap:r08] SPINON_R13_RECOVERY=complete reason=device_lost generation=2 redraw=success

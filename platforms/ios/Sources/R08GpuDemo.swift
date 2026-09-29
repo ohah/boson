@@ -6,20 +6,26 @@ final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
     private let logger = Logger(subsystem: "dev.spinon.bootstrap", category: "r08")
     private let canvas: UIView
     private let useWgpu: Bool
+    private let r13Enabled: Bool
     private let titleLabel = UILabel()
     private let statusLabel = UILabel()
     private let inputField = UITextField()
 
-    init(useWgpu: Bool = false) {
+    init(useWgpu: Bool = false, r13Enabled: Bool = false,
+         r13FailureInjection: Int32 = 0) {
         self.useWgpu = useWgpu
+        self.r13Enabled = r13Enabled
         self.canvas = useWgpu
-            ? R08WgpuCanvasView(frame: .zero)
+            ? R08WgpuCanvasView(
+                frame: .zero, r13Enabled: r13Enabled,
+                r13FailureInjection: r13FailureInjection)
             : R08MetalCanvasView(frame: .zero, device: MTLCreateSystemDefaultDevice())
         super.init(nibName: nil, bundle: nil)
     }
 
     required init?(coder: NSCoder) {
         self.useWgpu = false
+        self.r13Enabled = false
         self.canvas = R08MetalCanvasView(frame: .zero, device: MTLCreateSystemDefaultDevice())
         super.init(coder: coder)
     }
@@ -32,9 +38,11 @@ final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
         view.addSubview(canvas)
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = useWgpu
-            ? "SPINON · R08 GPU 표면\niOS · wgpu / Metal"
-            : "SPINON · R08 GPU 표면\niOS · Metal"
+        titleLabel.text = r13Enabled
+            ? "SPINON · R13 GPU 복구\niOS · wgpu / Metal"
+            : useWgpu
+                ? "SPINON · R08 GPU 표면\niOS · wgpu / Metal"
+                : "SPINON · R08 GPU 표면\niOS · Metal"
         titleLabel.textColor = UIColor(red: 0.92, green: 0.95, blue: 0.99, alpha: 1)
         titleLabel.font = .systemFont(ofSize: 22, weight: .bold)
         titleLabel.numberOfLines = 0
@@ -57,7 +65,7 @@ final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
         inputField.attributedPlaceholder = NSAttributedString(
             string: "텍스트 입력 · IME 경계 실험",
             attributes: [.foregroundColor: UIColor.darkGray])
-        inputField.accessibilityLabel = "R08 텍스트 입력 실험"
+        inputField.accessibilityLabel = r13Enabled ? "R13 텍스트 입력 실험" : "R08 텍스트 입력 실험"
         inputField.returnKeyType = .done
         inputField.autocorrectionType = .no
         inputField.delegate = self
@@ -112,20 +120,35 @@ final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
 
 private final class R08WgpuCanvasView: UIView {
     private let logger = Logger(subsystem: "dev.spinon.bootstrap", category: "r08")
+    private let r13Enabled: Bool
     private var renderer: UnsafeMutableRawPointer?
     private var activationCount: UInt32 = 0
     private var firstFrameLogged = false
     private var configuredSize = CGSize.zero
+    private var rendererGeneration = 0
+    private var pendingFailureInjection: Int32
+    private var hostActive: Bool
+    private var hasReachedActiveState = false
+    private var resumeRedrawPending = false
     var onActivate: ((Int) -> Void)?
 
     override class var layerClass: AnyClass { CAMetalLayer.self }
 
-    override init(frame: CGRect) {
+    init(frame: CGRect, r13Enabled: Bool = false,
+         r13FailureInjection: Int32 = 0) {
+        self.r13Enabled = r13Enabled
+        self.pendingFailureInjection = r13FailureInjection
+        self.hostActive = r13Enabled
+            ? UIApplication.shared.applicationState == .active
+            : true
         super.init(frame: frame)
         configure()
     }
 
     required init?(coder: NSCoder) {
+        self.r13Enabled = false
+        self.pendingFailureInjection = 0
+        self.hostActive = true
         super.init(coder: coder)
         configure()
     }
@@ -134,15 +157,30 @@ private final class R08WgpuCanvasView: UIView {
         isOpaque = true
         backgroundColor = UIColor(red: 0.055, green: 0.075, blue: 0.12, alpha: 1)
         isAccessibilityElement = true
-        accessibilityLabel = "R08 GPU 도형"
+        accessibilityLabel = r13Enabled ? "R13 GPU 도형" : "R08 GPU 도형"
         accessibilityValue = "활성화 0회"
         accessibilityHint = "중앙 도형을 두 번 탭하면 색이 바뀝니다."
         accessibilityTraits = .button
+        if r13Enabled {
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(hostWillResignActive),
+                name: UIApplication.willResignActiveNotification, object: nil)
+            NotificationCenter.default.addObserver(
+                self, selector: #selector(hostDidBecomeActive),
+                name: UIApplication.didBecomeActiveNotification, object: nil)
+        }
     }
 
     override func didMoveToWindow() {
         super.didMoveToWindow()
-        setNeedsLayout()
+        if r13Enabled && window == nil {
+            destroyRenderer()
+            configuredSize = .zero
+            logger.notice("SPINON_R13_SURFACE=detached")
+        } else {
+            setNeedsLayout()
+            if window != nil { layoutIfNeeded() }
+        }
     }
 
     override func layoutSubviews() {
@@ -154,30 +192,134 @@ private final class R08WgpuCanvasView: UIView {
         layer.contentsScale = scale
         (layer as? CAMetalLayer)?.drawableSize = CGSize(width: CGFloat(width), height: CGFloat(height))
 
-        if renderer == nil {
-            renderer = SpinonRunner.createR08Wgpu(
-                withUIKitView: Unmanaged.passUnretained(self).toOpaque(),
-                width: width,
-                height: height)
-            guard renderer != nil else { return }
-            logger.notice("SPINON_R08_WGPU_SURFACE=size \(width)x\(height)")
-        } else if configuredSize != CGSize(width: CGFloat(width), height: CGFloat(height)) {
-            let result = SpinonRunner.resizeR08Wgpu(renderer, width: width, height: height)
-            guard result == 0 else {
-                logger.error("SPINON_R08_WGPU_RESIZE_ERROR code=\(result)")
-                return
-            }
-        }
+        guard ensureRenderer(width: width, height: height, reason: "layout") else { return }
         configuredSize = CGSize(width: CGFloat(width), height: CGFloat(height))
-        draw()
+        if hostActive { draw() }
     }
 
     func draw() {
+        guard hostActive else { return }
+        if renderer == nil {
+            setNeedsLayout()
+            layoutIfNeeded()
+            return
+        }
         guard let renderer else { return }
         let result = SpinonRunner.drawR08Wgpu(renderer, activationCount: activationCount)
         if result == 0, !firstFrameLogged {
             firstFrameLogged = true
             logger.notice("SPINON_R08_WGPU_FRAME=first_draw_submitted")
+            if r13Enabled { logger.notice("SPINON_R13_FRAME=presented generation=\(self.rendererGeneration)") }
+        }
+        if result == 0 {
+            logResumeRedrawSuccess()
+        } else if r13Enabled && isRecoverable(result) {
+            recoverRenderer(failureCode: result)
+        }
+    }
+
+    @objc private func hostWillResignActive() {
+        hostActive = false
+        if r13Enabled { logger.notice("SPINON_R13_HOST=inactive") }
+    }
+
+    @objc private func hostDidBecomeActive() {
+        resumeRedrawPending = hasReachedActiveState && !hostActive
+        hostActive = true
+        hasReachedActiveState = true
+        if r13Enabled { logger.notice("SPINON_R13_HOST=active") }
+        setNeedsLayout()
+        layoutIfNeeded()
+    }
+
+    private func ensureRenderer(width: UInt32, height: UInt32, reason: String) -> Bool {
+        if renderer == nil {
+            renderer = SpinonRunner.createR08Wgpu(
+                withUIKitView: Unmanaged.passUnretained(self).toOpaque(),
+                width: width,
+                height: height)
+            guard renderer != nil else {
+                if r13Enabled { logger.error("SPINON_R13_RECOVERY=failed stage=create reason=\(reason)") }
+                return false
+            }
+            rendererGeneration += 1
+            if r13Enabled {
+                logger.notice("SPINON_R13_RENDERER=created generation=\(self.rendererGeneration) reason=\(reason)")
+            }
+            if pendingFailureInjection != 0, let renderer {
+                let failure = pendingFailureInjection
+                let result = SpinonRunner.injectR13Failure(renderer, kind: UInt32(failure))
+                if result == 0 {
+                    logger.notice("SPINON_R13_FAULT=injected kind=\(failure)")
+                    pendingFailureInjection = 0
+                } else {
+                    logger.error("SPINON_R13_FAULT=injection_failed code=\(result)")
+                }
+            }
+            return true
+        }
+        if configuredSize != CGSize(width: CGFloat(width), height: CGFloat(height)) {
+            let result = SpinonRunner.resizeR08Wgpu(renderer, width: width, height: height)
+            guard result == 0 else {
+                logger.error("SPINON_R08_WGPU_RESIZE_ERROR code=\(result)")
+                if r13Enabled {
+                    destroyRenderer()
+                    return ensureRenderer(width: width, height: height, reason: "resize_recreate")
+                }
+                return false
+            }
+            if r13Enabled { logger.notice("SPINON_R13_SURFACE=resized \(width)x\(height)") }
+        }
+        return true
+    }
+
+    private func isRecoverable(_ result: Int32) -> Bool {
+        return result == -3 || result == -4 || result == -5
+    }
+
+    private func failureName(_ result: Int32) -> String {
+        if result == -3 { return "surface_lost" }
+        if result == -4 { return "surface_outdated" }
+        return "device_lost"
+    }
+
+    private func recoverRenderer(failureCode: Int32) {
+        let reason = failureName(failureCode)
+        logger.notice("SPINON_R13_RECOVERY=started reason=\(reason) generation=\(self.rendererGeneration)")
+        destroyRenderer()
+        guard let window else {
+            logger.error("SPINON_R13_RECOVERY=failed reason=\(reason) stage=detached")
+            return
+        }
+        let scale = window.screen.scale
+        let width = UInt32(max(1, Int((bounds.width * scale).rounded())))
+        let height = UInt32(max(1, Int((bounds.height * scale).rounded())))
+        guard ensureRenderer(width: width, height: height, reason: "recover_\(reason)"),
+              let renderer else {
+            logger.error("SPINON_R13_RECOVERY=failed reason=\(reason) stage=create")
+            return
+        }
+        configuredSize = CGSize(width: CGFloat(width), height: CGFloat(height))
+        let retry = SpinonRunner.drawR08Wgpu(renderer, activationCount: activationCount)
+        if retry == 0 {
+            logger.notice("SPINON_R13_RECOVERY=complete reason=\(reason) generation=\(self.rendererGeneration) redraw=success")
+            logResumeRedrawSuccess()
+        } else {
+            logger.error("SPINON_R13_RECOVERY=failed reason=\(reason) stage=redraw code=\(retry)")
+        }
+    }
+
+    private func logResumeRedrawSuccess() {
+        if r13Enabled && resumeRedrawPending {
+            resumeRedrawPending = false
+            logger.notice("SPINON_R13_RESUME=redraw_success")
+        }
+    }
+
+    private func destroyRenderer() {
+        if let renderer {
+            self.renderer = nil
+            SpinonRunner.destroyR08Wgpu(renderer)
         }
     }
 
@@ -216,14 +358,13 @@ private final class R08WgpuCanvasView: UIView {
         activationCount += 1
         accessibilityValue = "활성화 \(activationCount)회"
         onActivate?(Int(activationCount))
-        logger.notice("SPINON_R08_WGPU_TOUCH count=\(self.activationCount)")
+        let tag = r13Enabled ? "R13" : "R08"
+        logger.notice("SPINON_\(tag)_TOUCH count=\(self.activationCount)")
         draw()
     }
 
     deinit {
-        if let renderer {
-            SpinonRunner.destroyR08Wgpu(renderer)
-        }
+        destroyRenderer()
     }
 }
 

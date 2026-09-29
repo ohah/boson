@@ -1,0 +1,12 @@
+--------- beginning of main
+09-29 10:37:51.896 12414 12414 I SpinonBootstrap: SPINON_R08_UI=ready text-input=EditText accessibility=button+EditText
+09-29 10:37:52.032 12414 12414 I SpinonBootstrap: SPINON_R13_SURFACE=created
+09-29 10:37:52.145 12414 12414 I SpinonBootstrap: SPINON_R08_WGPU=ready backend=Vulkan device=Cpu name=SwiftShader Device (LLVM 10.0.0) format=Rgba8Unorm supported_formats=[Rgba8UnormSrgb, Rgba8Unorm, Rgba16Float, Rgb10a2Unorm]
+09-29 10:37:52.145 12414 12414 I SpinonBootstrap: SPINON_R13_RENDERER=created generation=1 reason=surface_changed
+09-29 10:37:52.145 12414 12414 I SpinonBootstrap: SPINON_R13_FAULT=injected kind=1
+09-29 10:37:52.145 12414 12414 I SpinonBootstrap: SPINON_R08_WGPU_SURFACE=size 1080x2400
+09-29 10:37:52.145 12414 12414 E SpinonBootstrap: SPINON_R08_WGPU_DRAW_ERROR code=-3 detail=wgpu surface lost; recreate surface and renderer
+09-29 10:37:52.145 12414 12414 I SpinonBootstrap: SPINON_R13_RECOVERY=started reason=surface_lost generation=1
+09-29 10:37:52.225 12414 12414 I SpinonBootstrap: SPINON_R08_WGPU=ready backend=Vulkan device=Cpu name=SwiftShader Device (LLVM 10.0.0) format=Rgba8Unorm supported_formats=[Rgba8UnormSrgb, Rgba8Unorm, Rgba16Float, Rgb10a2Unorm]
+09-29 10:37:52.225 12414 12414 I SpinonBootstrap: SPINON_R13_RENDERER=created generation=2 reason=recover_surface_lost
+09-29 10:37:52.227 12414 12414 I SpinonBootstrap: SPINON_R13_RECOVERY=complete reason=surface_lost generation=2 redraw=success

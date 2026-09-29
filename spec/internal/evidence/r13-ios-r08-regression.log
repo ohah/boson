@@ -1,0 +1,3 @@
+2026-09-29 10:40:07.249 Df SpinonBootstrap[65307:23fe345] [dev.spinon.bootstrap:r08] SPINON_R08_UI=ready text-input=UITextField accessibility=button+UITextField
+2026-09-29 10:40:07.273 Df SpinonBootstrap[65307:23fe345] SPINON_R08_WGPU=ready backend=Metal device=DiscreteGpu name=Apple iOS simulator GPU format=Bgra8Unorm supported_formats=[Bgra8UnormSrgb, Bgra8Unorm, Rgba16Float]
+2026-09-29 10:40:07.275 Df SpinonBootstrap[65307:23fe345] [dev.spinon.bootstrap:r08] SPINON_R08_WGPU_FRAME=first_draw_submitted

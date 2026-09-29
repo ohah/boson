@@ -1,0 +1,6 @@
+2026-09-29 10:24:00.163 Df SpinonBootstrap[52240:23ef9e6] [dev.spinon.bootstrap:r08] SPINON_R13_SURFACE=resized 2622x1206
+2026-09-29 10:24:34.612 Df SpinonBootstrap[52240:23ef9e6] [dev.spinon.bootstrap:r08] SPINON_R13_TOUCH count=4
+2026-09-29 10:24:37.812 Df SpinonBootstrap[52240:23ef9e6] [dev.spinon.bootstrap:r08] SPINON_R13_SURFACE=resized 1206x2622
+2026-09-29 10:24:52.445 Df SpinonBootstrap[52240:23ef9e6] [dev.spinon.bootstrap:r08] SPINON_R13_HOST=inactive
+2026-09-29 10:24:54.508 Df SpinonBootstrap[52240:23ef9e6] [dev.spinon.bootstrap:r08] SPINON_R13_HOST=active
+2026-09-29 10:24:54.510 Df SpinonBootstrap[52240:23ef9e6] [dev.spinon.bootstrap:r08] SPINON_R13_RESUME=redraw_success

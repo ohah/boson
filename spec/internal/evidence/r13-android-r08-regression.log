@@ -1,0 +1,5 @@
+--------- beginning of main
+09-29 10:40:06.977 12526 12526 I SpinonBootstrap: SPINON_R08_UI=ready text-input=EditText accessibility=button+EditText
+09-29 10:40:07.242 12526 12526 I SpinonBootstrap: SPINON_R08_WGPU=ready backend=Vulkan device=Cpu name=SwiftShader Device (LLVM 10.0.0) format=Rgba8Unorm supported_formats=[Rgba8UnormSrgb, Rgba8Unorm, Rgba16Float, Rgb10a2Unorm]
+09-29 10:40:07.242 12526 12526 I SpinonBootstrap: SPINON_R08_WGPU_SURFACE=size 1080x2400
+09-29 10:40:08.477 12526 12526 I SpinonBootstrap: SPINON_R08_TOUCH count=1

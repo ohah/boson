@@ -11,13 +11,23 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         let arguments = ProcessInfo.processInfo.arguments
+        let isR13 = arguments.contains("--spinon-r13")
         let isR08 = arguments.contains("--spinon-r08")
             || arguments.contains("--spinon-r08-wgpu")
             || arguments.contains("--spinon-r08-native")
-        if isR08 {
-            let useWgpu = !arguments.contains("--spinon-r08-native")
+        if isR08 || isR13 {
+            let useWgpu = isR13 || !arguments.contains("--spinon-r08-native")
+            let failureArgument = arguments.first { $0.hasPrefix("--spinon-r13-failure=") }
+            let failureName = failureArgument?.components(separatedBy: "=").last
+            let failureInjection: Int32 = switch failureName {
+                case "surface": 1
+                case "device": 2
+                default: 0
+            }
             let window = UIWindow(frame: UIScreen.main.bounds)
-            window.rootViewController = R08GpuDemoViewController(useWgpu: useWgpu)
+            window.rootViewController = R08GpuDemoViewController(
+                useWgpu: useWgpu, r13Enabled: isR13,
+                r13FailureInjection: isR13 ? failureInjection : 0)
             window.makeKeyAndVisible()
             self.window = window
             return true
