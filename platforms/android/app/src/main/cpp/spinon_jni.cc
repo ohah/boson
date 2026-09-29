@@ -123,6 +123,16 @@ Java_dev_spinon_bootstrap_R08WgpuSurface_nativeResize(JNIEnv *, jclass,
                             static_cast<uint32_t>(height));
 }
 
+extern "C" JNIEXPORT jint JNICALL
+Java_dev_spinon_bootstrap_R08WgpuSurface_nativeInjectFailure(JNIEnv *, jclass,
+                                                              jlong handle,
+                                                              jint failure_kind) {
+  auto *context = reinterpret_cast<WgpuRendererContext *>(handle);
+  if (context == nullptr) return -1;
+  return spinon_wgpu_r13_inject_failure(context->renderer,
+                                         static_cast<uint32_t>(failure_kind));
+}
+
 extern "C" JNIEXPORT void JNICALL
 Java_dev_spinon_bootstrap_R08WgpuSurface_nativeDestroy(JNIEnv *, jclass,
                                                         jlong handle) {

@@ -1,5 +1,7 @@
 use std::ffi::{c_char, c_void};
 use std::ptr;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 use raw_window_handle::{
     AndroidDisplayHandle, AndroidNdkWindowHandle, RawDisplayHandle, RawWindowHandle,
@@ -39,7 +41,41 @@ struct Renderer {
     pipeline: wgpu::RenderPipeline,
     uniform: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
+    device_lost: Arc<AtomicBool>,
+    injected_failure: Option<u32>,
     info: String,
+}
+
+#[derive(Debug)]
+enum DrawFailure {
+    SurfaceLost,
+    SurfaceOutdated,
+    DeviceLost,
+    Temporary(String),
+}
+
+impl DrawFailure {
+    fn code(&self) -> i32 {
+        match self {
+            Self::SurfaceLost => -3,
+            Self::SurfaceOutdated => -4,
+            Self::DeviceLost => -5,
+            Self::Temporary(_) => -2,
+        }
+    }
+
+    fn message(&self) -> String {
+        match self {
+            Self::SurfaceLost => "wgpu surface lost; recreate surface and renderer".to_owned(),
+            Self::SurfaceOutdated => {
+                "wgpu surface outdated; reconfigure or recreate renderer".to_owned()
+            }
+            Self::DeviceLost => {
+                "wgpu device lost; recreate device resources and renderer".to_owned()
+            }
+            Self::Temporary(message) => message.clone(),
+        }
+    }
 }
 
 impl Renderer {
@@ -72,13 +108,17 @@ impl Renderer {
         .map_err(|error| format!("adapter request failed: {error}"))?;
 
         let info = adapter.get_info();
-        let (device, queue) = pollster::block_on(adapter.request_device(
-            &wgpu::DeviceDescriptor {
-                required_limits: adapter.limits(),
-                ..Default::default()
-            },
-        ))
+        let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+            required_limits: adapter.limits(),
+            ..Default::default()
+        }))
         .map_err(|error| format!("device request failed: {error}"))?;
+        let device_lost = Arc::new(AtomicBool::new(false));
+        let device_lost_callback = Arc::clone(&device_lost);
+        device.set_device_lost_callback(move |reason, message| {
+            eprintln!("SPINON_R13_DEVICE_LOST reason={reason:?} message={message}");
+            device_lost_callback.store(true, Ordering::Release);
+        });
 
         let capabilities = surface.get_capabilities(&adapter);
         let mut config = surface
@@ -153,18 +193,26 @@ impl Renderer {
             pipeline,
             uniform,
             bind_group,
+            device_lost,
+            injected_failure: None,
             info: format!(
                 "backend={:?} device={:?} name={} format={:?} supported_formats={:?}",
-                info.backend,
-                info.device_type,
-                info.name,
-                target_format,
-                capabilities.formats
+                info.backend, info.device_type, info.name, target_format, capabilities.formats
             ),
         })
     }
 
-    fn draw(&mut self, activation_count: u32) -> Result<(), String> {
+    fn draw(&mut self, activation_count: u32) -> Result<(), DrawFailure> {
+        if let Some(failure) = self.injected_failure.take() {
+            return Err(match failure {
+                1 => DrawFailure::SurfaceLost,
+                2 => DrawFailure::DeviceLost,
+                _ => DrawFailure::Temporary("unknown injected R13 failure".to_owned()),
+            });
+        }
+        if self.device_lost.load(Ordering::Acquire) {
+            return Err(DrawFailure::DeviceLost);
+        }
         let color = if activation_count.is_multiple_of(2) {
             [0.20f32, 0.49, 0.96, 1.0]
         } else {
@@ -176,7 +224,23 @@ impl Renderer {
         let frame = match self.surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(frame)
             | wgpu::CurrentSurfaceTexture::Suboptimal(frame) => frame,
-            state => return Err(format!("surface frame unavailable: {state:?}")),
+            wgpu::CurrentSurfaceTexture::Lost => return Err(DrawFailure::SurfaceLost),
+            wgpu::CurrentSurfaceTexture::Outdated => return Err(DrawFailure::SurfaceOutdated),
+            wgpu::CurrentSurfaceTexture::Timeout => {
+                return Err(DrawFailure::Temporary(
+                    "wgpu surface acquisition timed out".to_owned(),
+                ))
+            }
+            wgpu::CurrentSurfaceTexture::Occluded => {
+                return Err(DrawFailure::Temporary(
+                    "wgpu surface is occluded".to_owned(),
+                ))
+            }
+            wgpu::CurrentSurfaceTexture::Validation => {
+                return Err(DrawFailure::Temporary(
+                    "wgpu surface validation failed".to_owned(),
+                ))
+            }
         };
         let view = frame
             .texture
@@ -248,9 +312,8 @@ unsafe fn create_renderer(
     output: *mut c_char,
     output_capacity: usize,
 ) -> *mut c_void {
-    let result = choose_backend(backend).and_then(|backend| unsafe {
-        Renderer::new(display, window, width, height, backend)
-    });
+    let result = choose_backend(backend)
+        .and_then(|backend| unsafe { Renderer::new(display, window, width, height, backend) });
     match result {
         Ok(renderer) => {
             unsafe { write_message(output, output_capacity, &renderer.info) };
@@ -328,19 +391,34 @@ pub unsafe extern "C" fn spinon_wgpu_draw(
     };
     match renderer.draw(activation_count) {
         Ok(()) => 0,
-        Err(error) => {
-            unsafe { write_message(output, output_capacity, &error) };
-            -2
+        Err(failure) => {
+            unsafe { write_message(output, output_capacity, &failure.message()) };
+            failure.code()
         }
     }
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn spinon_wgpu_resize(
+pub unsafe extern "C" fn spinon_wgpu_r13_inject_failure(
     renderer: *mut c_void,
-    width: u32,
-    height: u32,
+    failure_kind: u32,
 ) -> i32 {
+    let Some(renderer) = (unsafe { renderer.cast::<Renderer>().as_mut() }) else {
+        return -1;
+    };
+    if !matches!(failure_kind, 1 | 2) {
+        return -2;
+    }
+    match failure_kind {
+        1 => renderer.injected_failure = Some(failure_kind),
+        2 => renderer.device_lost.store(true, Ordering::Release),
+        _ => unreachable!("failure kind was validated above"),
+    }
+    0
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn spinon_wgpu_resize(renderer: *mut c_void, width: u32, height: u32) -> i32 {
     let Some(renderer) = (unsafe { renderer.cast::<Renderer>().as_mut() }) else {
         return -1;
     };
@@ -349,7 +427,9 @@ pub unsafe extern "C" fn spinon_wgpu_resize(
     }
     renderer.config.width = width;
     renderer.config.height = height;
-    renderer.surface.configure(&renderer.device, &renderer.config);
+    renderer
+        .surface
+        .configure(&renderer.device, &renderer.config);
     0
 }
 
@@ -357,5 +437,18 @@ pub unsafe extern "C" fn spinon_wgpu_resize(
 pub unsafe extern "C" fn spinon_wgpu_destroy(renderer: *mut c_void) {
     if !renderer.is_null() {
         drop(unsafe { Box::from_raw(renderer.cast::<Renderer>()) });
+    }
+}
+
+#[cfg(test)]
+mod r13_tests {
+    use super::DrawFailure;
+
+    #[test]
+    fn recovery_failures_have_stable_host_codes() {
+        assert_eq!(DrawFailure::SurfaceLost.code(), -3);
+        assert_eq!(DrawFailure::SurfaceOutdated.code(), -4);
+        assert_eq!(DrawFailure::DeviceLost.code(), -5);
+        assert_eq!(DrawFailure::Temporary("timeout".to_owned()).code(), -2);
     }
 }

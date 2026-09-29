@@ -1,0 +1,6 @@
+09-29 10:17:38.046 11820 11820 I SpinonBootstrap: SPINON_R13_HOST=paused
+09-29 10:17:38.055 11820 11820 I SpinonBootstrap: SPINON_R13_SURFACE=destroyed
+09-29 10:17:38.120 11820 11820 I SpinonBootstrap: SPINON_R13_SURFACE=created
+09-29 10:17:38.179 11820 11820 I SpinonBootstrap: SPINON_R08_WGPU=ready backend=Vulkan device=Cpu name=SwiftShader Device (LLVM 10.0.0) format=Rgba8Unorm supported_formats=[Rgba8UnormSrgb, Rgba8Unorm, Rgba16Float, Rgb10a2Unorm]
+09-29 10:17:38.179 11820 11820 I SpinonBootstrap: SPINON_R13_RENDERER=created generation=1 reason=surface_changed
+09-29 10:17:41.103 11820 11820 I SpinonBootstrap: SPINON_R13_TOUCH count=1

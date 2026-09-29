@@ -62,6 +62,10 @@
   return spinon_wgpu_resize(renderer, width, height);
 }
 
++ (int32_t)injectR13Failure:(void *)renderer kind:(uint32_t)failureKind {
+  return spinon_wgpu_r13_inject_failure(renderer, failureKind);
+}
+
 + (void)destroyR08Wgpu:(void *)renderer {
   spinon_wgpu_destroy(renderer);
 }

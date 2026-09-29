@@ -1,0 +1,12 @@
+09-29 10:17:18.680 11820 11820 I SpinonBootstrap: SPINON_R13_SURFACE=created
+09-29 10:17:18.782 11820 11820 I SpinonBootstrap: SPINON_R08_WGPU=ready backend=Vulkan device=Cpu name=SwiftShader Device (LLVM 10.0.0) format=Rgba8Unorm supported_formats=[Rgba8UnormSrgb, Rgba8Unorm, Rgba16Float, Rgb10a2Unorm]
+09-29 10:17:18.782 11820 11820 I SpinonBootstrap: SPINON_R13_RENDERER=created generation=1 reason=surface_changed
+09-29 10:17:20.862 11820 11820 I SpinonBootstrap: SPINON_R13_TOUCH count=1
+09-29 10:17:21.883 11820 11820 I SpinonBootstrap: SPINON_R13_HOST=paused
+09-29 10:17:22.928 11820 11820 I SpinonBootstrap: SPINON_R13_SURFACE=destroyed
+09-29 10:17:23.912 11820 11820 I SpinonBootstrap: SPINON_R13_HOST=resumed
+09-29 10:17:23.912 11820 11820 I SpinonBootstrap: SPINON_R13_RESUME=waiting_for_surface
+09-29 10:17:23.925 11820 11820 I SpinonBootstrap: SPINON_R13_SURFACE=created
+09-29 10:17:24.000 11820 11820 I SpinonBootstrap: SPINON_R08_WGPU=ready backend=Vulkan device=Cpu name=SwiftShader Device (LLVM 10.0.0) format=Rgba8Unorm supported_formats=[Rgba8UnormSrgb, Rgba8Unorm, Rgba16Float, Rgb10a2Unorm]
+09-29 10:17:24.000 11820 11820 I SpinonBootstrap: SPINON_R13_RENDERER=created generation=2 reason=surface_changed
+09-29 10:17:24.004 11820 11820 I SpinonBootstrap: SPINON_R13_RESUME=redraw_success

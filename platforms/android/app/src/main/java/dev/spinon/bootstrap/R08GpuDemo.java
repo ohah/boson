@@ -33,7 +33,8 @@ final class R08GpuDemo {
 
     private R08GpuDemo() {}
 
-    static void show(Activity activity, boolean useWgpu, int backend) {
+    static R08WgpuSurface show(Activity activity, boolean useWgpu, int backend,
+                               boolean r13, int failureInjection) {
         float density = activity.getResources().getDisplayMetrics().density;
         FrameLayout root = new FrameLayout(activity);
         root.setBackgroundColor(Color.rgb(14, 19, 31));
@@ -41,7 +42,8 @@ final class R08GpuDemo {
         final View surfaceView;
         final R08GpuSurfaceControl surface;
         if (useWgpu) {
-            R08WgpuSurface wgpuSurface = new R08WgpuSurface(activity, backend);
+            R08WgpuSurface wgpuSurface = new R08WgpuSurface(
+                    activity, backend, r13, failureInjection);
             surfaceView = wgpuSurface;
             surface = wgpuSurface;
         } else {
@@ -57,7 +59,8 @@ final class R08GpuDemo {
         TextView title = new TextView(activity);
         String backendName = !useWgpu ? "OpenGL ES 2.0"
                 : backend == 1 ? "wgpu · Vulkan" : "wgpu · OpenGL ES 3.0+";
-        title.setText("SPINON · R08 GPU 표면\nAndroid · " + backendName);
+        title.setText((r13 ? "SPINON · R13 GPU 복구" : "SPINON · R08 GPU 표면")
+                + "\nAndroid · " + backendName);
         title.setTextColor(Color.rgb(235, 241, 250));
         title.setTextSize(22);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
@@ -106,7 +109,7 @@ final class R08GpuDemo {
         inputBackground.setColor(Color.WHITE);
         inputBackground.setCornerRadius(dp(8, density));
         input.setBackground(inputBackground);
-        input.setContentDescription("R08 텍스트 입력 실험");
+        input.setContentDescription((r13 ? "R13" : "R08") + " 텍스트 입력 실험");
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         input.setImeOptions(EditorInfo.IME_ACTION_DONE);
         input.setPadding(dp(14, density), 0, dp(14, density), 0);
@@ -123,9 +126,11 @@ final class R08GpuDemo {
         surfaceView.setOnClickListener(view -> {
             tapCount[0] += 1;
             surface.setActivationCount(tapCount[0]);
-            surfaceView.setContentDescription("R08 GPU 도형, 활성화 " + tapCount[0] + "회");
+            surfaceView.setContentDescription((r13 ? "R13" : "R08")
+                    + " GPU 도형, 활성화 " + tapCount[0] + "회");
             status.setText("GPU 도형 활성화 " + tapCount[0] + "회 · 텍스트 입력은 네이티브 오버레이");
-            Log.i(TAG, "SPINON_R08_TOUCH count=" + tapCount[0]);
+            Log.i(TAG, "SPINON_" + (r13 ? "R13" : "R08")
+                    + "_TOUCH count=" + tapCount[0]);
         });
 
         input.addTextChangedListener(new TextWatcher() {
@@ -168,6 +173,7 @@ final class R08GpuDemo {
 
         activity.setContentView(root);
         Log.i(TAG, "SPINON_R08_UI=ready text-input=EditText accessibility=button+EditText");
+        return useWgpu ? (R08WgpuSurface) surfaceView : null;
     }
 
     private static int dp(int value, float density) {
@@ -338,22 +344,31 @@ final class R08WgpuSurface extends SurfaceView
     private static final String TAG = "SpinonBootstrap";
 
     private final int backend;
+    private final boolean r13;
     private volatile long rendererHandle;
     private volatile int activationCount;
     private int configuredWidth;
     private int configuredHeight;
+    private int rendererGeneration;
+    private int pendingFailureInjection;
+    private boolean surfaceAvailable;
+    private boolean hostActive = true;
+    private boolean resumeRedrawPending;
 
     private static native long nativeCreate(Surface surface, int width, int height, int backend);
     private static native int nativeDraw(long renderer, int activationCount);
     private static native int nativeResize(long renderer, int width, int height);
+    private static native int nativeInjectFailure(long renderer, int failureKind);
     private static native void nativeDestroy(long renderer);
 
-    R08WgpuSurface(Activity activity, int backend) {
+    R08WgpuSurface(Activity activity, int backend, boolean r13, int failureInjection) {
         super(activity);
         this.backend = backend;
+        this.r13 = r13;
+        this.pendingFailureInjection = failureInjection;
         getHolder().addCallback(this);
         setClickable(true);
-        setContentDescription("R08 GPU 도형, 활성화 0회");
+        setContentDescription((r13 ? "R13" : "R08") + " GPU 도형, 활성화 0회");
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         setAccessibilityDelegate(new View.AccessibilityDelegate() {
             @Override
@@ -376,37 +391,30 @@ final class R08WgpuSurface extends SurfaceView
     }
 
     @Override
-    public void surfaceCreated(SurfaceHolder holder) {}
+    public void surfaceCreated(SurfaceHolder holder) {
+        surfaceAvailable = true;
+        if (r13) Log.i(TAG, "SPINON_R13_SURFACE=created");
+    }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         if (width <= 0 || height <= 0) return;
         configuredWidth = width;
         configuredHeight = height;
-        if (rendererHandle == 0) {
-            rendererHandle = nativeCreate(holder.getSurface(), width, height, backend);
-            if (rendererHandle == 0) {
-                Log.e(TAG, "SPINON_R08_WGPU_ERROR=renderer creation failed");
-                return;
-            }
-        } else {
-            int result = nativeResize(rendererHandle, width, height);
-            if (result != 0) {
-                Log.e(TAG, "SPINON_R08_WGPU_RESIZE_ERROR code=" + result);
-                return;
-            }
-        }
+        surfaceAvailable = holder.getSurface().isValid();
+        if (!ensureRenderer("surface_changed")) return;
         Log.i(TAG, "SPINON_R08_WGPU_SURFACE=size " + width + "x" + height);
         drawCurrentFrame();
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        if (rendererHandle != 0) {
-            nativeDestroy(rendererHandle);
-            rendererHandle = 0;
-            Log.i(TAG, "SPINON_R08_WGPU_SURFACE=destroyed");
-        }
+        surfaceAvailable = false;
+        destroyRenderer();
+        configuredWidth = 0;
+        configuredHeight = 0;
+        Log.i(TAG, "SPINON_R08_WGPU_SURFACE=destroyed");
+        if (r13) Log.i(TAG, "SPINON_R13_SURFACE=destroyed");
     }
 
     @Override
@@ -415,12 +423,122 @@ final class R08WgpuSurface extends SurfaceView
         drawCurrentFrame();
     }
 
-    private void drawCurrentFrame() {
-        long renderer = rendererHandle;
-        if (renderer == 0) return;
-        int result = nativeDraw(renderer, activationCount);
-        if (result != 0) {
-            Log.e(TAG, "SPINON_R08_WGPU_DRAW_ERROR code=" + result);
+    void onHostPaused() {
+        hostActive = false;
+        if (r13) Log.i(TAG, "SPINON_R13_HOST=paused");
+    }
+
+    void onHostResumed() {
+        hostActive = true;
+        resumeRedrawPending = r13;
+        if (r13) Log.i(TAG, "SPINON_R13_HOST=resumed");
+        if (surfaceAvailable && configuredWidth > 0 && configuredHeight > 0) {
+            ensureRenderer("host_resumed");
+            drawCurrentFrame();
+        } else if (r13) {
+            Log.i(TAG, "SPINON_R13_RESUME=waiting_for_surface");
         }
+    }
+
+    private boolean ensureRenderer(String reason) {
+        Surface surface = getHolder().getSurface();
+        if (!surfaceAvailable || !surface.isValid()
+                || configuredWidth <= 0 || configuredHeight <= 0) {
+            if (r13) Log.i(TAG, "SPINON_R13_RENDERER=waiting reason=" + reason);
+            return false;
+        }
+        if (rendererHandle == 0) {
+            rendererHandle = nativeCreate(surface, configuredWidth, configuredHeight, backend);
+            if (rendererHandle == 0) {
+                Log.e(TAG, "SPINON_R08_WGPU_ERROR=renderer creation failed");
+                if (r13) Log.e(TAG, "SPINON_R13_RECOVERY=renderer_create_failed reason=" + reason);
+                return false;
+            }
+            rendererGeneration++;
+            if (r13) {
+                Log.i(TAG, "SPINON_R13_RENDERER=created generation=" + rendererGeneration
+                        + " reason=" + reason);
+            }
+            if (pendingFailureInjection != 0) {
+                int injected = nativeInjectFailure(rendererHandle, pendingFailureInjection);
+                if (injected == 0) {
+                    Log.i(TAG, "SPINON_R13_FAULT=injected kind=" + pendingFailureInjection);
+                    pendingFailureInjection = 0;
+                } else {
+                    Log.e(TAG, "SPINON_R13_FAULT=injection_failed code=" + injected);
+                }
+            }
+            return true;
+        }
+        int result = nativeResize(rendererHandle, configuredWidth, configuredHeight);
+        if (result != 0) {
+            Log.e(TAG, "SPINON_R08_WGPU_RESIZE_ERROR code=" + result);
+            if (r13) Log.e(TAG, "SPINON_R13_RESIZE=failed code=" + result);
+            if (!r13) return false;
+            destroyRenderer();
+            return ensureRenderer("resize_recreate");
+        }
+        if (r13) Log.i(TAG, "SPINON_R13_SURFACE=resized " + configuredWidth + "x" + configuredHeight);
+        return true;
+    }
+
+    private boolean drawCurrentFrame() {
+        if (!hostActive) return false;
+        if (rendererHandle == 0 && !ensureRenderer("draw")) return false;
+        long renderer = rendererHandle;
+        if (renderer == 0) return false;
+        int result = nativeDraw(renderer, activationCount);
+        if (result == 0) {
+            logResumeRedrawSuccess();
+            return true;
+        }
+        if (r13 && isRecoverable(result)) return recoverRenderer(result);
+        Log.e(TAG, "SPINON_R08_WGPU_DRAW_ERROR code=" + result);
+        return false;
+    }
+
+    private boolean isRecoverable(int result) {
+        return result == -3 || result == -4 || result == -5;
+    }
+
+    private boolean recoverRenderer(int failureCode) {
+        String reason = failureName(failureCode);
+        Log.i(TAG, "SPINON_R13_RECOVERY=started reason=" + reason
+                + " generation=" + rendererGeneration);
+        destroyRenderer();
+        if (!ensureRenderer("recover_" + reason)) {
+            Log.e(TAG, "SPINON_R13_RECOVERY=failed reason=" + reason + " stage=create");
+            return false;
+        }
+        int retry = nativeDraw(rendererHandle, activationCount);
+        if (retry == 0) {
+            Log.i(TAG, "SPINON_R13_RECOVERY=complete reason=" + reason
+                    + " generation=" + rendererGeneration + " redraw=success");
+            logResumeRedrawSuccess();
+            return true;
+        } else {
+            Log.e(TAG, "SPINON_R13_RECOVERY=failed reason=" + reason
+                    + " stage=redraw code=" + retry);
+            return false;
+        }
+    }
+
+    private void logResumeRedrawSuccess() {
+        if (r13 && resumeRedrawPending) {
+            resumeRedrawPending = false;
+            Log.i(TAG, "SPINON_R13_RESUME=redraw_success");
+        }
+    }
+
+    private String failureName(int result) {
+        if (result == -3) return "surface_lost";
+        if (result == -4) return "surface_outdated";
+        return "device_lost";
+    }
+
+    private void destroyRenderer() {
+        long renderer = rendererHandle;
+        rendererHandle = 0;
+        if (renderer != 0) nativeDestroy(renderer);
     }
 }
