@@ -1,0 +1,31 @@
+Android Emulator: sdk_gphone64_arm64, Android API 36, 1080x2400.
+경로: 최근 앱에서 Spinon 작업을 화면 분할로 전환한 뒤 Chrome 작업을 두 번째 창으로 선택.
+작업 확인: Spinon과 Chrome 작업이 모두 visible=true, mode=multi-window.
+구분선 조절: 1080x1187 표면에서 1080x735 표면으로 변경 후, 다시 1080x1187로 복귀.
+작은 창 관찰: 1080x735 높이에서는 데모 제목과 GPU 도형이 겹치거나 잘림. 제품 수준의 반응형 UI 검증은 아님.
+터치 확인: 분할 상태에서 GPU 도형 탭 뒤 색상 변경, SPINON_R13_TOUCH count=1.
+키보드 확인: 분할 상태에서 네이티브 EditText 포커스, Gboard 표시, 조합 입력 로그 확인.
+09-29 15:02:27.860 I/SpinonBootstrap(14777): SPINON_R13_SURFACE=created
+09-29 15:02:27.944 I/SpinonBootstrap(14777): SPINON_R13_RENDERER=created generation=1 reason=surface_changed
+09-29 15:02:27.944 I/SpinonBootstrap(14777): SPINON_R08_WGPU_SURFACE=size 1080x1187
+09-29 15:03:09.375 I/SpinonBootstrap(14777): SPINON_R13_HOST=paused
+09-29 15:03:09.377 I/SpinonBootstrap(14777): SPINON_R13_SURFACE=destroyed
+09-29 15:03:09.395 I/SpinonBootstrap(14777): SPINON_R13_SURFACE=created
+09-29 15:03:09.658 I/SpinonBootstrap(14777): SPINON_R13_RENDERER=created generation=1 reason=surface_changed
+09-29 15:03:09.658 I/SpinonBootstrap(14777): SPINON_R08_WGPU_SURFACE=size 1080x735
+09-29 15:04:48.673 I/SpinonBootstrap(14777): SPINON_R13_HOST=paused
+09-29 15:04:48.674 I/SpinonBootstrap(14777): SPINON_R13_SURFACE=destroyed
+09-29 15:04:48.687 I/SpinonBootstrap(14777): SPINON_R13_SURFACE=created
+09-29 15:04:48.760 I/SpinonBootstrap(14777): SPINON_R13_RENDERER=created generation=1 reason=surface_changed
+09-29 15:04:48.760 I/SpinonBootstrap(14777): SPINON_R08_WGPU_SURFACE=size 1080x1187
+09-29 15:05:47.489 I/SpinonBootstrap(14777): SPINON_R13_TOUCH count=1
+09-29 15:06:13.924 I/SpinonBootstrap(14777): SPINON_R08_TEXT_INPUT length=1 composing=true
+09-29 15:06:13.933 I/SpinonBootstrap(14777): SPINON_R08_TEXT_INPUT length=1 composing=true
+09-29 15:06:13.935 I/SpinonBootstrap(14777): SPINON_R08_TEXT_INPUT length=2 composing=true
+09-29 15:06:13.935 I/SpinonBootstrap(14777): SPINON_R08_TEXT_INPUT length=3 composing=true
+09-29 15:06:13.936 I/SpinonBootstrap(14777): SPINON_R08_TEXT_INPUT length=4 composing=true
+09-29 15:06:13.937 I/SpinonBootstrap(14777): SPINON_R08_TEXT_INPUT length=5 composing=true
+      * Task{70d3bea #2181 type=standard A=10219:dev.spinon.bootstrap U=0 rootTaskId=3 visible=true visibleRequested=true mode=multi-window translucent=false sz=1}
+      * Task{79bb7c5 #2180 type=standard A=10153:com.android.chrome U=0 rootTaskId=3 visible=true visibleRequested=true mode=multi-window translucent=false sz=2}
+          * Task{70d3bea #2181 type=standard A=10219:dev.spinon.bootstrap U=0 rootTaskId=3 visible=true visibleRequested=true mode=multi-window translucent=false sz=1}
+          * Task{79bb7c5 #2180 type=standard A=10153:com.android.chrome U=0 rootTaskId=3 visible=true visibleRequested=true mode=multi-window translucent=false sz=2}

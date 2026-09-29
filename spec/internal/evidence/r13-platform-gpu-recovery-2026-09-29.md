@@ -10,8 +10,10 @@
 
 | 시나리오 | Android 에뮬레이터 | iOS 시뮬레이터 |
 | --- | --- | --- |
-| 첫 표면 생성과 화면 표시 | 통과 — [첫 실행 화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-initial.png), [입력 후 화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-touch-portrait.png), [로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-lifecycle.log) | 통과 — [입력 후 화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-touch-portrait.png) |
+| 첫 표면 표시와 중앙 GPU 도형 탭 후 색 전환 | 통과 — [첫 실행 화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-initial.png), [입력 후 화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-touch-portrait.png), [로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-lifecycle.log) | 통과 — [입력 후 화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-touch-portrait.png) |
 | 회전·크기 변경 후 화면 재생성 | 통과 — Activity와 `SurfaceHolder` 파괴·생성 후 새 렌더러 생성, [가로 화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-rotation-landscape.png), [회전 로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-rotation.log), [수명 로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-lifecycle.log) | 통과 — `CAMetalLayer` drawable 크기 재설정, [가로 화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-rotation-landscape.png), [회전 로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-rotation.log), [수명 로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-lifecycle.log) |
+| Android 실제 분할 화면·구분선 크기 변경 | 부분 통과 — Spinon과 Chrome 작업이 모두 `multi-window`로 표시됩니다. 표면 `1080x1187 → 1080x735 → 1080x1187` 재생성을 확인했습니다. [탭 후 분할 화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-multiwindow-touch.png), [작은 패널의 UI 겹침](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-multiwindow-small-pane.png), [로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-multiwindow.log) | — |
+| iPadOS Stage Manager 창 표시·크기 변경 | — | 부분 확인 — 앱을 부동 창으로 전환하고 `2752x2064` 표면 크기 로그 한 건을 확인했습니다. 반복적인 실시간 크기 변경 콜백은 확인하지 못했습니다. 물리 iPad 테스트가 아닙니다. |
 | 백그라운드 복귀 | 통과 — surface 재생성·렌더러 재생성 후 화면 표시, [화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-background-resume.png), [로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-lifecycle.log) | 통과 — inactive/active 이후 재그리기, [화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-background-resume.png), [로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-lifecycle.log) |
 | 창에서 분리·재부착 | `SurfaceHolder` 파괴·생성 경로는 Android 수명 로그에서 확인 | 개발용 실행 인자로 뷰를 창에서 분리한 뒤 재부착, 렌더러 generation 2 생성과 재그리기를 확인 — [화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-window-cycle.png), [로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-window-cycle.log) |
 | 표면 손실 주입 후 복구 | 통과 — [화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-surface-recovery.png), [재검증 로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-surface-recovery.log) | 통과 — [화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-surface-recovery.png), [재검증 로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-surface-recovery.log) |
@@ -22,6 +24,8 @@
 | 복구 후 GPU 입력 | 통과 — 세로·가로 방향에서 탭 수 증가 확인 | 통과 — 세로·가로 방향에서 접근성 값과 R13 터치 로그 확인 |
 | R08 기존 모드 회귀 | 통과 — Vulkan 렌더러·입력과 R08 접근성 이름 확인, [화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-r08-regression.png), [로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-r08-regression.log) | 통과 — Metal 렌더러·첫 프레임과 R08 접근성 이름 확인, [화면](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-r08-regression.png), [로그](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-r08-regression.log) |
 
+
+iOS의 [세로 화면 캡처](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-touch-portrait.png)는 중앙 GPU 도형을 한 번 탭한 뒤의 상태입니다. 도형은 주황색이고 활성화 횟수는 1회입니다. Android에서도 같은 중앙 영역 탭 뒤 색상과 횟수가 바뀌는 것을 확인했습니다.
 주입한 오류는 운영체제나 GPU 드라이버의 실제 표면·장치 손실이 아닙니다. 주입은 호스트의 오류 분기와 렌더러 재생성 경계를 확인합니다. 세부 ABI와 남은 범위는 [R13 내부 명세](../r13-platform-gpu-recovery.md)에 적었습니다.
 
 ## 재현 명령
@@ -58,7 +62,7 @@ xcrun simctl launch booted dev.spinon.bootstrap --spinon-r13 --spinon-r13-window
 - iOS의 `SPINON_R13_FRAME=submitted` 로그는 Rust `queue.submit`·`queue.present` 반환까지를 뜻하며 실제 compositor 표시 완료 증거는 아닙니다.
 - 회전 후 Activity가 재생성되면 데모의 탭 횟수는 초기화됩니다. 재생성 뒤 입력 자체는 다시 동작합니다.
 - FFI 핸들 호출은 UI 스레드에서 직렬화하는 계약입니다. 동시 `draw`·`resize`·`destroy` 경합은 시험하지 않았고, 장치 손실 주입도 실제 wgpu 비동기 콜백과 UI 스레드의 경합을 재현하지 않습니다.
-- 실제 GPU 드라이버가 만든 손실, 실기기 동작, 실제 멀티윈도우·외부 디스플레이 흐름은 검증하지 않았으므로 제품 안정성 근거에 포함하지 않습니다.
+- 실제 GPU 드라이버가 만든 손실과 실기기 동작은 검증하지 않았습니다. Android 에뮬레이터 분할 화면은 확인했지만 작은 패널에서 데모 레이아웃이 겹칩니다. iPadOS Stage Manager는 부동 창 진입만 확인했으며 반복 크기 변경과 외부 디스플레이 흐름은 검증하지 않았으므로 제품 안정성 근거에 포함하지 않습니다.
 
 ## 적대적 검토 5회
 
@@ -66,6 +70,6 @@ xcrun simctl launch booted dev.spinon.bootstrap --spinon-r13 --spinon-r13-window
 2. **오류 코드·FFI 경계:** `-3/-4/-5` 복구 대상과 `-2` 임시 오류가 코드·명세에서 일치합니다. 렌더러 호출은 UI 스레드에서 직렬화하고, 비동기 장치 손실 콜백은 원자 상태만 갱신합니다. 동시 FFI 경합과 실제 비동기 콜백 경합은 이 실험에서 실행하지 않았습니다.
 3. **Android 수명·복구:** 일시 중지 중 그리기를 막고 표면 재생성·복귀 뒤 재시도합니다. 복구는 한 번만 수행하며 실패를 반복 재시도하지 않습니다.
 4. **iOS 수명·모드 격리:** 첫 검토에서 R13 수명주기 처리가 R08 경로에도 번지는 점과 R08 앱 시작 시 비활성 상태가 첫 그리기를 막을 수 있는 점을 찾아 수정했습니다. 최종 빌드에서 두 모드의 회귀 로그와 화면을 다시 확인했습니다.
-5. **증거·주장 범위:** Android는 SwiftShader CPU 어댑터, iOS는 시뮬레이터 GPU입니다. 장치 손실과 `SurfaceOutdated`는 상태 주입이며 실기기 성능이나 실제 드라이버 손실을 검증했다는 주장은 하지 않습니다. 창 분리·재부착은 진단 인자로 확인했지만 실제 멀티윈도우 환경 전체를 검증한 것은 아닙니다.
+5. **증거·주장 범위:** Android는 SwiftShader CPU 어댑터, iOS는 시뮬레이터 GPU입니다. 장치 손실과 `SurfaceOutdated`는 상태 주입이며 실기기 성능이나 실제 드라이버 손실을 검증했다는 주장은 하지 않습니다. Android 에뮬레이터 분할 화면과 표면 재생성을 확인했지만 작은 창에서 데모 콘텐츠가 겹칩니다. iPad Stage Manager는 창 진입과 크기 로그 한 건만 확인했고, 반복 크기 조절·외부 디스플레이·실제 기기는 검증하지 않았습니다.
 
 검토에서 찾은 모드 격리 결함을 수정한 뒤 Android·iOS 빌드, Rust/Bun 테스트와 양 플랫폼 R08 화면을 다시 확인했습니다. 위에 적은 환경·재현 한계는 남아 있습니다.

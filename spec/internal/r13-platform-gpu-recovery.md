@@ -36,9 +36,11 @@ Android 실행은 `--ez spinon_r13 true`에 `--ei spinon_r13_failure 1|2|3|4`를
 ## 완료 판정 범위와 한계
 
 - Android 에뮬레이터에서 회전으로 Activity·표면이 재생성된 후 렌더러가 다시 만들어지고, 세로·가로 방향에서 입력이 동작하는 것을 확인했습니다.
+- iOS 시뮬레이터의 [세로 화면 캡처](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-ios-touch-portrait.png)는 중앙 GPU 도형을 한 번 탭한 뒤의 상태입니다. 도형이 주황색으로 바뀌고 활성화 횟수가 1회로 표시됩니다. 이는 R13 데모 입력 경로의 검증이며 제품 이벤트 API 지원을 뜻하지 않습니다.
+- Android API 36 에뮬레이터에서 Spinon과 Chrome을 실제 분할 화면 작업으로 열고 구분선을 움직였습니다. GPU 표면은 `1080x1187`에서 `1080x735`로 바뀐 뒤 다시 `1080x1187`로 재생성되었습니다. 작은 패널에서는 데모 콘텐츠가 겹치거나 잘려, 반응형 레이아웃은 검증되지 않았습니다. 화면과 로그는 [멀티윈도우 검증 기록](https://github.com/ohah/spinon/blob/feat/r13-platform-gpu-recovery/spec/internal/evidence/r13-android-multiwindow.log)에 있습니다.
 - Android와 iOS 시뮬레이터에서 표면 손실·장치 손실 상태를 각각 주입해 새 렌더러 생성과 재그리기를 확인했습니다.
 - 양쪽에서 백그라운드 복귀를 확인했습니다. Android는 실제 `SurfaceHolder` 파괴·생성 로그가 남았습니다. iOS는 비활성·활성 이후 다시 그려지는 동작을 확인했습니다.
-- iOS 회전에서는 `CAMetalLayer` drawable 크기 갱신과 wgpu surface 재구성을 확인했습니다. 창 분리·재부착은 `--spinon-r13-window-cycle` 개발 진단으로 시뮬레이터에서 확인했습니다. 실제 멀티윈도우·외부 디스플레이 환경 전체를 대표하지는 않습니다.
+- iOS 회전에서는 `CAMetalLayer` drawable 크기 갱신과 wgpu surface 재구성을 확인했습니다. iPadOS Stage Manager에서 앱을 부동 창으로 전환하고 표면 크기 로그 한 건을 확인했지만, 반복적인 실시간 크기 변경 처리는 확인하지 못했습니다. 창 분리·재부착은 `--spinon-r13-window-cycle` 개발 진단으로도 확인했습니다. 실제 기기와 외부 디스플레이는 검증하지 않았습니다.
 - 실제 GPU 드라이버·OS에 의한 장치 손실은 재현하지 않았습니다. `device` 주입은 실제 드라이버 손실 대신 같은 원자 손실 상태와 호스트 오류 경계를 검사합니다.
 - `outdated` 주입은 OS에서 실제 `wgpu::CurrentSurfaceTexture::Outdated`가 발생한 결과가 아니라 호스트의 `-4` 복구 분기를 검사합니다. `temporary`는 `-2` 자동 복구 제외 분기를 검사하며, 이 결과만으로 모든 일시 오류의 정책을 확정하지 않습니다.
 - 렌더러 핸들의 FFI 호출은 UI 스레드에서 직렬화하는 계약입니다. 동시 `draw`·`resize`·`destroy` 호출 경합은 계약 밖이므로 시험하지 않았습니다. 장치 손실 주입도 원자 상태만 동기적으로 세우며 실제 wgpu 비동기 손실 콜백과 UI 스레드의 경합은 재현하지 않았습니다.
