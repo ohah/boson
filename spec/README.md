@@ -6,7 +6,7 @@
 
 **공식 구현 상태:** [78개 로드맵 항목과 JS API 세부 체크리스트](STATUS.md) · **지원 완료 API:** [API 명세 목록](api/README.md). 구현 항목은 API/인터페이스 명세와 동작 근거를 함께 등록해야 완료로 표시한다.
 
-초기 빌드 연결에만 쓰는 내부 인터페이스는 [내부 명세 목록](internal/README.md)에 둔다. 내부 부트스트랩의 존재는 앱 작성자용 API 지원을 뜻하지 않는다.
+앱 작성자용 공개 API가 아닌 내부 구현 경계의 인터페이스 명세는 [내부 명세 목록](internal/README.md)에 둔다. 내부 명세의 존재는 앱 작성자용 API 지원을 뜻하지 않는다.
 
 ## 문서와 범위
 
@@ -18,7 +18,7 @@
 | 0004 | [실행·빌드·배포](0004-runtime-build.md) | JS 런타임, 웹/모바일 산출물, OTA 경계 |
 | 0005 | [개발 도구](0005-developer-tools.md) | CLI, HMR, Inspector, MCP의 역할 |
 | 0006 | [라우팅과 화면 이동](0006-routing.md) | 웹 URL·모바일 화면 스택·딥링크·뒤로 가기 |
-| 0007 | [모바일 DOM 호환 계층](0007-dom-compatibility.md) | 모바일 DOM façade, Rust 문서 트리, 첫 API 후보와 미정 계약 |
+| 0007 | [모바일 DOM 호환 계층](0007-dom-compatibility.md) | 모바일 DOM 호환 계층, Rust 문서 트리, 첫 API 후보와 미정 계약 |
 
 ## 읽는 법
 
