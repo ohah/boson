@@ -34,8 +34,10 @@ public final class MainActivity extends Activity {
             int backend = getIntent().getIntExtra("spinon_r08_backend", 1);
             boolean useWgpu = runR13 || !getIntent().getBooleanExtra("spinon_r08_native", false);
             int failureInjection = getIntent().getIntExtra("spinon_r13_failure", 0);
+            int recoveryFailureInjection = getIntent().getIntExtra("spinon_r13_recovery_failure", 0);
             R08WgpuSurface surface = R08GpuDemo.show(
-                    this, useWgpu, backend, runR13, failureInjection);
+                    this, useWgpu, backend, runR13, failureInjection,
+                    recoveryFailureInjection);
             r13Surface = runR13 ? surface : null;
             return;
         }

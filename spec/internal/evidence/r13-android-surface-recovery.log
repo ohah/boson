@@ -1,0 +1,55 @@
+--------- beginning of main
+09-29 14:07:09.506 13674 13674 I pinon.bootstrap: Late-enabling -Xcheck:jni
+09-29 14:07:09.538 13674 13674 I pinon.bootstrap: Using CollectorTypeCMC GC.
+09-29 14:07:09.552 13674 13674 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+09-29 14:07:09.591 13674 13674 I pinon.bootstrap: AssetManager2(0xb400007b89e314b8) locale list changing from [en-US] to [ko-KR]
+09-29 14:07:09.598 13674 13674 D nativeloader: Configuring clns-9 for other apk /data/app/~~dlvyM7FZKBafCnEJhOiXOw==/dev.spinon.bootstrap-BAU8RTuKWm-D4QyVHd_vMw==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~dlvyM7FZKBafCnEJhOiXOw==/dev.spinon.bootstrap-BAU8RTuKWm-D4QyVHd_vMw==/lib/arm64:/data/app/~~dlvyM7FZKBafCnEJhOiXOw==/dev.spinon.bootstrap-BAU8RTuKWm-D4QyVHd_vMw==/base.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/dev.spinon.bootstrap
+09-29 14:07:09.617 13674 13674 I pinon.bootstrap: AssetManager2(0xb400007b89e2fbb8) locale list changing from [] to [ko-KR]
+09-29 14:07:09.625 13674 13674 V GraphicsEnvironment: Currently set values for:
+09-29 14:07:09.626 13674 13674 V GraphicsEnvironment:   angle_gl_driver_selection_pkgs=[]
+09-29 14:07:09.626 13674 13674 V GraphicsEnvironment:   angle_gl_driver_selection_values=[]
+09-29 14:07:09.626 13674 13674 V GraphicsEnvironment: dev.spinon.bootstrap is not listed in per-application setting
+09-29 14:07:09.626 13674 13674 V GraphicsEnvironment: ANGLE allowlist from config: com.dreamgames.royalmatch com.dts.freefiremax com.dxx.firenow com.gramgames.mergedragons com.ludo.king com.mojang.minecraftpe com.my.defense com.nintendo.zaka com.os.airforce com.playrix.fishdomdd.gplay io.teslatech.callbreak jp.konami.prospia net.peakgames.toonblast
+09-29 14:07:09.626 13674 13674 V GraphicsEnvironment: dev.spinon.bootstrap is not listed in ANGLE allowlist or settings, returning default
+09-29 14:07:09.626 13674 13674 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+--------- beginning of system
+09-29 14:07:09.645 13674 13689 I DisplayManager: Choreographer implicitly registered for the refresh rate.
+09-29 14:07:09.655 13674 13674 I pinon.bootstrap: AssetManager2(0xb400007b89e27238) locale list changing from [] to [ko-KR]
+09-29 14:07:09.686 13674 13674 D nativeloader: Load /data/app/~~dlvyM7FZKBafCnEJhOiXOw==/dev.spinon.bootstrap-BAU8RTuKWm-D4QyVHd_vMw==/base.apk!/lib/arm64-v8a/libspinon_bootstrap.so using class loader ns clns-9 (caller=/data/app/~~dlvyM7FZKBafCnEJhOiXOw==/dev.spinon.bootstrap-BAU8RTuKWm-D4QyVHd_vMw==/base.apk!classes2.dex): ok
+09-29 14:07:09.689 13674 13674 E ashmem  : Pinning is deprecated since Android Q. Please use trim or other methods.
+09-29 14:07:09.727 13674 13674 W HWUI    : Image decoding logging dropped!
+09-29 14:07:09.729 13674 13674 W HWUI    : Image decoding logging dropped!
+09-29 14:07:09.730 13674 13674 W HWUI    : Image decoding logging dropped!
+09-29 14:07:09.744 13674 13689 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+09-29 14:07:09.744 13674 13689 I EGL_emulation: Opening libGLESv2_emulation.so
+09-29 14:07:09.763 13674 13674 D CompatChangeReporter: Compat change id reported: 377864165; UID 10219; state: ENABLED
+09-29 14:07:09.764 13674 13674 D DesktopModeFlags: Toggle override initialized to: OVERRIDE_UNSET
+09-29 14:07:09.777 13674 13674 I SpinonBootstrap: SPINON_R08_UI=ready text-input=EditText accessibility=button+EditText
+09-29 14:07:09.780 13674 13689 W HWUI    : Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-29 14:07:09.782 13674 13689 W HWUI    : Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-29 14:07:09.800 13674 13674 W HWUI    : Unknown dataspace 0
+09-29 14:07:09.946 13674 13674 I SpinonBootstrap: SPINON_R13_SURFACE=created
+09-29 14:07:09.948 13674 13674 W libc    : Access denied finding property "vendor.mesa.log"
+09-29 14:07:09.948 13674 13674 W libc    : Access denied finding property "vendor.mesa.log.file"
+09-29 14:07:09.948 13674 13674 E MESA    : Failed to open rendernode: No such file or directory
+09-29 14:07:09.956 13674 13674 D vulkan  : searching for layers in '/data/app/~~dlvyM7FZKBafCnEJhOiXOw==/dev.spinon.bootstrap-BAU8RTuKWm-D4QyVHd_vMw==/lib/arm64'
+09-29 14:07:09.956 13674 13674 D vulkan  : searching for layers in '/data/app/~~dlvyM7FZKBafCnEJhOiXOw==/dev.spinon.bootstrap-BAU8RTuKWm-D4QyVHd_vMw==/base.apk!/lib/arm64-v8a'
+09-29 14:07:09.958 13674 13674 W libc    : Access denied finding property "vendor.mesa.vk.trace.per.submit"
+09-29 14:07:09.958 13674 13674 W libc    : Access denied finding property "vendor.mesa.gallium.print.optio"
+09-29 14:07:09.958 13674 13674 W libc    : Access denied finding property "vendor.mesa.vk.trace.frame"
+09-29 14:07:09.959 13674 13674 W libc    : Access denied finding property "vendor.mesa.vk.wsi.headless.swa"
+09-29 14:07:10.024 13674 13674 I SpinonBootstrap: SPINON_R08_WGPU=ready backend=Vulkan device=Cpu name=SwiftShader Device (LLVM 10.0.0) format=Rgba8Unorm supported_formats=[Rgba8UnormSrgb, Rgba8Unorm, Rgba16Float, Rgb10a2Unorm]
+09-29 14:07:10.024 13674 13674 I SpinonBootstrap: SPINON_R13_RENDERER=created generation=1 reason=surface_changed
+09-29 14:07:10.025 13674 13674 I SpinonBootstrap: SPINON_R13_FAULT=injected stage=initial kind=1
+09-29 14:07:10.025 13674 13674 I SpinonBootstrap: SPINON_R08_WGPU_SURFACE=size 1080x2400
+09-29 14:07:10.025 13674 13674 E SpinonBootstrap: SPINON_R08_WGPU_DRAW_ERROR code=-3 detail=wgpu surface lost; recreate surface and renderer
+09-29 14:07:10.025 13674 13674 I SpinonBootstrap: SPINON_R13_RECOVERY=started reason=surface_lost generation=1
+09-29 14:07:10.028 13674 13674 W libc    : Access denied finding property "vendor.mesa.vk.trace.per.submit"
+09-29 14:07:10.028 13674 13674 W libc    : Access denied finding property "vendor.mesa.vk.trace.frame"
+09-29 14:07:10.029 13674 13674 W libc    : Access denied finding property "vendor.mesa.vk.wsi.headless.swa"
+09-29 14:07:10.084 13674 13674 I SpinonBootstrap: SPINON_R08_WGPU=ready backend=Vulkan device=Cpu name=SwiftShader Device (LLVM 10.0.0) format=Rgba8Unorm supported_formats=[Rgba8UnormSrgb, Rgba8Unorm, Rgba16Float, Rgb10a2Unorm]
+09-29 14:07:10.084 13674 13674 I SpinonBootstrap: SPINON_R13_RENDERER=created generation=2 reason=recover_surface_lost
+09-29 14:07:10.086 13674 13674 I SpinonBootstrap: SPINON_R13_RECOVERY=complete reason=surface_lost generation=2 redraw=success
+09-29 14:07:10.142 13674 13674 D InsetsController: hide(ime(), fromIme=false)
+09-29 14:07:10.142 13674 13674 I ImeTracker: dev.spinon.bootstrap:1610fd9c: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+09-29 14:07:10.231 13674 13679 I pinon.bootstrap: Compiler allocated 5111KB to compile void android.view.ViewRootImpl.performTraversals()

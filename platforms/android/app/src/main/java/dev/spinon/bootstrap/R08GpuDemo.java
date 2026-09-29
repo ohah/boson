@@ -34,7 +34,8 @@ final class R08GpuDemo {
     private R08GpuDemo() {}
 
     static R08WgpuSurface show(Activity activity, boolean useWgpu, int backend,
-                               boolean r13, int failureInjection) {
+                               boolean r13, int failureInjection,
+                               int recoveryFailureInjection) {
         float density = activity.getResources().getDisplayMetrics().density;
         FrameLayout root = new FrameLayout(activity);
         root.setBackgroundColor(Color.rgb(14, 19, 31));
@@ -43,7 +44,7 @@ final class R08GpuDemo {
         final R08GpuSurfaceControl surface;
         if (useWgpu) {
             R08WgpuSurface wgpuSurface = new R08WgpuSurface(
-                    activity, backend, r13, failureInjection);
+                    activity, backend, r13, failureInjection, recoveryFailureInjection);
             surfaceView = wgpuSurface;
             surface = wgpuSurface;
         } else {
@@ -351,6 +352,8 @@ final class R08WgpuSurface extends SurfaceView
     private int configuredHeight;
     private int rendererGeneration;
     private int pendingFailureInjection;
+    private int pendingRecoveryFailureInjection;
+    private int recoveryFailureForNextRenderer;
     private boolean surfaceAvailable;
     private boolean hostActive = true;
     private boolean resumeRedrawPending;
@@ -361,11 +364,13 @@ final class R08WgpuSurface extends SurfaceView
     private static native int nativeInjectFailure(long renderer, int failureKind);
     private static native void nativeDestroy(long renderer);
 
-    R08WgpuSurface(Activity activity, int backend, boolean r13, int failureInjection) {
+    R08WgpuSurface(Activity activity, int backend, boolean r13, int failureInjection,
+                   int recoveryFailureInjection) {
         super(activity);
         this.backend = backend;
         this.r13 = r13;
         this.pendingFailureInjection = failureInjection;
+        this.pendingRecoveryFailureInjection = recoveryFailureInjection;
         getHolder().addCallback(this);
         setClickable(true);
         setContentDescription((r13 ? "R13" : "R08") + " GPU 도형, 활성화 0회");
@@ -459,11 +464,20 @@ final class R08WgpuSurface extends SurfaceView
                 Log.i(TAG, "SPINON_R13_RENDERER=created generation=" + rendererGeneration
                         + " reason=" + reason);
             }
-            if (pendingFailureInjection != 0) {
-                int injected = nativeInjectFailure(rendererHandle, pendingFailureInjection);
+            int failureInjection = pendingFailureInjection;
+            String injectionStage = "initial";
+            if (failureInjection != 0) {
+                pendingFailureInjection = 0;
+            } else if (recoveryFailureForNextRenderer != 0) {
+                failureInjection = recoveryFailureForNextRenderer;
+                recoveryFailureForNextRenderer = 0;
+                injectionStage = "recovery_redraw";
+            }
+            if (failureInjection != 0) {
+                int injected = nativeInjectFailure(rendererHandle, failureInjection);
                 if (injected == 0) {
-                    Log.i(TAG, "SPINON_R13_FAULT=injected kind=" + pendingFailureInjection);
-                    pendingFailureInjection = 0;
+                    Log.i(TAG, "SPINON_R13_FAULT=injected stage=" + injectionStage
+                            + " kind=" + failureInjection);
                 } else {
                     Log.e(TAG, "SPINON_R13_FAULT=injection_failed code=" + injected);
                 }
@@ -493,6 +507,7 @@ final class R08WgpuSurface extends SurfaceView
             return true;
         }
         if (r13 && isRecoverable(result)) return recoverRenderer(result);
+        if (r13) Log.e(TAG, "SPINON_R13_DRAW=failed code=" + result);
         Log.e(TAG, "SPINON_R08_WGPU_DRAW_ERROR code=" + result);
         return false;
     }
@@ -505,8 +520,11 @@ final class R08WgpuSurface extends SurfaceView
         String reason = failureName(failureCode);
         Log.i(TAG, "SPINON_R13_RECOVERY=started reason=" + reason
                 + " generation=" + rendererGeneration);
+        recoveryFailureForNextRenderer = pendingRecoveryFailureInjection;
+        pendingRecoveryFailureInjection = 0;
         destroyRenderer();
         if (!ensureRenderer("recover_" + reason)) {
+            recoveryFailureForNextRenderer = 0;
             Log.e(TAG, "SPINON_R13_RECOVERY=failed reason=" + reason + " stage=create");
             return false;
         }

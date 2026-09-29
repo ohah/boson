@@ -22,12 +22,28 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             let failureInjection: Int32 = switch failureName {
                 case "surface": 1
                 case "device": 2
+                case "outdated": 3
+                case "temporary": 4
                 default: 0
             }
+            let recoveryFailureArgument = arguments.first {
+                $0.hasPrefix("--spinon-r13-recovery-failure=")
+            }
+            let recoveryFailureName = recoveryFailureArgument?.components(separatedBy: "=").last
+            let recoveryFailureInjection: Int32 = switch recoveryFailureName {
+                case "surface": 1
+                case "device": 2
+                case "outdated": 3
+                case "temporary": 4
+                default: 0
+            }
+            let runWindowCycle = arguments.contains("--spinon-r13-window-cycle")
             let window = UIWindow(frame: UIScreen.main.bounds)
             window.rootViewController = R08GpuDemoViewController(
                 useWgpu: useWgpu, r13Enabled: isR13,
-                r13FailureInjection: isR13 ? failureInjection : 0)
+                r13FailureInjection: isR13 ? failureInjection : 0,
+                r13RecoveryFailureInjection: isR13 ? recoveryFailureInjection : 0,
+                r13WindowCycle: isR13 && runWindowCycle)
             window.makeKeyAndVisible()
             self.window = window
             return true

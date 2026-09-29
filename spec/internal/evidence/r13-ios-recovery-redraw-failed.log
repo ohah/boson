@@ -1,0 +1,9 @@
+Timestamp               Ty Process[PID:TID]
+2026-09-29 14:00:58.166 Df SpinonBootstrap[27518:24d97a7] [dev.spinon.bootstrap:r08] SPINON_R08_UI=ready text-input=UITextField accessibility=button+UITextField
+2026-09-29 14:00:58.180 Df SpinonBootstrap[27518:24d97a7] [dev.spinon.bootstrap:r08] SPINON_R13_RENDERER=created generation=1 reason=layout
+2026-09-29 14:00:58.180 Df SpinonBootstrap[27518:24d97a7] [dev.spinon.bootstrap:r08] SPINON_R13_FAULT=injected stage=initial kind=3
+2026-09-29 14:00:58.240 Df SpinonBootstrap[27518:24d97a7] [dev.spinon.bootstrap:r08] SPINON_R13_HOST=active
+2026-09-29 14:00:58.240 Df SpinonBootstrap[27518:24d97a7] [dev.spinon.bootstrap:r08] SPINON_R13_RECOVERY=started reason=surface_outdated generation=1
+2026-09-29 14:00:58.244 Df SpinonBootstrap[27518:24d97a7] [dev.spinon.bootstrap:r08] SPINON_R13_RENDERER=created generation=2 reason=recover_surface_outdated
+2026-09-29 14:00:58.244 Df SpinonBootstrap[27518:24d97a7] [dev.spinon.bootstrap:r08] SPINON_R13_FAULT=injected stage=recovery_redraw kind=1
+2026-09-29 14:00:58.244 E  SpinonBootstrap[27518:24d97a7] [dev.spinon.bootstrap:r08] SPINON_R13_RECOVERY=failed reason=surface_outdated stage=redraw code=-3

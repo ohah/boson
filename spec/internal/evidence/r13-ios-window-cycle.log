@@ -1,0 +1,10 @@
+Timestamp               Ty Process[PID:TID]
+2026-09-29 14:06:41.146 Df SpinonBootstrap[39421:24e2914] [dev.spinon.bootstrap:r08] SPINON_R08_UI=ready text-input=UITextField accessibility=button+UITextField
+2026-09-29 14:06:41.171 Df SpinonBootstrap[39421:24e2914] [dev.spinon.bootstrap:r08] SPINON_R13_RENDERER=created generation=1 reason=layout
+2026-09-29 14:06:41.230 Df SpinonBootstrap[39421:24e2914] [dev.spinon.bootstrap:r08] SPINON_R13_HOST=active
+2026-09-29 14:06:41.233 Df SpinonBootstrap[39421:24e2914] [dev.spinon.bootstrap:r08] SPINON_R08_WGPU_FRAME=first_draw_submitted
+2026-09-29 14:06:41.233 Df SpinonBootstrap[39421:24e2914] [dev.spinon.bootstrap:r08] SPINON_R13_FRAME=submitted generation=1
+2026-09-29 14:06:41.649 Df SpinonBootstrap[39421:24e2914] [dev.spinon.bootstrap:r08] SPINON_R13_SURFACE=detached
+2026-09-29 14:06:41.649 Df SpinonBootstrap[39421:24e2914] [dev.spinon.bootstrap:r08] SPINON_R13_WINDOW_CYCLE=detached
+2026-09-29 14:06:41.912 Df SpinonBootstrap[39421:24e2914] [dev.spinon.bootstrap:r08] SPINON_R13_RENDERER=created generation=2 reason=layout
+2026-09-29 14:06:41.923 Df SpinonBootstrap[39421:24e2914] [dev.spinon.bootstrap:r08] SPINON_R13_WINDOW_CYCLE=reattached

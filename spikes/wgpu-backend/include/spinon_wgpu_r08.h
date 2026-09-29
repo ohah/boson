@@ -17,6 +17,8 @@ enum SpinonWgpuR08Backend {
 enum SpinonWgpuR13InjectedFailure {
   SPINON_WGPU_R13_SURFACE_LOST = 1,
   SPINON_WGPU_R13_DEVICE_LOST = 2,
+  SPINON_WGPU_R13_SURFACE_OUTDATED = 3,
+  SPINON_WGPU_R13_TEMPORARY_ERROR = 4,
 };
 
 // R08 실험 호출 계약: 생성에 성공하면 반환 핸들을 정확히 한 번 destroy한다.
@@ -31,7 +33,7 @@ void *spinon_wgpu_create_uikit(void *ui_view, uint32_t width, uint32_t height,
 int32_t spinon_wgpu_draw(void *renderer, uint32_t activation_count,
                          char *output, size_t output_capacity);
 int32_t spinon_wgpu_resize(void *renderer, uint32_t width, uint32_t height);
-// R13 실험 전용: 다음 draw에서 표면 손실 또는 장치 손실 결과를 한 번 주입한다.
+// R13 실험 전용: 다음 draw에서 지정한 오류 결과를 한 번 주입한다.
 int32_t spinon_wgpu_r13_inject_failure(void *renderer, uint32_t failure_kind);
 void spinon_wgpu_destroy(void *renderer);
 

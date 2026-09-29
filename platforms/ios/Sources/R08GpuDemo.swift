@@ -7,18 +7,23 @@ final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
     private let canvas: UIView
     private let useWgpu: Bool
     private let r13Enabled: Bool
+    private let r13WindowCycle: Bool
     private let titleLabel = UILabel()
     private let statusLabel = UILabel()
     private let inputField = UITextField()
 
     init(useWgpu: Bool = false, r13Enabled: Bool = false,
-         r13FailureInjection: Int32 = 0) {
+         r13FailureInjection: Int32 = 0,
+         r13RecoveryFailureInjection: Int32 = 0,
+         r13WindowCycle: Bool = false) {
         self.useWgpu = useWgpu
         self.r13Enabled = r13Enabled
+        self.r13WindowCycle = r13WindowCycle
         self.canvas = useWgpu
             ? R08WgpuCanvasView(
                 frame: .zero, r13Enabled: r13Enabled,
-                r13FailureInjection: r13FailureInjection)
+                r13FailureInjection: r13FailureInjection,
+                r13RecoveryFailureInjection: r13RecoveryFailureInjection)
             : R08MetalCanvasView(frame: .zero, device: MTLCreateSystemDefaultDevice())
         super.init(nibName: nil, bundle: nil)
     }
@@ -26,6 +31,7 @@ final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
     required init?(coder: NSCoder) {
         self.useWgpu = false
         self.r13Enabled = false
+        self.r13WindowCycle = false
         self.canvas = R08MetalCanvasView(frame: .zero, device: MTLCreateSystemDefaultDevice())
         super.init(coder: coder)
     }
@@ -78,11 +84,8 @@ final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
         (canvas as? R08MetalCanvasView)?.onActivate = onActivate
         (canvas as? R08WgpuCanvasView)?.onActivate = onActivate
 
+        constrainCanvasToRootView()
         NSLayoutConstraint.activate([
-            canvas.topAnchor.constraint(equalTo: view.topAnchor),
-            canvas.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            canvas.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            canvas.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 22),
             titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -22),
@@ -95,7 +98,33 @@ final class R08GpuDemoViewController: UIViewController, UITextFieldDelegate {
             inputField.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -14)
         ])
 
+        if r13WindowCycle { runWindowCycleDiagnostic() }
+
         logger.notice("SPINON_R08_UI=ready text-input=UITextField accessibility=button+UITextField")
+    }
+
+    private func constrainCanvasToRootView() {
+        NSLayoutConstraint.activate([
+            canvas.topAnchor.constraint(equalTo: view.topAnchor),
+            canvas.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            canvas.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            canvas.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+
+    private func runWindowCycleDiagnostic() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) { [weak self] in
+            guard let self, self.canvas.window != nil else { return }
+            self.canvas.removeFromSuperview()
+            self.logger.notice("SPINON_R13_WINDOW_CYCLE=detached")
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(250)) { [weak self] in
+                guard let self else { return }
+                self.view.insertSubview(self.canvas, at: 0)
+                self.constrainCanvasToRootView()
+                self.view.layoutIfNeeded()
+                self.logger.notice("SPINON_R13_WINDOW_CYCLE=reattached")
+            }
+        }
     }
 
     override func viewDidLayoutSubviews() {
@@ -127,6 +156,8 @@ private final class R08WgpuCanvasView: UIView {
     private var configuredSize = CGSize.zero
     private var rendererGeneration = 0
     private var pendingFailureInjection: Int32
+    private var pendingRecoveryFailureInjection: Int32
+    private var recoveryFailureForNextRenderer: Int32 = 0
     private var hostActive: Bool
     private var hasReachedActiveState = false
     private var resumeRedrawPending = false
@@ -135,9 +166,11 @@ private final class R08WgpuCanvasView: UIView {
     override class var layerClass: AnyClass { CAMetalLayer.self }
 
     init(frame: CGRect, r13Enabled: Bool = false,
-         r13FailureInjection: Int32 = 0) {
+         r13FailureInjection: Int32 = 0,
+         r13RecoveryFailureInjection: Int32 = 0) {
         self.r13Enabled = r13Enabled
         self.pendingFailureInjection = r13FailureInjection
+        self.pendingRecoveryFailureInjection = r13RecoveryFailureInjection
         self.hostActive = r13Enabled
             ? UIApplication.shared.applicationState == .active
             : true
@@ -148,6 +181,7 @@ private final class R08WgpuCanvasView: UIView {
     required init?(coder: NSCoder) {
         self.r13Enabled = false
         self.pendingFailureInjection = 0
+        self.pendingRecoveryFailureInjection = 0
         self.hostActive = true
         super.init(coder: coder)
         configure()
@@ -209,12 +243,14 @@ private final class R08WgpuCanvasView: UIView {
         if result == 0, !firstFrameLogged {
             firstFrameLogged = true
             logger.notice("SPINON_R08_WGPU_FRAME=first_draw_submitted")
-            if r13Enabled { logger.notice("SPINON_R13_FRAME=presented generation=\(self.rendererGeneration)") }
+            if r13Enabled { logger.notice("SPINON_R13_FRAME=submitted generation=\(self.rendererGeneration)") }
         }
         if result == 0 {
             logResumeRedrawSuccess()
         } else if r13Enabled && isRecoverable(result) {
             recoverRenderer(failureCode: result)
+        } else if r13Enabled {
+            logger.error("SPINON_R13_DRAW=failed code=\(result)")
         }
     }
 
@@ -246,12 +282,19 @@ private final class R08WgpuCanvasView: UIView {
             if r13Enabled {
                 logger.notice("SPINON_R13_RENDERER=created generation=\(self.rendererGeneration) reason=\(reason)")
             }
-            if pendingFailureInjection != 0, let renderer {
-                let failure = pendingFailureInjection
+            var failure = pendingFailureInjection
+            var injectionStage = "initial"
+            if failure != 0 {
+                pendingFailureInjection = 0
+            } else if recoveryFailureForNextRenderer != 0 {
+                failure = recoveryFailureForNextRenderer
+                recoveryFailureForNextRenderer = 0
+                injectionStage = "recovery_redraw"
+            }
+            if failure != 0, let renderer {
                 let result = SpinonRunner.injectR13Failure(renderer, kind: UInt32(failure))
                 if result == 0 {
-                    logger.notice("SPINON_R13_FAULT=injected kind=\(failure)")
-                    pendingFailureInjection = 0
+                    logger.notice("SPINON_R13_FAULT=injected stage=\(injectionStage) kind=\(failure)")
                 } else {
                     logger.error("SPINON_R13_FAULT=injection_failed code=\(result)")
                 }
@@ -286,6 +329,8 @@ private final class R08WgpuCanvasView: UIView {
     private func recoverRenderer(failureCode: Int32) {
         let reason = failureName(failureCode)
         logger.notice("SPINON_R13_RECOVERY=started reason=\(reason) generation=\(self.rendererGeneration)")
+        recoveryFailureForNextRenderer = pendingRecoveryFailureInjection
+        pendingRecoveryFailureInjection = 0
         destroyRenderer()
         guard let window else {
             logger.error("SPINON_R13_RECOVERY=failed reason=\(reason) stage=detached")
@@ -296,6 +341,7 @@ private final class R08WgpuCanvasView: UIView {
         let height = UInt32(max(1, Int((bounds.height * scale).rounded())))
         guard ensureRenderer(width: width, height: height, reason: "recover_\(reason)"),
               let renderer else {
+            recoveryFailureForNextRenderer = 0
             logger.error("SPINON_R13_RECOVERY=failed reason=\(reason) stage=create")
             return
         }
