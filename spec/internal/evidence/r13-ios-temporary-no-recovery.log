@@ -1,0 +1,9 @@
+Timestamp               Ty Process[PID:TID]
+2026-09-29 14:14:41.292 Df SpinonBootstrap[63449:24f69dc] [dev.spinon.bootstrap:r08] SPINON_R08_UI=ready text-input=UITextField accessibility=button+UITextField
+2026-09-29 14:14:41.307 Df SpinonBootstrap[63449:24f69dc] [dev.spinon.bootstrap:r08] SPINON_R13_RENDERER=created generation=1 reason=layout
+2026-09-29 14:14:41.307 Df SpinonBootstrap[63449:24f69dc] [dev.spinon.bootstrap:r08] SPINON_R13_FAULT=injected stage=initial kind=4
+2026-09-29 14:14:41.368 Df SpinonBootstrap[63449:24f69dc] [dev.spinon.bootstrap:r08] SPINON_R13_HOST=active
+2026-09-29 14:14:41.368 E  SpinonBootstrap[63449:24f69dc] [dev.spinon.bootstrap:r08] SPINON_R13_DRAW=failed code=-2
+2026-09-29 14:14:42.963 Df SpinonBootstrap[63449:24f69dc] [dev.spinon.bootstrap:r08] SPINON_R13_TOUCH count=1
+2026-09-29 14:14:42.966 Df SpinonBootstrap[63449:24f69dc] [dev.spinon.bootstrap:r08] SPINON_R08_WGPU_FRAME=first_draw_submitted
+2026-09-29 14:14:42.966 Df SpinonBootstrap[63449:24f69dc] [dev.spinon.bootstrap:r08] SPINON_R13_FRAME=submitted generation=1

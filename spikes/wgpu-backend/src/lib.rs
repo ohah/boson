@@ -78,6 +78,22 @@ impl DrawFailure {
     }
 }
 
+fn injected_failure(failure_kind: u32) -> Option<DrawFailure> {
+    match failure_kind {
+        1 => Some(DrawFailure::SurfaceLost),
+        2 => Some(DrawFailure::DeviceLost),
+        3 => Some(DrawFailure::SurfaceOutdated),
+        4 => Some(DrawFailure::Temporary(
+            "injected temporary surface error".to_owned(),
+        )),
+        _ => None,
+    }
+}
+
+fn is_supported_failure_kind(failure_kind: u32) -> bool {
+    injected_failure(failure_kind).is_some()
+}
+
 impl Renderer {
     unsafe fn new(
         display: RawDisplayHandle,
@@ -204,11 +220,9 @@ impl Renderer {
 
     fn draw(&mut self, activation_count: u32) -> Result<(), DrawFailure> {
         if let Some(failure) = self.injected_failure.take() {
-            return Err(match failure {
-                1 => DrawFailure::SurfaceLost,
-                2 => DrawFailure::DeviceLost,
-                _ => DrawFailure::Temporary("unknown injected R13 failure".to_owned()),
-            });
+            return Err(injected_failure(failure).unwrap_or_else(|| {
+                DrawFailure::Temporary("unknown injected R13 failure".to_owned())
+            }));
         }
         if self.device_lost.load(Ordering::Acquire) {
             return Err(DrawFailure::DeviceLost);
@@ -406,11 +420,11 @@ pub unsafe extern "C" fn spinon_wgpu_r13_inject_failure(
     let Some(renderer) = (unsafe { renderer.cast::<Renderer>().as_mut() }) else {
         return -1;
     };
-    if !matches!(failure_kind, 1 | 2) {
+    if !is_supported_failure_kind(failure_kind) {
         return -2;
     }
     match failure_kind {
-        1 => renderer.injected_failure = Some(failure_kind),
+        1 | 3 | 4 => renderer.injected_failure = Some(failure_kind),
         2 => renderer.device_lost.store(true, Ordering::Release),
         _ => unreachable!("failure kind was validated above"),
     }
@@ -442,7 +456,7 @@ pub unsafe extern "C" fn spinon_wgpu_destroy(renderer: *mut c_void) {
 
 #[cfg(test)]
 mod r13_tests {
-    use super::DrawFailure;
+    use super::{injected_failure, is_supported_failure_kind, DrawFailure};
 
     #[test]
     fn recovery_failures_have_stable_host_codes() {
@@ -450,5 +464,18 @@ mod r13_tests {
         assert_eq!(DrawFailure::SurfaceOutdated.code(), -4);
         assert_eq!(DrawFailure::DeviceLost.code(), -5);
         assert_eq!(DrawFailure::Temporary("timeout".to_owned()).code(), -2);
+    }
+
+    #[test]
+    fn injected_failure_kinds_cover_recovery_and_non_recovery_paths() {
+        for (kind, expected_code) in [(1, -3), (2, -5), (3, -4), (4, -2)] {
+            assert_eq!(
+                injected_failure(kind).map(|failure| failure.code()),
+                Some(expected_code)
+            );
+            assert!(is_supported_failure_kind(kind));
+        }
+        assert!(!is_supported_failure_kind(0));
+        assert!(!is_supported_failure_kind(5));
     }
 }

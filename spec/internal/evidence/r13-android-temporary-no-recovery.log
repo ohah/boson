@@ -1,0 +1,11 @@
+--------- beginning of main
+09-29 14:15:18.496 13878 13878 I SpinonBootstrap: SPINON_R08_UI=ready text-input=EditText accessibility=button+EditText
+09-29 14:15:18.748 13878 13878 I SpinonBootstrap: SPINON_R13_SURFACE=created
+09-29 14:15:18.833 13878 13878 I SpinonBootstrap: SPINON_R08_WGPU=ready backend=Vulkan device=Cpu name=SwiftShader Device (LLVM 10.0.0) format=Rgba8Unorm supported_formats=[Rgba8UnormSrgb, Rgba8Unorm, Rgba16Float, Rgb10a2Unorm]
+09-29 14:15:18.833 13878 13878 I SpinonBootstrap: SPINON_R13_RENDERER=created generation=1 reason=surface_changed
+09-29 14:15:18.833 13878 13878 I SpinonBootstrap: SPINON_R13_FAULT=injected stage=initial kind=4
+09-29 14:15:18.833 13878 13878 I SpinonBootstrap: SPINON_R08_WGPU_SURFACE=size 1080x2400
+09-29 14:15:18.833 13878 13878 E SpinonBootstrap: SPINON_R08_WGPU_DRAW_ERROR code=-2 detail=injected temporary surface error
+09-29 14:15:18.833 13878 13878 E SpinonBootstrap: SPINON_R13_DRAW=failed code=-2
+09-29 14:15:18.833 13878 13878 E SpinonBootstrap: SPINON_R08_WGPU_DRAW_ERROR code=-2
+09-29 14:15:20.925 13878 13878 I SpinonBootstrap: SPINON_R13_TOUCH count=1
