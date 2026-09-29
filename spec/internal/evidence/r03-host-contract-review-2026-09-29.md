@@ -5,7 +5,7 @@
 - [내부 인터페이스 0003 · 공통 문서·호스트 계약 초안](../0003-shared-host-contract.md)
 - [UI 트리·이벤트 제안](../../0002-ui-tree-events.md)
 - [모바일 DOM 호환 제안](../../0007-dom-compatibility.md)
-- 대조한 구현·계획: [S01 Rust 트리 코어](../0002-rust-tree-core.md), [GPU 렌더러 구현 계획](../../../docs/plans/renderer.md), [모노레포 구현 계획](../../../docs/plans/implementation.md)
+- 대조한 구현·계획: [S01 Rust 트리 코어](../0002-rust-tree-core.md), [GPU 렌더러 구현 계획](https://github.com/ohah/spinon/blob/main/docs/plans/renderer.md), [모노레포 구현 계획](https://github.com/ohah/spinon/blob/main/docs/plans/implementation.md)
 
 이 작업은 내부 설계 문서 산출물입니다. 실행 코드, 앱 작성 API, 브라우저·시뮬레이터 동작의 구현 증거는 추가하지 않았습니다.
 
