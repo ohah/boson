@@ -157,7 +157,7 @@ Xcode build phase가 Bun 번들 → Rust 정적 라이브러리 → V8 C++ 어�
 | 7. Rspack·Vue·Svelte·CLI | 코어 호스트 계약을 재사용해 어댑터와 도구 지원 추가. TypeScript CLI를 Node LTS용으로 배포 | `packages/bundlers/rspack`, `packages/frameworks/vue`, `packages/frameworks/svelte`, `packages/cli` | 각 조합의 지원표와 통합 테스트가 있음 |
 | 8. 성능·OTA | 같은 fixture·릴리스 빌드에서 비교, 매니페스트·서명·청크·롤백 구현과 호환성 검사 | `tests/`, `packages/cli`, OTA 모듈 | 앱스토어 정책 확인과 대상 플랫폼별 복구·부분 배포 증거 확보 |
 
-단계 0의 설정은 코어 공개 계약을 대신하지 않습니다. S01은 R03의 Rust 트리 작업과 R06의 Rust 커밋 원자성만 닫습니다. 웹·모바일 공통 이벤트·프레임워크 매핑은 R03에, V8·UI thread affinity·취소·경계 수명은 R06에 남깁니다. 레이아웃에는 R10, GPU 렌더러에는 R08, CSS 빌드 변환에는 R11, 성능 비교에는 R04·R05 근거를 요구합니다. 제품 완료 표시는 단계가 끝났다는 이유만으로 바꾸지 않고, [공식 상태 대장 규칙](../../spec/STATUS.md)에 필요한 명세와 실행 근거가 있을 때만 갱신합니다.
+단계 0의 설정은 코어 공개 계약을 대신하지 않습니다. S01은 R03의 Rust 트리 작업과 R06의 Rust 커밋 원자성만 닫습니다. 웹·모바일 공통 이벤트·프레임워크 매핑은 R03에, V8·UI thread affinity·취소·경계 수명은 R06에 남깁니다. R06 후보 규칙과 현재 정적 증거는 [내부 위험 분석](../../spec/internal/0004-thread-ownership-risks.md)에 있으며 S03의 실행 검증을 대신하지 않습니다. 레이아웃에는 R10, GPU 렌더러에는 R08, CSS 빌드 변환에는 R11, 성능 비교에는 R04·R05 근거를 요구합니다. 제품 완료 표시는 단계가 끝났다는 이유만으로 바꾸지 않고, [공식 상태 대장 규칙](../../spec/STATUS.md)에 필요한 명세와 실행 근거가 있을 때만 갱신합니다.
 
 ## 단계별 병렬 작업 경계
 
