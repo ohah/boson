@@ -1,6 +1,6 @@
 # 내부 인터페이스 0005 · V8 런타임 세션 실험
 
-**상태:** 실험 전용 · **인터페이스 버전:** `0.1.0-draft` · **공개 API:** 아님 · **분리 후 검증:** 저장 공간 확보 뒤 Bun 1개·Rust 33개 테스트, Android ARM64 빌드·에뮬레이터 실행, iOS 시뮬레이터 빌드·자동 실행 통과. Android·iOS 모두 취소·대기 이벤트·owner thread를 확인했고, iOS에서는 heartbeat와 세션 재생성도 확인. 실제 V8 혼합 우선순위 경합·기아, 실기기와 JITless 검증은 미완료
+**상태:** 실험 전용 · **인터페이스 버전:** `0.1.0-draft` · **공개 API:** 아님 · **분리 후 검증:** 저장 공간 확보 뒤 Bun 1개·Rust 33개 테스트, Android ARM64 빌드·에뮬레이터 실행, iOS 시뮬레이터 빌드·자동 실행 통과. 후속 실제 V8 우선순위 단일 배치 검증은 Android 16 에뮬레이터와 iPhone 17 Pro / iOS 26.2 시뮬레이터에서 통과했다. 장기 기아·공정성, 실기기와 JITless 검증은 미완료
 
 이 문서는 한 JavaScript 런타임 세션이 V8 Isolate 하나를 소유하는 실험 인터페이스다. `spinon-runtime`이 Rust 전용 OS 스레드에서 V8을 초기화하고 일반 V8 호출을 직렬 처리한다. `spinon-ffi`는 플랫폼용 C ABI의 인자·버퍼·불투명 핸들을 검사하고 런타임 호출에 위임한다. Android와 iOS 개발 화면에서 입력·취소·재사용·종료 경계를 확인한다. 이 구현은 제품 스레드 정책이나 R06 완료를 뜻하지 않는다. 결정된 기본 실행 방향과 미정 구현 경계는 [UI 트리·이벤트 명세](../0002-ui-tree-events.md)를 따른다.
 
@@ -8,6 +8,7 @@
 
 - Android ARM64 앱 경로: V8 소스의 `out/boson-android-mac/args.gn`에서 `v8_jitless = false`를 확인했다. Android 16 에뮬레이터에서 백그라운드 입력, 실제 V8 취소 후 같은 Isolate 재사용, Activity 종료·세션 재생성, 플랫폼 작업 대기열 압력을 확인했다.
 - iOS ARM64 시뮬레이터: iPhone 17 Pro / iOS 26.2에서 백그라운드 부팅, 수동 UIKit 입력, 실제 V8 무한 평가 취소 후 대기 이벤트 처리, 세션 종료·재생성을 확인했다. 분리 후 빌드에서도 자동 시나리오를 다시 통과했다. 시뮬레이터 V8 GN 설정은 `v8_jitless = false`다. 실기기 실행과 JITless 기기 정책은 확인하지 않았다.
+- 우선순위 선택: Android 16 ARM64 에뮬레이터와 iPhone 17 Pro / iOS 26.2 시뮬레이터에서 실제 V8 차단 작업을 취소한 뒤 섞어서 접수한 여섯 작업의 strict-priority 선택 및 등급별 FIFO를 확인했다. 두 환경의 V8 GN 설정은 `v8_jitless = false`다. 검증 절차와 원본은 [실제 V8 우선순위 시뮬레이터 검증](evidence/r06-priority-simulators-2026-09-30.md)에 둔다.
 - 공개 DOM·HostDocument·GPU·React·Fetch·Promise·타이머 API는 범위 밖이다.
 - 스레드 수·공정성·성능에 관한 비교 결론은 내리지 않는다.
 
@@ -39,6 +40,7 @@
 | 세션 생성 | `RuntimeSession::new() -> Result<(RuntimeSession, String), String>` | 전용 OS 스레드와 V8 Isolate 준비를 기다리고 시작 보고를 반환한다. 초기화 실패는 오류 문자열로 돌려준다. |
 | JavaScript 평가 | `eval(&self, source: &str, priority: TaskPriority) -> OperationResponse` | 작업을 제한된 우선순위 큐에 넣고 완료를 기다린다. Rust 문자열에 NUL이 있으면 인자 오류 `-1`을 돌려준다. |
 | 이벤트 전달 | `dispatch(&self, node_id: i32, priority: TaskPriority) -> OperationResponse` | 지정한 노드 ID 이벤트를 같은 Isolate 소유 스레드에서 처리한다. |
+| 우선순위 진단 | `run_priority_probe() -> Result<String, String>` | 새 세션에서 실제 V8 단일 배치의 세 등급 선택·등급별 FIFO와 callback owner thread를 검사한다. 앱 API가 아닌 개발용 시뮬레이터 진단이다. |
 | 취소 | `cancel(&self) -> i32` | 실행 중 평가 취소 요청은 `0`, 실행 중 작업 없음은 `1`, 실패는 음수다. 대기 작업은 취소하지 않는다. |
 | 응답 | `OperationResponse { status, report }` | Rust 상태 코드와 진단 보고 문자열이다. C 버퍼 복사는 FFI 어댑터가 맡는다. |
 | 종료 | `Drop for RuntimeSession` | 새 작업을 막고 활성 JS 취소를 요청한 뒤 큐를 닫고 작업자 스레드를 join한다. 제한 시간은 없다. |
@@ -56,6 +58,7 @@
 | `spinon_runtime_session_eval_with_priority` | eval과 같은 상태 코드 | 내부 실험용으로 세 등급 중 지정 |
 | `spinon_runtime_session_dispatch` | eval과 같은 상태 코드 | 기본 `user-blocking`; 등록 이벤트 핸들러에 노드 ID 전달 |
 | `spinon_runtime_session_dispatch_with_priority` | eval과 같은 상태 코드 | 내부 실험용으로 세 등급 중 지정 |
+| `spinon_runtime_priority_probe` | 성공 `0`, 인자 오류 `-1`, 출력 부족 `-3`, 검증 실패 `-7` | 새 실제 V8 세션에서 여섯 작업 단일 배치를 검사하는 개발용 진단; 제품 API 아님 |
 | `spinon_runtime_session_cancel` | 취소 요청 `0`, 실행 중 아님 `1`, 오류 음수 | 별도 제어 스레드에서 호출 가능 |
 | `spinon_runtime_session_free` | 반환값 없음 | 다른 세션 호출자와 동시 호출 금지, 취소·join으로 기다릴 수 있음 |
 
@@ -88,6 +91,6 @@ xcrun simctl launch --terminate-running-process booted dev.spinon.bootstrap --sp
 - 기본 실행 방향은 UI 트리·이벤트 명세에서 백그라운드 기본값으로 정했지만, 앱마다 전용 OS 스레드를 둘지 공용 런타임 스레드 풀을 둘지, 메모리·공정성·다중 앱 종료 격리를 비교하지 않았다.
 - iOS 시뮬레이터의 세션 owner thread, 입력·취소·대기 이벤트와 재생성은 확인했다. iOS 플랫폼 대기열 포화, 실기기 JITless 동작은 미검증이다.
 - HostDocument 소유자, UI 커밋 경계, revision 충돌과 JS-visible 동기 조회는 연결되지 않았다.
-- 분리 전 배치에서는 우선순위 선택기·세션 작업자 Rust 단위 테스트(가짜 V8 혼합 우선순위 실행 순서 포함), Android/iOS Simulator 앱 빌드와 iOS R06 자동 시나리오를 통과했다. 분리 후 저장 공간 확보 뒤 `mise exec -- bun run test`(Bun 1개·Rust 33개), Android ARM64 앱 빌드와 Android 16 에뮬레이터 실행, iOS Simulator 빌드와 자동 수명 시나리오를 통과했다. iOS에서 취소·대기 이벤트·heartbeat·owner thread 일치·세션 종료와 재생성을 확인했다. 실제 V8 혼합 우선순위 선택과 기아 동작은 아직 검증하지 않았다. 제품 task-source 기본 매핑, 이벤트 병합, 프레임 snapshot 병합은 미정이다. 상세 내용은 [R06 검증 기록](evidence/r06-task-scheduler-2026-09-30.md)을 따른다.
+- 분리 전 배치에서는 우선순위 선택기·세션 작업자 Rust 단위 테스트(가짜 V8 혼합 우선순위 실행 순서 포함), Android/iOS Simulator 앱 빌드와 iOS R06 자동 시나리오를 통과했다. 분리 후 저장 공간 확보 뒤 `mise exec -- bun run test`(Bun 1개·Rust 33개), Android ARM64 앱 빌드와 Android 16 에뮬레이터 실행, iOS Simulator 빌드와 자동 수명 시나리오를 통과했다. iOS에서 취소·대기 이벤트·heartbeat·owner thread 일치·세션 종료와 재생성을 확인했다. 후속 실제 V8 단일 배치 우선순위 검증은 Android 에뮬레이터와 iOS 시뮬레이터에서 통과했다. 지속 유입 시 기아·공정성과 실기기 동작은 확인하지 않았다. 제품 task-source 기본 매핑, 이벤트 병합, 프레임 snapshot 병합은 미정이다. 상세 내용은 [R06 검증 기록](evidence/r06-task-scheduler-2026-09-30.md) 및 [실제 V8 우선순위 시뮬레이터 검증](evidence/r06-priority-simulators-2026-09-30.md)을 따른다.
 - `free` 대기 시간 제한, 강제 종료 후 Isolate 복구, pending Promise·플랫폼 요청 오류 보존은 미정이다.
 - 메모리 할당 실패·Rust panic·C++ 예외의 복구와 진단 보존을 보장하지 않는다.

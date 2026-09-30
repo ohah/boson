@@ -38,6 +38,7 @@ public final class MainActivity extends Activity {
     private static native long nativeSessionCreate();
     private static native byte[] nativeSessionEval(long session, byte[] sourceUtf8);
     private static native byte[] nativeSessionDispatch(long session, int nodeId);
+    private static native byte[] nativeSessionPriorityProbe();
     private static native int nativeSessionCancel(long session);
     private static native void nativeSessionFree(long session);
 
@@ -67,6 +68,10 @@ public final class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getIntent().getBooleanExtra("spinon_priority_probe", false)) {
+            showPriorityProbe();
+            return;
+        }
         boolean runR13 = getIntent().getBooleanExtra("spinon_r13", false);
         if (runR13 || getIntent().getBooleanExtra("spinon_r08", false)) {
             int backend = getIntent().getIntExtra("spinon_r08_backend", 1);
@@ -111,6 +116,70 @@ public final class MainActivity extends Activity {
         } catch (RuntimeException error) {
             Log.e(TAG, "SPINON_BOOTSTRAP_RUNTIME_ERROR", error);
         }
+    }
+
+    private void showPriorityProbe() {
+        float density = getResources().getDisplayMetrics().density;
+        int inset = Math.round(24 * density);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(inset, inset, inset, inset);
+        root.setBackgroundColor(Color.rgb(14, 19, 31));
+        root.setOnApplyWindowInsetsListener((view, windowInsets) -> {
+            view.setPadding(
+                    inset + windowInsets.getSystemWindowInsetLeft(),
+                    inset + windowInsets.getSystemWindowInsetTop(),
+                    inset + windowInsets.getSystemWindowInsetRight(),
+                    inset + windowInsets.getSystemWindowInsetBottom());
+            return windowInsets;
+        });
+
+        TextView title = new TextView(this);
+        title.setText("SPINON · Android R06 우선순위 검증");
+        title.setTextColor(Color.rgb(230, 237, 248));
+        title.setTextSize(20);
+        title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        root.addView(title);
+
+        TextView description = new TextView(this);
+        description.setText("개발 전용 · 실제 V8의 세 우선순위 선택과 등급별 FIFO를 확인합니다");
+        description.setTextColor(Color.rgb(170, 184, 207));
+        description.setTextSize(13);
+        description.setPadding(0, Math.round(8 * density), 0, Math.round(12 * density));
+        root.addView(description);
+
+        TextView status = new TextView(this);
+        status.setText("실제 V8 우선순위 검증 중…");
+        status.setTextColor(Color.rgb(97, 185, 255));
+        status.setTextSize(15);
+        root.addView(status);
+
+        TextView report = new TextView(this);
+        report.setTextColor(Color.rgb(230, 237, 248));
+        report.setTypeface(Typeface.MONOSPACE);
+        report.setTextSize(12);
+        report.setPadding(0, Math.round(12 * density), 0, Math.round(16 * density));
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(report);
+        root.addView(scroll, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+        setContentView(root);
+
+        bootstrapExecutor.execute(() -> {
+            String result = decode(nativeSessionPriorityProbe());
+            Log.i(TAG, "SPINON_PRIORITY_PROBE " + result);
+            runOnUiThread(() -> {
+                boolean passed = result.contains("status=0 priority_probe=PASS");
+                status.setText(passed ? "실제 V8 우선순위 검증 통과" : "실제 V8 우선순위 검증 실패");
+                report.setText(result
+                        .replace(" priority_probe=", "\npriority_probe=")
+                        .replace(" blocker_status=", "\n차단 작업 status=")
+                        .replace(" cancel_status=", "\n취소 status=")
+                        .replace(" order=[", "\n실행 순서\n  ")
+                        .replace(",", "\n  ")
+                        .replace(" owner_tid=", "\n소유 스레드="));
+            });
+        });
     }
 
     private void showRuntimeThreadExperiment(String source) {

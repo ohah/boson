@@ -11,11 +11,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         let arguments = ProcessInfo.processInfo.arguments
-        if arguments.contains("--spinon-runtime-threads") {
+        let runPriorityProbe = arguments.contains("--spinon-priority-probe")
+        if arguments.contains("--spinon-runtime-threads") || runPriorityProbe {
             let window = UIWindow(frame: UIScreen.main.bounds)
             window.backgroundColor = UIColor(red: 0.055, green: 0.075, blue: 0.12, alpha: 1)
             window.rootViewController = RuntimeThreadExperimentViewController(
-                automaticallyRun: arguments.contains("--spinon-r06-auto")
+                automaticallyRun: arguments.contains("--spinon-r06-auto"),
+                runPriorityProbe: runPriorityProbe
             )
             window.makeKeyAndVisible()
             self.window = window

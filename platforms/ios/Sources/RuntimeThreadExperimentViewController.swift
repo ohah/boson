@@ -3,6 +3,7 @@ import OSLog
 
 final class RuntimeThreadExperimentViewController: UIViewController {
     private let automaticallyRun: Bool
+    private let runPriorityProbe: Bool
     private let logger = Logger(subsystem: "dev.spinon.bootstrap", category: "r06")
     private let runtimeCalls = DispatchQueue(
         label: "dev.spinon.r06.runtime-calls",
@@ -32,8 +33,9 @@ final class RuntimeThreadExperimentViewController: UIViewController {
     private let cancelButton = UIButton(type: .system)
     private let recreateButton = UIButton(type: .system)
 
-    init(automaticallyRun: Bool) {
+    init(automaticallyRun: Bool, runPriorityProbe: Bool = false) {
         self.automaticallyRun = automaticallyRun
+        self.runPriorityProbe = runPriorityProbe
         if let sourceURL = Bundle.main.url(forResource: "app", withExtension: "js"),
            let source = try? String(contentsOf: sourceURL, encoding: .utf8) {
             bootstrapSource = source
@@ -50,6 +52,21 @@ final class RuntimeThreadExperimentViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
+        if runPriorityProbe {
+            setButtons(enabled: false)
+            setStatus("실제 V8 우선순위 선택 검증 중…")
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                let report = SpinonRunner.runRuntimePriorityProbe() ?? "우선순위 검증 응답 없음"
+                DispatchQueue.main.async {
+                    guard let self else { return }
+                    self.appendReport(report)
+                    self.setStatus(report.contains("status=0 priority_probe=PASS")
+                        ? "실제 V8 우선순위 검증 통과"
+                        : "실제 V8 우선순위 검증 실패")
+                }
+            }
+            return
+        }
         heartbeatTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
             guard let self else { return }
             heartbeatCount += 1
@@ -76,13 +93,17 @@ final class RuntimeThreadExperimentViewController: UIViewController {
         view.backgroundColor = UIColor(red: 0.055, green: 0.075, blue: 0.12, alpha: 1)
 
         let title = UILabel()
-        title.text = "SPINON · iOS R06 실행 스레드 실험"
+        title.text = runPriorityProbe
+            ? "SPINON · iOS R06 우선순위 검증"
+            : "SPINON · iOS R06 실행 스레드 실험"
         title.font = .systemFont(ofSize: 20, weight: .bold)
         title.textColor = UIColor(red: 0.90, green: 0.93, blue: 0.98, alpha: 1)
         title.numberOfLines = 0
 
         let description = UILabel()
-        description.text = "개발 전용 · JS 실행은 백그라운드 V8 소유 스레드 · UI heartbeat와 큐 대기·취소를 기록합니다"
+        description.text = runPriorityProbe
+            ? "개발 전용 · 실제 V8에서 세 우선순위 선택과 동일 등급 FIFO를 확인합니다"
+            : "개발 전용 · JS 실행은 백그라운드 V8 소유 스레드 · UI heartbeat와 큐 대기·취소를 기록합니다"
         description.font = .systemFont(ofSize: 13)
         description.textColor = UIColor(red: 0.66, green: 0.72, blue: 0.81, alpha: 1)
         description.numberOfLines = 0

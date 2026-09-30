@@ -68,6 +68,6 @@
 이 실험은 런타임 스레드 소유권과 기본 취소·해제 제어 흐름의 PoC다. 제품 API나 React Native·ReactLynx보다 빠르다는 주장을 제공하지 않는다. R06을 완료로 표시하지 않는다.
 
 - 실기기 실행, iOS JITless V8, 공유 스레드 풀과 세션별 스레드의 메모리·공정성·head-of-line 비교는 남아 있다.
-- Rust 내부 큐 포화의 실제 V8 부하, iOS 플랫폼 큐 포화, 우선순위·이벤트 병합·backpressure 정책, 취소·해제 시간 제한은 미검증이다.
+- 이 기록 이후 별도 배치에서 실제 V8 우선순위 선택 순서와 등급별 FIFO는 Android·iOS 시뮬레이터로 확인했다([후속 검증](r06-priority-simulators-2026-09-30.md)). Rust 내부 큐 포화의 실제 V8 부하, iOS 플랫폼 큐 포화, 지속 입력의 기아·공정성, 이벤트 병합·backpressure 정책, 취소·해제 시간 제한은 여전히 미검증이다.
 - `HostDocument` 소유권, UI commit/revision 경계, 비동기 Promise·Fetch 수명, 강제 종료 복구, 메모리 부족·panic·C++ 예외의 복구와 오류 보존은 미정이다.
 - 에뮬레이터·시뮬레이터 queue 대기 시간은 기기 성능 지표로 사용하지 않는다.
