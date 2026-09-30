@@ -18,6 +18,7 @@
 - [R03 · 공통 호스트 계약 검토](./evidence/r03-host-contract-review-2026-09-29.md) — 제안 계약을 기존 DOM·Rust 트리·렌더러 계획과 대조한 문서 검토 기록.
 - [R06 · 스레드·소유권 소스 감사](./evidence/r06-thread-ownership-source-audit-2026-09-29.md) — V8·Rust FFI·트리·GPU 코드를 대조한 정적 조사. 경합을 실행 검증하지 않음.
 - [R06 · V8 런타임 세션 실험](./evidence/r06-v8-runtime-thread-2026-09-30.md) — Android 16 에뮬레이터와 iOS 26.2 시뮬레이터의 취소·입력·세션 재생성 근거와 한계.
-- [R06 · Chromium 참고 우선순위 큐](./evidence/r06-task-scheduler-2026-09-30.md) — strict-priority/FIFO 선택기, fake V8 FFI 순서 테스트, 35개 Rust 테스트, Android·iOS 빌드와 R06 smoke, 실제 V8 검증 한계.
+- [R06 · Chromium 참고 우선순위 큐](./evidence/r06-task-scheduler-2026-09-30.md) — strict-priority/FIFO 선택기, fake V8 순서 테스트, 분리 후 Rust 33개 테스트, Android·iOS 검증과 실제 V8 혼합 우선순위 검증 한계.
+- `evidence/r06-ios-simulator-post-split-2026-09-30.log` · `evidence/spinon-r06-ios-post-split-2026-09-30.png` — 저장 공간 확보 뒤 현재 런타임 분리 코드로 수행한 iOS 26.2 시뮬레이터 검증 원본 로그와 화면.
 - `evidence/r06-android-queue-pressure-2026-09-30.log` — 무한 JavaScript 중 주입한 UI 탭, 접수된 이벤트, 플랫폼 대기열의 명시적 거부와 세션 종료 원본 로그(저장소 파일).
 - [R13 · 플랫폼 생명주기·GPU 복구](./evidence/r13-platform-gpu-recovery-2026-09-29.md) — 회전·백그라운드·오류 주입·입력 복구의 로그와 화면 캡처.
