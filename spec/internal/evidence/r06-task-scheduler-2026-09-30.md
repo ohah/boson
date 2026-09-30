@@ -1,12 +1,12 @@
 # R06 Chromium 참고 우선순위 큐 구현 확인
 
-**일자:** 2026-09-30 · **범위:** Rust 선택기, FFI 세션 작업자, 플랫폼 빌드·기본 런타임 smoke · **실기기 우선순위 경합:** 미검증
+**일자:** 2026-09-30 · **검증 당시 범위:** Rust 선택기, FFI 세션 작업자, 플랫폼 빌드·기본 런타임 smoke · **실기기 우선순위 경합:** 미검증
 
 ## 구현
 
 - `spinon-core::PriorityQueue`에 `user-blocking`, `user-visible`, `background`의 세 FIFO를 두고 높은 등급부터 선택한다.
 - 같은 우선순위에서는 먼저 넣은 작업이 먼저 나온다.
-- `spinon-ffi` 런타임 세션은 총 대기 작업 64개를 제한하고, 작업자가 대기 중일 때 조건 변수로 깨운다.
+- 검증 당시 `spinon-ffi` 런타임 세션은 총 대기 작업 64개를 제한하고, 작업자가 대기 중일 때 조건 변수로 깨웠다.
 - 기존 `dispatch`는 `user-blocking`, 기존 `eval`은 `user-visible`로 제출한다. 내부 실험 C ABI의 `*_with_priority`는 세 등급을 직접 지정할 수 있다.
 - 실행 중 JavaScript는 선점하지 않고 일반 기아 방지나 등급별 용량 예약은 구현하지 않았다. 지연 작업이 없으므로 Chromium의 지연/즉시 작업 보정도 구현하지 않았다.
 
@@ -28,7 +28,7 @@ cargo test --locked --workspace
 | `spinon-style-layout-spike` 라이브러리 | 5 |
 | `spinon-style-layout-spike` 실행 파일 | 3 |
 
-새 코어 선택기 테스트는 세 등급의 선택 순서와 등급별 FIFO를 확인한다. FFI 세션 통합 테스트는 가짜 V8의 긴 평가가 실행 중일 때 background eval, user-visible dispatch, user-blocking dispatch 두 개를 순서대로 접수한 뒤 취소한다. 실행 순서는 `dispatch:31`, `dispatch:32`, `dispatch:22`, `eval:background`였다. 실행 중 작업은 선점하지 않고, 다음 작업 선택에서 높은 등급을 우선하며 같은 등급 FIFO를 유지함을 확인했다. 별도의 FFI 어댑터 테스트는 ABI 우선순위 값, bounded 대기열 선택과 종료 후 제출 거부를 확인한다.
+검증 당시 코어 선택기 테스트는 세 등급 선택과 FIFO를 확인했다. FFI 세션 통합 테스트는 가짜 V8의 긴 평가가 실행 중일 때 background eval, user-visible dispatch, user-blocking dispatch 두 개를 순서대로 접수한 뒤 취소했다. 실행 순서는 `dispatch:31`, `dispatch:32`, `dispatch:22`, `eval:background`였다. 실행 중 작업은 선점하지 않고, 다음 작업 선택에서 높은 등급을 우선하며 같은 등급 FIFO를 유지함을 확인했다. 별도의 FFI 어댑터 테스트는 ABI 우선순위 값, bounded 대기열 선택과 종료 후 제출 거부를 확인했다.
 
 플랫폼 확인:
 
@@ -52,3 +52,7 @@ cargo test --locked --workspace
 ## Chromium 참고 범위
 
 이 구현은 Chromium `TaskQueueSelector`의 우선순위 선택과 같은 우선순위 안의 enqueue 순서를 작은 R06 실험 큐에 반영한다. Chromium의 모든 큐 종류, task source 정책, Blink 입력·컴포지터 재분류 또는 지연 작업 보정의 완전한 포팅이 아니다. 코드 근거와 경계는 [내부 JavaScript 작업 스케줄러 설계](../0006-js-task-scheduler.md)를 따른다.
+
+## 후속 코드 분리
+
+검증 뒤 세션 작업자와 V8 소유권 코드를 `crates/spinon-runtime`으로 이동하고 `crates/spinon-ffi`를 C ABI 변환 어댑터로 정리했다. 분리 후 `cargo check --workspace --locked`는 통과했지만 자동 테스트와 Android/iOS 빌드는 실행하지 않았다. 위 테스트·플랫폼 검증 결과는 분리 전 소스 커밋의 기록이며, 새 배치가 동일하게 동작한다는 증거로 사용하지 않는다.

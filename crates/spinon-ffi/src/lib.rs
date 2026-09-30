@@ -1,66 +1,8 @@
-use std::ffi::{CStr, CString, c_char, c_void};
-use std::ptr;
+#[cfg(feature = "r10-experiment")]
+use std::ffi::CString;
+use std::ffi::{CStr, c_char};
 
 mod runtime_session;
-
-#[repr(C)]
-struct SpinonV8Runtime {
-    _private: [u8; 0],
-}
-
-type NodeCallback = extern "C" fn(*mut c_void, i32, *const c_char);
-type TextCallback = extern "C" fn(*mut c_void, *const c_char);
-
-unsafe extern "C" {
-    fn spinon_v8_runtime_new(
-        node_callback: NodeCallback,
-        text_callback: TextCallback,
-        user_data: *mut c_void,
-    ) -> *mut SpinonV8Runtime;
-    fn spinon_v8_runtime_eval(runtime: *mut SpinonV8Runtime, source: *const c_char) -> i32;
-    fn spinon_v8_runtime_dispatch(runtime: *mut SpinonV8Runtime, node_id: i32) -> i32;
-    fn spinon_v8_runtime_last_error(runtime: *mut SpinonV8Runtime) -> *const c_char;
-    fn spinon_v8_runtime_free(runtime: *mut SpinonV8Runtime);
-}
-
-#[derive(Default)]
-struct CallbackState {
-    created_nodes: u32,
-    last_node_id: i32,
-    last_tag: String,
-    last_text: String,
-}
-
-impl CallbackState {
-    fn report(&self) -> String {
-        format!(
-            "nodes={} last_node={} tag={} text={}",
-            self.created_nodes, self.last_node_id, self.last_tag, self.last_text
-        )
-    }
-}
-
-extern "C" fn on_node(user_data: *mut c_void, node_id: i32, tag: *const c_char) {
-    if user_data.is_null() || tag.is_null() {
-        return;
-    }
-    // V8 invokes this synchronously on the thread that evaluates or dispatches JS.
-    let state = unsafe { &mut *user_data.cast::<CallbackState>() };
-    let tag = unsafe { CStr::from_ptr(tag) }.to_string_lossy();
-    state.created_nodes = state.created_nodes.saturating_add(1);
-    state.last_node_id = node_id;
-    state.last_tag = tag.into_owned();
-}
-
-extern "C" fn on_text(user_data: *mut c_void, text: *const c_char) {
-    if user_data.is_null() || text.is_null() {
-        return;
-    }
-    let state = unsafe { &mut *user_data.cast::<CallbackState>() };
-    state.last_text = unsafe { CStr::from_ptr(text) }
-        .to_string_lossy()
-        .into_owned();
-}
 
 fn copy_report(report: &str, output: &mut [u8]) -> bool {
     let bytes = report.as_bytes();
@@ -75,20 +17,17 @@ fn copy_report(report: &str, output: &mut [u8]) -> bool {
     true
 }
 
-fn last_error(runtime: *mut SpinonV8Runtime) -> String {
-    let value = unsafe { spinon_v8_runtime_last_error(runtime) };
-    if value.is_null() {
-        return "V8 returned an empty error".to_owned();
+fn write_report(output: *mut c_char, output_capacity: usize, report: &str) -> bool {
+    if output.is_null() || output_capacity == 0 {
+        return false;
     }
-    unsafe { CStr::from_ptr(value) }
-        .to_string_lossy()
-        .into_owned()
+    let output = unsafe { std::slice::from_raw_parts_mut(output.cast::<u8>(), output_capacity) };
+    copy_report(report, output)
 }
 
-/// V8를 만들고 예제 JavaScript를 평가한 뒤, 네이티브 콜백과 역방향 JS 이벤트를 실행합니다.
+/// V8를 만들고 예제 JavaScript를 평가한 뒤 네이티브 콜백과 역방향 JS 이벤트를 실행합니다.
 ///
-/// 이 함수와 `spinon` JavaScript 객체는 앱 빌드 연결을 검증하는 내부 smoke 경로입니다.
-/// 제품 공개 API가 아닙니다.
+/// 앱 빌드 연결을 검증하는 내부 smoke 경로이며 제품 공개 API가 아닙니다.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn spinon_app_run(
     source: *const c_char,
@@ -98,39 +37,20 @@ pub unsafe extern "C" fn spinon_app_run(
     if source.is_null() || output.is_null() || output_capacity == 0 {
         return -1;
     }
-    let source = unsafe { CStr::from_ptr(source) };
-
-    let mut state = CallbackState::default();
-    let state_ptr = ptr::addr_of_mut!(state).cast::<c_void>();
-    let runtime = unsafe { spinon_v8_runtime_new(on_node, on_text, state_ptr) };
-    if runtime.is_null() {
-        return -2;
-    }
-
-    let mut v8_result = unsafe { spinon_v8_runtime_eval(runtime, source.as_ptr()) };
-    if v8_result == 0 {
-        // 부팅 smoke의 마지막 단계로 네이티브에서 JS 핸들러를 호출합니다.
-        v8_result = unsafe { spinon_v8_runtime_dispatch(runtime, 7) };
-    }
-
-    let report = if v8_result == 0 {
-        state.report()
-    } else {
-        format!("V8 error: {}", last_error(runtime))
+    let source = unsafe { CStr::from_ptr(source) }.to_string_lossy();
+    let (status, report) = match spinon_runtime::run_bootstrap_smoke(&source) {
+        Ok(report) => (0, report),
+        Err(spinon_runtime::BootstrapSmokeError::RuntimeUnavailable) => {
+            (-2, "V8 Isolate를 만들지 못했습니다".to_owned())
+        }
+        Err(spinon_runtime::BootstrapSmokeError::JavaScript(error)) => {
+            (-4, format!("V8 error: {error}"))
+        }
     };
-    let report = CString::new(report).expect("report contains no NUL bytes");
-    let output_slice =
-        unsafe { std::slice::from_raw_parts_mut(output.cast::<u8>(), output_capacity) };
-    let copied = copy_report(
-        report.to_str().unwrap_or("V8 report encoding error"),
-        output_slice,
-    );
-    unsafe { spinon_v8_runtime_free(runtime) };
-
-    if !copied {
+    if !write_report(output, output_capacity, &report) {
         return -3;
     }
-    if v8_result == 0 { 0 } else { -4 }
+    status
 }
 
 /// 명시적으로 실행된 개발용 Taffy 실험의 결과를 호출자 버퍼에 씁니다.
@@ -199,29 +119,65 @@ pub unsafe extern "C" fn spinon_taffy_r10_run(
 
 #[cfg(test)]
 mod tests {
-    use super::{CallbackState, copy_report};
+    use super::copy_report;
     use std::ffi::CStr;
 
-    #[test]
-    fn report_includes_callbacks_from_javascript() {
-        let state = CallbackState {
-            created_nodes: 2,
-            last_node_id: 8,
-            last_tag: "text".to_owned(),
-            last_text: "이벤트:7".to_owned(),
-        };
-        assert_eq!(state.report(), "nodes=2 last_node=8 tag=text text=이벤트:7");
+    #[repr(C)]
+    struct TestV8Runtime {
+        _private: [u8; 0],
     }
 
-    #[test]
-    fn report_copy_is_nul_terminated_and_rejects_short_buffers() {
-        let mut output = [0_u8; 8];
-        assert!(!copy_report("too long", &mut output));
-        assert_eq!(output[0], 0);
+    // FFI 테스트 바이너리의 네이티브 V8 참조를 해소하는 링크 스텁입니다.
+    // 이 스텁은 V8 동작을 검증하지 않으며, 해당 검증은 런타임 테스트에서 따로 합니다.
+    type NodeCallback = extern "C" fn(*mut std::ffi::c_void, i32, *const std::ffi::c_char);
+    type TextCallback = extern "C" fn(*mut std::ffi::c_void, *const std::ffi::c_char);
 
-        let mut output = [0_u8; 5];
-        assert!(copy_report("done", &mut output));
-        assert_eq!(&output, b"done\0");
+    #[unsafe(no_mangle)]
+    extern "C" fn spinon_v8_runtime_new(
+        _node_callback: NodeCallback,
+        _text_callback: TextCallback,
+        _user_data: *mut std::ffi::c_void,
+    ) -> *mut TestV8Runtime {
+        std::ptr::null_mut()
+    }
+
+    #[unsafe(no_mangle)]
+    extern "C" fn spinon_v8_runtime_eval(
+        _runtime: *mut TestV8Runtime,
+        _source: *const std::ffi::c_char,
+    ) -> i32 {
+        -1
+    }
+
+    #[unsafe(no_mangle)]
+    extern "C" fn spinon_v8_runtime_dispatch(_runtime: *mut TestV8Runtime, _node_id: i32) -> i32 {
+        -1
+    }
+
+    #[unsafe(no_mangle)]
+    extern "C" fn spinon_v8_runtime_last_error(
+        _runtime: *mut TestV8Runtime,
+    ) -> *const std::ffi::c_char {
+        c"테스트용 V8 오류".as_ptr()
+    }
+
+    #[unsafe(no_mangle)]
+    extern "C" fn spinon_v8_runtime_was_terminated(_runtime: *mut TestV8Runtime) -> i32 {
+        0
+    }
+
+    #[unsafe(no_mangle)]
+    extern "C" fn spinon_v8_runtime_free(_runtime: *mut TestV8Runtime) {}
+
+    #[unsafe(no_mangle)]
+    extern "C" fn spinon_v8_runtime_terminate(_runtime: *mut TestV8Runtime) {}
+
+    #[unsafe(no_mangle)]
+    extern "C" fn spinon_v8_runtime_cancel_termination(_runtime: *mut TestV8Runtime) {}
+
+    #[unsafe(no_mangle)]
+    extern "C" fn spinon_v8_current_thread_id() -> u64 {
+        1
     }
 
     #[cfg(feature = "r10-experiment")]

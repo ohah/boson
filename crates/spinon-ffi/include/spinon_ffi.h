@@ -17,7 +17,8 @@ int32_t spinon_app_run(const char *source, char *output, size_t output_capacity)
 int32_t spinon_taffy_r10_run(float width, float height, float scale,
                              char *output, size_t output_capacity);
 
-/* 장기 실행 V8 스레드·작업 스케줄러 실험용 API입니다. 제품 공개 API가 아닙니다.
+/* 플랫폼 호스트용 내부 C ABI입니다. 세션·작업 큐·V8 Isolate는 spinon-runtime이 소유하며,
+   이 함수들은 경계 인자와 버퍼를 변환합니다. 제품 공개 API가 아닙니다.
    session_new는 초기화 보고 문자열을 출력하고, 실패하면 NULL을 반환합니다.
    eval/dispatch는 호출 스레드를 막으므로 UI 스레드에서 부르지 마세요.
    기본 eval은 user-visible, 기본 dispatch는 user-blocking입니다.

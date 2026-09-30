@@ -9,15 +9,14 @@ R08 실험은 Android 기본 실행에서 Vulkan을 선택하고 OpenGL ES 백�
 ```text
 React / Vue / Svelte 어댑터 · DOM façade · Fetch API
                          ↓
-                  V8 호스트 바인딩
-                    ├─ UI/DOM 작업 → 제한된 C ABI → Rust 문서·UI 트리
-                    │                                  ↓
-                    │                         스타일 → 레이아웃 → 장면
-                    │                                  ↓
-                    │                         GPU 렌더러 → 프레임
-                    └─ Fetch 요청 → NetworkHost → 네트워크 전송 계층
-                                                  ↓
-                                          Android / iOS 호스트
+       spinon-runtime (V8 세션 · Isolate 소유 스레드 · 작업 큐)
+                    ↕ 엔진 내부 C ABI
+                 native/v8
+                    ↓ Rust API
+       spinon-core → 스타일 → 레이아웃 → 장면 → GPU 프레임
+
+Android / iOS 호스트 → spinon-ffi (플랫폼 C ABI) → spinon-runtime
+Fetch 요청 → NetworkHost → 네트워크 전송 계층 → Android / iOS 호스트
 ```
 
 ## 소유권과 책임
@@ -26,11 +25,13 @@ React / Vue / Svelte 어댑터 · DOM façade · Fetch API
 | --- | --- | --- |
 | 프레임워크 어댑터 | 컴포넌트 상태·훅·반응성, 이전/다음 UI의 차이 계산, 공통 트리에 호스트 작업 제출 | GPU 자원과 V8 내부 객체 |
 | DOM 호환 façade | 제안된 `Document`·`Node`·`Element`·`Text` API를 공통 호스트 작업에 연결 | 브라우저 전체 DOM·HTML 파서·CSS 엔진 |
-| V8 어댑터 | Isolate·Context, JS 함수/값 핸들, JS↔C ABI 변환, DOM 호스트 바인딩과 이벤트 콜백 | 레이아웃과 GPU 자원 |
+| Rust 런타임 (`crates/spinon-runtime`) | 세션 수명, Isolate 소유 스레드, JS 작업 큐, eval/이벤트 실행·취소와 실행 보고 | 플랫폼 공개 포인터·버퍼 ABI, 문서 트리·레이아웃·GPU 자원 |
+| V8 C++ 어댑터 (`native/v8`) | V8 Isolate·Context와 엔진별 호출, JS 호스트 함수·콜백 연결 | 세션 스케줄링 정책, 플랫폼 앱 수명주기 |
+| C ABI 어댑터 (`crates/spinon-ffi`) | `spinon-runtime` 호출, 우선순위 값·불투명 핸들·버퍼의 경계 검사와 변환 | V8 Isolate 소유권, 작업 큐와 실행 스레드 |
 | 플랫폼 모듈 레지스트리 | 앱에 포함된 버전 있는 JS 모듈과 Android/iOS 호스트 구현을 빌드 시 연결하고 플랫폼별 기능을 공개 | V8 핸들·Rust 포인터의 공개, 임의 네이티브 라이브러리의 무검증 로딩 |
 | JavaScript 네트워크 호스트 | 제안된 `fetch`·`Request`·`Response` 표면을 네트워크 호스트 계약에 연결 | Rust UI 트리와 GPU 렌더링 |
 | 네트워크 전송 계층 | URLSession·Android 네트워크 구현 또는 공통 전송 구현을 같은 계약 뒤에서 검증 | DOM 노드와 UI 장면 |
-| Rust 코어 | 안정적인 노드 ID, 문서·UI 트리, 스타일, 레이아웃 결과, 장면 변경 배치의 순서 | JS 객체와 플랫폼 객체 |
+| Rust 코어 | 안정적인 노드 ID, 문서·UI 트리, 스타일, 레이아웃 결과, 장면 변경 배치의 순서, 공통 우선순위 선택기 | JS 객체와 플랫폼 객체, V8 세션 수명 |
 | GPU 렌더러 | 그리기 명령, 텍스트·이미지·클리핑·합성, 프레임 제출 | 컴포넌트 상태와 JS 객체 |
 | 플랫폼 호스트 | GPU 표면·입력·IME·접근성 연결, 폰트/이미지 자원과 표시 완료 신호 | 프레임워크의 컴포넌트 상태 |
 
@@ -63,7 +64,7 @@ Tailwind CSS는 별도 모바일 런타임이 아니라 빌드 도구로 취급�
 ## 다음 구현 단계
 
 1. iOS 실기기에서 JIT 없는 V8 실행을 확인하고, 웹 호스트 계약 초안과 [네 구현 비교](plans/benchmark.md)의 작은 기준 화면·계측 조건을 먼저 준비한다. GPU 표면·텍스트·입력·접근성 연결의 최소 성립 조건과 Vue·Svelte, Taffy, Lightning CSS 경계를 작은 실험으로 확인한다.
-2. 현재 [동적 트리 PoC](../spikes/dynamic-tree/README.md)의 Rust 파일에서 트리·커밋·FFI 책임을 분리한다. DOM 목표 범위를 확정한 경우에만 혼합 요소·텍스트 노드와 동기 DOM 트리 계약을 추가한다. PoC 결과와 코드는 비교 기준으로 보존한다.
+2. 현재 [동적 트리 PoC](../spikes/dynamic-tree/README.md)의 Rust 파일에서 트리·커밋·런타임·FFI 책임을 분리한다. DOM 목표 범위를 확정한 경우에만 혼합 요소·텍스트 노드와 동기 DOM 트리 계약을 추가한다. PoC 결과와 코드는 비교 기준으로 보존한다.
 3. 이벤트 ID와 JS 콜백의 등록·해제 수명을 명시하고 React 어댑터와 선택된 DOM façade를 같은 Rust 트리에 연결한다. DOM façade를 사용하지 않는 React 카운터도 독립 실행되어야 한다. 같은 카운터 화면이 세 플랫폼에서 동작하면 네 구현을 처음 비교한다.
 4. 스타일·텍스트·입력·목록 기능을 추가할 때마다 같은 사용자 시나리오로 다시 비교한다. 그 결과를 토대로 부분 갱신, 스레드 스케줄러, GPU 프레임 제출 방식을 개선한다.
 

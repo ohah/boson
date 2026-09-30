@@ -1,0 +1,11 @@
+[package]
+name = "spinon-runtime"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+spinon-core = { path = "../spinon-core" }
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
