@@ -38,10 +38,10 @@
 
 양쪽 원본 로그 모두 `status=0 priority_probe=PASS`를 기록한다. 최신 반복 검증의 소유 thread ID는 Android `8409`, iOS `5302955`이며 플랫폼마다 다르다. 각 실행 안에서 검증기는 여섯 콜백의 thread ID가 모두 해당 Isolate의 소유 thread ID와 일치하는지 확인했다.
 
-- Android 원본 로그: [r06-priority-android-emulator-2026-09-30.log](r06-priority-android-emulator-2026-09-30.log)
-- Android 화면: ![Android 16 에뮬레이터 실제 V8 우선순위 검증 통과](spinon-r06-priority-android-2026-09-30.png)
-- iOS 원본 로그: [r06-priority-ios-simulator-2026-09-30.log](r06-priority-ios-simulator-2026-09-30.log)
-- iOS 화면: ![iPhone 17 Pro 시뮬레이터 실제 V8 우선순위 검증 통과](spinon-r06-priority-ios-simulator-2026-09-30.png)
+- Android 원본 로그: [r06-priority-android-emulator-2026-09-30.log](https://github.com/ohah/spinon/blob/main/spec/internal/evidence/r06-priority-android-emulator-2026-09-30.log)
+- Android 화면: ![Android 16 에뮬레이터 실제 V8 우선순위 검증 통과](./spinon-r06-priority-android-2026-09-30.png)
+- iOS 원본 로그: [r06-priority-ios-simulator-2026-09-30.log](https://github.com/ohah/spinon/blob/main/spec/internal/evidence/r06-priority-ios-simulator-2026-09-30.log)
+- iOS 화면: ![iPhone 17 Pro 시뮬레이터 실제 V8 우선순위 검증 통과](./spinon-r06-priority-ios-simulator-2026-09-30.png)
 
 ## 적대적 검토 5회
 

@@ -84,7 +84,7 @@ xcrun simctl launch booted dev.spinon.bootstrap --spinon-runtime-threads
 xcrun simctl launch --terminate-running-process booted dev.spinon.bootstrap --spinon-runtime-threads --spinon-r06-auto
 ```
 
-첫 실행 인자는 수동 검증 화면을 연다. 두 번째는 긴 JS, UIKit 타깃 액션, 취소, 메인 UI heartbeat와 대기 이벤트 처리를 자동 확인한다. 별도 수동 검증에서 시뮬레이터 터치 입력도 확인했다. 12초 watchdog은 취소를 요청할 뿐 V8 반환 전에 시나리오를 완료 처리하지 않는다. 분리 전 근거는 [런타임 세션 실험 기록](evidence/r06-v8-runtime-thread-2026-09-30.md), 분리 후 최신 로그·캡처와 검증 내용은 [우선순위 큐 재검증 기록](evidence/r06-task-scheduler-2026-09-30.md) 및 [iOS 원본 로그](evidence/r06-ios-simulator-post-split-2026-09-30.log)에 있다. 이 화면은 제품 API가 아니다.
+첫 실행 인자는 수동 검증 화면을 연다. 두 번째는 긴 JS, UIKit 타깃 액션, 취소, 메인 UI heartbeat와 대기 이벤트 처리를 자동 확인한다. 별도 수동 검증에서 시뮬레이터 터치 입력도 확인했다. 12초 watchdog은 취소를 요청할 뿐 V8 반환 전에 시나리오를 완료 처리하지 않는다. 분리 전 근거는 [런타임 세션 실험 기록](evidence/r06-v8-runtime-thread-2026-09-30.md), 분리 후 최신 로그·캡처와 검증 내용은 [우선순위 큐 재검증 기록](evidence/r06-task-scheduler-2026-09-30.md) 및 [iOS 원본 로그](https://github.com/ohah/spinon/blob/main/spec/internal/evidence/r06-ios-simulator-post-split-2026-09-30.log)에 있다. 이 화면은 제품 API가 아니다.
 
 ## 미결정 사항
 
