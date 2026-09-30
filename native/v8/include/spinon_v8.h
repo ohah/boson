@@ -17,7 +17,12 @@ SpinonV8Runtime *spinon_v8_runtime_new(SpinonNodeCallback node_callback,
 int32_t spinon_v8_runtime_eval(SpinonV8Runtime *runtime, const char *source);
 int32_t spinon_v8_runtime_dispatch(SpinonV8Runtime *runtime, int32_t node_id);
 const char *spinon_v8_runtime_last_error(SpinonV8Runtime *runtime);
+int32_t spinon_v8_runtime_was_terminated(SpinonV8Runtime *runtime);
+/* TerminateExecution은 V8가 다른 스레드 호출을 허용하는 유일한 취소 경로입니다. */
+void spinon_v8_runtime_terminate(SpinonV8Runtime *runtime);
+void spinon_v8_runtime_cancel_termination(SpinonV8Runtime *runtime);
 void spinon_v8_runtime_free(SpinonV8Runtime *runtime);
+uint64_t spinon_v8_current_thread_id(void);
 
 #ifdef __cplusplus
 }

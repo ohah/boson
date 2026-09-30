@@ -7,6 +7,7 @@
 #include "spinon_wgpu_r08.h"
 
 #include <array>
+#include <cstdint>
 #include <cstring>
 #include <string>
 #include <vector>
@@ -18,6 +19,19 @@ struct WgpuRendererContext {
   ANativeWindow *window;
   void *renderer;
 };
+
+jbyteArray ToByteArray(JNIEnv *env, const std::string &value) {
+  const auto length = static_cast<jsize>(value.size());
+  jbyteArray output = env->NewByteArray(length);
+  if (output == nullptr) return nullptr;
+  env->SetByteArrayRegion(output, 0, length,
+                          reinterpret_cast<const jbyte *>(value.data()));
+  return env->ExceptionCheck() ? nullptr : output;
+}
+
+SpinonRuntimeSession *SessionFromHandle(jlong handle) {
+  return reinterpret_cast<SpinonRuntimeSession *>(static_cast<uintptr_t>(handle));
+}
 }
 
 extern "C" JNIEXPORT jbyteArray JNICALL
@@ -141,4 +155,72 @@ Java_dev_spinon_bootstrap_R08WgpuSurface_nativeDestroy(JNIEnv *, jclass,
   spinon_wgpu_destroy(context->renderer);
   ANativeWindow_release(context->window);
   delete context;
+}
+
+extern "C" JNIEXPORT jlong JNICALL
+Java_dev_spinon_bootstrap_MainActivity_nativeSessionCreate(JNIEnv *, jclass) {
+  std::array<char, 512> output{};
+  SpinonRuntimeSession *session =
+      spinon_runtime_session_new(output.data(), output.size());
+  if (session == nullptr) {
+    __android_log_print(ANDROID_LOG_ERROR, kTag,
+                        "SPINON_RUNTIME_SESSION_CREATE_ERROR=%s", output.data());
+    return 0;
+  }
+  __android_log_print(ANDROID_LOG_INFO, kTag, "SPINON_RUNTIME_SESSION=%s",
+                      output.data());
+  return static_cast<jlong>(reinterpret_cast<uintptr_t>(session));
+}
+
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_dev_spinon_bootstrap_MainActivity_nativeSessionEval(JNIEnv *env, jclass,
+                                                          jlong handle,
+                                                          jbyteArray source) {
+  if (handle == 0 || source == nullptr) return nullptr;
+  const jsize source_length = env->GetArrayLength(source);
+  std::vector<char> source_utf8(static_cast<size_t>(source_length) + 1);
+  env->GetByteArrayRegion(source, 0, source_length,
+                          reinterpret_cast<jbyte *>(source_utf8.data()));
+  if (env->ExceptionCheck()) return nullptr;
+  source_utf8[static_cast<size_t>(source_length)] = '\0';
+  std::array<char, 2048> output{};
+  const int32_t status = spinon_runtime_session_eval(
+      SessionFromHandle(handle), source_utf8.data(), output.data(), output.size());
+  const std::string report = "status=" + std::to_string(status) + " " + output.data();
+  __android_log_print(status == 0 ? ANDROID_LOG_INFO : ANDROID_LOG_WARN, kTag,
+                      "SPINON_RUNTIME_EVAL=%s", report.c_str());
+  return ToByteArray(env, report);
+}
+
+extern "C" JNIEXPORT jbyteArray JNICALL
+Java_dev_spinon_bootstrap_MainActivity_nativeSessionDispatch(JNIEnv *env, jclass,
+                                                              jlong handle,
+                                                              jint node_id) {
+  if (handle == 0) return nullptr;
+  std::array<char, 2048> output{};
+  const int32_t status = spinon_runtime_session_dispatch(
+      SessionFromHandle(handle), node_id, output.data(), output.size());
+  const std::string report = "status=" + std::to_string(status) + " " + output.data();
+  __android_log_print(status == 0 ? ANDROID_LOG_INFO : ANDROID_LOG_WARN, kTag,
+                      "SPINON_RUNTIME_DISPATCH=%s", report.c_str());
+  return ToByteArray(env, report);
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_dev_spinon_bootstrap_MainActivity_nativeSessionCancel(JNIEnv *, jclass,
+                                                            jlong handle) {
+  if (handle == 0) return -1;
+  const int32_t status = spinon_runtime_session_cancel(SessionFromHandle(handle));
+  __android_log_print(ANDROID_LOG_INFO, kTag, "SPINON_RUNTIME_CANCEL status=%d",
+                      status);
+  return status;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_dev_spinon_bootstrap_MainActivity_nativeSessionFree(JNIEnv *, jclass,
+                                                          jlong handle) {
+  if (handle == 0) return;
+  __android_log_print(ANDROID_LOG_INFO, kTag, "SPINON_RUNTIME_SESSION_FREE start");
+  spinon_runtime_session_free(SessionFromHandle(handle));
+  __android_log_print(ANDROID_LOG_INFO, kTag, "SPINON_RUNTIME_SESSION_FREE done");
 }

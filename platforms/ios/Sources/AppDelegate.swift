@@ -11,6 +11,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("--spinon-runtime-threads") {
+            let window = UIWindow(frame: UIScreen.main.bounds)
+            window.backgroundColor = UIColor(red: 0.055, green: 0.075, blue: 0.12, alpha: 1)
+            window.rootViewController = RuntimeThreadExperimentViewController(
+                automaticallyRun: arguments.contains("--spinon-r06-auto")
+            )
+            window.makeKeyAndVisible()
+            self.window = window
+            return true
+        }
+
         let isR13 = arguments.contains("--spinon-r13")
         let isR08 = arguments.contains("--spinon-r08")
             || arguments.contains("--spinon-r08-wgpu")
@@ -49,24 +60,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             return true
         }
 
-        let sourceURL = Bundle.main.url(forResource: "app", withExtension: "js")
-        do {
-            guard let sourceURL else {
-                logger.error("SPINON_BOOTSTRAP_ASSET_ERROR=app.js missing")
-                return true
-            }
-            let source = try String(contentsOf: sourceURL, encoding: .utf8)
-            let result = SpinonRunner.runSource(source) ?? "empty bootstrap result"
-            logger.notice("SPINON_BOOTSTRAP_RESULT=\(result, privacy: .public)")
-        } catch {
-            logger.error("SPINON_BOOTSTRAP_ASSET_ERROR=\(String(describing: error), privacy: .public)")
-        }
 
         let window = UIWindow(frame: UIScreen.main.bounds)
         window.rootViewController = UIViewController()
         window.backgroundColor = .white
         window.makeKeyAndVisible()
         self.window = window
+        runBootstrapInBackground()
 
         if ProcessInfo.processInfo.arguments.contains("--spinon-r10") {
             let screen = UIScreen.main
@@ -96,6 +96,23 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         return true
+    }
+
+    private func runBootstrapInBackground() {
+        DispatchQueue.global(qos: .userInitiated).async { [logger] in
+            logger.notice("SPINON_BOOTSTRAP_EXECUTION is_main_thread=\(Thread.isMainThread)")
+            guard let sourceURL = Bundle.main.url(forResource: "app", withExtension: "js") else {
+                logger.error("SPINON_BOOTSTRAP_ASSET_ERROR=app.js missing")
+                return
+            }
+            do {
+                let source = try String(contentsOf: sourceURL, encoding: .utf8)
+                let result = SpinonRunner.runSource(source) ?? "empty bootstrap result"
+                logger.notice("SPINON_BOOTSTRAP_RESULT=\(result, privacy: .public)")
+            } catch {
+                logger.error("SPINON_BOOTSTRAP_ASSET_ERROR=\(String(describing: error), privacy: .public)")
+            }
+        }
     }
 
     private func formatR10Report(_ report: String) -> String {

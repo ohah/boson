@@ -1,6 +1,6 @@
 # 스피논 구현 상태와 API 명세 대장
 
-**기준:** 2026-09-29 · **명세 버전:** `0.1.0-draft` · **현재 제품 지원 완료:** 없음
+**기준:** 2026-09-30 · **명세 버전:** `0.1.0-draft` · **현재 제품 지원 완료:** 없음
 
 Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발 기반이다. 제품 기능 상태를 대신하지 않으며, 이 초기화만으로 아래 항목을 완료 처리하지 않는다.
 
@@ -26,7 +26,7 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 - [x] **R03 공통 호스트 계약 초안** — [내부 인터페이스 0003](internal/0003-shared-host-contract.md)에 공통 `HostDocument`·`HostRoot`, 혼합 요소·텍스트 순서, `DOMString` 변환 경계, 동기 논리 변경, 논리·표시 트리 revision 분리, CSS 무효화, 이벤트 대상과 소유권을 제안했다. [적대적 검토 기록](internal/evidence/r03-host-contract-review-2026-09-29.md). 이 체크는 초안 산출물의 완료만 뜻한다. 공개 루트 API, 태그·CSS 범위, 정확한 예외, JS 래퍼 객체 회수, 이벤트 전파, 전역 revision 충돌 복구, 플랫폼 환경 revision, 소유자 스레드와 실제 구현은 미정이다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · [0007-dom-compatibility.md](0007-dom-compatibility.md) · API: 내부 제안 `0.1.0-draft` · 실행 근거: 해당 없음(문서 검토 산출물) · 실험: S01 생성·삭제 실험은 별도이며 DOM 구현이 아님
 - [ ] **R04 세 비교 기준 앱** — React Native Fabric·ReactLynx·Android Views/UIKit의 같은 카운터 화면을 만든다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R05 계측 계약과 원본 수집** — 실기기 전경·입력 성공·첫 유효 화면·프레임·메모리의 수집과 제외 조건을 고정한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
-- [ ] **R06 스레드·소유권 위험 표** — 현재 V8·Rust FFI·트리·GPU 소스와 후보 실행 경계를 [0004 내부 위험 분석](internal/0004-thread-ownership-risks.md)에 정리했다. 정적 소스 감사만 했으며 Isolate 직렬화, 객체 수명, revision 공개, 비동기 완료·취소·오류 경계의 런타임 검증과 실기기 경합은 미완료다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 내부 검토 초안 · 산출물: 위험 분석 초안 · 근거: [R06 소스 감사](internal/evidence/r06-thread-ownership-source-audit-2026-09-29.md) (실행 증거 아님)
+- [ ] **R06 스레드·소유권 위험 표** — 앱 JavaScript와 일반 이벤트는 백그라운드 실행이 기본이며 UI·GPU 경로는 일반 JS 완료를 동기 대기하지 않는다. [0005 내부 인터페이스](internal/0005-v8-runtime-session.md)의 세션별 전용 스레드 실험에서 Android 16 ARM64 에뮬레이터와 iPhone 17 Pro / iOS 26.2 시뮬레이터의 호출·콜백 owner thread 일치, UI 입력·heartbeat, 무한 평가 취소 뒤 같은 Isolate 재사용, 세션 종료·재생성을 확인했다. 단일 실행의 큐 대기는 Android 215,512µs, iOS 282,691µs였으며 성능 지표가 아니다. Android 플랫폼 대기열 압력에서는 70회 탭 주입 중 화면 카운터 69회, 플랫폼 작업 2회 거부, 네이티브 dispatch 67회 성공을 관찰했다. Rust 런타임 큐 포화나 iOS 대기열 포화는 입증하지 않았다. 시뮬레이터 iOS V8은 `v8_jitless=false`다. 실기기, JITless iOS, 공유 실행기 비교, HostDocument/revision, 비동기 요청 수명, 종료 시간 제한·복구 정책은 미완료다. [R06 실행 근거](internal/evidence/r06-v8-runtime-thread-2026-09-30.md).
 - [ ] **R07 Vue·Svelte 호스트 가능성** — React 전용 가정이 공통 노드 계약에 새지 않는지 작은 어댑터 실험으로 확인한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **R08 GPU 출력 위험 실험** — 공통 모바일 GPU API로 `wgpu`를 채택하고 Android Vulkan 기본 실험 경로·OpenGL ES 3.0 이상 비교 경로 및 iOS Metal에서 최소 사각형 출력을 검증한다. 에뮬레이터와 시뮬레이터 결과만 있어 Android·iOS 실기기 동작, iOS 한글 조합, VoiceOver/TalkBack, 자동 백엔드 선택·복구, 색상 관리, 실제 표시 시각은 미완료다. [wgpu R08 실험 기록](internal/evidence/r08-wgpu-surface-2026-09-29.md). 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 부분 검증 · 상태: 미완료
 - [ ] **R09 iOS 배포·OTA 정책 범위** — V8·CSS 해석·원격 JS 업데이트에 적용될 지침과 기능 변경 한계를 공식 문서로 검토한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
@@ -73,7 +73,7 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 - [ ] **E02 GPU 텍스트·이미지 품질** — 글리프 캐시, 이미지 업로드, 클리핑·합성의 품질과 메모리 비용을 개선한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **E03 입력·접근성 통합 검증** — GPU 화면의 IME·선택·스크롤·접근성 의미 트리가 플랫폼 기능과 일치하는지 확인한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **E04 GPU 프레임 배치** — 변경 명령 병합·자원 재사용·불필요한 GPU 제출 제거를 구현한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음
-- [ ] **E05 스레드 스케줄러** — JS·레이아웃·UI 큐와 우선순위, 역압력, 취소 및 입력 응답을 측정하며 정한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음
+- [ ] **E05 스레드 스케줄러** — 결정된 백그라운드 기본 실행을 유지하면서 Isolate당 큐 지연·공정성·역압력·취소와 UI 입력 응답을 측정한다. UI 스크립트는 별도 실행 경계와 실기기 입력 지연 이득을 입증한 경우에만 후속 계약으로 검토한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **E06 제스처·애니메이션** — 드래그·스크롤·취소·동시 제스처와 프레임 스케줄러를 연결한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **E07 장시간·오류 회귀** — 회전, 백그라운드 복귀, 빠른 입력, 누수와 오류 복원을 확인한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 - [ ] **E08 시작 시간 최적화 실험** — 번들 사전 변환·V8 코드 캐시·스냅샷의 효과와 버전 호환성을 따로 측정한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
@@ -130,7 +130,7 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 - [ ] **J14 기본 플랫폼 모듈** — 안전 영역·앱 상태·뒤로 가기·키보드·권한·촉각·외부 URL 각각의 웹 대체·모바일 이벤트·구독 해제·권한 거부 동작을 확정한다. 상위: X08, D01, X17, X16.
 - [ ] **J15 사용자 정의 네이티브 모듈** — JS 타입 선언, 바인딩 생성, Android/iOS 구현 등록, 웹 대체 구현 또는 미지원 진단, 동기·비동기 호출 규칙, 오류·취소·권한·스레드 호출 제약·자원 해제, 호스트 API 버전과 OTA 호환 거부를 정의한다. 필요성이 입증된 고용량 데이터 경로는 별도의 소유권 계약으로 검토한다. 상위: S03, X08, D02, X16.
 - [ ] **J16 미검토 브라우저 API 판정** — `XMLHttpRequest`, `requestIdleCallback`, `navigator.geolocation`, `navigator.mediaDevices`, `clipboard`, `share` 등을 라이브러리 요구와 플랫폼 권한 기준으로 조사해 포함·제외·추후 검토를 정한다. 현재 미검토 항목을 지원 또는 영구 제외로 오인하게 두지 않는다. 상위: R12, X08, X10, X16.
-- [ ] **J17 브라우저·Node 전용 경계 진단** — `window`/탭 탐색, Service Worker, Worker 계열, Canvas 계열, `process`/`fs`/`Buffer`/`setImmediate`의 지원 여부와 빌드·런타임 진단을 정의한다. 내부 GPU 렌더링과 앱 공개 Canvas/WebGPU를 구분한다. 상위: R01, R12, X06, X10, X16.
+- [ ] **J17 브라우저·Node 전용 경계 진단** — `window`/탭 탐색, Service Worker, Worker 계열, Canvas 계열, `process`/`fs`/`Buffer`/`setImmediate`와 실행 위치 표시의 지원 여부 및 빌드·런타임 진단을 정의한다. 백그라운드 기본 실행은 Worker API를 뜻하지 않으며 Worker와 향후 제한적 UI 실행은 별도 지원 표에 기록한다. 내부 GPU 렌더링과 앱 공개 Canvas/WebGPU를 구분한다. 상위: R01, R12, X06, X10, X16.
 - [ ] **J18 프레임워크·번들러 적합성** — React 첫 호스트 경로를 확정한 뒤 Vue·Svelte 어댑터, React/Vue/Svelte의 사용 라이브러리·전이 의존성, Vite·Rspack의 웹/모바일 산출물을 별도 매트릭스와 실행 사례로 검증한다. 상위: R07, S05, X02, X03, X04, X05, X16.
 
 ## 기존 PoC의 위치
