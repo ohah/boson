@@ -25,4 +25,15 @@ adb shell am start -n dev.spinon.bootstrap/.MainActivity --ez spinon_runtime_thr
 adb logcat -s SpinonBootstrap:I
 ```
 
-화면에서 긴 JavaScript 실행 중 탭을 눌러 UI가 반응하는지 확인하고, 별도 취소 버튼을 누른 뒤 `owner_tid`가 유지되는지 로그를 확인합니다. 가짜 V8 단위 테스트는 제어 경로만 검증하므로 실제 V8이 실행된 에뮬레이터나 실기기의 원본 로그가 필요합니다. Android 어댑터는 동기 FFI 호출을 4개 작업자와 최대 64개 대기 작업으로 제한하고, 취소는 별도 제어 실행기에서 보냅니다. [대기열 압력 원본 로그](../../spec/internal/evidence/r06-android-queue-pressure-2026-09-30.log)는 Android 16 에뮬레이터에서 70회 탭 주입, 화면 카운터 69회, 플랫폼 작업 2회 거부, V8 dispatch 67회 성공을 기록합니다. 이 수치는 플랫폼 대기열 실험이며 Rust 런타임 큐 포화를 뜻하지 않습니다. 범위와 한계는 [V8 실행 스레드 실험 명세](../../spec/internal/0005-v8-runtime-session.md)와 [R06 검증 근거](../../spec/internal/evidence/r06-v8-runtime-thread-2026-09-30.md)에 기록합니다.
+화면에서 긴 JavaScript 실행 중 탭을 눌러 UI가 반응하는지 확인하고, 별도 취소 버튼을 누른 뒤 `owner_tid`가 유지되는지 로그를 확인합니다. 가짜 V8 단위 테스트는 제어 경로만 검증하므로 실제 V8이 실행된 에뮬레이터의 원본 로그도 확인합니다. Android 어댑터는 동기 FFI 호출을 4개 작업자와 최대 64개 대기 작업으로 제한하고, 취소는 별도 제어 실행기에서 보냅니다. [대기열 압력 원본 로그](../../spec/internal/evidence/r06-android-queue-pressure-2026-09-30.log)는 Android 16 에뮬레이터에서 70회 탭 주입, 화면 카운터 69회, 플랫폼 작업 2회 거부, V8 dispatch 67회 성공을 기록합니다. 이 수치는 플랫폼 대기열 실험이며 Rust 런타임 큐 포화를 뜻하지 않습니다. 범위와 한계는 [V8 실행 스레드 실험 명세](../../spec/internal/0005-v8-runtime-session.md)와 [R06 검증 근거](../../spec/internal/evidence/r06-v8-runtime-thread-2026-09-30.md)에 기록합니다.
+
+### 실제 V8 우선순위 선택 검증
+
+에뮬레이터에서 세 우선순위 선택 순서와 각 등급의 FIFO 순서를 확인하는 개발 진단 화면을 실행합니다.
+
+```sh
+adb shell am start -n dev.spinon.bootstrap/.MainActivity --ez spinon_priority_probe true
+adb logcat -s SpinonBootstrap:I | rg 'SPINON_PRIORITY_PROBE'
+```
+
+진단은 실제 V8에서 실행 중인 JavaScript를 취소한 뒤, 우선순위를 섞어 접수한 6개 작업의 실행 순서를 검사합니다. 통과 로그는 `priority_probe=PASS`와 `user-blocking`, `user-visible`, `background` 순서 및 같은 등급의 접수 순서를 표시합니다. 일반 앱 API가 아닌 내부 검증 경로입니다. 2026-09-30 Android 16 ARM64 에뮬레이터에서 실제 V8 검증을 통과했습니다. 상세 결과·화면·원본 로그는 [우선순위 시뮬레이터 검증](../../spec/internal/evidence/r06-priority-simulators-2026-09-30.md)을 참고하세요. 이 단일 배치는 지속 유입 시 기아·공정성이나 실기기 성능을 검증하지 않습니다.

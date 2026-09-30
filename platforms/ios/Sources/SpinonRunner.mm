@@ -86,6 +86,23 @@
   return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(session));
 }
 
++ (NSString *)runRuntimePriorityProbe {
+  std::array<char, 4096> output{};
+  const int32_t status =
+      spinon_runtime_priority_probe(output.data(), output.size());
+  NSString *message = [NSString stringWithUTF8String:output.data()];
+  if (status == 0) {
+    os_log(OS_LOG_DEFAULT, "SPINON_PRIORITY_PROBE status=%{public}d %{public}@",
+           status, message ?: @"empty report");
+  } else {
+    os_log_error(OS_LOG_DEFAULT,
+                 "SPINON_PRIORITY_PROBE status=%{public}d %{public}@",
+                 status, message ?: @"empty report");
+  }
+  return [NSString stringWithFormat:@"status=%d %@", status,
+                                    message ?: @"empty report"];
+}
+
 + (NSString *)evalRuntimeSession:(uint64_t)handle source:(NSString *)source {
   const char *sourceUTF8 = source.UTF8String;
   if (handle == 0 || sourceUTF8 == nullptr) return @"status=-1 invalid session or source";

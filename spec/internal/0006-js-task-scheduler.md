@@ -1,6 +1,6 @@
 # 내부 설계 0006 · JavaScript 작업 스케줄러
 
-**상태:** Chromium식 우선순위 선택 기준을 R06 실험 런타임에 반영 · **분리 후 테스트:** 저장 공간 확보 뒤 Bun 1개·Rust 33개 통과 · **플랫폼 빌드:** Android ARM64와 iOS Simulator 성공 · **런타임 실행:** Android 16 에뮬레이터와 iPhone 17 Pro / iOS 26.2 시뮬레이터에서 취소·대기 이벤트·owner thread 확인, iOS heartbeat·세션 재생성 확인 · **미검증:** 실제 V8 혼합 우선순위 선택·기아, 실기기 · **공개 API:** 아님 · **제품 지원:** 아님
+**상태:** Chromium식 우선순위 선택 기준을 R06 실험 런타임에 반영 · **분리 후 테스트:** 저장 공간 확보 뒤 Bun 1개·Rust 33개 통과 · **플랫폼 빌드:** Android ARM64와 iOS Simulator 성공 · **런타임 실행:** Android 16 에뮬레이터와 iPhone 17 Pro / iOS 26.2 시뮬레이터에서 실제 V8 혼합 우선순위 단일 배치 및 등급별 FIFO, 취소·대기 이벤트·owner thread를 확인. iOS heartbeat·세션 재생성 확인 · **미검증:** 지속 유입 시 기아·공정성, 실기기 · **공개 API:** 아님 · **제품 지원:** 아님
 
 이 문서는 앱 JavaScript 작업의 우선순위를 설계하기 위한 내부 기준이다. 웹의 작업 스케줄러 우선순위 이름과 Chromium의 기본 큐 선택 규칙을 참고한다. Blink의 내부 큐 구성이나 시점별 정책을 복제한다고 약속하지 않는다. 제품 API와 구현 상태의 원본은 각각 `spec/` 문서와 [상태 대장](../STATUS.md)이다.
 
@@ -66,7 +66,7 @@ Chromium의 기본 `TaskQueue` 문서는 우선순위가 낮은 큐에 일반적
 
 ## 현재 검증과 남은 검증 관문
 
-분리 전에는 가짜 V8 혼합 우선순위 테스트에서 실행 순서를 확인했다. 분리 후에는 `mise exec -- bun run test`(Bun 1개·Rust 33개), Android ARM64 debug APK 빌드와 Android 16 에뮬레이터 취소·대기 이벤트 실행, iOS Simulator 빌드와 iPhone 17 Pro 자동 시나리오를 통과했다. iOS에서 취소·대기 이벤트, heartbeat, owner thread 일치와 세션 재생성을 확인했다. 이전 저장 공간 부족으로 중단된 재실행은 이 통과 결과로 대체한다. 실제 V8 세 등급 경합과 플랫폼 선택 순서·기아 동작은 여전히 검증하지 않았다. 상세 결과는 [R06 검증 기록](evidence/r06-task-scheduler-2026-09-30.md)에 둔다.
+분리 전에는 가짜 V8 혼합 우선순위 테스트에서 실행 순서를 확인했다. 분리 후에는 `mise exec -- bun run test`(Bun 1개·Rust 33개), Android ARM64 debug APK 빌드와 Android 16 에뮬레이터 취소·대기 이벤트 실행, iOS Simulator 빌드와 iPhone 17 Pro 자동 시나리오를 통과했다. 후속 실제 V8 단일 배치 검증에서 두 시뮬레이터 모두 `user-blocking` → `user-visible` → `background` 순서와 각 등급 FIFO를 통과했다. iOS에서 취소·대기 이벤트, heartbeat, owner thread 일치와 세션 재생성도 확인했다. 이전 저장 공간 부족으로 중단된 재실행은 이 통과 결과로 대체한다. 지속적인 상위 등급 유입 시 기아·공정성은 확인하지 않았다. 상세 결과는 [R06 검증 기록](evidence/r06-task-scheduler-2026-09-30.md)과 [실제 V8 우선순위 시뮬레이터 검증](evidence/r06-priority-simulators-2026-09-30.md)에 둔다.
 
 명령별 결과와 테스트 범위: [R06 Chromium 참고 우선순위 큐 구현 확인](evidence/r06-task-scheduler-2026-09-30.md).
 

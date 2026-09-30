@@ -51,5 +51,5 @@ S05를 완료하기 전에는 오래된 revision의 이벤트를 받은 어댑�
 
 - JS Isolate, Rust 문서 트리, GPU 표면은 각각 소유 경계가 있다. 핸들·콜백·GPU 자원을 경계 너머로 넘길 때 소유자, 해제 시점, 오류 전달을 정한다.
 - Android 에뮬레이터와 iOS 시뮬레이터는 기본 UI 분리와 R06 세션 소유권 실험만 확인했다. 실기기 지연·메모리, iOS JITless 제약, 앱별 전용 OS 스레드와 공용 실행기의 공정성·head-of-line 대기·종료 격리는 미검증이다.
-- HostDocument 소유자, UI 커밋 경계, revision 전달과 충돌 복구, 제품 작업 출처 매핑·backpressure, 취소·종료 제한 시간 및 오류 복구는 미정이다. R06 실험 큐의 기본은 strict priority/FIFO이며 일반 기아 방지를 두지 않는다. Rust 테스트와 Android/iOS Simulator 빌드는 통과했지만 여러 우선순위를 동시에 대기시킨 실제 런타임 선택 순서와 기아는 검증하지 않았다.
+- HostDocument 소유자, UI 커밋 경계, revision 전달과 충돌 복구, 제품 작업 출처 매핑·backpressure, 취소·종료 제한 시간 및 오류 복구는 미정이다. R06 실험 큐의 기본은 strict priority/FIFO이며 일반 기아 방지를 두지 않는다. Android·iOS 시뮬레이터의 실제 V8에서 혼합 우선순위 여섯 작업 단일 배치 선택 순서와 등급별 FIFO를 확인했다. 지속 유입 시 기아·공정성은 검증하지 않았다. [검증 기록](internal/evidence/r06-priority-simulators-2026-09-30.md)
 - 첫 화면의 초기 JavaScript 실행과 첫 GPU 프레임 순서, 초기화 지연·실패 때 표시 동작은 미정이다.

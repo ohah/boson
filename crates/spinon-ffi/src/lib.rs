@@ -53,6 +53,25 @@ pub unsafe extern "C" fn spinon_app_run(
     status
 }
 
+/// 실제 V8 세션에서 우선순위 선택과 동일 등급 FIFO를 확인하는 내부 진단 함수입니다.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn spinon_runtime_priority_probe(
+    output: *mut c_char,
+    output_capacity: usize,
+) -> i32 {
+    if output.is_null() || output_capacity == 0 {
+        return -1;
+    }
+    let (status, report) = match spinon_runtime::run_priority_probe() {
+        Ok(report) => (0, report),
+        Err(error) => (-7, error),
+    };
+    if !write_report(output, output_capacity, &report) {
+        return -3;
+    }
+    status
+}
+
 /// 명시적으로 실행된 개발용 Taffy 실험의 결과를 호출자 버퍼에 씁니다.
 #[cfg(feature = "r10-experiment")]
 #[unsafe(no_mangle)]
