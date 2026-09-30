@@ -135,7 +135,7 @@ Xcode build phase가 Bun 번들 → Rust 정적 라이브러리 → V8 C++ 어�
 
 | 테스트 층 | 위치·실행기 | 확인 대상 |
 | --- | --- | --- |
-| Rust 단위·통합 | 각 crate의 `tests/`, `cargo test --locked --workspace` | 코어 트리·우선순위 선택기, 런타임 세션·취소·큐, FFI 버퍼·ABI 변환을 각각 검사. 레이아웃 테스트는 승격 단계에서 추가 |
+| Rust 단위·통합 | 각 crate의 `tests/`, `cargo test --locked --workspace` | 코어 트리·우선순위 선택기, Taffy 레이아웃 입력·오류·프레임, 기존 행/열 기준 비교, 런타임 세션·취소·큐, FFI 버퍼·ABI 변환을 각각 검사 |
 | JS/TS 패키지 | `examples/bootstrap/*.test.ts`, `bun test` | 현재 예제 JS의 호스트 콜백과 역방향 이벤트 호출 |
 | 공통 적합성 | `tests/conformance/`, Bun 실행기와 Rust fixture 소비 | 동일 앱 시나리오의 트리 revision, 이벤트, 프레임 기대값 |
 | 웹 통합 | Playwright 브라우저 테스트 | DOM 호스트, Vite/Rspack 번들, 웹 기준 출력 |
@@ -151,7 +151,7 @@ Xcode build phase가 Bun 번들 → Rust 정적 라이브러리 → V8 C++ 어�
 | --- | --- | --- | --- |
 | 0. 워크스페이스와 빌드 부트스트랩 | Cargo·Bun 기초, 고정 V8 소스 입력, Rust 런타임·FFI·Android Gradle·iOS Xcode 빌드 smoke와 JS/Rust 단위 검사 | 루트 설정, `crates/spinon-runtime`, `crates/spinon-ffi`, `native/v8`, `platforms/`, `tools/` | V8 연결 앱이 각 플랫폼에서 실행되고 결과 문자열이 맞음. 제품 API 완료는 아님 |
 | 1. Rust 트리 코어 | 노드 ID·revision·create/insert/update/move/remove와 원자 커밋 의미를 고정하고, 동적 트리 PoC에서 트리 자료 모델만 분리 | `crates/spinon-core` | 실패 묶음이 상태를 바꾸지 않고 ID·순서·오류 규칙 단위 테스트 통과 |
-| 2. 레이아웃 모듈 | Taffy 적합성·비용을 검증하고 작은 PoC와 비교 | `crates/spinon-layout` | 공통 fixture의 웹 기준 좌표와 허용 차이가 정의됨 |
+| 2. 레이아웃 모듈 | 코어 트리 스냅샷 입력, 버전 있는 내부 `LayoutEngine` 계약, Taffy Flex subset과 작은 PoC를 같은 fixture에서 비교 | `crates/spinon-layout`, `spec/internal/0009-layout-engine.md` | Chromium 기준 좌표와 기존 PoC가 공통 fixture에서 허용 오차 안에 있고, 미지원 스타일·단위·측정 범위가 명세에 기록됨. 비용·모바일 크기 검증은 별도 후속 관문 |
 | 3. 제품 V8·FFI 경계 | smoke 경계를 제품 런타임으로 승격하고 격리·예외·콜백 수명·스레드 규칙을 정해 검증 | `crates/spinon-runtime`, `crates/spinon-ffi`, `native/v8` | 버전 있는 내부 계약·오류 복구·실기기 검증 |
 | 4. 모바일 호스트 골격 | 현재 부팅 앱을 GPU surface·입력·수명주기·복구 검증으로 확장 | `platforms/android`, `platforms/ios` | 같은 런타임이 두 앱에서 실행되고 앱 수명 복구 확인 |
 | 5. GPU 첫 수직 화면 | R08 실험 후 GPU 백엔드와 텍스트·버튼 hit-test·접근성 연결 | `crates/spinon-render`, 플랫폼 surface | Android·iOS에서 같은 카운터 시나리오가 표시·입력·복구됨 |

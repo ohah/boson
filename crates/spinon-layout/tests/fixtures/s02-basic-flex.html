@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spinon S02 Flex 좌표 기준 fixture</title>
+    <style>
+      html, body { margin: 0; padding: 0; }
+      #stage { position: relative; width: 320px; height: 240px; }
+      [data-node-id] {
+        display: flex;
+        box-sizing: border-box;
+        align-items: stretch;
+        align-content: stretch;
+        justify-content: flex-start;
+        flex-basis: auto;
+        flex-wrap: nowrap;
+        flex-shrink: 0;
+        margin: 0;
+        position: relative;
+      }
+      [data-tag="column"] { background: #f1f5f9; outline: 1px solid #64748b; }
+      [data-tag="row"] { background: #e0e7ff; outline: 1px solid #6366f1; }
+      [data-tag="text"] { background: #dbeafe; outline: 1px solid #0284c7; }
+      [data-tag="button"] { background: #dcfce7; outline: 1px solid #16a34a; }
+      [data-node-id]::after {
+        content: "id " attr(data-node-id);
+        position: absolute;
+        top: 2px;
+        left: 4px;
+        color: #0f172a;
+        font: 11px/14px ui-monospace, monospace;
+        pointer-events: none;
+      }
+      #rtl-stage { width: 300px; height: 100px; }
+    </style>
+  </head>
+  <body>
+    <main id="stage" aria-label="레이아웃 기준 화면"></main>
+    <aside id="rtl-stage" aria-label="RTL 기준 화면"></aside>
+    <script id="fixture-data" type="application/json">
+      {
+        "version": 1,
+        "viewport": { "width": 320, "height": 240 },
+        "root": 1,
+          "nodes": [
+          { "id": 1, "tag": "column", "children": [2, 5], "style": {
+            "width": 320, "height": 240, "flexDirection": "column", "direction": "ltr",
+            "padding": { "top": 16, "right": 16, "bottom": 16, "left": 16 },
+            "rowGap": 8, "columnGap": 0, "flexGrow": 0
+          }},
+          { "id": 2, "tag": "row", "children": [3, 4], "style": {
+            "width": "auto", "height": 64, "flexDirection": "row", "direction": "ltr",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 8, "flexGrow": 1
+          }},
+          { "id": 3, "tag": "text", "children": [], "style": {
+            "width": "auto", "height": "auto", "flexDirection": "row", "direction": "ltr",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 0, "flexGrow": 1
+          }},
+          { "id": 4, "tag": "button", "children": [], "style": {
+            "width": 64, "height": 40, "flexDirection": "row", "direction": "ltr",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 0, "flexGrow": 0
+          }},
+          { "id": 5, "tag": "row", "children": [6, 7], "style": {
+            "width": "auto", "height": 64, "flexDirection": "row", "direction": "ltr",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 8, "flexGrow": 1
+          }},
+          { "id": 6, "tag": "text", "children": [], "style": {
+            "width": "auto", "height": "auto", "flexDirection": "row", "direction": "ltr",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 0, "flexGrow": 1
+          }},
+          { "id": 7, "tag": "button", "children": [], "style": {
+            "width": 64, "height": 40, "flexDirection": "row", "direction": "ltr",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 0, "flexGrow": 0
+          }}
+        ],
+        "expected": {
+          "1": { "x": 0, "y": 0, "width": 320, "height": 240 },
+          "2": { "x": 16, "y": 16, "width": 288, "height": 100 },
+          "3": { "x": 16, "y": 16, "width": 216, "height": 100 },
+          "4": { "x": 240, "y": 16, "width": 64, "height": 40 },
+          "5": { "x": 16, "y": 124, "width": 288, "height": 100 },
+          "6": { "x": 16, "y": 124, "width": 216, "height": 100 },
+          "7": { "x": 240, "y": 124, "width": 64, "height": 40 }
+        }
+      }
+    </script>
+    <script id="rtl-fixture-data" type="application/json">
+      {
+        "version": 1,
+        "viewport": { "width": 300, "height": 100 },
+        "root": 8,
+        "nodes": [
+          { "id": 8, "tag": "row", "children": [9, 10], "style": {
+            "width": 300, "height": 100, "flexDirection": "row", "direction": "rtl",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 0, "flexGrow": 0
+          }},
+          { "id": 9, "tag": "button", "children": [], "style": {
+            "width": 60, "height": 20, "flexDirection": "row", "direction": "rtl",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 0, "flexGrow": 0
+          }},
+          { "id": 10, "tag": "button", "children": [], "style": {
+            "width": 40, "height": 20, "flexDirection": "row", "direction": "rtl",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 0, "flexGrow": 0
+          }}
+        ],
+        "expected": {
+          "8": { "x": 0, "y": 0, "width": 300, "height": 100 },
+          "9": { "x": 240, "y": 0, "width": 60, "height": 20 },
+          "10": { "x": 200, "y": 0, "width": 40, "height": 20 }
+        }
+      }
+    </script>
+    <script>
+      const fixture = JSON.parse(document.querySelector('#fixture-data').textContent);
+      const rtlFixture = JSON.parse(document.querySelector('#rtl-fixture-data').textContent);
+      const byId = new Map(fixture.nodes.map((node) => [node.id, node]));
+      const rtlById = new Map(rtlFixture.nodes.map((node) => [node.id, node]));
+      const stage = document.querySelector('#stage');
+      const rtlStage = document.querySelector('#rtl-stage');
+
+      function render(id, parent, nodes) {
+        const node = nodes.get(id);
+        const element = document.createElement('div');
+        const style = node.style;
+        element.dataset.nodeId = String(id);
+        element.dataset.tag = node.tag;
+        element.style.width = typeof style.width === 'number' ? `${style.width}px` : 'auto';
+        element.style.height = typeof style.height === 'number' ? `${style.height}px` : 'auto';
+        element.style.flexDirection = style.flexDirection;
+        element.style.direction = style.direction;
+        element.style.padding = `${style.padding.top}px ${style.padding.right}px ${style.padding.bottom}px ${style.padding.left}px`;
+        element.style.rowGap = `${style.rowGap}px`;
+        element.style.columnGap = `${style.columnGap}px`;
+        element.style.flexGrow = String(style.flexGrow);
+        element.style.flexShrink = '0';
+        parent.append(element);
+        for (const child of node.children) render(child, element, nodes);
+      }
+
+      render(fixture.root, stage, byId);
+      render(rtlFixture.root, rtlStage, rtlById);
+      window.spinonFixture = fixture;
+      window.spinonRtlFixture = rtlFixture;
+      const measure = (container) => {
+        const root = container.querySelector(':scope > [data-node-id]').getBoundingClientRect();
+        return Object.fromEntries(
+          [...container.querySelectorAll('[data-node-id]')].map((element) => {
+          const rect = element.getBoundingClientRect();
+          return [element.dataset.nodeId, {
+            x: rect.x - root.x, y: rect.y - root.y, width: rect.width, height: rect.height,
+          }];
+          }),
+        );
+      };
+      window.spinonFrames = () => measure(stage);
+      window.spinonRtlFrames = () => measure(rtlStage);
+    </script>
+  </body>
+</html>
