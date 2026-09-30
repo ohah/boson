@@ -73,7 +73,7 @@ cargo test --locked --workspace
 
 첫 테스트 실행은 경고 수정 전 소스에서 통과했다. 이후 수정은 사용하지 않는 테스트 import 한 줄 제거뿐이며, 수정 뒤 Rust 재실행과 iOS 전체 빌드는 저장 공간 문제로 완료하지 못했다. Android 링크 빌드는 수정 뒤 성공했다. 이 결과는 분리 후 앱 런타임 실행이나 실제 V8 우선순위 선택 순서를 증명하지 않는다.
 
-Android 실행에서는 긴 JavaScript 평가 중 두 번째 UI 탭이 즉시 화면에 반영됐고, JS 취소를 요청하자 평가가 `status=-8`로 반환된 뒤 이벤트 dispatch가 `status=0`으로 처리됐다. 해당 한 번의 큐 대기 보고는 성능 지표가 아니다. [분리 후 Android 화면 캡처](spinon-r06-android-post-split-2026-09-30.png).
+Android 실행에서는 긴 JavaScript 평가 중 두 번째 UI 탭이 즉시 화면에 반영됐고, JS 취소를 요청하자 평가가 `status=-8`로 반환된 뒤 이벤트 dispatch가 `status=0`으로 처리됐다. 해당 한 번의 큐 대기 보고는 성능 지표가 아니다. [분리 후 Android 화면 캡처](https://github.com/ohah/spinon/blob/main/spec/internal/evidence/spinon-r06-android-post-split-2026-09-30.png).
 
 ## 저장 공간 확보 뒤 분리 후 재검증
 
@@ -84,7 +84,7 @@ Android 실행에서는 긴 JavaScript 평가 중 두 번째 UI 탭이 즉시 �
 | `mise exec -- bun run test` | 통과: Bun 1개, Rust 단위 테스트 33개. `spinon-core` 16개, `spinon-ffi` 3개, `spinon-runtime` 6개, 레이아웃 실험 라이브러리 5개·실행 파일 3개. |
 | `mise exec -- bun run build:ios-sim` | Xcode 26.2 / iOS 26.2 Simulator SDK, ARM64 앱 빌드 성공. V8 정적 아카이브의 중복 debug-map 경고가 있었지만 dSYM 생성을 포함해 빌드가 완료됐다. |
 | iPhone 17 Pro / iOS 26.2 시뮬레이터 설치·자동 실행 | `--spinon-runtime-threads --spinon-r06-auto` 실행 완료. 긴 평가 `status=-8`, 대기 이벤트 `status=0`, heartbeat 증가 17, 평가·dispatch·콜백 owner thread 일치, 세션 종료·재생성 후 eval·dispatch `status=0`. |
-| 원본 근거 | [iOS OS 로그](r06-ios-simulator-post-split-2026-09-30.log) · [검증 완료 화면](spinon-r06-ios-post-split-2026-09-30.png). |
+| 원본 근거 | [iOS OS 로그](https://github.com/ohah/spinon/blob/main/spec/internal/evidence/r06-ios-simulator-post-split-2026-09-30.log) · [검증 완료 화면](https://github.com/ohah/spinon/blob/main/spec/internal/evidence/spinon-r06-ios-post-split-2026-09-30.png). |
 
 대기 이벤트의 `queue_wait_us=466715`는 한 번의 시뮬레이터 실행 관찰값이며 성능 지표가 아니다. 이번 실행은 분리 후 iOS 앱 경로의 취소·대기 이벤트·스레드 소유권·세션 재생성을 확인한다. 실제 V8 혼합 우선순위 선택 순서와 기아, 실기기, JITless iOS, 공유 실행기 비교는 검증하지 않는다. 앞선 저장 공간 부족으로 인한 iOS 빌드 실패와 테스트 재실행 실패는 이번 성공한 재검증으로 대체한다.
 
