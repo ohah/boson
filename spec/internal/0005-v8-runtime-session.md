@@ -1,8 +1,8 @@
 # 내부 인터페이스 0005 · V8 런타임 세션 실험
 
-**상태:** 실험 전용 · **인터페이스 버전:** `0.1.0-draft` · **공개 API:** 아님 · **우선순위 선택 코드:** 가짜 V8 FFI 혼합 우선순위 테스트·Android/iOS Simulator 빌드 통과, 실제 V8 경합 검증 전
+**상태:** 실험 전용 · **인터페이스 버전:** `0.1.0-draft` · **공개 API:** 아님 · **우선순위 선택 코드:** 분리 전 배치에서 가짜 V8 혼합 우선순위 테스트·Android/iOS Simulator 빌드 통과. 분리 후 `cargo check --workspace --locked` 통과, Rust 테스트·모바일 빌드는 미실행이며 실제 V8 경합도 미검증
 
-이 문서는 한 JavaScript 런타임 세션이 V8 Isolate 하나를 소유하는 실험 인터페이스다. Rust가 만든 전용 OS 스레드에서 V8을 초기화하고 일반 V8 호출을 직렬 처리한다. Android와 iOS 개발 화면에서 입력·취소·재사용·종료 경계를 확인한다. 이 구현은 제품 스레드 정책이나 R06 완료를 뜻하지 않는다. 결정된 기본 실행 방향과 미정 구현 경계는 [UI 트리·이벤트 명세](../0002-ui-tree-events.md)를 따른다.
+이 문서는 한 JavaScript 런타임 세션이 V8 Isolate 하나를 소유하는 실험 인터페이스다. `spinon-runtime`이 Rust 전용 OS 스레드에서 V8을 초기화하고 일반 V8 호출을 직렬 처리한다. `spinon-ffi`는 플랫폼용 C ABI의 인자·버퍼·불투명 핸들을 검사하고 런타임 호출에 위임한다. Android와 iOS 개발 화면에서 입력·취소·재사용·종료 경계를 확인한다. 이 구현은 제품 스레드 정책이나 R06 완료를 뜻하지 않는다. 결정된 기본 실행 방향과 미정 구현 경계는 [UI 트리·이벤트 명세](../0002-ui-tree-events.md)를 따른다.
 
 ## 검증 대상
 
@@ -16,7 +16,7 @@
 1. `spinon_runtime_session_new`는 `spinon-js-runtime` OS 스레드를 만들고 그 스레드에서 V8 Isolate와 Context를 생성한다.
 2. 해당 세션의 `eval`, 이벤트 `dispatch`, Isolate 해제는 이 스레드에서만 실행한다. Rust 콜백도 현재 동기 호출이므로 같은 스레드에서 실행된다.
 3. C ABI `eval`과 `dispatch`는 결과를 기다리는 동기 함수다. 플랫폼 UI 스레드에서 직접 호출하지 말고 별도 실행기에서 호출해야 한다.
-4. 런타임 명령 큐는 `spinon-core::PriorityQueue`의 세 FIFO를 사용한다. 각 작업 경계에서 `user-blocking`, `user-visible`, `background` 순으로 처음 비지 않은 큐의 앞 작업을 고른다. 같은 등급에서는 접수 FIFO를 유지하고, 실행 중 JavaScript는 선점하지 않는다. 일반 기아 방지는 두지 않으므로 높은 등급의 작업이 이어지면 낮은 등급이 굶을 수 있다. 지연 작업 큐가 없어 Chromium selector의 지연/즉시 작업 보정은 포함하지 않는다. 총 대기 용량 64개는 실험 설정이며 포화 시 새 작업을 즉시 거부한다. Android/iOS 플랫폼 대기열과는 별도 용량이고, 단계 간 backpressure는 미정이다.
+4. 런타임 명령 큐는 `spinon-runtime`에서 소유하고 `spinon-core::PriorityQueue`의 세 FIFO를 사용한다. 각 작업 경계에서 `user-blocking`, `user-visible`, `background` 순으로 처음 비지 않은 큐의 앞 작업을 고른다. 같은 등급에서는 접수 FIFO를 유지하고, 실행 중 JavaScript는 선점하지 않는다. 일반 기아 방지는 두지 않으므로 높은 등급의 작업이 이어지면 낮은 등급이 굶을 수 있다. 지연 작업 큐가 없어 Chromium selector의 지연/즉시 작업 보정은 포함하지 않는다. 총 대기 용량 64개는 실험 설정이며 포화 시 새 작업을 즉시 거부한다. Android/iOS 플랫폼 대기열과는 별도 용량이고, 단계 간 backpressure는 미정이다.
 5. 보고서에는 호출자·소유자·마지막 콜백 OS thread ID, 명령 큐 대기 시간, V8 eval/dispatch 호출 시간, 취소 요청 여부가 포함된다. `queue_wait_us`는 API 제출 시점부터 작업자 수신까지이고, `v8_call_us`는 C++ V8 호출 구간만 잰다. 취소 요청과 실제 V8 종료는 별도 값이다. `-8`은 요청이 있었고 V8 `TryCatch::HasTerminated()`도 참일 때만 반환한다.
 
 ## 취소와 종료
@@ -30,9 +30,24 @@
 
 실험의 제어 실행기와 64개 대기 용량을 제품 스케줄러 계약으로 일반화하지 않는다. 기본 우선순위 선택은 [0006 JavaScript 작업 스케줄러](0006-js-task-scheduler.md)의 Chromium 참고 규칙을 따른다.
 
+## Rust 내부 API
+
+아래 API는 `crates/spinon-runtime`이 같은 Cargo 워크스페이스의 `spinon-ffi`에 제공하는 내부 Rust 인터페이스다. 앱 작성자용 API가 아니며, 버전 있는 외부 호환성 약속도 아니다.
+
+| 항목 | 시그니처·결과 | 동작 |
+| --- | --- | --- |
+| 세션 생성 | `RuntimeSession::new() -> Result<(RuntimeSession, String), String>` | 전용 OS 스레드와 V8 Isolate 준비를 기다리고 시작 보고를 반환한다. 초기화 실패는 오류 문자열로 돌려준다. |
+| JavaScript 평가 | `eval(&self, source: &str, priority: TaskPriority) -> OperationResponse` | 작업을 제한된 우선순위 큐에 넣고 완료를 기다린다. Rust 문자열에 NUL이 있으면 인자 오류 `-1`을 돌려준다. |
+| 이벤트 전달 | `dispatch(&self, node_id: i32, priority: TaskPriority) -> OperationResponse` | 지정한 노드 ID 이벤트를 같은 Isolate 소유 스레드에서 처리한다. |
+| 취소 | `cancel(&self) -> i32` | 실행 중 평가 취소 요청은 `0`, 실행 중 작업 없음은 `1`, 실패는 음수다. 대기 작업은 취소하지 않는다. |
+| 응답 | `OperationResponse { status, report }` | Rust 상태 코드와 진단 보고 문자열이다. C 버퍼 복사는 FFI 어댑터가 맡는다. |
+| 종료 | `Drop for RuntimeSession` | 새 작업을 막고 활성 JS 취소를 요청한 뒤 큐를 닫고 작업자 스레드를 join한다. 제한 시간은 없다. |
+
+`TaskPriority`는 `spinon-core`에서 정의하며 Rust API에서는 열거형으로 전달한다. 정수 값 변환, 원시 포인터, NUL 종료 버퍼 계약은 `spinon-ffi`만 소유한다.
+
 ## 내부 C ABI
 
-선언은 저장소 파일 `crates/spinon-ffi/include/spinon_ffi.h`에 있다.
+세션·실행기 구현은 `crates/spinon-runtime`에 있고, 플랫폼 C ABI 선언과 얇은 어댑터는 `crates/spinon-ffi/include/spinon_ffi.h` 및 `crates/spinon-ffi/src/runtime_session.rs`에 있다. 의존 방향은 `spinon-ffi → spinon-runtime → spinon-core`다.
 
 | 함수 | 결과 | 주요 제약 |
 | --- | --- | --- |
@@ -73,6 +88,6 @@ xcrun simctl launch --terminate-running-process booted dev.spinon.bootstrap --sp
 - 기본 실행 방향은 UI 트리·이벤트 명세에서 백그라운드 기본값으로 정했지만, 앱마다 전용 OS 스레드를 둘지 공용 런타임 스레드 풀을 둘지, 메모리·공정성·다중 앱 종료 격리를 비교하지 않았다.
 - iOS의 실행 스레드/큐 및 JITless 실기기 동작은 미검증이다.
 - HostDocument 소유자, UI 커밋 경계, revision 충돌과 JS-visible 동기 조회는 연결되지 않았다.
-- 우선순위 선택기·FFI 세션 작업자의 Rust 단위 테스트(가짜 V8에서 mixed-priority 실행 순서 포함), Android/iOS Simulator 앱 빌드, 새 iOS 바이너리의 기존 R06 자동 수명 시나리오를 통과했다. 실제 V8을 이용한 다중 우선순위 동시 제출과 모바일 입력 경합은 아직 검증하지 않았다. 제품 task-source 기본 매핑, 이벤트 병합, 프레임 snapshot 병합은 미정이다.
+- 분리 전 배치에서 우선순위 선택기·세션 작업자의 Rust 단위 테스트(가짜 V8 혼합 우선순위 실행 순서 포함), Android/iOS Simulator 앱 빌드, 새 iOS 바이너리의 기존 R06 자동 수명 시나리오를 통과했다. 세션 작업자를 `spinon-runtime`으로 옮긴 현재 변경은 `cargo check --workspace --locked`를 통과했다. 분리 후 Rust 테스트와 Android/iOS 앱 빌드는 아직 실행하지 않았다. 실제 V8을 이용한 다중 우선순위 동시 제출과 모바일 입력 경합도 아직 검증하지 않았다. 제품 task-source 기본 매핑, 이벤트 병합, 프레임 snapshot 병합은 미정이다.
 - `free` 대기 시간 제한, 강제 종료 후 Isolate 복구, pending Promise·플랫폼 요청 오류 보존은 미정이다.
 - 메모리 할당 실패·Rust panic·C++ 예외의 복구와 진단 보존을 보장하지 않는다.

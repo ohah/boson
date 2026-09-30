@@ -14,6 +14,7 @@ spinon/
 ├── bun.lock                   # JS/TS workspace 잠금 파일
 ├── crates/
 │   ├── spinon-core/           # 문서·UI 트리, ID, 변경, 오류 계약
+│   ├── spinon-runtime/        # V8 세션, Isolate 소유 스레드, 작업 스케줄러
 │   ├── spinon-layout/         # LayoutEngine 경계와 Taffy 어댑터
 │   ├── spinon-render/         # 플랫폼에 무관한 장면·그리기 명령
 │   └── spinon-ffi/            # 좁은 C ABI: Rust와 호스트 연결
@@ -52,9 +53,10 @@ spinon/
 | 경계 | 경로 | 책임 |
 | --- | --- | --- |
 | 공통 런타임 코어 | `crates/spinon-core` | 안정적 노드 ID, 문서·UI 트리, 혼합 요소/텍스트 자식 순서, 논리 문서·연결 표시 트리 revision, 변경, 오류·복구 의미 |
+| JavaScript 실행기 | `crates/spinon-runtime` | V8 세션·Isolate 소유 스레드·작업 큐·실행/취소 수명주기. 공통 우선순위 선택기는 `spinon-core`를 사용 |
 | 레이아웃 | `crates/spinon-layout` | 코어 노드와 레이아웃 엔진 사이 어댑터, Taffy 적용·검증 |
 | 렌더 명령 | `crates/spinon-render` | 장면 변경, 그리기 명령, hit-test 입력·결과 모델 |
-| 언어 경계 | `crates/spinon-ffi`, `native/v8` | Rust C ABI와 V8 C++ API를 제한된 값·핸들로 연결 |
+| 언어 경계 | `crates/spinon-ffi`, `native/v8` | FFI는 플랫폼용 C ABI를 검사·변환하고 런타임 API에 위임. V8 C++ 어댑터는 엔진 호출·호스트 콜백을 제공 |
 | Android | `platforms/android` | Gradle 빌드, 앱 수명주기, 표면·입력·IME·접근성·JNI 연결 |
 | iOS | `platforms/ios` | Xcode 빌드, 앱 수명주기, 표면·입력·IME·접근성·Objective-C++ 연결 |
 | JS 호스트 API | `packages/runtime` | 공개 호스트 API, DOM façade, Fetch 표면과 버전 있는 호스트 계약 |
@@ -63,7 +65,7 @@ spinon/
 | CLI | `packages/cli` | 앱 생성·실행·빌드·진단 명령 |
 | 공통 적합성 | `tests/conformance` | 플랫폼·프레임워크별로 공유할 시나리오와 기대 결과 |
 
-Rust 코어와 C ABI는 분리합니다. `spinon-core`의 공개 Rust API는 안전한 타입 중심으로 두고, 포인터 수명·버퍼 복사·콜백 ABI는 `spinon-ffi`에 둡니다. V8 객체와 Rust 내부 포인터를 경계 밖에 보관하지 않습니다.
+Rust 코어, 런타임, C ABI는 분리합니다. 의존 방향은 `spinon-ffi → spinon-runtime → spinon-core`입니다. `spinon-runtime`은 세션·실행 스레드·큐·V8 호출을 맡고, `spinon-ffi`는 포인터 수명·버퍼 복사·C ABI 변환만 맡습니다. V8 객체와 Rust 내부 포인터를 경계 밖에 보관하지 않습니다.
 
 현재 S01 코어의 트리 모델은 DOM 노드 모델이 아닙니다. DOM façade 구현을 시작하기 전에 요소·텍스트가 순서대로 섞이는 자식 모델, 앱 문서의 표시 루트, 동기 DOM 변경·조회와 프레임 단위 GPU 적용의 분리를 설계하고 상태 대장 계약을 갱신합니다. 상세 후보와 미정 항목은 [DOM 호환 명세](../../spec/0007-dom-compatibility.md)에 둡니다.
 
@@ -75,7 +77,7 @@ Bun은 저장소의 JS/TS 워크스페이스, 잠금 파일, 스크립트와 테
 
 ## Cargo와 Bun 워크스페이스
 
-- 루트 `Cargo.toml`이 제품·내부 crate를 `[workspace]`로 관리하고 루트 `Cargo.lock` 하나를 사용합니다. 현재 `crates/spinon-ffi`는 부팅 smoke만 잇는 내부 crate이며 제품 API를 제공하지 않습니다. 공통 crate 버전은 `workspace.dependencies`에서 고정합니다.
+- 루트 `Cargo.toml`이 제품·내부 crate를 `[workspace]`로 관리하고 루트 `Cargo.lock` 하나를 사용합니다. 현재 `spinon-core`, `spinon-runtime`, `spinon-ffi`는 제품 공개 API가 아닌 내부 기반입니다. 공통 crate 버전은 `workspace.dependencies`에서 고정합니다.
 - 루트 `package.json`은 Bun workspace와 문서·저장소 명령 진입점만 관리합니다. 실제 패키지는 준비될 때 구성원으로 추가하고, 존재하지 않는 패키지 경로를 미리 workspace에 나열하지 않습니다. 문서 생성기는 `packages/docs`에 두고 RSPress를 `2.0.22`에 고정합니다. `examples/bootstrap/app.js`는 프레임워크 API 확정 전의 번들 입력입니다.
 - Rust 컴파일 결과는 루트 `build/` 또는 Cargo 공통 `target/`에 모읍니다. Gradle 캐시, Xcode 산출물, JS 의존성, 환경 파일은 Git에 넣지 않습니다.
 - 스파이크의 독립 `Cargo.lock`, Bun 잠금 파일, 빌드 명령은 코드를 제품 크레이트로 옮겨 동작이 같음을 확인할 때까지 보존합니다. 잠금 파일을 일괄 삭제하거나 의존성을 최신화하지 않습니다.
@@ -133,7 +135,7 @@ Xcode build phase가 Bun 번들 → Rust 정적 라이브러리 → V8 C++ 어�
 
 | 테스트 층 | 위치·실행기 | 확인 대상 |
 | --- | --- | --- |
-| Rust 단위·통합 | 각 crate의 `tests/`, `cargo test --locked --workspace` | 현재는 FFI 보고 문자열·버퍼 규칙만 검사하며, 트리·레이아웃 테스트는 승격 단계에서 추가 |
+| Rust 단위·통합 | 각 crate의 `tests/`, `cargo test --locked --workspace` | 코어 트리·우선순위 선택기, 런타임 세션·취소·큐, FFI 버퍼·ABI 변환을 각각 검사. 레이아웃 테스트는 승격 단계에서 추가 |
 | JS/TS 패키지 | `examples/bootstrap/*.test.ts`, `bun test` | 현재 예제 JS의 호스트 콜백과 역방향 이벤트 호출 |
 | 공통 적합성 | `tests/conformance/`, Bun 실행기와 Rust fixture 소비 | 동일 앱 시나리오의 트리 revision, 이벤트, 프레임 기대값 |
 | 웹 통합 | Playwright 브라우저 테스트 | DOM 호스트, Vite/Rspack 번들, 웹 기준 출력 |
@@ -147,10 +149,10 @@ Xcode build phase가 Bun 번들 → Rust 정적 라이브러리 → V8 C++ 어�
 
 | 단계 | 구현·선행 결정 | 대상 위치 | 다음 단계로 가는 기준 |
 | --- | --- | --- | --- |
-| 0. 워크스페이스와 빌드 부트스트랩 | Cargo·Bun 기초, 고정 V8 소스 입력, Rust FFI·Android Gradle·iOS Xcode 빌드 smoke와 JS/Rust 단위 검사 | 루트 설정, `crates/spinon-ffi`, `native/v8`, `platforms/`, `tools/` | V8 연결 앱이 각 플랫폼에서 실행되고 결과 문자열이 맞음. 제품 API 완료는 아님 |
+| 0. 워크스페이스와 빌드 부트스트랩 | Cargo·Bun 기초, 고정 V8 소스 입력, Rust 런타임·FFI·Android Gradle·iOS Xcode 빌드 smoke와 JS/Rust 단위 검사 | 루트 설정, `crates/spinon-runtime`, `crates/spinon-ffi`, `native/v8`, `platforms/`, `tools/` | V8 연결 앱이 각 플랫폼에서 실행되고 결과 문자열이 맞음. 제품 API 완료는 아님 |
 | 1. Rust 트리 코어 | 노드 ID·revision·create/insert/update/move/remove와 원자 커밋 의미를 고정하고, 동적 트리 PoC에서 트리 자료 모델만 분리 | `crates/spinon-core` | 실패 묶음이 상태를 바꾸지 않고 ID·순서·오류 규칙 단위 테스트 통과 |
 | 2. 레이아웃 모듈 | Taffy 적합성·비용을 검증하고 작은 PoC와 비교 | `crates/spinon-layout` | 공통 fixture의 웹 기준 좌표와 허용 차이가 정의됨 |
-| 3. 제품 V8·FFI 경계 | smoke 경계를 제품 런타임으로 승격하고 격리·예외·콜백 수명·스레드 규칙을 정해 검증 | `crates/spinon-ffi`, `native/v8` | 버전 있는 내부 계약·오류 복구·실기기 검증 |
+| 3. 제품 V8·FFI 경계 | smoke 경계를 제품 런타임으로 승격하고 격리·예외·콜백 수명·스레드 규칙을 정해 검증 | `crates/spinon-runtime`, `crates/spinon-ffi`, `native/v8` | 버전 있는 내부 계약·오류 복구·실기기 검증 |
 | 4. 모바일 호스트 골격 | 현재 부팅 앱을 GPU surface·입력·수명주기·복구 검증으로 확장 | `platforms/android`, `platforms/ios` | 같은 런타임이 두 앱에서 실행되고 앱 수명 복구 확인 |
 | 5. GPU 첫 수직 화면 | R08 실험 후 GPU 백엔드와 텍스트·버튼 hit-test·접근성 연결 | `crates/spinon-render`, 플랫폼 surface | Android·iOS에서 같은 카운터 시나리오가 표시·입력·복구됨 |
 | 6. JS workspace와 첫 개발 흐름 | Runtime 패키지, React 어댑터, Vite 우선 통합, 웹 호스트, 다시 로드·오류 위치 | `packages/runtime`, `packages/frameworks/react`, `packages/bundlers/vite`, `examples/counter` | 한 TSX 앱이 웹·Android·iOS에서 빌드되고 공통 fixture 통과 |

@@ -2,7 +2,7 @@
 
 **상태:** 실험 전용 · **인터페이스 버전:** `0.1.0-draft` · **공개 API:** 아님
 
-이 문서는 Android·iOS 빌드 골격에서 V8 정적 라이브러리, C++ 엔진 어댑터, Rust `spinon-ffi` 정적 라이브러리 사이의 호출 규약을 고정합니다. 이 실험 표면은 제품의 UI 트리·이벤트 API나 안정 ABI를 약속하지 않습니다.
+이 문서는 Android·iOS 빌드 골격에서 V8 정적 라이브러리, C++ 엔진 어댑터, Rust `spinon-runtime`, 플랫폼 C ABI인 `spinon-ffi` 사이의 호출 규약을 고정합니다. `spinon-runtime`이 V8 호출을 소유하고 `spinon-ffi`가 플랫폼 인자·버퍼 변환을 맡습니다. 이 실험 표면은 제품의 UI 트리·이벤트 API나 안정 ABI를 약속하지 않습니다.
 
 ## 빌드 기준
 
@@ -14,12 +14,13 @@
 
 ## 호출과 소유권
 
-1. 앱 호스트가 번들 JavaScript UTF-8 문자열을 `spinon_app_run`에 전달합니다.
-2. Rust가 스택 수명의 콜백 상태를 만들고 `spinon_v8_runtime_new`를 호출합니다.
-3. C++ 어댑터가 V8 `Isolate`와 `Context`를 소유하며, Rust는 V8 핸들이나 포인터를 보관하지 않습니다.
-4. 실행 중 V8은 Rust 콜백을 동기 호출합니다. 콜백 사용자 데이터는 `spinon_app_run`이 반환하기 전까지만 유효합니다.
-5. Rust가 JavaScript 이벤트 핸들러를 동기 호출하고 결과를 호스트 버퍼에 NUL 종료 UTF-8 문자열로 복사합니다.
-6. 성공·오류와 무관하게 Rust가 V8 런타임을 해제합니다. V8 프로세스 전역 플랫폼은 앱 프로세스 종료까지 유지합니다.
+1. 앱 호스트가 번들 JavaScript UTF-8 문자열을 플랫폼 C ABI의 `spinon_app_run`에 전달합니다.
+2. `spinon-ffi`가 포인터·출력 버퍼를 확인하고 `spinon-runtime`의 부팅 확인 API를 호출합니다.
+3. `spinon-runtime`이 콜백 상태를 만들고 V8 C++ 어댑터의 `spinon_v8_runtime_new`를 호출합니다.
+4. C++ 어댑터가 V8 `Isolate`와 `Context`를 생성·해제합니다. `spinon-runtime`은 세션 수명 동안 필요한 불투명 런타임 주소를 내부 제어 상태에만 보관하며 플랫폼 C ABI 밖으로 노출하지 않습니다.
+5. 실행 중 V8은 `spinon-runtime`의 Rust 콜백을 동기 호출합니다. 콜백 사용자 데이터는 부팅 확인 API가 반환하기 전까지만 유효합니다.
+6. `spinon-runtime`이 JavaScript 이벤트 핸들러를 동기 호출하고 보고 문자열을 반환하면, `spinon-ffi`가 호스트 버퍼에 NUL 종료 UTF-8 문자열로 복사합니다.
+7. 성공·오류와 무관하게 `spinon-runtime`이 V8 런타임을 해제합니다. V8 프로세스 전역 플랫폼은 앱 프로세스 종료까지 유지합니다.
 
 `spinon_app_run`은 성공 `0`, 인자 오류 `-1`, V8 생성 실패 `-2`, 출력 버퍼 부족 `-3`, 평가·이벤트 오류 `-4`를 반환합니다. 평가·이벤트 오류 메시지는 결과 버퍼에 들어갑니다. 호출자는 결과 버퍼를 호출 전 할당하고, 성공·오류 문자열을 읽기 전까지 유지해야 합니다.
 
