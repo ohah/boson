@@ -31,9 +31,9 @@ Fetch 요청 → NetworkHost → 네트워크 전송 계층 → Android / iOS �
 | 플랫폼 모듈 레지스트리 | 앱에 포함된 버전 있는 JS 모듈과 Android/iOS 호스트 구현을 빌드 시 연결하고 플랫폼별 기능을 공개 | V8 핸들·Rust 포인터의 공개, 임의 네이티브 라이브러리의 무검증 로딩 |
 | JavaScript 네트워크 호스트 | 제안된 `fetch`·`Request`·`Response` 표면을 네트워크 호스트 계약에 연결 | Rust UI 트리와 GPU 렌더링 |
 | 네트워크 전송 계층 | URLSession·Android 네트워크 구현 또는 공통 전송 구현을 같은 계약 뒤에서 검증 | DOM 노드와 UI 장면 |
-| Rust 코어 | 안정적인 노드 ID, 문서·UI 트리, 변경 배치와 revision, 공통 우선순위 선택기 | JS 객체와 플랫폼 객체, V8 세션 수명 |
+| Rust 코어 (`crates/spinon-core`) | 안정적인 노드 ID, 문서·UI 트리, 자식 순서, 구조 revision, 원자 변경 묶음, 공통 우선순위 선택기 | 계산 스타일·CSS cascade, 레이아웃 프레임, JS 객체와 플랫폼 객체, V8 세션 수명 |
 | `spinon-style` | 내장 UA CSS 자원과 이후 Stylo DOM 어댑터·계산 스타일 | 레이아웃 계산과 GPU 표시 |
-| `spinon-layout` | 계산 스타일에서 Taffy 및 추가 알고리즘으로 연결, 텍스트·이미지 측정 | CSS cascade와 페인트 속성 |
+| 레이아웃 (`crates/spinon-layout`) | 코어 트리와 계산 스타일 스냅샷, `LayoutEngine` 경계, Taffy Flex 계산·프레임 결과 | CSS 파싱·cascade, 폰트/이미지 측정, 장면·GPU 자원 |
 | GPU 렌더러 | 그리기 명령, 텍스트·이미지·클리핑·합성, 프레임 제출 | 컴포넌트 상태와 JS 객체 |
 | 플랫폼 호스트 | GPU 표면·입력·IME·접근성 연결, 폰트/이미지 자원과 표시 완료 신호 | 프레임워크의 컴포넌트 상태 |
 
@@ -51,7 +51,7 @@ V8은 JavaScript 언어 엔진이며 브라우저의 `fetch`, 타이머, DOM 등
 
 JSI는 React Native가 채택한 JavaScript↔C++ 인터페이스다. 스피논은 V8을 선택했으므로 엔진 API에 붙는 내부 어댑터가 필요하지만 RN의 JSI를 그대로 넣을 이유는 없다. 앱 작성자가 자체 Kotlin·Swift·Rust·C++ 기능을 JS에서 부르도록 하려면, V8별 API를 노출하는 대신 빌드 시 생성·등록되는 버전 있는 플랫폼 모듈 계약을 별도로 제공한다. 웹 빌드의 대체 구현 또는 명시적 미지원 동작도 모듈 계약에 포함한다. 일반 값 전달과 비동기 호출을 기본으로 하고, 고용량 zero-copy 데이터는 별도 수명·소유권 계약을 갖는 후속 경로로 둔다. 이 확장 경계의 공개 범위는 [JS API 구현 체크리스트의 J15](../spec/STATUS.md#javascript-api-구현-체크리스트)에서 X08 하위 작업으로 정한다.
 
-초기 레이아웃 구현에는 Taffy를 `LayoutEngine` 경계 뒤에 둔다. Taffy는 Block·Flexbox·Grid 배치 계산에 사용하고, 폰트/이미지 측정은 플랫폼과 스피논의 별도 책임으로 둔다. 기존 작은 행·열 엔진은 PoC 비교 기준으로 보존한다. Taffy 버전은 실제 코어 크레이트를 만들 때 고정하고, 부분 갱신 비용과 모바일 크기를 측정한 뒤 계속 사용할지 판정한다. Taffy를 사용하지 않으면 이 배치 알고리즘과 테스트·유지보수를 스피논에서 직접 맡아야 한다.
+`crates/spinon-layout`은 `spinon-core::Tree`와 계산 스타일 맵에서 순서가 보존된 스냅샷을 만들고 `LayoutEngine` 경계 뒤에서 Taffy를 호출한다. workspace는 Taffy `0.14.0`을 고정하며 현재 `std`, `flexbox`, `taffy_tree` 기능만 연결한다. 구현 범위는 고정/auto 크기, row/column, LTR/RTL, padding, gap, flex-grow의 작은 Flex subset이다. 결과는 구조 revision과 함께 소수 좌표 프레임으로 반환한다. CSS 파싱·cascade, flex-shrink, wrap, Grid·Block, 실제 폰트·이미지 측정과 CSS px↔dp/point 변환은 이 경계의 책임이 아니며 아직 지원하지 않는다. 기존 작은 행·열 엔진과 같은 입력 fixture를 비교 기준으로 보존한다. 매 계산마다 Taffy 트리를 다시 만들므로 부분 갱신 비용, 모바일 바이너리 크기와 성능은 이후 검증 과제다. 전체 동작·오류 계약은 [내부 레이아웃 인터페이스](../spec/internal/0009-layout-engine.md)에 둔다.
 
 CSS 계산은 모바일에서 Stylo를 사용하고 레이아웃과 GPU 페인트는 별도 모듈이 소유한다. `spinon-style`은 지원 요소의 기본 스타일 자원을 컴파일 시 포함하고 내부 FFI에서 읽기 전용으로 제공한다. 이 자원은 Stylo의 UA cascade나 실제 렌더 경로에 아직 연결되지 않았다. Spinon 소유 문서 트리용 adapter를 별도로 구현한다. Blitz DOM은 런타임 의존성으로 넣지 않는다. Taffy는 검증된 Block·Flexbox·Grid 경로에 적용하되 전체 CSS 목표에 필요한 알고리즘을 추가할 수 있도록 `spinon-layout` 경계를 유지한다.
 

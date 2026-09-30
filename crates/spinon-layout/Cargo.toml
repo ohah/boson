@@ -1,0 +1,16 @@
+[package]
+name = "spinon-layout"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+spinon-core = { path = "../spinon-core" }
+taffy = { version = "=0.14.0", default-features = false, features = ["std", "flexbox", "taffy_tree"] }
+
+[dev-dependencies]
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.151"
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"

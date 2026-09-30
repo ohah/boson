@@ -104,6 +104,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "spinon-layout"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "spinon-core",
+ "taffy",
+]
+
+[[package]]
 name = "spinon-runtime"
 version = "0.1.0"
 dependencies = [
