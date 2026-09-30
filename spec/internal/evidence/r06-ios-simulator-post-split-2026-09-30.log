@@ -1,0 +1,19 @@
+2026-09-30 18:15:01.247 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 초기 JavaScript · status=0 seq=1 op=eval status=0 caller_tid=4770423 owner_tid=4770498 callback_tid=4770498 queue_wait_us=6 v8_call_us=3413 cancel_requested=false callback_count=2 created_nodes=1 last_node_id=1 error=none
+2026-09-30 18:15:01.249 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 자동 검증 시작 · UI 타깃 액션을 보낸 뒤 JS 취소
+2026-09-30 18:15:01.250 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 무한 JavaScript 평가 제출 · UI 메인 스레드는 대기하지 않음
+2026-09-30 18:15:01.560 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS UIKit 타깃 액션 1 제출
+2026-09-30 18:15:02.027 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 취소 요청 · status=0
+2026-09-30 18:15:02.030 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 긴 평가 반환 · status=-8 seq=2 op=eval status=-8 caller_tid=4770421 owner_tid=4770498 callback_tid=0 queue_wait_us=8 v8_call_us=776526 cancel_requested=true callback_count=0 created_nodes=0 last_node_id=0 error=null
+2026-09-30 18:15:02.031 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 이벤트 1 · status=0 seq=3 op=dispatch status=0 caller_tid=4770426 owner_tid=4770498 callback_tid=4770498 queue_wait_us=466715 v8_call_us=3972 cancel_requested=false callback_count=2 created_nodes=1 last_node_id=2 error=none
+2026-09-30 18:15:02.032 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 통과 · 취소된 평가
+2026-09-30 18:15:02.033 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 통과 · 대기 이벤트 처리
+2026-09-30 18:15:02.034 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 통과 · 실행 중 취소 요청
+2026-09-30 18:15:02.035 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 통과 · 메인 UI heartbeat
+2026-09-30 18:15:02.036 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 통과 · Isolate 소유 스레드
+2026-09-30 18:15:02.037 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 통과 · JS 콜백 소유 스레드
+2026-09-30 18:15:02.038 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS heartbeat 증가량=17 · owner_tid=4770498
+2026-09-30 18:15:02.462 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 기존 세션 해제 완료
+2026-09-30 18:15:02.463 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 새 세션 초기화 · status=0 seq=1 op=eval status=0 caller_tid=4770416 owner_tid=4770614 callback_tid=4770614 queue_wait_us=5 v8_call_us=50 cancel_requested=false callback_count=2 created_nodes=1 last_node_id=1 error=none
+2026-09-30 18:15:02.464 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 새 세션 이벤트 · status=0 seq=2 op=dispatch status=0 caller_tid=4770416 owner_tid=4770614 callback_tid=4770614 queue_wait_us=9 v8_call_us=17 cancel_requested=false callback_count=2 created_nodes=1 last_node_id=100 error=none
+2026-09-30 18:15:02.466 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 통과 · 세션 종료·재생성 후 호출
+2026-09-30 18:15:02.467 Df SpinonBootstrap[37432:48ca2f] [dev.spinon.bootstrap:r06] SPINON_R06_IOS 자동 검증 전체 완료
