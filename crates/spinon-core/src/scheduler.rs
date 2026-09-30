@@ -1,6 +1,8 @@
 use std::collections::VecDeque;
 
 /// JavaScript 작업의 논리적 우선순위입니다. OS 스레드 우선순위와는 별개입니다.
+/// 큐에서 다음 JavaScript 작업을 고르고 같은 등급 안의 FIFO 순서를 유지하기 위한 분류입니다.
+/// 설계 배경은 [JavaScript 작업 스케줄러 명세](https://github.com/ohah/spinon/blob/main/spec/internal/0006-js-task-scheduler.md)를 참고하세요.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TaskPriority {
     UserBlocking,
