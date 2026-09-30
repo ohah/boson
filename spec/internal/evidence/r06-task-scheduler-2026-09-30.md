@@ -53,9 +53,9 @@ cargo test --locked --workspace
 
 이 구현은 Chromium `TaskQueueSelector`의 우선순위 선택과 같은 우선순위 안의 enqueue 순서를 작은 R06 실험 큐에 반영한다. Chromium의 모든 큐 종류, task source 정책, Blink 입력·컴포지터 재분류 또는 지연 작업 보정의 완전한 포팅이 아니다. 코드 근거와 경계는 [내부 JavaScript 작업 스케줄러 설계](../0006-js-task-scheduler.md)를 따른다.
 
-## 후속 코드 분리
+## 코드 분리 직후 기록 (저장 공간 확보 전)
 
-검증 뒤 세션 작업자와 V8 소유권 코드를 `crates/spinon-runtime`으로 이동하고 `crates/spinon-ffi`를 C ABI 변환 어댑터로 정리했다. 분리 후 `cargo check --workspace --locked`는 통과했지만 자동 테스트와 Android/iOS 빌드는 실행하지 않았다. 위 테스트·플랫폼 검증 결과는 분리 전 소스 커밋의 기록이며, 새 배치가 동일하게 동작한다는 증거로 사용하지 않는다.
+세션 작업자와 V8 소유권 코드를 `crates/spinon-runtime`으로 이동하고 `crates/spinon-ffi`를 C ABI 변환 어댑터로 정리한 직후의 기록이다. 이 시점에는 `cargo check --workspace --locked`만 통과했고 자동 테스트와 Android/iOS 빌드는 실행하지 않았다. 이는 코드 분리 직후의 중간 결과다. 아래 저장 공간 확보 뒤 재검증 결과가 현재 상태다. 위쪽 테스트·플랫폼 결과는 분리 전 소스 커밋의 기록이며 새 배치가 동일하게 동작한다는 증거로 사용하지 않는다.
 
 ## 분리 후 초기 적대적 재검증 (저장 공간 확보 전)
 
