@@ -56,3 +56,19 @@ cargo test --locked --workspace
 ## 후속 코드 분리
 
 검증 뒤 세션 작업자와 V8 소유권 코드를 `crates/spinon-runtime`으로 이동하고 `crates/spinon-ffi`를 C ABI 변환 어댑터로 정리했다. 분리 후 `cargo check --workspace --locked`는 통과했지만 자동 테스트와 Android/iOS 빌드는 실행하지 않았다. 위 테스트·플랫폼 검증 결과는 분리 전 소스 커밋의 기록이며, 새 배치가 동일하게 동작한다는 증거로 사용하지 않는다.
+
+## 분리 후 적대적 재검증
+
+2026-09-30에 의존 방향, V8 심볼 소유권, C 헤더와 Rust ABI 선언, 세션 취소·종료 경로, 상태 대장과 근거 문서를 다시 대조했다. FFI 테스트 모듈의 사용하지 않는 import 경고를 발견해 제거했다.
+
+| 명령 | 결과 |
+| --- | --- |
+| `mise exec -- bun run test` | Bun 1개와 Rust 단위 테스트 33개 통과. 실행 때 사용하지 않는 import 경고가 있었고 이후 제거했다. 제거 뒤 재실행은 `target/.fingerprint` 기록 중 디스크 부족으로 Rust 테스트 시작 전에 실패했다. |
+| `mise exec -- bun run build:android` | Android ARM64 Rust/C++ 라이브러리와 debug APK 빌드 성공. Gradle은 환경 NDK 경로가 고정 버전과 달라 무시하고 SDK NDK `27.1.12297006`을 사용했다. |
+| `mise exec -- bun run build:ios-sim` | ARM64 앱 실행 파일 생성 뒤 dSYM 단계에서 `No space left on device`로 전체 빌드 실패. 실행 당시 여유 공간은 약 101 MiB였고 앱 설치·실행은 확인하지 않았다. |
+| Android 16 ARM64 `sdk_gphone64_arm64` 에뮬레이터에 새 APK 설치·실행 | 초기 eval 성공. 무한 eval 중 UI 탭 카운터가 증가했고, 취소 후 eval `status=-8`, 대기 이벤트 `status=0`; 실행·콜백 `owner_tid=7550`으로 일치했다. |
+| `gh pr checks 15` | 보고된 검사 없음. |
+
+첫 테스트 실행은 경고 수정 전 소스에서 통과했다. 이후 수정은 사용하지 않는 테스트 import 한 줄 제거뿐이며, 수정 뒤 Rust 재실행과 iOS 전체 빌드는 저장 공간 문제로 완료하지 못했다. Android 링크 빌드는 수정 뒤 성공했다. 이 결과는 분리 후 앱 런타임 실행이나 실제 V8 우선순위 선택 순서를 증명하지 않는다.
+
+Android 실행에서는 긴 JavaScript 평가 중 두 번째 UI 탭이 즉시 화면에 반영됐고, JS 취소를 요청하자 평가가 `status=-8`로 반환된 뒤 이벤트 dispatch가 `status=0`으로 처리됐다. 해당 한 번의 큐 대기 보고는 성능 지표가 아니다. [분리 후 Android 화면 캡처](spinon-r06-android-post-split-2026-09-30.png).

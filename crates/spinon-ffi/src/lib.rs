@@ -119,7 +119,6 @@ pub unsafe extern "C" fn spinon_taffy_r10_run(
 
 #[cfg(test)]
 mod tests {
-    use super::copy_report;
     use std::ffi::CStr;
 
     #[repr(C)]
