@@ -37,3 +37,5 @@ adb logcat -s SpinonBootstrap:I | rg 'SPINON_PRIORITY_PROBE'
 ```
 
 진단은 실제 V8에서 실행 중인 JavaScript를 취소한 뒤, 우선순위를 섞어 접수한 6개 작업의 실행 순서를 검사합니다. 통과 로그는 `priority_probe=PASS`와 `user-blocking`, `user-visible`, `background` 순서 및 같은 등급의 접수 순서를 표시합니다. 일반 앱 API가 아닌 내부 검증 경로입니다. 2026-09-30 Android 16 ARM64 에뮬레이터에서 실제 V8 검증을 통과했습니다. 상세 결과·화면·원본 로그는 [우선순위 시뮬레이터 검증](../../spec/internal/evidence/r06-priority-simulators-2026-09-30.md)을 참고하세요. 이 단일 배치는 지속 유입 시 기아·공정성이나 실기기 성능을 검증하지 않습니다.
+
+Android와 iOS 시뮬레이터를 함께 자동 실행하고 로그를 판정하려면 저장소 루트에서 `mise exec -- bun run verify:r06-priority:simulators`를 실행합니다. 이 명령은 연결된 `emulator-*` Android 대상만 허용합니다.

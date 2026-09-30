@@ -16,6 +16,7 @@ mise exec -- bun install --frozen-lockfile
 mise exec -- bun run docs:dev
 mise exec -- bun run docs:build
 mise exec -- bun run test
+mise exec -- bun run verify:r06-priority:simulators
 ```
 
 ## 네이티브 빌드 부트스트랩
@@ -30,6 +31,24 @@ mise exec -- bun run build:ios-sim
 이 부트스트랩은 앱 빌드 연결을 검증합니다. GPU 렌더링, 제품 UI, OTA, 공개 API 지원 완료를 의미하지 않습니다.
 
 현재 Android 실기기와 iOS 시뮬레이터에서 확인한 부팅 결과 및 검증 범위는 [네이티브 부트스트랩 기록](docs/evidence/native-bootstrap-2026-09-28.md)에 있습니다.
+
+### 실제 V8 우선순위 시뮬레이터 검증
+
+실행 중인 Android 에뮬레이터 하나와 iOS 시뮬레이터 하나를 선택해 실제 V8 우선순위·등급별 FIFO 진단을 빌드부터 실행까지 반복합니다. Android 대상은 `emulator-*` serial만 허용하며, 실기기는 선택되지 않습니다. 여러 시뮬레이터가 켜져 있다면 `SPINON_ANDROID_EMULATOR_SERIAL`과 `SPINON_IOS_SIMULATOR_UDID`로 대상을 지정합니다. 로그와 화면 캡처는 Git에 포함되지 않는 `build/spinon/priority-validation/<UTC 시각>/`에 저장합니다.
+
+```sh
+mise exec -- bun run verify:r06-priority:simulators
+```
+
+여러 대상이 부팅되어 있으면 serial과 UDID를 고정해 실행할 수 있습니다.
+
+```sh
+SPINON_ANDROID_EMULATOR_SERIAL=emulator-5554 \
+SPINON_IOS_SIMULATOR_UDID=ACA7BF91-E2D5-4CF7-909A-08D1AD95FF3D \
+  mise exec -- bun run verify:r06-priority:simulators
+```
+
+테스트 목적·단일 배치의 범위와 남은 한계는 [R06 우선순위 검증 기록](spec/internal/evidence/r06-priority-simulators-2026-09-30.md)에 있습니다.
 
 정식 사이트는 GitHub Pages에 배포합니다. `main`에 문서 변경이 반영되면 GitHub Actions가 새 HTML을 생성해 게시합니다. `packages/docs/rspress.config.ts`의 기본 경로는 `/spinon/`입니다.
 

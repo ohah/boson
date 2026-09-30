@@ -13,6 +13,7 @@
     "test:js": "cd examples/bootstrap && bun test",
     "test:rust": "cargo test --locked --workspace",
     "test": "bun run test:js && cargo test --locked --workspace",
+    "verify:r06-priority:simulators": "bash tools/verify-r06-priority-simulators.sh",
     "build:android": "bash tools/build-android-app.sh",
     "build:ios-sim": "bash tools/build-ios-sim.sh"
   }
