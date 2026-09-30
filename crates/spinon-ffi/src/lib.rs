@@ -1,6 +1,8 @@
 use std::ffi::{CStr, CString, c_char, c_void};
 use std::ptr;
 
+mod runtime_session;
+
 #[repr(C)]
 struct SpinonV8Runtime {
     _private: [u8; 0],

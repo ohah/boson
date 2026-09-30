@@ -10,4 +10,9 @@
 + (int32_t)resizeR08Wgpu:(void *)renderer width:(uint32_t)width height:(uint32_t)height;
 + (int32_t)injectR13Failure:(void *)renderer kind:(uint32_t)failureKind;
 + (void)destroyR08Wgpu:(void *)renderer;
++ (uint64_t)createRuntimeSession;
++ (NSString *)evalRuntimeSession:(uint64_t)handle source:(NSString *)source;
++ (NSString *)dispatchRuntimeSession:(uint64_t)handle nodeID:(int32_t)nodeID;
++ (int32_t)cancelRuntimeSession:(uint64_t)handle;
++ (void)freeRuntimeSession:(uint64_t)handle;
 @end

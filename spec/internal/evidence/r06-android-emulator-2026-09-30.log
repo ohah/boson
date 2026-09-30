@@ -1,0 +1,27 @@
+--------- beginning of main
+09-30 12:54:57.621  5987  6005 I SpinonBootstrap: SPINON_RUNTIME_SESSION=session=ready owner_tid=6006 isolate_per_session=1 queue_capacity=64
+09-30 12:54:57.621  5987  6005 I SpinonBootstrap: SPINON_RUNTIME_EVAL=status=0 seq=1 op=eval status=0 caller_tid=6005 owner_tid=6006 callback_tid=6006 queue_wait_us=3 v8_call_us=441 cancel_requested=false callback_count=2 created_nodes=1 last_node_id=1 error=none
+09-30 12:54:57.621  5987  6005 I SpinonBootstrap: SPINON_RUNTIME_UI session-create status=0 seq=1 op=eval status=0 caller_tid=6005 owner_tid=6006 callback_tid=6006 queue_wait_us=3 v8_call_us=441 cancel_requested=false callback_count=2 created_nodes=1 last_node_id=1 error=none
+09-30 12:55:35.256  5987  5987 I SpinonBootstrap: SPINON_RUNTIME_UI 무한 JS 평가를 시작했습니다. 화면은 계속 탭할 수 있어야 합니다.
+09-30 12:55:36.537  5987  6146 I SpinonBootstrap: SPINON_RUNTIME_CANCEL status=0
+09-30 12:55:36.537  5987  6146 I SpinonBootstrap: SPINON_RUNTIME_UI 취소 요청 status=0 (0=실행 중 취소 요청, 1=실행 중인 JS 없음)
+09-30 12:55:36.537  5987  6121 W SpinonBootstrap: SPINON_RUNTIME_EVAL=status=-8 seq=2 op=eval status=-8 caller_tid=6121 owner_tid=6006 callback_tid=0 queue_wait_us=173 v8_call_us=1246892 cancel_requested=true callback_count=0 created_nodes=0 last_node_id=0 error=null
+09-30 12:55:36.537  5987  6121 I SpinonBootstrap: SPINON_RUNTIME_UI long-eval status=-8 seq=2 op=eval status=-8 caller_tid=6121 owner_tid=6006 callback_tid=0 queue_wait_us=173 v8_call_us=1246892 cancel_requested=true callback_count=0 created_nodes=0 last_node_id=0 error=null
+09-30 12:55:36.538  5987  6133 I SpinonBootstrap: SPINON_RUNTIME_DISPATCH=status=0 seq=3 op=dispatch status=0 caller_tid=6133 owner_tid=6006 callback_tid=6006 queue_wait_us=215512 v8_call_us=706 cancel_requested=false callback_count=2 created_nodes=1 last_node_id=2 error=none
+09-30 12:55:36.538  5987  6133 I SpinonBootstrap: SPINON_RUNTIME_UI dispatch status=0 seq=3 op=dispatch status=0 caller_tid=6133 owner_tid=6006 callback_tid=6006 queue_wait_us=215512 v8_call_us=706 cancel_requested=false callback_count=2 created_nodes=1 last_node_id=2 error=none
+09-30 12:55:37.787  5987  5987 I SpinonBootstrap: SPINON_RUNTIME_UI 호스트가 0.5초 뒤 JS 콜백을 큐에 넣도록 예약했습니다.
+09-30 12:55:38.290  5987  6159 I SpinonBootstrap: SPINON_RUNTIME_EVAL=status=0 seq=4 op=eval status=0 caller_tid=6159 owner_tid=6006 callback_tid=6006 queue_wait_us=238 v8_call_us=277 cancel_requested=false callback_count=1 created_nodes=0 last_node_id=0 error=none
+09-30 12:55:38.290  5987  6159 I SpinonBootstrap: SPINON_RUNTIME_UI delayed-host-response status=0 seq=4 op=eval status=0 caller_tid=6159 owner_tid=6006 callback_tid=6006 queue_wait_us=238 v8_call_us=277 cancel_requested=false callback_count=1 created_nodes=0 last_node_id=0 error=none
+09-30 12:55:39.427  5987  6146 I SpinonBootstrap: SPINON_RUNTIME_CANCEL status=1
+09-30 12:55:39.427  5987  6146 I SpinonBootstrap: SPINON_RUNTIME_SESSION_FREE start
+09-30 12:55:39.428  5987  6146 I SpinonBootstrap: SPINON_RUNTIME_SESSION_FREE done
+09-30 12:55:40.144  5987  6178 I SpinonBootstrap: SPINON_RUNTIME_SESSION=session=ready owner_tid=6179 isolate_per_session=1 queue_capacity=64
+09-30 12:55:40.144  5987  6178 I SpinonBootstrap: SPINON_RUNTIME_EVAL=status=0 seq=1 op=eval status=0 caller_tid=6178 owner_tid=6179 callback_tid=6179 queue_wait_us=3 v8_call_us=113 cancel_requested=false callback_count=2 created_nodes=1 last_node_id=1 error=none
+09-30 12:55:40.144  5987  6178 I SpinonBootstrap: SPINON_RUNTIME_UI session-create status=0 seq=1 op=eval status=0 caller_tid=6178 owner_tid=6179 callback_tid=6179 queue_wait_us=3 v8_call_us=113 cancel_requested=false callback_count=2 created_nodes=1 last_node_id=1 error=none
+09-30 12:55:41.254  5987  6196 I SpinonBootstrap: SPINON_RUNTIME_DISPATCH=status=0 seq=2 op=dispatch status=0 caller_tid=6196 owner_tid=6179 callback_tid=6179 queue_wait_us=9 v8_call_us=142 cancel_requested=false callback_count=2 created_nodes=1 last_node_id=2 error=none
+09-30 12:55:41.254  5987  6196 I SpinonBootstrap: SPINON_RUNTIME_UI dispatch status=0 seq=2 op=dispatch status=0 caller_tid=6196 owner_tid=6179 callback_tid=6179 queue_wait_us=9 v8_call_us=142 cancel_requested=false callback_count=2 created_nodes=1 last_node_id=2 error=none
+09-30 12:55:42.424  5987  6210 I SpinonBootstrap: SPINON_RUNTIME_CANCEL status=1
+09-30 12:55:42.424  5987  6210 I SpinonBootstrap: SPINON_RUNTIME_SESSION_FREE start
+09-30 12:55:42.424  5987  6210 I SpinonBootstrap: SPINON_RUNTIME_SESSION_FREE done
+09-30 12:56:00.720  5987  6229 I SpinonBootstrap: SPINON_BOOTSTRAP_EXECUTION is_main_thread=false
+09-30 12:56:00.729  5987  6229 I SpinonBootstrap: SPINON_BOOTSTRAP_RESULT=nodes=2 last_node=8 tag=text text=이벤트:7

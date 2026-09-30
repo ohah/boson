@@ -1,5 +1,8 @@
 #import "SpinonRunner.h"
 
+#include <array>
+#include <cstdint>
+
 #include "spinon_ffi.h"
 #include "spinon_wgpu_r08.h"
 
@@ -68,6 +71,72 @@
 
 + (void)destroyR08Wgpu:(void *)renderer {
   spinon_wgpu_destroy(renderer);
+}
+
++ (uint64_t)createRuntimeSession {
+  std::array<char, 512> output{};
+  SpinonRuntimeSession *session =
+      spinon_runtime_session_new(output.data(), output.size());
+  if (session == nullptr) {
+    os_log_error(OS_LOG_DEFAULT, "SPINON_RUNTIME_SESSION_CREATE_ERROR=%{public}s",
+                 output.data());
+    return 0;
+  }
+  os_log(OS_LOG_DEFAULT, "SPINON_RUNTIME_SESSION=%{public}s", output.data());
+  return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(session));
+}
+
++ (NSString *)evalRuntimeSession:(uint64_t)handle source:(NSString *)source {
+  const char *sourceUTF8 = source.UTF8String;
+  if (handle == 0 || sourceUTF8 == nullptr) return @"status=-1 invalid session or source";
+  std::array<char, 2048> output{};
+  const int32_t status = spinon_runtime_session_eval(
+      reinterpret_cast<SpinonRuntimeSession *>(static_cast<uintptr_t>(handle)),
+      sourceUTF8, output.data(), output.size());
+  NSString *message = [NSString stringWithUTF8String:output.data()];
+  if (status == 0) {
+    os_log(OS_LOG_DEFAULT, "SPINON_RUNTIME_EVAL status=%{public}d %{public}@",
+           status, message ?: @"empty report");
+  } else {
+    os_log_error(OS_LOG_DEFAULT, "SPINON_RUNTIME_EVAL status=%{public}d %{public}@",
+                 status, message ?: @"empty report");
+  }
+  return [NSString stringWithFormat:@"status=%d %@", status,
+                                    message ?: @"empty report"];
+}
+
++ (NSString *)dispatchRuntimeSession:(uint64_t)handle nodeID:(int32_t)nodeID {
+  if (handle == 0) return @"status=-1 invalid session";
+  std::array<char, 2048> output{};
+  const int32_t status = spinon_runtime_session_dispatch(
+      reinterpret_cast<SpinonRuntimeSession *>(static_cast<uintptr_t>(handle)),
+      nodeID, output.data(), output.size());
+  NSString *message = [NSString stringWithUTF8String:output.data()];
+  if (status == 0) {
+    os_log(OS_LOG_DEFAULT, "SPINON_RUNTIME_DISPATCH status=%{public}d %{public}@",
+           status, message ?: @"empty report");
+  } else {
+    os_log_error(OS_LOG_DEFAULT, "SPINON_RUNTIME_DISPATCH status=%{public}d %{public}@",
+                 status, message ?: @"empty report");
+  }
+  return [NSString stringWithFormat:@"status=%d %@", status,
+                                    message ?: @"empty report"];
+}
+
++ (int32_t)cancelRuntimeSession:(uint64_t)handle {
+  if (handle == 0) return -1;
+  const int32_t status = spinon_runtime_session_cancel(
+      reinterpret_cast<SpinonRuntimeSession *>(static_cast<uintptr_t>(handle)));
+  os_log(OS_LOG_DEFAULT, "SPINON_RUNTIME_CANCEL status=%{public}d", status);
+  return status;
+}
+
++ (void)freeRuntimeSession:(uint64_t)handle {
+  if (handle == 0) return;
+  os_log(OS_LOG_DEFAULT, "SPINON_RUNTIME_SESSION_FREE start");
+  spinon_runtime_session_free(
+      reinterpret_cast<SpinonRuntimeSession *>(static_cast<uintptr_t>(handle)));
+  os_log(OS_LOG_DEFAULT, "SPINON_RUNTIME_SESSION_FREE done");
 }
 
 @end

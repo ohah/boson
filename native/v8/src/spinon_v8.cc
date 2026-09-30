@@ -7,6 +7,13 @@
 #include <mutex>
 #include <string>
 
+#if defined(__ANDROID__) || defined(__linux__)
+#include <sys/syscall.h>
+#include <unistd.h>
+#elif defined(__APPLE__)
+#include <pthread.h>
+#endif
+
 struct SpinonV8Runtime {
   v8::Isolate *isolate = nullptr;
   v8::ArrayBuffer::Allocator *allocator = nullptr;
@@ -16,6 +23,7 @@ struct SpinonV8Runtime {
   SpinonTextCallback text_callback = nullptr;
   void *user_data = nullptr;
   std::string error;
+  bool was_terminated = false;
 };
 
 namespace {
@@ -118,6 +126,7 @@ extern "C" int32_t spinon_v8_runtime_eval(SpinonV8Runtime *runtime,
                                             const char *source) {
   if (!runtime || !source) return -1;
   runtime->error.clear();
+  runtime->was_terminated = false;
   v8::Isolate::Scope isolate_scope(runtime->isolate);
   v8::HandleScope handle_scope(runtime->isolate);
   v8::Local<v8::Context> context;
@@ -132,6 +141,7 @@ extern "C" int32_t spinon_v8_runtime_eval(SpinonV8Runtime *runtime,
   v8::Local<v8::Script> script;
   if (!v8::Script::Compile(context, text.ToLocalChecked()).ToLocal(&script) ||
       script->Run(context).IsEmpty()) {
+    runtime->was_terminated = try_catch.HasTerminated();
     runtime->error = ExceptionText(runtime->isolate, try_catch);
     return -1;
   }
@@ -143,6 +153,7 @@ extern "C" int32_t spinon_v8_runtime_dispatch(SpinonV8Runtime *runtime,
                                                  int32_t node_id) {
   if (!runtime) return -1;
   runtime->error.clear();
+  runtime->was_terminated = false;
   v8::Isolate::Scope isolate_scope(runtime->isolate);
   v8::HandleScope handle_scope(runtime->isolate);
   v8::Local<v8::Context> context;
@@ -157,6 +168,7 @@ extern "C" int32_t spinon_v8_runtime_dispatch(SpinonV8Runtime *runtime,
   v8::Local<v8::Value> arguments[] = {
       v8::Int32::New(runtime->isolate, node_id)};
   if (handler->Call(context, context->Global(), 1, arguments).IsEmpty()) {
+    runtime->was_terminated = try_catch.HasTerminated();
     runtime->error = ExceptionText(runtime->isolate, try_catch);
     return -1;
   }
@@ -167,6 +179,32 @@ extern "C" int32_t spinon_v8_runtime_dispatch(SpinonV8Runtime *runtime,
 extern "C" const char *spinon_v8_runtime_last_error(
     SpinonV8Runtime *runtime) {
   return runtime ? runtime->error.c_str() : "null runtime";
+}
+
+extern "C" int32_t spinon_v8_runtime_was_terminated(
+    SpinonV8Runtime *runtime) {
+  return runtime && runtime->was_terminated ? 1 : 0;
+}
+
+extern "C" void spinon_v8_runtime_terminate(SpinonV8Runtime *runtime) {
+  if (runtime && runtime->isolate) runtime->isolate->TerminateExecution();
+}
+
+extern "C" void spinon_v8_runtime_cancel_termination(
+    SpinonV8Runtime *runtime) {
+  if (runtime && runtime->isolate) runtime->isolate->CancelTerminateExecution();
+}
+
+extern "C" uint64_t spinon_v8_current_thread_id() {
+#if defined(__ANDROID__) || defined(__linux__)
+  return static_cast<uint64_t>(syscall(SYS_gettid));
+#elif defined(__APPLE__)
+  uint64_t thread_id = 0;
+  if (pthread_threadid_np(nullptr, &thread_id) == 0) return thread_id;
+  return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(pthread_self()));
+#else
+  return 0;
+#endif
 }
 
 extern "C" void spinon_v8_runtime_free(SpinonV8Runtime *runtime) {
