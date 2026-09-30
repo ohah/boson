@@ -98,6 +98,7 @@ version = "0.1.0"
 name = "spinon-ffi"
 version = "0.1.0"
 dependencies = [
+ "spinon-core",
  "spinon-style-layout-spike",
 ]
 

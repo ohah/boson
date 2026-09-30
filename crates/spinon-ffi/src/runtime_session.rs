@@ -1,8 +1,9 @@
+use spinon_core::{PriorityQueue, TaskPriority};
 use std::ffi::{CStr, CString, c_char, c_void};
 use std::ptr;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::mpsc::{self, Receiver, SyncSender, TrySendError};
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::mpsc::{self, SyncSender};
+use std::sync::{Arc, Condvar, Mutex, MutexGuard};
 use std::thread::{self, JoinHandle};
 use std::time::Instant;
 
@@ -15,6 +16,71 @@ const ERR_QUEUE_FULL: i32 = -5;
 const ERR_CLOSED: i32 = -6;
 const ERR_WORKER: i32 = -7;
 const ERR_CANCELLED: i32 = -8;
+
+struct SchedulerState {
+    queue: PriorityQueue<Command>,
+    stopped: bool,
+}
+
+struct TaskScheduler {
+    state: Mutex<SchedulerState>,
+    available: Condvar,
+}
+
+enum EnqueueError {
+    Full,
+    Stopped,
+}
+
+impl TaskScheduler {
+    fn new() -> Self {
+        Self {
+            state: Mutex::new(SchedulerState {
+                queue: PriorityQueue::new(),
+                stopped: false,
+            }),
+            available: Condvar::new(),
+        }
+    }
+
+    fn try_enqueue(&self, priority: TaskPriority, command: Command) -> Result<(), EnqueueError> {
+        let mut state = lock(&self.state);
+        if state.stopped {
+            return Err(EnqueueError::Stopped);
+        }
+        if state.queue.len() >= QUEUE_CAPACITY {
+            return Err(EnqueueError::Full);
+        }
+
+        state.queue.push(priority, command);
+        self.available.notify_one();
+        Ok(())
+    }
+
+    fn receive(&self) -> Option<Command> {
+        let mut state = lock(&self.state);
+        loop {
+            if let Some(command) = state.queue.pop_next() {
+                return Some(command);
+            }
+
+            if state.stopped {
+                return None;
+            }
+
+            state = self
+                .available
+                .wait(state)
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
+        }
+    }
+
+    fn stop(&self) {
+        let mut state = lock(&self.state);
+        state.stopped = true;
+        self.available.notify_all();
+    }
+}
 
 #[repr(C)]
 pub struct SpinonRuntimeSession {
@@ -40,7 +106,7 @@ impl RuntimeControl {
 }
 
 struct Session {
-    sender: SyncSender<Command>,
+    scheduler: Arc<TaskScheduler>,
     worker: Mutex<Option<JoinHandle<()>>>,
     control: Arc<Mutex<RuntimeControl>>,
     submission: Mutex<()>,
@@ -62,7 +128,6 @@ enum Command {
         caller_thread_id: u64,
         reply: SyncSender<OperationResponse>,
     },
-    Stop,
 }
 
 struct OperationResponse {
@@ -175,7 +240,7 @@ fn v8_error(runtime: *mut SpinonV8Runtime) -> String {
 }
 
 fn actor_loop(
-    receiver: Receiver<Command>,
+    scheduler: Arc<TaskScheduler>,
     control: Arc<Mutex<RuntimeControl>>,
     ready: mpsc::Sender<Result<u64, String>>,
 ) {
@@ -200,9 +265,8 @@ fn actor_loop(
         return;
     }
 
-    while let Ok(command) = receiver.recv() {
+    while let Some(command) = scheduler.receive() {
         match command {
-            Command::Stop => break,
             Command::Eval {
                 sequence,
                 source,
@@ -369,8 +433,18 @@ fn operation_report(
     )
 }
 
+fn task_priority_from_abi(value: i32) -> Option<TaskPriority> {
+    match value {
+        0 => Some(TaskPriority::UserBlocking),
+        1 => Some(TaskPriority::UserVisible),
+        2 => Some(TaskPriority::Background),
+        _ => None,
+    }
+}
+
 fn submit(
     session: &Session,
+    priority: TaskPriority,
     command: impl FnOnce(u64, Instant, u64, SyncSender<OperationResponse>) -> Command,
 ) -> OperationResponse {
     let (reply, response) = mpsc::sync_channel(1);
@@ -384,21 +458,21 @@ fn submit(
     let sequence = session.next_sequence.fetch_add(1, Ordering::Relaxed) + 1;
     let submitted_at = Instant::now();
     let caller_thread_id = current_thread_id();
-    match session
-        .sender
-        .try_send(command(sequence, submitted_at, caller_thread_id, reply))
-    {
+    match session.scheduler.try_enqueue(
+        priority,
+        command(sequence, submitted_at, caller_thread_id, reply),
+    ) {
         Ok(()) => {}
-        Err(TrySendError::Full(_)) => {
+        Err(EnqueueError::Full) => {
             return OperationResponse {
                 status: ERR_QUEUE_FULL,
                 report: format!("명령 큐가 가득 찼습니다 capacity={QUEUE_CAPACITY}"),
             };
         }
-        Err(TrySendError::Disconnected(_)) => {
+        Err(EnqueueError::Stopped) => {
             return OperationResponse {
-                status: ERR_WORKER,
-                report: "V8 실행기 스레드가 종료되었습니다".to_owned(),
+                status: ERR_CLOSED,
+                report: "V8 실행기 큐가 종료되었습니다".to_owned(),
             };
         }
     }
@@ -420,11 +494,12 @@ pub unsafe extern "C" fn spinon_runtime_session_new(
     }
     let control = Arc::new(Mutex::new(RuntimeControl::new()));
     let worker_control = Arc::clone(&control);
-    let (sender, receiver) = mpsc::sync_channel(QUEUE_CAPACITY);
+    let scheduler = Arc::new(TaskScheduler::new());
+    let worker_scheduler = Arc::clone(&scheduler);
     let (ready_sender, ready_receiver) = mpsc::channel();
     let worker = match thread::Builder::new()
         .name("spinon-js-runtime".to_owned())
-        .spawn(move || actor_loop(receiver, worker_control, ready_sender))
+        .spawn(move || actor_loop(worker_scheduler, worker_control, ready_sender))
     {
         Ok(worker) => worker,
         Err(error) => {
@@ -458,19 +533,19 @@ pub unsafe extern "C" fn spinon_runtime_session_new(
         }
     };
     let report = format!(
-        "session=ready owner_tid={owner_thread_id} isolate_per_session=1 queue_capacity={QUEUE_CAPACITY}"
+        "session=ready owner_tid={owner_thread_id} isolate_per_session=1 queue_capacity={QUEUE_CAPACITY} queue_policy=strict-priority-fifo"
     );
     if !unsafe { write_report(output, output_capacity, &report) } {
         {
             let mut state = lock(&control);
             state.closing = true;
         }
-        let _ = sender.send(Command::Stop);
+        scheduler.stop();
         let _ = worker.join();
         return ptr::null_mut();
     }
     let session = Box::new(Session {
-        sender,
+        scheduler,
         worker: Mutex::new(Some(worker)),
         control,
         submission: Mutex::new(()),
@@ -487,6 +562,39 @@ pub unsafe extern "C" fn spinon_runtime_session_eval(
     output: *mut c_char,
     output_capacity: usize,
 ) -> i32 {
+    unsafe {
+        session_eval_with_priority(
+            session,
+            source,
+            TaskPriority::UserVisible,
+            output,
+            output_capacity,
+        )
+    }
+}
+
+/// 내부 호출자가 JavaScript 평가 작업의 우선순위를 지정합니다.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn spinon_runtime_session_eval_with_priority(
+    session: *mut SpinonRuntimeSession,
+    source: *const c_char,
+    priority: i32,
+    output: *mut c_char,
+    output_capacity: usize,
+) -> i32 {
+    let Some(priority) = task_priority_from_abi(priority) else {
+        return ERR_ARGUMENT;
+    };
+    unsafe { session_eval_with_priority(session, source, priority, output, output_capacity) }
+}
+
+unsafe fn session_eval_with_priority(
+    session: *mut SpinonRuntimeSession,
+    source: *const c_char,
+    priority: TaskPriority,
+    output: *mut c_char,
+    output_capacity: usize,
+) -> i32 {
     if session.is_null() || source.is_null() || output.is_null() || output_capacity == 0 {
         return ERR_ARGUMENT;
     }
@@ -498,6 +606,7 @@ pub unsafe extern "C" fn spinon_runtime_session_eval(
     let session = unsafe { &*session.cast::<Session>() };
     let response = submit(
         session,
+        priority,
         |sequence, submitted_at, caller_thread_id, reply| Command::Eval {
             sequence,
             source,
@@ -520,12 +629,46 @@ pub unsafe extern "C" fn spinon_runtime_session_dispatch(
     output: *mut c_char,
     output_capacity: usize,
 ) -> i32 {
+    unsafe {
+        session_dispatch_with_priority(
+            session,
+            node_id,
+            TaskPriority::UserBlocking,
+            output,
+            output_capacity,
+        )
+    }
+}
+
+/// 내부 호출자가 이벤트 작업의 우선순위를 지정합니다.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn spinon_runtime_session_dispatch_with_priority(
+    session: *mut SpinonRuntimeSession,
+    node_id: i32,
+    priority: i32,
+    output: *mut c_char,
+    output_capacity: usize,
+) -> i32 {
+    let Some(priority) = task_priority_from_abi(priority) else {
+        return ERR_ARGUMENT;
+    };
+    unsafe { session_dispatch_with_priority(session, node_id, priority, output, output_capacity) }
+}
+
+unsafe fn session_dispatch_with_priority(
+    session: *mut SpinonRuntimeSession,
+    node_id: i32,
+    priority: TaskPriority,
+    output: *mut c_char,
+    output_capacity: usize,
+) -> i32 {
     if session.is_null() || output.is_null() || output_capacity == 0 {
         return ERR_ARGUMENT;
     }
     let session = unsafe { &*session.cast::<Session>() };
     let response = submit(
         session,
+        priority,
         |sequence, submitted_at, caller_thread_id, reply| Command::Dispatch {
             sequence,
             node_id,
@@ -575,7 +718,7 @@ pub unsafe extern "C" fn spinon_runtime_session_free(session: *mut SpinonRuntime
         lock(&session.control).closing = true;
     }
     let _ = cancel_control(&session.control);
-    let _ = session.sender.send(Command::Stop);
+    session.scheduler.stop();
     if let Some(worker) = lock(&session.worker).take() {
         let _ = worker.join();
     }
@@ -584,9 +727,11 @@ pub unsafe extern "C" fn spinon_runtime_session_free(session: *mut SpinonRuntime
 #[cfg(test)]
 mod tests {
     use super::{
-        CallbackState, ERR_CANCELLED, ERR_QUEUE_FULL, OK, QUEUE_CAPACITY, Session,
-        SpinonRuntimeSession, copy_report, operation_report, spinon_runtime_session_cancel,
-        spinon_runtime_session_dispatch, spinon_runtime_session_eval, spinon_runtime_session_free,
+        CallbackState, Command, ERR_CANCELLED, ERR_QUEUE_FULL, EnqueueError, OK, QUEUE_CAPACITY,
+        Session, SpinonRuntimeSession, TaskPriority, TaskScheduler, copy_report, operation_report,
+        spinon_runtime_session_cancel, spinon_runtime_session_dispatch,
+        spinon_runtime_session_dispatch_with_priority, spinon_runtime_session_eval,
+        spinon_runtime_session_eval_with_priority, spinon_runtime_session_free,
         spinon_runtime_session_new,
     };
     use std::ffi::{CStr, CString, c_char, c_void};
@@ -602,6 +747,7 @@ mod tests {
         user_data: usize,
         terminated: AtomicBool,
         was_terminated: AtomicBool,
+        operation_order: Mutex<Vec<String>>,
     }
 
     unsafe impl Sync for FakeV8Runtime {}
@@ -618,6 +764,7 @@ mod tests {
             user_data: user_data as usize,
             terminated: AtomicBool::new(false),
             was_terminated: AtomicBool::new(false),
+            operation_order: Mutex::new(Vec::new()),
         }))
         .cast::<super::SpinonV8Runtime>()
     }
@@ -637,6 +784,11 @@ mod tests {
             runtime.was_terminated.store(true, Ordering::Release);
             return -1;
         }
+        runtime
+            .operation_order
+            .lock()
+            .unwrap()
+            .push(format!("eval:{}", String::from_utf8_lossy(source)));
         (runtime.node_callback)(runtime.user_data as *mut c_void, 7, c"view".as_ptr());
         (runtime.text_callback)(runtime.user_data as *mut c_void, c"ready".as_ptr());
         0
@@ -649,6 +801,11 @@ mod tests {
     ) -> i32 {
         let runtime = unsafe { &*runtime.cast::<FakeV8Runtime>() };
         runtime.was_terminated.store(false, Ordering::Release);
+        runtime
+            .operation_order
+            .lock()
+            .unwrap()
+            .push(format!("dispatch:{node_id}"));
         (runtime.node_callback)(
             runtime.user_data as *mut c_void,
             node_id + 1,
@@ -740,6 +897,197 @@ mod tests {
         let mut exact = [0_u8; 5];
         assert!(copy_report("four", &mut exact));
         assert_eq!(&exact, b"four\0");
+    }
+
+    #[test]
+    fn bounded_scheduler_selects_priority_then_fifo_and_drains_on_stop() {
+        let scheduler = TaskScheduler::new();
+        for (priority, node_id) in [
+            (TaskPriority::Background, 1),
+            (TaskPriority::UserVisible, 2),
+            (TaskPriority::Background, 3),
+            (TaskPriority::UserBlocking, 4),
+            (TaskPriority::UserBlocking, 5),
+            (TaskPriority::UserVisible, 6),
+        ] {
+            let (reply, _response) = std::sync::mpsc::sync_channel(1);
+            let command = Command::Dispatch {
+                sequence: node_id as u64,
+                node_id,
+                submitted_at: Instant::now(),
+                caller_thread_id: 0,
+                reply,
+            };
+            assert!(scheduler.try_enqueue(priority, command).is_ok());
+        }
+
+        let mut order = Vec::new();
+        for _ in 0..6 {
+            let command = scheduler.receive().expect("대기 작업을 받아야 합니다");
+            if let Command::Dispatch { node_id, .. } = command {
+                order.push(node_id);
+            }
+        }
+        assert_eq!(order, [4, 5, 2, 6, 1, 3]);
+
+        scheduler.stop();
+        assert!(scheduler.receive().is_none());
+        let (reply, _response) = std::sync::mpsc::sync_channel(1);
+        assert!(matches!(
+            scheduler.try_enqueue(
+                TaskPriority::UserBlocking,
+                Command::Dispatch {
+                    sequence: 7,
+                    node_id: 7,
+                    submitted_at: Instant::now(),
+                    caller_thread_id: 0,
+                    reply,
+                }
+            ),
+            Err(EnqueueError::Stopped)
+        ));
+    }
+
+    #[test]
+    fn c_abi_priority_values_match_the_three_runtime_priorities() {
+        assert_eq!(
+            super::task_priority_from_abi(0),
+            Some(TaskPriority::UserBlocking)
+        );
+        assert_eq!(
+            super::task_priority_from_abi(1),
+            Some(TaskPriority::UserVisible)
+        );
+        assert_eq!(
+            super::task_priority_from_abi(2),
+            Some(TaskPriority::Background)
+        );
+        assert!(super::task_priority_from_abi(3).is_none());
+    }
+
+    #[test]
+    fn session_executes_pending_commands_by_priority_and_fifo() {
+        let session = new_session();
+        assert!(!session.is_null());
+        let session_address = session as usize;
+        let running =
+            thread::spawn(move || eval(session_address as *mut SpinonRuntimeSession, "hang"));
+        wait_until_active(session);
+
+        let background = thread::spawn(move || {
+            eval_with_priority(
+                session_address as *mut SpinonRuntimeSession,
+                "background",
+                2,
+            )
+        });
+        wait_for_queue_len(session, 1);
+        let visible = thread::spawn(move || {
+            dispatch_with_priority(session_address as *mut SpinonRuntimeSession, 22, 1)
+        });
+        wait_for_queue_len(session, 2);
+        let blocking_first = thread::spawn(move || {
+            dispatch_with_priority(session_address as *mut SpinonRuntimeSession, 31, 0)
+        });
+        wait_for_queue_len(session, 3);
+        let blocking_second = thread::spawn(move || {
+            dispatch_with_priority(session_address as *mut SpinonRuntimeSession, 32, 0)
+        });
+        wait_for_queue_len(session, 4);
+
+        assert_eq!(unsafe { spinon_runtime_session_cancel(session) }, OK);
+        assert_eq!(running.join().unwrap().0, ERR_CANCELLED);
+        assert_eq!(background.join().unwrap().0, OK);
+        assert_eq!(visible.join().unwrap().0, OK);
+        assert_eq!(blocking_first.join().unwrap().0, OK);
+        assert_eq!(blocking_second.join().unwrap().0, OK);
+
+        let session_ref = unsafe { &*session.cast::<Session>() };
+        let runtime = super::lock(&session_ref.control)
+            .runtime
+            .expect("세션 V8 실행기가 남아 있어야 합니다");
+        let operation_order = unsafe { &*(runtime as *const FakeV8Runtime) }
+            .operation_order
+            .lock()
+            .unwrap()
+            .clone();
+        assert_eq!(
+            operation_order,
+            [
+                "dispatch:31",
+                "dispatch:32",
+                "dispatch:22",
+                "eval:background"
+            ]
+        );
+
+        unsafe { spinon_runtime_session_free(session) };
+    }
+
+    fn wait_until_active(session: *mut SpinonRuntimeSession) {
+        let session_ref = unsafe { &*session.cast::<Session>() };
+        let deadline = Instant::now() + Duration::from_secs(2);
+        while !super::lock(&session_ref.control).active && Instant::now() < deadline {
+            thread::sleep(Duration::from_millis(1));
+        }
+        assert!(super::lock(&session_ref.control).active);
+    }
+
+    fn wait_for_queue_len(session: *mut SpinonRuntimeSession, expected: usize) {
+        let session_ref = unsafe { &*session.cast::<Session>() };
+        let deadline = Instant::now() + Duration::from_secs(2);
+        while super::lock(&session_ref.scheduler.state).queue.len() != expected
+            && Instant::now() < deadline
+        {
+            thread::sleep(Duration::from_millis(1));
+        }
+        assert_eq!(
+            super::lock(&session_ref.scheduler.state).queue.len(),
+            expected
+        );
+    }
+
+    fn eval_with_priority(
+        session: *mut SpinonRuntimeSession,
+        source: &str,
+        priority: i32,
+    ) -> (i32, String) {
+        let source = CString::new(source).unwrap();
+        let mut output = [0_i8; 1024];
+        let status = unsafe {
+            spinon_runtime_session_eval_with_priority(
+                session,
+                source.as_ptr(),
+                priority,
+                output.as_mut_ptr(),
+                output.len(),
+            )
+        };
+        let report = unsafe { CStr::from_ptr(output.as_ptr()) }
+            .to_string_lossy()
+            .into_owned();
+        (status, report)
+    }
+
+    fn dispatch_with_priority(
+        session: *mut SpinonRuntimeSession,
+        node_id: i32,
+        priority: i32,
+    ) -> (i32, String) {
+        let mut output = [0_i8; 1024];
+        let status = unsafe {
+            spinon_runtime_session_dispatch_with_priority(
+                session,
+                node_id,
+                priority,
+                output.as_mut_ptr(),
+                output.len(),
+            )
+        };
+        let report = unsafe { CStr::from_ptr(output.as_ptr()) }
+            .to_string_lossy()
+            .into_owned();
+        (status, report)
     }
 
     #[test]
