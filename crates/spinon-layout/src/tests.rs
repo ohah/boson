@@ -77,8 +77,11 @@ struct FixtureFrame {
 const HTML_FIXTURE: &str = include_str!("../tests/fixtures/s02-basic-flex.html");
 const FIXTURE_START: &str = "<script id=\"fixture-data\" type=\"application/json\">";
 const RTL_FIXTURE_START: &str = "<script id=\"rtl-fixture-data\" type=\"application/json\">";
+const FRACTIONAL_FIXTURE_START: &str =
+    "<script id=\"fractional-fixture-data\" type=\"application/json\">";
 const FIXTURE_END: &str = "</script>";
 const TOLERANCE: f32 = 0.5;
+const FRACTIONAL_TOLERANCE: f32 = 0.01;
 
 fn fixture() -> Fixture {
     parse_fixture(FIXTURE_START)
@@ -86,6 +89,10 @@ fn fixture() -> Fixture {
 
 fn rtl_fixture() -> Fixture {
     parse_fixture(RTL_FIXTURE_START)
+}
+
+fn fractional_fixture() -> Fixture {
+    parse_fixture(FRACTIONAL_FIXTURE_START)
 }
 
 fn parse_fixture(marker: &str) -> Fixture {
@@ -166,6 +173,14 @@ fn assert_browser_frames(
     actual: &BTreeMap<NodeId, crate::LayoutFrame>,
     expected: &BTreeMap<String, FixtureFrame>,
 ) {
+    assert_browser_frames_with_tolerance(actual, expected, TOLERANCE);
+}
+
+fn assert_browser_frames_with_tolerance(
+    actual: &BTreeMap<NodeId, crate::LayoutFrame>,
+    expected: &BTreeMap<String, FixtureFrame>,
+    tolerance: f32,
+) {
     assert_eq!(
         actual.len(),
         expected.len(),
@@ -176,10 +191,17 @@ fn assert_browser_frames(
         let frame = actual
             .get(&id)
             .unwrap_or_else(|| panic!("노드 {id} 프레임이 없습니다"));
-        assert_close(frame.x, expected.x);
-        assert_close(frame.y, expected.y);
-        assert_close(frame.width, expected.width);
-        assert_close(frame.height, expected.height);
+        for (field, actual, expected) in [
+            ("x", frame.x, expected.x),
+            ("y", frame.y, expected.y),
+            ("width", frame.width, expected.width),
+            ("height", frame.height, expected.height),
+        ] {
+            assert!(
+                (actual - expected).abs() <= tolerance,
+                "노드 {id}의 {field}: 실제 {actual}, 기준 {expected}, 허용치 {tolerance}"
+            );
+        }
     }
 }
 
@@ -217,6 +239,19 @@ fn rtl_row_preserves_dom_child_order_while_starting_at_the_right() {
     let fixture = rtl_fixture();
     let output = TaffyLayoutEngine.compute(&to_input(&fixture)).unwrap();
     assert_browser_frames(&output.frames, &fixture.expected);
+}
+
+#[test]
+fn fractional_flex_distribution_matches_chromium_without_integer_rounding() {
+    let fixture = fractional_fixture();
+    assert_eq!(
+        fixture.expected.len(),
+        fixture.nodes.len(),
+        "소수 Flex fixture의 브라우저 기준 프레임을 기록해야 합니다"
+    );
+
+    let output = TaffyLayoutEngine.compute(&to_input(&fixture)).unwrap();
+    assert_browser_frames_with_tolerance(&output.frames, &fixture.expected, FRACTIONAL_TOLERANCE);
 }
 
 #[test]

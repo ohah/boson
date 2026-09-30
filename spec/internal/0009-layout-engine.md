@@ -64,6 +64,6 @@ assert_eq!(output.tree_revision, input.tree_revision());
 
 ## 의존성과 비교 기준
 
-제품 workspace는 `taffy = 0.14.0`을 정확히 고정하고 기본 기능을 끈 뒤 `std`, `flexbox`, `taffy_tree`만 켭니다. Lightning CSS 파서나 웹뷰는 런타임 의존성에 포함되지 않습니다. 이전 행·열 PoC는 `spikes/dynamic-tree/rust/tree.rs`에 보존하며, 공유된 정수 fixture에서 Taffy 결과와 비교합니다. 기존 엔진은 정수 크기와 제한된 행·열만 처리하므로 이 비교는 작은 fixture의 회귀 확인이지 브라우저/CSS 전체 적합성이나 속도 비교가 아닙니다.
+제품 workspace는 `taffy = 0.14.0`을 정확히 고정하고 기본 기능을 끈 뒤 `std`, `flexbox`, `taffy_tree`만 켭니다. Lightning CSS 파서나 웹뷰는 런타임 의존성에 포함되지 않습니다. 이전 행·열 PoC는 `spikes/dynamic-tree/rust/tree.rs`에 보존하며, 공유된 정수 LTR fixture에서 Taffy 결과와 비교합니다. 별도의 151.5 CSS px 너비에 flex-grow 자식 셋을 둔 소수 분배 fixture는 Chromium과 Taffy만 비교합니다. 기존 엔진은 정수 크기와 제한된 행·열만 처리하므로 이 비교는 작은 fixture의 회귀 확인이지 브라우저/CSS 전체 적합성이나 속도 비교가 아닙니다.
 
 fixture와 브라우저 좌표, 테스트 결과는 [S02 근거](evidence/s02-taffy-layout-2026-09-30.md)에 기록합니다. 이 구현은 `spec/STATUS.md`의 S02 완료 표시나 공개 Flex/CSS API 지원을 뜻하지 않습니다.

@@ -33,11 +33,13 @@
         pointer-events: none;
       }
       #rtl-stage { width: 300px; height: 100px; }
+      #fractional-stage { width: 151.5px; height: 30px; }
     </style>
   </head>
   <body>
     <main id="stage" aria-label="레이아웃 기준 화면"></main>
     <aside id="rtl-stage" aria-label="RTL 기준 화면"></aside>
+    <main id="fractional-stage" aria-label="소수 Flex 분배 기준 화면"></main>
     <script id="fixture-data" type="application/json">
       {
         "version": 1,
@@ -120,13 +122,51 @@
         }
       }
     </script>
+    <script id="fractional-fixture-data" type="application/json">
+      {
+        "version": 1,
+        "viewport": { "width": 151.5, "height": 30 },
+        "root": 11,
+        "nodes": [
+          { "id": 11, "tag": "row", "children": [12, 13, 14], "style": {
+            "width": 151.5, "height": 30, "flexDirection": "row", "direction": "ltr",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 0, "flexGrow": 0
+          }},
+          { "id": 12, "tag": "text", "children": [], "style": {
+            "width": "auto", "height": 30, "flexDirection": "row", "direction": "ltr",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 0, "flexGrow": 1
+          }},
+          { "id": 13, "tag": "text", "children": [], "style": {
+            "width": "auto", "height": 30, "flexDirection": "row", "direction": "ltr",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 0, "flexGrow": 1
+          }},
+          { "id": 14, "tag": "text", "children": [], "style": {
+            "width": "auto", "height": 30, "flexDirection": "row", "direction": "ltr",
+            "padding": { "top": 0, "right": 0, "bottom": 0, "left": 0 },
+            "rowGap": 0, "columnGap": 0, "flexGrow": 1
+          }}
+        ],
+        "expected": {
+          "11": { "x": 0, "y": 0, "width": 151.5, "height": 30 },
+          "12": { "x": 0, "y": 0, "width": 50.5, "height": 30 },
+          "13": { "x": 50.5, "y": 0, "width": 50.5, "height": 30 },
+          "14": { "x": 101, "y": 0, "width": 50.5, "height": 30 }
+        }
+      }
+    </script>
     <script>
       const fixture = JSON.parse(document.querySelector('#fixture-data').textContent);
       const rtlFixture = JSON.parse(document.querySelector('#rtl-fixture-data').textContent);
+      const fractionalFixture = JSON.parse(document.querySelector('#fractional-fixture-data').textContent);
       const byId = new Map(fixture.nodes.map((node) => [node.id, node]));
       const rtlById = new Map(rtlFixture.nodes.map((node) => [node.id, node]));
+      const fractionalById = new Map(fractionalFixture.nodes.map((node) => [node.id, node]));
       const stage = document.querySelector('#stage');
       const rtlStage = document.querySelector('#rtl-stage');
+      const fractionalStage = document.querySelector('#fractional-stage');
 
       function render(id, parent, nodes) {
         const node = nodes.get(id);
@@ -149,8 +189,10 @@
 
       render(fixture.root, stage, byId);
       render(rtlFixture.root, rtlStage, rtlById);
+      render(fractionalFixture.root, fractionalStage, fractionalById);
       window.spinonFixture = fixture;
       window.spinonRtlFixture = rtlFixture;
+      window.spinonFractionalFixture = fractionalFixture;
       const measure = (container) => {
         const root = container.querySelector(':scope > [data-node-id]').getBoundingClientRect();
         return Object.fromEntries(
@@ -164,6 +206,7 @@
       };
       window.spinonFrames = () => measure(stage);
       window.spinonRtlFrames = () => measure(rtlStage);
+      window.spinonFractionalFrames = () => measure(fractionalStage);
     </script>
   </body>
 </html>
