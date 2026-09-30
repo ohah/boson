@@ -82,7 +82,7 @@ GPU 표면 소유 실행기  ← 완성 스냅샷 ──┤
 2. iOS·Android의 각 실행기를 어떤 원시 thread/queue API로 구현할지. 직렬 dispatch queue는 논리 직렬성만으로 V8의 물리 thread affinity를 증명하지 않습니다.
 3. `HostDocument` 소유자를 JS 실행기와 같게 둘지 별도 코어 worker로 나눌지. 분리하면 동기 DOM 조회의 대기·교착·commit 순서가 추가 검증 대상입니다.
 4. 전역 `DocumentRevision` 충돌을 어댑터 전체 재계산·Owner별 revision·다른 검증 가능한 방식 중 무엇으로 해결할지.
-5. 큐 용량, 우선순위, 프레임 snapshot 병합, 포인터 이동 병합, 눌림·해제 보존 및 backpressure 정책.
+5. 우선순위 기준은 [JavaScript 작업 스케줄러 설계](0006-js-task-scheduler.md)의 Chromium 참고 방향으로 정했다. 공개 API, 플랫폼 이벤트와 내부 작업의 우선순위 매핑, 공정성, 용량, 프레임 snapshot 병합, 포인터 이동 병합, 눌림·해제 보존 및 backpressure 정책은 미정이다.
 6. running JavaScript 취소, 종료 대기 시간 제한, V8 강제 종료 후 isolate 재사용 가능 여부.
 7. 종료 중 pending Promise·타이머·플랫폼 모듈 요청의 결과와 오류 보고 방식.
 8. 메모리 할당 실패·Rust panic·C++ 예외의 앱 복구 범위와 비동기 오류의 진단 보존 기간.
@@ -92,6 +92,7 @@ GPU 표면 소유 실행기  ← 완성 스냅샷 ──┤
 - 현재 V8 경계: [0001 V8 부팅 실험](0001-v8-bootstrap.md)
 - Rust 트리 commit: [0002 Rust 트리 코어](0002-rust-tree-core.md)
 - 공통 문서·호스트 계약: [0003 공통 호스트 계약](0003-shared-host-contract.md)
+- JavaScript 작업 우선순위·스케줄러: [0006 JavaScript 작업 스케줄러](0006-js-task-scheduler.md)
 - GPU 표면 수명: [R13 플랫폼 생명주기·GPU 복구](r13-platform-gpu-recovery.md)
 - 제품 기능 상태: [공식 상태 대장 R06](../STATUS.md#1-위험-검증)
 - 정적 조사 근거와 한계: [R06 소스 감사](./evidence/r06-thread-ownership-source-audit-2026-09-29.md)
