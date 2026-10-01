@@ -11,8 +11,9 @@
     "docs:preview": "bun run --filter @spinon/docs docs:preview",
     "bundle:bootstrap": "mkdir -p build/spinon/bootstrap && bun build examples/bootstrap/app.js --target=browser --outfile build/spinon/bootstrap/app.js",
     "test:js": "cd examples/bootstrap && bun test",
+    "test:css-reference": "node --test tools/css-reference/*.test.mjs",
     "test:rust": "cargo test --locked --workspace",
-    "test": "bun run test:js && cargo test --locked --workspace",
+    "test": "bun run test:js && bun run test:css-reference && cargo test --locked --workspace",
     "verify:r06-priority:simulators": "bash tools/verify-r06-priority-simulators.sh",
     "build:android": "bash tools/build-android-app.sh",
     "build:ios-sim": "bash tools/build-ios-sim.sh"

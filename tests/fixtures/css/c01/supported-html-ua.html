@@ -17,37 +17,12 @@
   <pre id="reference-result"></pre>
   <script>
     (() => {
-      const cases = [
-        { selector: "div", features: [{ id: "ua.display.div.v0", property: "display" }] },
-        { selector: "span", features: [{ id: "ua.display.span.v0", property: "display" }] },
-        { selector: "a", features: [{ id: "ua.display.a.v0", property: "display" }] },
-        { selector: "img", features: [{ id: "ua.display.img.v0", property: "display" }] },
-        { selector: "button", features: [{ id: "ua.display.button.v0", property: "display" }] },
-        { selector: "input", features: [{ id: "ua.display.input.v0", property: "display" }] },
-        {
-          selector: "p",
-          features: [
-            { id: "ua.display.p.v0", property: "display" },
-            { id: "ua.margin-block-start.p.v0", property: "margin-block-start" },
-            { id: "ua.margin-block-end.p.v0", property: "margin-block-end" },
-            { id: "ua.margin-inline-start.p.v0", property: "margin-inline-start" },
-            { id: "ua.margin-inline-end.p.v0", property: "margin-inline-end" },
-          ],
-        },
-        {
-          selector: "ul",
-          features: [
-            { id: "ua.display.ul.v0", property: "display" },
-            { id: "ua.list-style-type.ul.v0", property: "list-style-type" },
-            { id: "ua.margin-block-start.ul.v0", property: "margin-block-start" },
-            { id: "ua.margin-block-end.ul.v0", property: "margin-block-end" },
-            { id: "ua.margin-inline-start.ul.v0", property: "margin-inline-start" },
-            { id: "ua.margin-inline-end.ul.v0", property: "margin-inline-end" },
-            { id: "ua.padding-inline-start.ul.v0", property: "padding-inline-start" },
-          ],
-        },
-        { selector: "li", features: [{ id: "ua.display.li.v0", property: "display" }] },
-      ];
+      const inventory = window.__SPINON_C01_INVENTORY__;
+      if (inventory?.schema !== "spinon-css-feature-inventory/v1"
+        || inventory.fixtureId !== "C01-UAv0-supported-html-elements") {
+        throw new Error("C01 feature inventory가 주입되지 않았거나 fixture와 맞지 않습니다.");
+      }
+      const cases = inventory.elements;
       window.__SPINON_C01_CASES__ = cases;
       const observe = () => cases.map(({ selector, features }) => {
         const matches = Array.from(document.querySelectorAll(selector));
@@ -69,7 +44,9 @@
       });
       window.__SPINON_C01_OBSERVE__ = observe;
       const observation = {
-        fixtureId: "C01-UAv0-supported-html-elements",
+        fixtureId: inventory.fixtureId,
+        inventoryId: inventory.inventoryId,
+        inventorySchema: inventory.schema,
         viewport: {
           width: window.innerWidth,
           height: window.innerHeight,
