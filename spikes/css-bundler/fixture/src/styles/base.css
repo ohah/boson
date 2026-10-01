@@ -1,0 +1,17 @@
+@import "./tokens.css";
+@import url("https://styles.example.invalid/external.css");
+
+@font-face {
+  font-family: "C02 Fixture";
+  src: url("../../assets/fixture.woff2") format("woff2");
+}
+
+#app {
+  --base-marker: "base";
+  background-image: url("../../assets/pattern.svg");
+  font-family: "C02 Fixture", sans-serif;
+}
+
+.external-image {
+  background-image: url("https://assets.example.invalid/external.svg");
+}

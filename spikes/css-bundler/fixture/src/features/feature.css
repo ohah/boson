@@ -1,0 +1,4 @@
+.feature-mounted {
+  --feature-marker: "lazy-feature";
+  background-image: url("../../assets/feature.svg");
+}

@@ -1,0 +1,8 @@
+.card {
+  background-image: url("../../assets/module.svg");
+  border-color: var(--brand-color);
+}
+
+.featured {
+  color: var(--brand-color);
+}

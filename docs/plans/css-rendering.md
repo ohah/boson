@@ -9,6 +9,7 @@
 - `spikes/stylo-style`은 [Stylo crate `0.22.0`](https://crates.io/crates/stylo/0.22.0)으로 inline 선언을 파싱한다. selector matching, DOM cascade, computed style, Taffy 변환, GPU 표시는 연결하지 않았다.
 - `spikes/blitz-stylo-layout`은 Blitz DOM을 Stylo `0.20.0`·`stylo_taffy`·Taffy `0.14.0`에 연결한 비교 실험이다. Spinon 제품 트리 구현이나 Stylo `0.22.0` 연동 증거가 아니다.
 - R10은 Taffy의 트리 갱신·좌표·합성 텍스트 측정을 비교했다. 실제 글꼴 shaping·줄바꿈·GPU 화면을 검증하지 않았다.
+- C02 생산물 비교는 [Vite `8.3.1`·Rspack `2.2.7` 기록](../../spec/internal/evidence/css-c02-bundler-2026-10-01.md)에 있다. 양쪽 production build에서 CSS Module named import, 로컬 `@import`, SVG·WOFF2 자원과 entry/동적 CSS chunk를 확인했다. Vite 기본 CSS Module 객체 import는 통과하고 Rspack은 `namedExports: false` 설정으로 맞출 수 있다. Rspack stats는 소스 CSS 모듈·외부 import edge를 기록하지만 Vite manifest는 최종 chunk·CSS·asset 연결 중심이다. Vite CSS source map과 누락 로컬 자원의 정확한 stylesheet 위치가 나오지 않아 M6는 미해결이다. 실험은 adapter, 최종 graph 직렬화, 모바일/OTA 연결을 구현하지 않았으며 C02는 미완료다.
 - 따라서 새 구현은 Spinon 트리를 Stylo `0.22.0`에 연결하고, 이 버전에 고정한 스타일 변환 계층과 Taffy 레이아웃 모듈을 만들어야 한다.
 
 

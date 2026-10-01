@@ -1,0 +1,930 @@
+{
+  "model": "C02-M1..M7-v2",
+  "run": {
+    "status": "실험 실행 완료",
+    "host": "darwin-arm64",
+    "node": "v24.20.0",
+    "versions": {
+      "vite": "8.3.1",
+      "rspack": "2.2.7"
+    },
+    "input": [
+      {
+        "file": "assets/feature.svg",
+        "bytes": 134,
+        "sha256": "32fa7605811d21d2040d656fd16fd43aa362f06519bc07db5e95ef37e534dad9"
+      },
+      {
+        "file": "assets/fixture.woff2",
+        "bytes": 102,
+        "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e"
+      },
+      {
+        "file": "assets/module.svg",
+        "bytes": 141,
+        "sha256": "dc39c7ab124120bdd4fd7b72ce0b9e966fe50db2898f76a1e1c6d33da5c5cf1f"
+      },
+      {
+        "file": "assets/pattern.svg",
+        "bytes": 134,
+        "sha256": "83fa26018ae77528636dd0155cd0ed83053d2df97ec566f1391c6d3f369df02b"
+      },
+      {
+        "file": "diagnostics.html",
+        "bytes": 186,
+        "sha256": "93f9b9c89e0b941c016e5116ebdecadf951e599330533d9dc8f901ff28d4cde0"
+      },
+      {
+        "file": "index.html",
+        "bytes": 308,
+        "sha256": "ddf3f56f62cba6f06c90ac46584872eab3533156f2a690a772cf2b8f1ab90be0"
+      },
+      {
+        "file": "module-default.html",
+        "bytes": 222,
+        "sha256": "835b7b43c262aba2a9d9ad0aa489f4c670643cbc32a2bf2d614da81941dade11"
+      },
+      {
+        "file": "src/diagnostics.js",
+        "bytes": 35,
+        "sha256": "c9ac73c1d6cabb45ba40239fbc4e1e5917e5a369c372a8b1c09ec96fe844aef8"
+      },
+      {
+        "file": "src/diagnostics/broken.css",
+        "bytes": 54,
+        "sha256": "51d35d03b07f7c0073906f256c9127d4f925e0da516ca93c6150f7564c573477"
+      },
+      {
+        "file": "src/features/feature.css",
+        "bytes": 110,
+        "sha256": "9ec7e4538652095978810a80561fc335ef9a3c58919c61a206135c809a41ee83"
+      },
+      {
+        "file": "src/features/lazy.js",
+        "bytes": 173,
+        "sha256": "08ce3dbb8c24fb72deb18de533acfd2329d273d34c31a31257fe5d3c18e020ad"
+      },
+      {
+        "file": "src/main.js",
+        "bytes": 536,
+        "sha256": "b9d2eb0f4f46d5b3457945292c0570a9222bcd0cc2feb27f86ac64edf28b8e4d"
+      },
+      {
+        "file": "src/module-default.js",
+        "bytes": 131,
+        "sha256": "c6bf83caf1f69b7809fe6fabc5b485e98a50e53e80ce0ac343d6e90c57ff6b7a"
+      },
+      {
+        "file": "src/styles/base.css",
+        "bytes": 411,
+        "sha256": "c2c6c3d59305af88cb1c852a12b39be1ecf1073a399f59f92775779225470ab8"
+      },
+      {
+        "file": "src/styles/card.module.css",
+        "bytes": 142,
+        "sha256": "1387c011f7ad63c9020fc143d2735d306a416d58e1762d3b8c69390207d120c8"
+      },
+      {
+        "file": "src/styles/shared.css",
+        "bytes": 47,
+        "sha256": "5394747530313912842c936ed54380a88b3b3cb1cf97722de3df043bfcad768d"
+      },
+      {
+        "file": "src/styles/tokens.css",
+        "bytes": 81,
+        "sha256": "a64a5e025446eeaddb0cc45399c342a14d7a988566d9cd9bcd38e183b6c645e4"
+      }
+    ]
+  },
+  "outputs": {
+    "vite": {
+      "entry": {
+        "file": "assets/index-CgAyIRd6.js",
+        "css": [
+          "assets/index-Dtgv3iLQ.css"
+        ],
+        "dynamicImports": [
+          "src/features/lazy.js"
+        ]
+      },
+      "dynamicEntry": {
+        "file": "assets/lazy-CSE4mHBe.js",
+        "css": [
+          "assets/lazy-vAmwLnNw.css"
+        ],
+        "assets": [
+          "assets/feature-DyPHVK7W.svg"
+        ]
+      },
+      "graphEvidence": {
+        "manifestKeys": [
+          "assets/feature.svg",
+          "assets/fixture.woff2",
+          "assets/module.svg",
+          "assets/pattern.svg",
+          "index.html",
+          "src/features/lazy.js"
+        ],
+        "cssSourceKeys": []
+      },
+      "assets": [
+        {
+          "file": ".vite/manifest.json",
+          "bytes": 1115,
+          "sha256": "37f8a78fbe983fb98b2e73353a3ee9e8d23e80dfe0b699e82a0feb9147834f83"
+        },
+        {
+          "file": "assets/feature-DyPHVK7W.svg",
+          "bytes": 134,
+          "sha256": "32fa7605811d21d2040d656fd16fd43aa362f06519bc07db5e95ef37e534dad9"
+        },
+        {
+          "file": "assets/fixture-Cb_KYlk7.woff2",
+          "bytes": 102,
+          "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e"
+        },
+        {
+          "file": "assets/index-CgAyIRd6.js",
+          "bytes": 2400,
+          "sha256": "6737167534e7cb80a25cde36c37b308e8780af6c4db92b4b97093687c318eabc"
+        },
+        {
+          "file": "assets/index-CgAyIRd6.js.map",
+          "bytes": 1008,
+          "sha256": "d49d25bafacfe03d696c11d3f7e324d178dbe158922a2e9966f6c6f48446fbaa"
+        },
+        {
+          "file": "assets/index-Dtgv3iLQ.css",
+          "bytes": 581,
+          "sha256": "e4de0769fb77f618732b12bf199691fe4566504dfe52ab952b4e85684985a5f1"
+        },
+        {
+          "file": "assets/lazy-CSE4mHBe.js",
+          "bytes": 174,
+          "sha256": "d2d0019373a4873a066222b4877e0523b74656ee671836d5b40153951852441f"
+        },
+        {
+          "file": "assets/lazy-CSE4mHBe.js.map",
+          "bytes": 420,
+          "sha256": "c926013dc6aef0f4f54094fffe0584de705090addc47e49dfceeee4267509330"
+        },
+        {
+          "file": "assets/lazy-vAmwLnNw.css",
+          "bytes": 101,
+          "sha256": "824468f26bbb295865d89089eb22234d3b10279ffbea73741d6dade12fcfe5d8"
+        },
+        {
+          "file": "assets/module-lhmQVEjK.svg",
+          "bytes": 141,
+          "sha256": "dc39c7ab124120bdd4fd7b72ce0b9e966fe50db2898f76a1e1c6d33da5c5cf1f"
+        },
+        {
+          "file": "assets/pattern-LUcythGg.svg",
+          "bytes": 134,
+          "sha256": "83fa26018ae77528636dd0155cd0ed83053d2df97ec566f1391c6d3f369df02b"
+        },
+        {
+          "file": "index.html",
+          "bytes": 407,
+          "sha256": "47dda3abea9d482a44d09cd424b05fe515b34f2344f52da031b4f8e92d3cf099"
+        }
+      ],
+      "cssModules": {
+        "localKeys": [
+          "card",
+          "featured"
+        ],
+        "classes": {
+          "card": "_card_1o5yj_1",
+          "featured": "_featured_1o5yj_6"
+        },
+        "jsReferences": {
+          "card": true,
+          "featured": true
+        }
+      },
+      "defaultImportCompatibility": {
+        "vite": {
+          "buildRejected": false,
+          "error": null
+        },
+        "rspackDefault": {
+          "buildRejected": true,
+          "errors": [
+            "  × ESModulesLinkingError: export 'default' (imported as 'classes') was not found in './styles/card.module.css' (possible exports: card, featured)\n   ╭─[3:46]\n 1 │ import classes from \"./styles/card.module.css\";\n 2 │ \n 3 │ document.querySelector(\"#app\").className = `${classes.card} ${classes.featured}`;\n   ·                                               ────────────\n   ╰────\n",
+            "  × ESModulesLinkingError: export 'default' (imported as 'classes') was not found in './styles/card.module.css' (possible exports: card, featured)\n   ╭─[3:62]\n 1 │ import classes from \"./styles/card.module.css\";\n 2 │ \n 3 │ document.querySelector(\"#app\").className = `${classes.card} ${classes.featured}`;\n   ·                                                               ────────────────\n   ╰────\n"
+          ]
+        },
+        "rspackCompatible": {
+          "buildRejected": false,
+          "errors": [],
+          "parser": {
+            "css/auto": {
+              "namedExports": false
+            }
+          }
+        }
+      },
+      "cssUrls": [
+        {
+          "css": "assets/index-Dtgv3iLQ.css",
+          "value": "https://styles.example.invalid/external.css",
+          "kind": "external-css-import"
+        },
+        {
+          "css": "assets/index-Dtgv3iLQ.css",
+          "value": "/assets/fixture-Cb_KYlk7.woff2",
+          "file": "assets/fixture-Cb_KYlk7.woff2",
+          "source": "assets/fixture.woff2",
+          "exists": true,
+          "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e",
+          "matchesInput": true,
+          "kind": "font"
+        },
+        {
+          "css": "assets/index-Dtgv3iLQ.css",
+          "value": "/assets/pattern-LUcythGg.svg",
+          "file": "assets/pattern-LUcythGg.svg",
+          "source": "assets/pattern.svg",
+          "exists": true,
+          "sha256": "83fa26018ae77528636dd0155cd0ed83053d2df97ec566f1391c6d3f369df02b",
+          "matchesInput": true,
+          "kind": "image"
+        },
+        {
+          "css": "assets/index-Dtgv3iLQ.css",
+          "value": "https://assets.example.invalid/external.svg",
+          "kind": "external"
+        },
+        {
+          "css": "assets/index-Dtgv3iLQ.css",
+          "value": "/assets/module-lhmQVEjK.svg",
+          "file": "assets/module-lhmQVEjK.svg",
+          "source": "assets/module.svg",
+          "exists": true,
+          "sha256": "dc39c7ab124120bdd4fd7b72ce0b9e966fe50db2898f76a1e1c6d33da5c5cf1f",
+          "matchesInput": true,
+          "kind": "image"
+        },
+        {
+          "css": "assets/lazy-vAmwLnNw.css",
+          "value": "/assets/feature-DyPHVK7W.svg",
+          "file": "assets/feature-DyPHVK7W.svg",
+          "source": "assets/feature.svg",
+          "exists": true,
+          "sha256": "32fa7605811d21d2040d656fd16fd43aa362f06519bc07db5e95ef37e534dad9",
+          "matchesInput": true,
+          "kind": "image"
+        }
+      ],
+      "sourceMaps": [
+        {
+          "file": "assets/index-CgAyIRd6.js.map",
+          "kind": "js",
+          "sources": [
+            "../../../fixture/src/main.js"
+          ]
+        },
+        {
+          "file": "assets/lazy-CSE4mHBe.js.map",
+          "kind": "js",
+          "sources": [
+            "../../../fixture/src/features/lazy.js"
+          ]
+        }
+      ]
+    },
+    "rspack": {
+      "entry": {
+        "name": [
+          "main"
+        ],
+        "files": [
+          "assets/main-3c9c372b4c55277c.css",
+          "assets/main-5b49d8b3569dbb63.js"
+        ]
+      },
+      "dynamicEntry": {
+        "name": [
+          "feature"
+        ],
+        "files": [
+          "assets/feature-73d6be9fa8b4b6ef.js",
+          "assets/feature-c1363d6788e4f4e4.css"
+        ]
+      },
+      "graphEvidence": {
+        "sourceModules": [
+          {
+            "type": "css/auto",
+            "name": "./src/styles/base.css",
+            "issuer": "./src/main.js"
+          },
+          {
+            "type": "css/auto",
+            "name": "./src/styles/shared.css",
+            "issuer": "./src/main.js"
+          },
+          {
+            "type": "css/auto",
+            "name": "./src/styles/card.module.css",
+            "issuer": "./src/main.js"
+          },
+          {
+            "type": "css/auto",
+            "name": "./src/styles/tokens.css",
+            "issuer": "./src/styles/base.css"
+          },
+          {
+            "type": "javascript/dynamic",
+            "name": "external \"https://styles.example.invalid/external.css\"",
+            "issuer": "./src/styles/base.css"
+          },
+          {
+            "type": "css/auto",
+            "name": "./src/features/feature.css",
+            "issuer": "./src/features/lazy.js"
+          }
+        ]
+      },
+      "assets": [
+        {
+          "file": "assets/feature-4acfa6c1a34d713a.svg",
+          "bytes": 134,
+          "sha256": "32fa7605811d21d2040d656fd16fd43aa362f06519bc07db5e95ef37e534dad9"
+        },
+        {
+          "file": "assets/feature-73d6be9fa8b4b6ef.js",
+          "bytes": 240,
+          "sha256": "d459d560348b698c62aa57931575e666f9577124cf31e80d8f3109414a177c10"
+        },
+        {
+          "file": "assets/feature-73d6be9fa8b4b6ef.js.map",
+          "bytes": 433,
+          "sha256": "387777e1383747ca46a06e33260dfe51e43d5caa1214a196ff3557627e5fab04"
+        },
+        {
+          "file": "assets/feature-c1363d6788e4f4e4.css",
+          "bytes": 164,
+          "sha256": "0e4978ae40fc33d75bcedc23f16f23d228f555d1e9903cdf2ecc1c0178c0050a"
+        },
+        {
+          "file": "assets/feature-c1363d6788e4f4e4.css.map",
+          "bytes": 279,
+          "sha256": "e160fad838356e4e74117281d037a63efe9dacd9c13c056f196f0e29ca89f4de"
+        },
+        {
+          "file": "assets/fixture-9f7b2b087618157b.woff2",
+          "bytes": 102,
+          "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e"
+        },
+        {
+          "file": "assets/main-3c9c372b4c55277c.css",
+          "bytes": 639,
+          "sha256": "8ca3e4082c539dc89b8c6c1a3fbf2795f223622fc6be8e07ce552cb1aadce7a3"
+        },
+        {
+          "file": "assets/main-3c9c372b4c55277c.css.map",
+          "bytes": 1052,
+          "sha256": "5a4713bb019d4b92d01fa23b1d1d942639ea0015b171f7755424d2eb6456bbb6"
+        },
+        {
+          "file": "assets/main-5b49d8b3569dbb63.js",
+          "bytes": 3794,
+          "sha256": "f5cab0ebc36a51422ad7ab42875191f9168c5d7c24b0a216f06e525852d0b94a"
+        },
+        {
+          "file": "assets/main-5b49d8b3569dbb63.js.map",
+          "bytes": 18133,
+          "sha256": "5b55c09b19b4e363a44b88b04b31e33901dd6b1fb5dfae29538392275b48d790"
+        },
+        {
+          "file": "assets/module-2ee38fa82c2335e7.svg",
+          "bytes": 141,
+          "sha256": "dc39c7ab124120bdd4fd7b72ce0b9e966fe50db2898f76a1e1c6d33da5c5cf1f"
+        },
+        {
+          "file": "assets/pattern-04a6a611e3d795fa.svg",
+          "bytes": 134,
+          "sha256": "83fa26018ae77528636dd0155cd0ed83053d2df97ec566f1391c6d3f369df02b"
+        }
+      ],
+      "cssModules": {
+        "localKeys": [
+          "card",
+          "featured"
+        ],
+        "classes": {
+          "card": "csPk0D",
+          "featured": "i57fPC"
+        },
+        "jsReferences": {
+          "card": true,
+          "featured": true
+        }
+      },
+      "defaultImportCompatibility": {
+        "vite": {
+          "buildRejected": false,
+          "error": null
+        },
+        "rspackDefault": {
+          "buildRejected": true,
+          "errors": [
+            "  × ESModulesLinkingError: export 'default' (imported as 'classes') was not found in './styles/card.module.css' (possible exports: card, featured)\n   ╭─[3:46]\n 1 │ import classes from \"./styles/card.module.css\";\n 2 │ \n 3 │ document.querySelector(\"#app\").className = `${classes.card} ${classes.featured}`;\n   ·                                               ────────────\n   ╰────\n",
+            "  × ESModulesLinkingError: export 'default' (imported as 'classes') was not found in './styles/card.module.css' (possible exports: card, featured)\n   ╭─[3:62]\n 1 │ import classes from \"./styles/card.module.css\";\n 2 │ \n 3 │ document.querySelector(\"#app\").className = `${classes.card} ${classes.featured}`;\n   ·                                                               ────────────────\n   ╰────\n"
+          ]
+        },
+        "rspackCompatible": {
+          "buildRejected": false,
+          "errors": [],
+          "parser": {
+            "css/auto": {
+              "namedExports": false
+            }
+          }
+        }
+      },
+      "cssUrls": [
+        {
+          "css": "assets/main-3c9c372b4c55277c.css",
+          "value": "https://styles.example.invalid/external.css",
+          "kind": "external-css-import"
+        },
+        {
+          "css": "assets/main-3c9c372b4c55277c.css",
+          "value": "/assets/fixture-9f7b2b087618157b.woff2",
+          "file": "assets/fixture-9f7b2b087618157b.woff2",
+          "source": "assets/fixture.woff2",
+          "exists": true,
+          "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e",
+          "matchesInput": true,
+          "kind": "font"
+        },
+        {
+          "css": "assets/main-3c9c372b4c55277c.css",
+          "value": "/assets/pattern-04a6a611e3d795fa.svg",
+          "file": "assets/pattern-04a6a611e3d795fa.svg",
+          "source": "assets/pattern.svg",
+          "exists": true,
+          "sha256": "83fa26018ae77528636dd0155cd0ed83053d2df97ec566f1391c6d3f369df02b",
+          "matchesInput": true,
+          "kind": "image"
+        },
+        {
+          "css": "assets/main-3c9c372b4c55277c.css",
+          "value": "https://assets.example.invalid/external.svg",
+          "kind": "external"
+        },
+        {
+          "css": "assets/main-3c9c372b4c55277c.css",
+          "value": "/assets/module-2ee38fa82c2335e7.svg",
+          "file": "assets/module-2ee38fa82c2335e7.svg",
+          "source": "assets/module.svg",
+          "exists": true,
+          "sha256": "dc39c7ab124120bdd4fd7b72ce0b9e966fe50db2898f76a1e1c6d33da5c5cf1f",
+          "matchesInput": true,
+          "kind": "image"
+        },
+        {
+          "css": "assets/feature-c1363d6788e4f4e4.css",
+          "value": "/assets/feature-4acfa6c1a34d713a.svg",
+          "file": "assets/feature-4acfa6c1a34d713a.svg",
+          "source": "assets/feature.svg",
+          "exists": true,
+          "sha256": "32fa7605811d21d2040d656fd16fd43aa362f06519bc07db5e95ef37e534dad9",
+          "matchesInput": true,
+          "kind": "image"
+        }
+      ],
+      "sourceMaps": [
+        {
+          "file": "assets/feature-73d6be9fa8b4b6ef.js.map",
+          "kind": "js",
+          "sources": [
+            "webpack:///./src/features/lazy.js"
+          ]
+        },
+        {
+          "file": "assets/feature-c1363d6788e4f4e4.css.map",
+          "kind": "css",
+          "sources": [
+            "webpack:///./src/features/feature.css"
+          ]
+        },
+        {
+          "file": "assets/main-3c9c372b4c55277c.css.map",
+          "kind": "css",
+          "sources": [
+            "webpack:///./src/styles/tokens.css",
+            "webpack:///./src/styles/base.css",
+            "webpack:///./src/styles/shared.css",
+            "webpack:///./src/styles/card.module.css"
+          ]
+        },
+        {
+          "file": "assets/main-5b49d8b3569dbb63.js.map",
+          "kind": "js",
+          "sources": [
+            "webpack:///webpack/runtime/load_script",
+            "webpack:///webpack/runtime/css_loading",
+            "webpack:///webpack/runtime/jsonp_chunk_loading",
+            "webpack:///css ./src/styles/card.module.css",
+            "webpack:///./src/main.js",
+            "webpack:///webpack/runtime/define_property_getters",
+            "webpack:///webpack/runtime/ensure_chunk",
+            "webpack:///webpack/runtime/get css chunk filename",
+            "webpack:///webpack/runtime/get javascript chunk filename",
+            "webpack:///webpack/runtime/has_own_property",
+            "webpack:///webpack/runtime/public_path"
+          ]
+        }
+      ]
+    }
+  },
+  "checks": [
+    {
+      "id": "M1",
+      "condition": "두 production 빌드가 동일 입력 fixture에서 산출물을 만든다",
+      "status": "통과",
+      "details": {
+        "inputFileCount": 17,
+        "viteOutputCount": 12,
+        "rspackOutputCount": 12
+      }
+    },
+    {
+      "id": "M2",
+      "condition": "CSS Module의 card·featured named export가 CSS와 JS 산출물에 연결된다",
+      "status": "통과",
+      "details": {
+        "vite": {
+          "localKeys": [
+            "card",
+            "featured"
+          ],
+          "classes": {
+            "card": "_card_1o5yj_1",
+            "featured": "_featured_1o5yj_6"
+          },
+          "jsReferences": {
+            "card": true,
+            "featured": true
+          }
+        },
+        "rspack": {
+          "localKeys": [
+            "card",
+            "featured"
+          ],
+          "classes": {
+            "card": "csPk0D",
+            "featured": "i57fPC"
+          },
+          "jsReferences": {
+            "card": true,
+            "featured": true
+          }
+        }
+      }
+    },
+    {
+      "id": "M2a",
+      "condition": "CSS Module default import 기본값과 Rspack 호환 설정 차이를 기록한다",
+      "status": "통과",
+      "details": {
+        "vite": {
+          "buildRejected": false,
+          "error": null
+        },
+        "rspackDefault": {
+          "buildRejected": true,
+          "errors": [
+            "  × ESModulesLinkingError: export 'default' (imported as 'classes') was not found in './styles/card.module.css' (possible exports: card, featured)\n   ╭─[3:46]\n 1 │ import classes from \"./styles/card.module.css\";\n 2 │ \n 3 │ document.querySelector(\"#app\").className = `${classes.card} ${classes.featured}`;\n   ·                                               ────────────\n   ╰────\n",
+            "  × ESModulesLinkingError: export 'default' (imported as 'classes') was not found in './styles/card.module.css' (possible exports: card, featured)\n   ╭─[3:62]\n 1 │ import classes from \"./styles/card.module.css\";\n 2 │ \n 3 │ document.querySelector(\"#app\").className = `${classes.card} ${classes.featured}`;\n   ·                                                               ────────────────\n   ╰────\n"
+          ]
+        },
+        "rspackCompatible": {
+          "buildRejected": false,
+          "errors": [],
+          "parser": {
+            "css/auto": {
+              "namedExports": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "M3",
+      "condition": "로컬 @import 내용은 포함되고 외부 @import는 외부 참조로 남는다",
+      "status": "통과",
+      "details": {
+        "vite": {
+          "localImportApplied": true,
+          "externalImport": true
+        },
+        "rspack": {
+          "localImportApplied": true,
+          "externalImport": true
+        }
+      }
+    },
+    {
+      "id": "M4",
+      "condition": "CSS의 로컬 SVG·WOFF2 URL이 별도 산출 자원을 가리킨다",
+      "status": "통과",
+      "details": {
+        "vite": [
+          {
+            "css": "assets/index-Dtgv3iLQ.css",
+            "value": "https://styles.example.invalid/external.css",
+            "kind": "external-css-import"
+          },
+          {
+            "css": "assets/index-Dtgv3iLQ.css",
+            "value": "/assets/fixture-Cb_KYlk7.woff2",
+            "file": "assets/fixture-Cb_KYlk7.woff2",
+            "source": "assets/fixture.woff2",
+            "exists": true,
+            "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e",
+            "matchesInput": true,
+            "kind": "font"
+          },
+          {
+            "css": "assets/index-Dtgv3iLQ.css",
+            "value": "/assets/pattern-LUcythGg.svg",
+            "file": "assets/pattern-LUcythGg.svg",
+            "source": "assets/pattern.svg",
+            "exists": true,
+            "sha256": "83fa26018ae77528636dd0155cd0ed83053d2df97ec566f1391c6d3f369df02b",
+            "matchesInput": true,
+            "kind": "image"
+          },
+          {
+            "css": "assets/index-Dtgv3iLQ.css",
+            "value": "https://assets.example.invalid/external.svg",
+            "kind": "external"
+          },
+          {
+            "css": "assets/index-Dtgv3iLQ.css",
+            "value": "/assets/module-lhmQVEjK.svg",
+            "file": "assets/module-lhmQVEjK.svg",
+            "source": "assets/module.svg",
+            "exists": true,
+            "sha256": "dc39c7ab124120bdd4fd7b72ce0b9e966fe50db2898f76a1e1c6d33da5c5cf1f",
+            "matchesInput": true,
+            "kind": "image"
+          },
+          {
+            "css": "assets/lazy-vAmwLnNw.css",
+            "value": "/assets/feature-DyPHVK7W.svg",
+            "file": "assets/feature-DyPHVK7W.svg",
+            "source": "assets/feature.svg",
+            "exists": true,
+            "sha256": "32fa7605811d21d2040d656fd16fd43aa362f06519bc07db5e95ef37e534dad9",
+            "matchesInput": true,
+            "kind": "image"
+          }
+        ],
+        "rspack": [
+          {
+            "css": "assets/main-3c9c372b4c55277c.css",
+            "value": "https://styles.example.invalid/external.css",
+            "kind": "external-css-import"
+          },
+          {
+            "css": "assets/main-3c9c372b4c55277c.css",
+            "value": "/assets/fixture-9f7b2b087618157b.woff2",
+            "file": "assets/fixture-9f7b2b087618157b.woff2",
+            "source": "assets/fixture.woff2",
+            "exists": true,
+            "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e",
+            "matchesInput": true,
+            "kind": "font"
+          },
+          {
+            "css": "assets/main-3c9c372b4c55277c.css",
+            "value": "/assets/pattern-04a6a611e3d795fa.svg",
+            "file": "assets/pattern-04a6a611e3d795fa.svg",
+            "source": "assets/pattern.svg",
+            "exists": true,
+            "sha256": "83fa26018ae77528636dd0155cd0ed83053d2df97ec566f1391c6d3f369df02b",
+            "matchesInput": true,
+            "kind": "image"
+          },
+          {
+            "css": "assets/main-3c9c372b4c55277c.css",
+            "value": "https://assets.example.invalid/external.svg",
+            "kind": "external"
+          },
+          {
+            "css": "assets/main-3c9c372b4c55277c.css",
+            "value": "/assets/module-2ee38fa82c2335e7.svg",
+            "file": "assets/module-2ee38fa82c2335e7.svg",
+            "source": "assets/module.svg",
+            "exists": true,
+            "sha256": "dc39c7ab124120bdd4fd7b72ce0b9e966fe50db2898f76a1e1c6d33da5c5cf1f",
+            "matchesInput": true,
+            "kind": "image"
+          },
+          {
+            "css": "assets/feature-c1363d6788e4f4e4.css",
+            "value": "/assets/feature-4acfa6c1a34d713a.svg",
+            "file": "assets/feature-4acfa6c1a34d713a.svg",
+            "source": "assets/feature.svg",
+            "exists": true,
+            "sha256": "32fa7605811d21d2040d656fd16fd43aa362f06519bc07db5e95ef37e534dad9",
+            "matchesInput": true,
+            "kind": "image"
+          }
+        ]
+      }
+    },
+    {
+      "id": "M5",
+      "condition": "entry와 동적 기능 CSS가 구분된 출력 청크에 연결된다",
+      "status": "통과",
+      "details": {
+        "vite": {
+          "entryCss": [
+            "assets/index-Dtgv3iLQ.css"
+          ],
+          "dynamicCss": [
+            "assets/lazy-vAmwLnNw.css"
+          ],
+          "sharedStyleOccurrences": {
+            "entry": 1,
+            "dynamic": 0
+          }
+        },
+        "rspack": {
+          "entryCss": [
+            "assets/main-3c9c372b4c55277c.css"
+          ],
+          "dynamicCss": [
+            "assets/feature-c1363d6788e4f4e4.css"
+          ],
+          "sharedStyleOccurrences": {
+            "entry": 1,
+            "dynamic": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "M6",
+      "condition": "source map 또는 빌드 진단이 CSS 원본 위치를 가리킨다",
+      "status": "원본 위치 공백",
+      "details": {
+        "viteCssMaps": [],
+        "rspackCssMaps": [
+          {
+            "file": "assets/feature-c1363d6788e4f4e4.css.map",
+            "kind": "css",
+            "sources": [
+              "webpack:///./src/features/feature.css"
+            ]
+          },
+          {
+            "file": "assets/main-3c9c372b4c55277c.css.map",
+            "kind": "css",
+            "sources": [
+              "webpack:///./src/styles/tokens.css",
+              "webpack:///./src/styles/base.css",
+              "webpack:///./src/styles/shared.css",
+              "webpack:///./src/styles/card.module.css"
+            ]
+          }
+        ],
+        "viteCssMapReferences": [
+          {
+            "file": "assets/index-Dtgv3iLQ.css",
+            "sourceMappingUrl": null
+          },
+          {
+            "file": "assets/lazy-vAmwLnNw.css",
+            "sourceMappingUrl": null
+          }
+        ],
+        "rspackCssMapReferences": [
+          {
+            "file": "assets/feature-c1363d6788e4f4e4.css",
+            "sourceMappingUrl": "feature-c1363d6788e4f4e4.css.map"
+          },
+          {
+            "file": "assets/main-3c9c372b4c55277c.css",
+            "sourceMappingUrl": "main-3c9c372b4c55277c.css.map"
+          }
+        ],
+        "viteMissingAssetDiagnostic": {
+          "buildRejected": false,
+          "reportsSource": false,
+          "reportsMissingResource": true,
+          "keepsMissingReference": true,
+          "line": null,
+          "column": null,
+          "warnings": [
+            "./missing.svg referenced in ./missing.svg didn't resolve at build time, it will remain unchanged to be resolved at runtime"
+          ]
+        },
+        "rspackMissingAssetDiagnostic": {
+          "buildRejected": true,
+          "reportsSource": true,
+          "reportsMissingResource": true,
+          "sourceFile": "./src/diagnostics/broken.css",
+          "line": 2,
+          "column": 24,
+          "excerpt": "  × Module not found: Can't resolve './missing.svg' in '<fixture>/src/diagnostics'\n   ╭─[2:24]\n 1 │ .broken {\n 2 │   background-image: url(\"./missing.svg\");\n   ·                         ───────────────\n 3 │ }\n   ╰────\n"
+        }
+      }
+    },
+    {
+      "id": "M7",
+      "condition": "외부 URL은 별도 번들 자원으로 내보내지 않고 CSS 참조로 보존한다",
+      "status": "통과",
+      "details": {
+        "vite": {
+          "cssImportPreserved": true,
+          "urlPreserved": true
+        },
+        "rspack": {
+          "cssImportPreserved": true,
+          "urlPreserved": true
+        }
+      }
+    }
+  ],
+  "sourceLocation": {
+    "viteCssMaps": [],
+    "rspackCssMaps": [
+      {
+        "file": "assets/feature-c1363d6788e4f4e4.css.map",
+        "kind": "css",
+        "sources": [
+          "webpack:///./src/features/feature.css"
+        ]
+      },
+      {
+        "file": "assets/main-3c9c372b4c55277c.css.map",
+        "kind": "css",
+        "sources": [
+          "webpack:///./src/styles/tokens.css",
+          "webpack:///./src/styles/base.css",
+          "webpack:///./src/styles/shared.css",
+          "webpack:///./src/styles/card.module.css"
+        ]
+      }
+    ],
+    "viteCssMapReferences": [
+      {
+        "file": "assets/index-Dtgv3iLQ.css",
+        "sourceMappingUrl": null
+      },
+      {
+        "file": "assets/lazy-vAmwLnNw.css",
+        "sourceMappingUrl": null
+      }
+    ],
+    "rspackCssMapReferences": [
+      {
+        "file": "assets/feature-c1363d6788e4f4e4.css",
+        "sourceMappingUrl": "feature-c1363d6788e4f4e4.css.map"
+      },
+      {
+        "file": "assets/main-3c9c372b4c55277c.css",
+        "sourceMappingUrl": "main-3c9c372b4c55277c.css.map"
+      }
+    ],
+    "viteMissingAssetDiagnostic": {
+      "buildRejected": false,
+      "reportsSource": false,
+      "reportsMissingResource": true,
+      "keepsMissingReference": true,
+      "line": null,
+      "column": null,
+      "warnings": [
+        "./missing.svg referenced in ./missing.svg didn't resolve at build time, it will remain unchanged to be resolved at runtime"
+      ]
+    },
+    "rspackMissingAssetDiagnostic": {
+      "buildRejected": true,
+      "reportsSource": true,
+      "reportsMissingResource": true,
+      "sourceFile": "./src/diagnostics/broken.css",
+      "line": 2,
+      "column": 24,
+      "excerpt": "  × Module not found: Can't resolve './missing.svg' in '<fixture>/src/diagnostics'\n   ╭─[2:24]\n 1 │ .broken {\n 2 │   background-image: url(\"./missing.svg\");\n   ·                         ───────────────\n 3 │ }\n   ╰────\n"
+    },
+    "status": "차이 확인 · 원본 위치 보강 필요"
+  },
+  "scope": {
+    "productApi": false,
+    "mobileCssRuntime": false,
+    "otaManifestIntegration": false,
+    "browserRendering": false,
+    "validFontDecode": false,
+    "externalNetworkFetch": false,
+    "c02Complete": false
+  }
+}
