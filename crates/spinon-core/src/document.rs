@@ -3,6 +3,8 @@ mod snapshot;
 mod types;
 
 #[cfg(test)]
+mod reservation_tests;
+#[cfg(test)]
 mod tests;
 
 pub use snapshot::HostDocumentSnapshot;
@@ -75,6 +77,21 @@ impl HostDocument {
             generation: self.generation,
             id,
         })
+    }
+
+    /// 노드를 만들기 전에 예약한 핸들을 취소합니다. 이미 소비되었거나 취소된 핸들이면 `false`입니다.
+    /// 취소한 ID도 다시 사용하지 않으며 문서 revision은 바뀌지 않습니다.
+    pub fn cancel_node_handle_reservation(
+        &mut self,
+        handle: HostNodeHandle,
+    ) -> Result<bool, DocumentError> {
+        if handle.generation != self.generation {
+            return Err(DocumentError::batch(DocumentErrorKind::StaleGeneration {
+                expected: self.generation.get(),
+                actual: handle.generation.get(),
+            }));
+        }
+        Ok(self.reserved_ids.remove(&handle.id))
     }
 
     /// 전체 변경 묶음을 임시 상태에서 검증한 뒤 한 번에 공개합니다.

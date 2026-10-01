@@ -43,6 +43,8 @@ DOM 호환 계층만으로 `react-dom`이나 브라우저 DOM을 직접 호출�
 | 트리 읽기·쓰기 | `nodeType`, `nodeName`, `parentNode`, `firstChild`, `nextSibling`, `textContent`, `Text.data`/`nodeValue` | `textContent`의 getter·setter와 자식 교체 의미, `Text.data`의 getter·setter, 노드 종류별 `nodeValue`, 요소와 텍스트가 섞인 순서, 노드 이름·종류 상수, 분리된 노드의 수명, 변경 직후 읽기 |
 | 기본 속성 | `getAttribute()`, `setAttribute()`, `removeAttribute()`, `id`, `className` | JavaScript 문자열 인수의 변환, 속성 이름의 대소문자, `id`·`className`과 `id`·`class` 속성의 반영 관계, 지원 CSS 선택자에 미치는 효과 |
 
+Rust `HostDocument::reserve_node_handle()`는 ID만 예약하는 내부 단계이며 JavaScript `document.createElement()`와 일대일 대응하지 않습니다. 공개 DOM API를 구현할 때는 분리된 `Element` 래퍼와 논리 노드가 함수 반환 뒤의 동기 조회에서 보이도록 해야 합니다. 내부 ID 예약과 노드 생성 커밋을 어떻게 연결할지는 JS façade 구현 계약에 둡니다. 프레임워크 변경 묶음은 중간 상태를 앱이 관찰할 수 없을 때만 합칠 수 있습니다. 이름 정규화와 예외 변환은 아직 결정되지 않았습니다.
+
 다음 항목은 첫 단계에 자동 포함하지 않는다. 각 항목은 별도 동작 계약과 적합성 시나리오가 필요하다.
 
 | 항목 | 현재 제안 경계 |
