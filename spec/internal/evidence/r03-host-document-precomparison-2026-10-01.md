@@ -25,7 +25,7 @@
 
 ## 재검증 기록
 
-구현 후 `cargo test --locked -p spinon-core`는 **27개 테스트 모두 통과**했고, `cargo test --locked --workspace`는 전체 **59개 테스트 모두 통과**했다. `cargo fmt --all -- --check`와 `git diff --check`도 통과했다. Rust 코어는 Android ARM64, iOS device ARM64, iOS simulator ARM64 대상으로 각각 `cargo check --locked -p spinon-core --target ...`을 통과했다. 이 검증은 Rust 코어 컴파일이며 앱 패키지·V8·Stylo·GPU 통합 검증은 아니다. 실행 환경은 Apple Silicon Mac Studio, macOS `26.5.1` / Darwin `25.5.0`, Rust `1.96.1`이다.
+초기 R03 구현 시점에는 `cargo test --locked -p spinon-core` 27개, `cargo test --locked --workspace` 59개가 통과했다. 이후 코어 회귀 테스트가 추가되어 현재 코어 테스트 수는 29개다. 이 문서의 초기 R03 Android/iOS 교차 컴파일 기록은 당시 `spinon-core` 대상만 확인한 결과이며 Stylo 연동 결과를 포함하지 않는다.
 
 ## 검토 후 수정 사항
 
@@ -43,4 +43,4 @@
 
 향후 JS API는 반환 직후의 동기 논리 조회에서 분리 노드를 보이게 해야 하며, GPU 프레임 반영은 늦어도 됩니다. 중간 상태를 앱이 관찰할 수 있는 DOM 호출을 하나의 묶음으로 합치면 안 됩니다. 이름 정규화·Web IDL 변환·DOMException·JS 래퍼 객체 정체성·GC·OwnerId 발급은 아직 구현되지 않았고 공개 지원으로 표시하지 않습니다.
 
-현재 검증은 `cargo test --locked --workspace` 61개 통과, `cargo clippy --locked --workspace --all-targets -- -D warnings`, 실험 feature Clippy, `cargo fmt --all -- --check`, `git diff --check`, Android ARM64·iOS 기기·iOS 시뮬레이터 대상 `cargo check` 통과입니다. 앱 실행·V8·Stylo·GPU 통합 검증은 아닙니다.
+R03 후속 변경 당시에는 `cargo test --locked --workspace` 61개 통과와 Rust 코어 대상 교차 컴파일을 확인했다. 현재 전체 저장소의 추가 검증과 Stylo 대상 결과는 [C03 실행 근거](css-c03-stylo-dom-adapter-2026-10-01.md)에 기록한다. 이 문서의 기존 R03 기록은 앱 실행·V8·Stylo·GPU 통합 검증이 아니다.

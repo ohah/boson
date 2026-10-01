@@ -4,5 +4,16 @@ version = "0.1.0"
 edition = "2024"
 publish = false
 
+[dependencies]
+app_units = "=0.7.8"
+euclid = "0.22"
+selectors = "=0.41.0"
+spinon-core = { path = "../spinon-core" }
+stylo = "=0.22.0"
+stylo_dom = "=0.22.0"
+
+[dev-dependencies]
+url = "2.5"
+
 [lints.rust]
-unsafe_code = "forbid"
+unsafe_code = "deny"

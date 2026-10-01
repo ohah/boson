@@ -2,6 +2,10 @@
 
 use std::ffi::CStr;
 
+mod stylo_dom;
+
+pub use stylo_dom::{StyloDocument, StyloDocumentView, StyloDomError, StyloElement, StyloNode};
+
 /// 지원 HTML 요소 기본 스타일 프로필의 초안 식별자입니다.
 pub const UA_STYLESHEET_PROFILE_ID: &CStr = c"spinon-html-ua/0.1.0-draft";
 
