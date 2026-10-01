@@ -5,10 +5,15 @@ import { access, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promise
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { summarizeC01Inventory, validateC01Inventory } from './inventory.mjs';
 
 const repositoryRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const fixtureRelativePath = 'tests/fixtures/css/c01/supported-html-ua.html';
 const fixturePath = join(repositoryRoot, fixtureRelativePath);
+const inventoryRelativePath = 'tests/fixtures/css/c01/inventory.v1.json';
+const inventoryPath = join(repositoryRoot, inventoryRelativePath);
+const inventoryModuleRelativePath = 'tools/css-reference/inventory.mjs';
+const inventoryModulePath = join(repositoryRoot, inventoryModuleRelativePath);
 const uaCssRelativePath = 'crates/spinon-style/resources/ua/supported-elements-v0.css';
 const uaCssPath = join(repositoryRoot, uaCssRelativePath);
 const captureScriptRelativePath = 'tools/css-reference/capture.mjs';
@@ -22,38 +27,6 @@ const comparisonBaselineCss = `
   margin-inline-end: 1px;
   padding-inline-start: 0px;
 }`;
-const expectedSelectorIds = {
-  div: ['ua-div'],
-  span: ['ua-span'],
-  a: ['ua-anchor'],
-  img: ['ua-image'],
-  button: ['ua-button'],
-  input: ['ua-input'],
-  p: ['ua-paragraph'],
-  ul: ['ua-list'],
-  li: ['ua-list-item'],
-};
-const expectedComputedFeatureIds = [
-  'ua.display.div.v0',
-  'ua.display.span.v0',
-  'ua.display.a.v0',
-  'ua.display.img.v0',
-  'ua.display.button.v0',
-  'ua.display.input.v0',
-  'ua.display.p.v0',
-  'ua.margin-block-start.p.v0',
-  'ua.margin-block-end.p.v0',
-  'ua.margin-inline-start.p.v0',
-  'ua.margin-inline-end.p.v0',
-  'ua.display.ul.v0',
-  'ua.list-style-type.ul.v0',
-  'ua.margin-block-start.ul.v0',
-  'ua.margin-block-end.ul.v0',
-  'ua.margin-inline-start.ul.v0',
-  'ua.margin-inline-end.ul.v0',
-  'ua.padding-inline-start.ul.v0',
-  'ua.display.li.v0',
-];
 const expectedProfileCssSha256 = 'bd15dd612a21cc8cb48e25eb38b86803868667df75cd56f111d7c476ddba3ebd';
 const defaultChromiumPaths = process.platform === 'darwin'
   ? ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome']
@@ -182,6 +155,11 @@ if (!chromiumPath) {
   throw new Error('Chromium 실행 파일을 찾지 못했습니다. SPINON_CHROMIUM_BIN으로 지정하세요.');
 }
 
+const inventoryBytes = await readFile(inventoryPath);
+const inventory = validateC01Inventory(JSON.parse(inventoryBytes.toString('utf8')));
+const inventorySha256 = createHash('sha256').update(inventoryBytes).digest('hex');
+const inventorySummary = summarizeC01Inventory(inventory);
+
 const versionResult = spawnSync(chromiumPath, ['--version'], { encoding: 'utf8' });
 if (versionResult.error || versionResult.status !== 0) {
   throw new Error(`Chromium 버전을 읽지 못했습니다: ${versionResult.error?.message ?? versionResult.stderr}`);
@@ -234,6 +212,14 @@ try {
   await pageDevTools.opened;
   await pageDevTools.send('Page.enable');
   await pageDevTools.send('Runtime.enable');
+  await pageDevTools.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `Object.defineProperty(globalThis, '__SPINON_C01_INVENTORY__', {
+      configurable: false,
+      enumerable: false,
+      writable: false,
+      value: Object.freeze(${JSON.stringify(inventory)}),
+    });`,
+  });
   await pageDevTools.send('Emulation.setDeviceMetricsOverride', {
     width: 800,
     height: 600,
@@ -272,6 +258,12 @@ try {
   if (observation.fixtureId !== 'C01-UAv0-supported-html-elements') {
     throw new Error(`예상하지 않은 fixture 결과: ${observation.fixtureId}`);
   }
+  if (observation.inventoryId !== inventory.inventoryId || observation.inventorySchema !== inventory.schema) {
+    throw new Error(`fixture에 주입된 inventory가 입력 파일과 다릅니다: ${JSON.stringify({
+      inventoryId: observation.inventoryId,
+      inventorySchema: observation.inventorySchema,
+    })}`);
+  }
   if (observation.viewport.width !== 800 || observation.viewport.height !== 600) {
     throw new Error(`CSS viewport가 고정값과 다릅니다: ${JSON.stringify(observation.viewport)}`);
   }
@@ -296,13 +288,14 @@ try {
     throw new Error(`fixture에 author stylesheet가 있습니다: ${observation.authorStyleSheetCount}`);
   }
   const observedSelectors = observation.elements.map((element) => element.selector);
-  const expectedSelectors = Object.keys(expectedSelectorIds);
+  const expectedSelectors = inventory.elements.map((element) => element.selector);
   if (JSON.stringify(observedSelectors) !== JSON.stringify(expectedSelectors)) {
-    throw new Error(`fixture 선택자 목록이 고정 입력과 다릅니다: ${JSON.stringify(observedSelectors)}`);
+    throw new Error(`fixture 선택자 목록이 inventory와 다릅니다: ${JSON.stringify(observedSelectors)}`);
   }
   const observedFeatureIds = observation.elements.flatMap((element) => element.features.map((feature) => feature.id));
-  if (JSON.stringify(observedFeatureIds) !== JSON.stringify(expectedComputedFeatureIds)) {
-    throw new Error(`fixture CSS feature inventory가 고정 입력과 다릅니다: ${JSON.stringify(observedFeatureIds)}`);
+  const expectedFeatureIds = inventory.elements.flatMap((element) => element.features.map((feature) => feature.id));
+  if (JSON.stringify(observedFeatureIds) !== JSON.stringify(expectedFeatureIds)) {
+    throw new Error(`fixture CSS feature 목록이 inventory와 다릅니다: ${JSON.stringify(observedFeatureIds)}`);
   }
   const fontEvaluation = await pageDevTools.send('Runtime.evaluate', {
     expression: `({
@@ -359,7 +352,8 @@ try {
   for (const referenceElement of observation.elements) {
     const baselineElement = profileObservation.baselineElements.find((item) => item.selector === referenceElement.selector);
     const profileElement = profileObservation.elements.find((item) => item.selector === referenceElement.selector);
-    const expectedIds = expectedSelectorIds[referenceElement.selector];
+    const inventoryElement = inventory.elements.find((element) => element.selector === referenceElement.selector);
+    const expectedIds = inventoryElement?.nodeIds;
     const referenceIds = referenceElement.matches.map((item) => item.id);
     const baselineIds = baselineElement?.matches.map((item) => item.id) ?? [];
     const profileIds = profileElement?.matches.map((item) => item.id) ?? [];
@@ -407,7 +401,7 @@ try {
   const fixtureBytes = await readFile(fixturePath);
   const fixtureSha256 = createHash('sha256').update(fixtureBytes).digest('hex');
   const platformId = process.platform === 'darwin' ? 'macos' : process.platform;
-  const referenceId = `chromium-${platformId}-${process.arch}-${version}-ua-profile-override-v1`;
+  const referenceId = `chromium-${platformId}-${process.arch}-${version}-ua-profile-override-v3-inventory-${inventorySha256.slice(0, 12)}`;
   const outputDirectory = join(repositoryRoot, 'tests/fixtures/css/references', referenceId);
   const outputPath = join(outputDirectory, 'ua-supported-elements.json');
   try {
@@ -434,6 +428,10 @@ try {
     captureTool: {
       path: captureScriptRelativePath,
       sha256: await sha256File(fileURLToPath(import.meta.url)),
+      supportModules: [{
+        path: inventoryModuleRelativePath,
+        sha256: await sha256File(inventoryModulePath),
+      }],
     },
     oracle: {
       name: 'Chromium',
@@ -471,6 +469,16 @@ try {
       cssProfile: 'spinon-html-ua/0.1.0-draft',
       profileCssPath: uaCssRelativePath,
       profileCssSha256,
+      inventory: {
+        schema: inventory.schema,
+        id: inventory.inventoryId,
+        path: inventoryRelativePath,
+        sha256: inventorySha256,
+        completeness: inventory.completeness,
+        elementCount: inventorySummary.elementCount,
+        featureCount: inventorySummary.featureCount,
+        uncovered: inventory.uncovered,
+      },
       comparisonBaseline: {
         authorStyleSheetCount: profileObservation.baselineAuthorStyleSheetCount,
         cssSha256: baselineCssSha256,
@@ -495,7 +503,7 @@ try {
   await writeFile(outputPath, `${JSON.stringify(snapshot, null, 2)}\n`, { flag: 'wx' });
   console.log(`Chromium ${version} (${browserVersion.revision}) 기준 저장: ${outputPath}`);
   console.log(`바이너리 SHA-256: ${snapshot.oracle.executableSha256}`);
-  console.log(`비교: 내장 프로필 computed CSS ${comparedFeatures.length}개 값 일치; fixture selector ${selectorCoverage.length}개 확인`);
+  console.log(`비교: partial inventory ${inventorySummary.elementCount}개 요소 / computed CSS ${comparedFeatures.length}개 값 일치`);
   console.log('실행 조건: macOS, arm64, 800×600 CSS px, scale=1, en-US, UTC, light/no-preference');
 } finally {
   pageDevTools?.close();

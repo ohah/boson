@@ -1,0 +1,74 @@
+{
+  "schema": "spinon-css-feature-inventory/v1",
+  "inventoryId": "C01-UAv0-supported-html-elements",
+  "profileId": "spinon-html-ua/0.1.0-draft",
+  "fixtureId": "C01-UAv0-supported-html-elements",
+  "completeness": "partial",
+  "uncovered": [
+    "전체 HTML 요소와 SVG 요소 목록",
+    "CSSWG·WPT 버전 및 기능별 값 조합",
+    "선택자·cascade·상속·레이아웃·텍스트·페인트 기준",
+    "Android·iOS 비교 행렬"
+  ],
+  "elements": [
+    {
+      "selector": "div",
+      "nodeIds": ["ua-div"],
+      "features": [{ "id": "ua.display.div.v0", "property": "display" }]
+    },
+    {
+      "selector": "span",
+      "nodeIds": ["ua-span"],
+      "features": [{ "id": "ua.display.span.v0", "property": "display" }]
+    },
+    {
+      "selector": "a",
+      "nodeIds": ["ua-anchor"],
+      "features": [{ "id": "ua.display.a.v0", "property": "display" }]
+    },
+    {
+      "selector": "img",
+      "nodeIds": ["ua-image"],
+      "features": [{ "id": "ua.display.img.v0", "property": "display" }]
+    },
+    {
+      "selector": "button",
+      "nodeIds": ["ua-button"],
+      "features": [{ "id": "ua.display.button.v0", "property": "display" }]
+    },
+    {
+      "selector": "input",
+      "nodeIds": ["ua-input"],
+      "features": [{ "id": "ua.display.input.v0", "property": "display" }]
+    },
+    {
+      "selector": "p",
+      "nodeIds": ["ua-paragraph"],
+      "features": [
+        { "id": "ua.display.p.v0", "property": "display" },
+        { "id": "ua.margin-block-start.p.v0", "property": "margin-block-start" },
+        { "id": "ua.margin-block-end.p.v0", "property": "margin-block-end" },
+        { "id": "ua.margin-inline-start.p.v0", "property": "margin-inline-start" },
+        { "id": "ua.margin-inline-end.p.v0", "property": "margin-inline-end" }
+      ]
+    },
+    {
+      "selector": "ul",
+      "nodeIds": ["ua-list"],
+      "features": [
+        { "id": "ua.display.ul.v0", "property": "display" },
+        { "id": "ua.list-style-type.ul.v0", "property": "list-style-type" },
+        { "id": "ua.margin-block-start.ul.v0", "property": "margin-block-start" },
+        { "id": "ua.margin-block-end.ul.v0", "property": "margin-block-end" },
+        { "id": "ua.margin-inline-start.ul.v0", "property": "margin-inline-start" },
+        { "id": "ua.margin-inline-end.ul.v0", "property": "margin-inline-end" },
+        { "id": "ua.padding-inline-start.ul.v0", "property": "padding-inline-start" }
+      ]
+    },
+    {
+      "selector": "li",
+      "nodeIds": ["ua-list-item"],
+      "features": [{ "id": "ua.display.li.v0", "property": "display" }]
+    }
+  ]
+}
