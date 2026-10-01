@@ -55,7 +55,7 @@ void register_default_ua_style(void) {
 
 ## 아직 연결하지 않은 런타임 동작
 
-1. C03에서 지원 요소가 HTML namespace와 일치하는지 연결한다.
+1. **완료:** C03 DOM adapter가 HTML 문서 모드와 XHTML namespace를 함께 판정한다. 이 연결만으로 UA stylesheet를 적용하지는 않는다.
 2. C04에서 자원을 Stylo의 UA cascade 출처로 등록하고 앱 author stylesheet가 CSS cascade 규칙대로 덮어쓸 수 있게 한다.
 3. CSS 의미·계산 스타일·레이아웃·GPU 픽셀을 기준 Chromium과 Android·iOS에서 각각 비교한다.
 4. 버튼·입력 외형, 기본 폰트, 링크 상태 규칙은 별도 지원 프로필과 적합성 fixture가 정해지기 전까지 지원 완료로 표시하지 않는다.
