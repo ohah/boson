@@ -2,7 +2,7 @@
 
 **결과:** production 산출 그래프의 주요 사례 통과 · **C02 제품 구현:** 미완료 · **남은 차이:** CSS 원본 진단 위치
 
-이 실험은 [C02 비교 모델](../0008-css-bundler-c02.md) v2의 같은 fixture를 Vite와 Rspack으로 각각 production build 했다. 모든 fixture, 설정, lockfile과 정규화된 원본·산출물 SHA-256은 [결과 JSON](./css-c02-bundler-2026-10-01.json)에 보관한다.
+이 실험은 [C02 비교 모델](../0008-css-bundler-c02.md) v2의 같은 fixture를 Vite와 Rspack으로 각각 production build 했다. 모든 fixture, 설정, lockfile과 정규화된 원본·산출물 SHA-256은 [결과 JSON](https://github.com/ohah/spinon/blob/main/spec/internal/evidence/css-c02-bundler-2026-10-01.json)에 보관한다.
 
 ## 환경과 실행
 

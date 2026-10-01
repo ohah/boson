@@ -1,8 +1,8 @@
 # 내부 인터페이스 0003 · 공통 문서·호스트 계약 초안
 
-**상태:** 제안 · **인터페이스 버전:** `0.1.0-draft` · **공개 API:** 아님 · **상태 대장:** R03
+**상태:** Rust 코어 일부 구현 · **인터페이스 버전:** `0.2.0-draft` · **공개 API:** 아님 · **상태 대장:** R03
 
-이 문서는 제한된 모바일 DOM 호환 계층과 React·Vue·Svelte 호스트 어댑터가 공유할 Rust 문서 모델 및 호스트 동작의 내부 제안입니다. 사용자에게 보이는 DOM 동작을 다루는 공개 제안은 [UI 트리·이벤트 제안](../0002-ui-tree-events.md)과 [모바일 DOM 호환 제안](../0007-dom-compatibility.md)입니다. 이 문서는 구현 완료, 웹 호환성, 출시 범위를 선언하지 않습니다.
+이 문서는 제한된 모바일 DOM 호환 계층과 React·Vue·Svelte 호스트 어댑터가 공유할 Rust 문서 모델 및 호스트 동작을 정의합니다. Rust 코어의 트리·변경·snapshot 일부가 구현됐습니다. 사용자에게 보이는 DOM 동작을 다루는 공개 제안은 [UI 트리·이벤트 제안](../0002-ui-tree-events.md)과 [모바일 DOM 호환 제안](../0007-dom-compatibility.md)입니다. 이 문서는 공개 DOM 지원, Stylo 연결, 웹 호환성 또는 출시 범위를 선언하지 않습니다.
 
 ## 권고 구조
 
@@ -32,6 +32,37 @@ React / Vue / Svelte 어댑터 ─┐
 
 공개 DOM의 앱 루트 연결 진입점, 실제 래퍼 객체 회수와 V8 GC 정리 콜백 연결은 이 초안으로 결정되지 않습니다. 특히 분리된 노드는 DOM에서 다시 삽입할 수 있으므로, 부모에서 떼었다는 사실만으로 객체 정체성이나 이벤트 등록을 폐기해서는 안 됩니다.
 
+## Rust 코어 인터페이스 `0.2.0-draft`
+
+다음 타입은 `crates/spinon-core/src/document.rs`에 있습니다. 모두 내부 Rust 인터페이스이며 V8·C ABI·앱 작성자 API에 노출되지 않습니다.
+
+| 타입·메서드 | 계약 |
+| --- | --- |
+| `HostDocument::new()` | 프로세스 안에서 겹치지 않는 문서 generation을 할당합니다. 식별자가 모두 소진되면 `GenerationExhausted`를 반환합니다. |
+| `reserve_node_handle()` | 문서 generation과 단조 증가 `NodeId`로 된 핸들을 예약합니다. 예약 자체는 문서 revision을 바꾸지 않습니다. 생성 묶음이 실패하면 예약 ID는 유지되어 재시도할 수 있고, 성공한 ID는 제거·분리 뒤에도 재사용하지 않습니다. |
+| `DocumentChangeBatch::new(owner, base_revision)` | 한 `OwnerId`와 현재 `DocumentRevision`에 대한 변경 묶음을 만듭니다. 작업은 입력 순서대로 임시 후보에 적용합니다. |
+| `commit(batch)` | 모든 작업이 유효할 때만 후보 상태와 revision을 한 번에 공개합니다. 오류가 나면 노드·루트 자식·속성·두 revision을 보존합니다. 현재 revision과 기준이 다르면 묶음 전체를 거부합니다. |
+| `snapshot()` | 연결·분리 노드와 두 revision을 복사한 읽기 전용 `HostDocumentSnapshot`을 만듭니다. 현재 구현은 전체 맵을 복사하며 부분 snapshot이나 성능 보장은 없습니다. |
+| `DocumentOperation` | 요소·텍스트 생성, `insertBefore` 형태 삽입/이동, 직접 자식 분리, 텍스트 변경, namespace가 있는 속성 설정/제거, 6개 요소 상태 설정을 제공합니다. |
+
+`DocumentRevision`은 성공한 문서 상태 변경 묶음마다 한 번 증가합니다. `RenderTreeRevision`은 변경 전이나 후에 내부 `HostRoot`와 연결된 트리에 영향을 준 변경 묶음마다 한 번 증가합니다. 분리 노드 생성·수정은 문서 revision만 올립니다. 빈 묶음과 실질적으로 같은 순서를 만드는 삽입·같은 값 쓰기는 두 revision을 바꾸지 않습니다. 연결 노드의 모든 속성·텍스트·상태 변경은 현재 보수적으로 표시 revision도 올립니다.
+
+`HostNodeKind`는 `Element`와 `Text`이고 요소 자식 목록에는 두 종류가 같은 순서로 들어갑니다. `HostParent::Root`는 비표시 앱 루트를 나타내며, 루트 아래 형제는 여러 `OwnerId`가 소유할 수 있습니다. 요소 부모·자식 및 `insertBefore` 참조 노드는 변경 묶음의 소유자와 같아야 합니다. 여러 Owner의 루트 자식 순서는 각각 다른 문서 변경 묶음으로 직렬화합니다. 요소 namespace·로컬 이름과 속성 namespace·로컬 이름은 정확한 문자열로 보관합니다. 현재 Rust 경계는 이름을 비었는지·공백/NUL이 있는지만 검사합니다. HTML/XML 이름 정규화, HTML 태그 허용 목록과 대소문자 규칙은 JS façade/제품 명세에서 정합니다.
+
+`DomString`은 문자열을 UTF-16 코드 단위로 보관해 단독 서로게이트를 포함한 원래 값을 보존합니다. 텍스트·속성 값을 Rust `String` 또는 화면 글꼴 문자열로 자동 변환하지 않습니다. `to_string_lossy()`는 개발 진단용이며 DOM getter 대체로 쓰지 않습니다.
+
+초기 `ElementState`는 `Hover`, `Active`, `Focus`, `FocusVisible`, `Disabled`, `Checked`입니다. 이들은 상태 저장 입력일 뿐 이벤트 생성, OS 포커스, HTML의 `:enabled` 의미, 다른 pseudo-class 또는 CSS 선택자 구현을 뜻하지 않습니다. 지원할 상태와 전이는 CSS/이벤트 계약에서 정합니다.
+
+`DocumentErrorKind`는 내부 Rust 실패를 식별합니다. 아직 Web IDL 변환이나 JavaScript `DOMException` 이름·메시지 계약이 아닙니다. `AttributeName::new()`는 잘못된 단순 이름에 `None`을 반환합니다. 속성 값은 generic map에만 저장합니다. 이름이 `style`인 속성을 저장해도 선언 파싱, inline style 적용, CSSOM 객체 또는 스타일 무효화 엔진을 제공하지 않습니다.
+
+현재 구현 한계:
+
+- 제거한 노드는 폐기하지 않으며 별도 `dispose`·GC·V8 래퍼 회수 기능이 없습니다. 문서 수명 동안 노드 맵과 예약 ID는 증가할 수 있습니다.
+- `DocumentGeneration`은 한 프로세스에서만 유일합니다. 핸들을 프로세스 밖에 보존하거나 재시작 후 재사용하는 계약은 없습니다.
+- `OwnerId::new()`는 호출자가 번호를 공급하는 내부 생성자입니다. 런타임이 OwnerId를 발급·회수하는 정책이 아직 없어, 현재 소유권 검사는 협력하는 내부 어댑터 간 일관성 검사이며 신뢰 경계나 권한 보안 경계가 아닙니다.
+- 소유자별 revision·재동기화가 없어 서로 다른 어댑터의 동시 변경은 전역 revision 충돌로 거부될 수 있습니다. 충돌 정책은 R06 검증 전까지 미확정입니다.
+- 생성, CSS 계산, 스타일시트, 렌더링 snapshot, layout·GPU, 부분 무효화, 노드 limit, 동기 플랫폼 호출은 미구현입니다.
+
 ## 노드 생성·변경·제거
 
 모든 변경은 Rust 문서 소유자의 단일 순서에서 검증하고 원자적으로 적용합니다. 프레임워크 어댑터는 한 번의 트리 조정 확정 작업을 하나의 변경 묶음으로 제출합니다. DOM 호환 계층의 동기 메서드는 해당 DOM 알고리즘 전체를 하나의 변경 묶음으로 제출합니다. 한 메서드가 실패하면 그 메서드의 부분 변경은 남지 않습니다.
@@ -45,7 +76,7 @@ React / Vue / Svelte 어댑터 ─┐
 | 텍스트 변경 | Text 데이터 또는 제한된 textContent 알고리즘을 원자 적용합니다. 후속 조회는 성공 결과를 즉시 봅니다. | JS 문자열 변환·노드 종류·문서 세대를 확인한 뒤 실패하면 기존 내용을 보존합니다. |
 | 속성 변경 | 지원되는 요소의 문자열 속성 맵을 원자 갱신합니다. `id`·`class` 등 지원 CSS 선택자가 관찰하는 변경은 스타일 무효화 입력이 됩니다. | 속성 이름 검증과 CSS 연동은 공개 DOM·CSS 명세에 따릅니다. `style` 문자열이 CSSOM을 자동 제공하지 않습니다. |
 
-S01의 현재 `Tree`는 연결된 트리와 단일 루트를 검증하는 실험 모델입니다. `Operation::Remove`는 하위 노드를 활성 맵에서 삭제합니다. 그러므로 이를 DOM의 `removeChild()` 구현으로 곧장 노출하면 분리 노드 재삽입과 JS 래퍼 객체 정체성 요구를 깨뜨립니다. J10 구현 범위에서 `HostDocument`의 수명과 분리 노드를 모델링하거나, 그 전에 S01 코어를 명시적으로 확장해 이 차이를 해소해야 합니다.
+S01의 `spinon_core::Tree`는 연결된 트리와 단일 루트를 검증하는 실험 모델입니다. `Operation::Remove`는 하위 노드를 활성 맵에서 삭제합니다. 그러므로 이를 DOM의 `removeChild()` 구현으로 곧장 노출하면 분리 노드 재삽입과 JS 래퍼 객체 정체성 요구를 깨뜨립니다. R03의 별도 `HostDocument`는 혼합 노드·분리 수명·속성·소유권을 모델링하지만, 아직 V8 DOM façade나 Stylo adapter는 연결하지 않았습니다.
 
 DOM `insertBefore(node, referenceChild)` 경로에서는 `referenceChild`가 null이거나 지정 부모의 직접 자식인지 먼저 검증합니다. `referenceChild`가 이동할 `node` 자신이면 기존 다음 형제를 기준 위치로 삼아 같은 위치 삽입이 순서를 바꾸지 않게 합니다. 같은 부모 안에서 이동할 때 최종 인덱스는 이동할 노드를 뺀 자식 목록을 기준으로 계산합니다. 검증과 위치 계산이 끝나기 전에 기존 연결을 끊지 않습니다. 어댑터가 내부 위치 삽입을 호출할 때는 이미 검증된 최종 위치를 전달합니다. 실질 상태가 바뀌지 않는 호출은 문서·표시 revision을 올리지 않습니다.
 
@@ -59,7 +90,7 @@ DOM `insertBefore(node, referenceChild)` 경로에서는 `referenceChild`가 nul
 - 변경 묶음의 기대 기준은 `DocumentRevision`입니다. 오래된 기준 revision, 잘못된 참조, 순환, 소유권 위반 또는 잘못된 최종 연결은 전체를 거부하고 두 revision과 이전 문서를 보존합니다. 호스트가 임의로 작업을 부분 적용하거나 같은 묶음을 자동 재실행하지 않습니다.
 - JS DOM 메서드의 인수는 Rust에 도달하기 전에 API의 Web IDL 타입 규칙으로 변환합니다. 제안된 `DOMString` 입력은 UTF-16 코드 단위 그대로 보존하며, `null`·`undefined`·`Symbol` 변환 동작을 시그니처별로 적용합니다. Rust의 UTF-8 `String`으로 바꾸면서 단독 서로게이트를 잃지 않도록 경계 표현을 둡니다. 속성·텍스트를 그릴 때 유효하지 않은 서로게이트를 치환하는 처리는 DOM 읽기 값과 분리합니다.
 - 스피논이 같은 문서의 노드 래퍼로 만든 객체만 노드 인수로 받습니다. 임의 객체를 문자열로 바꾸어 Node로 취급하지 않습니다. 이 초안에서는 여러 `Document` 사이 채택·이동을 지원하지 않습니다.
-- Rust `HostError`는 안정된 종류와 제한된 진단 값을 사용합니다. V8 경계는 이를 JS `TypeError` 또는 표준 DOMException 계열로 변환하고, C ABI 밖으로 Rust panic을 전달하지 않습니다. 개별 API의 정확한 예외 이름·메시지는 공개 적합성 표를 만들 때 고정합니다.
+- Rust `DocumentError`는 내부 트리 변경 실패를 분류합니다. 아직 `HostError` 통합 타입이나 V8 변환 계층은 없습니다. 후속 V8 경계는 내부 오류를 JS `TypeError` 또는 표준 DOMException 계열로 변환하고, C ABI 밖으로 Rust panic을 전달하지 않아야 합니다. 개별 API의 정확한 예외 이름·메시지는 공개 적합성 표를 만들 때 고정합니다.
 
 이 계약은 R06의 취소와 변경 묶음 공개 경합, 문서 소유자 스레드 선택, FFI 스레드 호출 제약, 비동기 `Isolate` 전달을 대신 결정하지 않습니다. 위험 항목과 후보 실행 규칙은 [R06 스레드·소유권 위험 분석](0004-thread-ownership-risks.md)에 기록하지만, 해당 문서는 검토 초안이며 S03·렌더러 계획의 선행 검증을 끝내지 않습니다.
 

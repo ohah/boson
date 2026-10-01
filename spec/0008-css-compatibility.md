@@ -16,7 +16,7 @@
 
 **UA stylesheet**(User-Agent stylesheet)는 HTML 요소의 브라우저 기본 스타일 규칙이다. 앱 author CSS와 Tailwind Preflight/reset CSS와 구분되는 cascade 출처다. 웹 브라우저는 자체 UA stylesheet를 적용하지만, 모바일 Spinon GPU 트리에는 브라우저가 없으므로 지원 요소의 기본 규칙을 내장해야 한다.
 
-초기 구조 규칙 자원은 `spinon-style` 크레이트의 [`supported-elements-v0.css`](../crates/spinon-style/resources/ua/supported-elements-v0.css)에 두고 Rust 컴파일 시 바이너리에 포함한다. 현재 초안은 HTML namespace의 `div`, `span`, `a`, `img`, `button`, `input`, `p`, `ul`, `li`에 구조적 기본값을 제공한다. 버튼·입력의 OS별 모양과 기본 폰트, 링크 상태별 색·장식은 이 초안에 포함하지 않는다. 내장 자원이 존재하는 것과 Stylo에서 UA cascade 출처로 등록되어 화면에 적용되는 것은 별도 단계다. 등록·선택자 매칭·레이아웃·GPU 표시가 연결되기 전에는 기본 스타일이 동작한다고 주장하지 않는다. Chromium 버전과 요소별 기준값은 `C01`에서 고정하고, 그 기준에 맞춘 검증을 마칠 때까지 이 자원은 호환성 완료 근거가 아니다. Rust·네이티브 경계와 포인터 수명은 [내장 UA stylesheet 인터페이스](internal/0007-ua-stylesheet-resource.md)에 둔다.
+초기 구조 규칙 자원은 `spinon-style` 크레이트의 [`supported-elements-v0.css`](https://github.com/ohah/spinon/blob/main/crates/spinon-style/resources/ua/supported-elements-v0.css)에 두고 Rust 컴파일 시 바이너리에 포함한다. 현재 초안은 HTML namespace의 `div`, `span`, `a`, `img`, `button`, `input`, `p`, `ul`, `li`에 구조적 기본값을 제공한다. 버튼·입력의 OS별 모양과 기본 폰트, 링크 상태별 색·장식은 이 초안에 포함하지 않는다. 내장 자원이 존재하는 것과 Stylo에서 UA cascade 출처로 등록되어 화면에 적용되는 것은 별도 단계다. 등록·선택자 매칭·레이아웃·GPU 표시가 연결되기 전에는 기본 스타일이 동작한다고 주장하지 않는다. Chromium 버전과 요소별 기준값은 `C01`에서 고정하고, 그 기준에 맞춘 검증을 마칠 때까지 이 자원은 호환성 완료 근거가 아니다. Rust·네이티브 경계와 포인터 수명은 [내장 UA stylesheet 인터페이스](internal/0007-ua-stylesheet-resource.md)에 둔다.
 
 
 ## 초기 Chromium 기준 스냅샷
@@ -67,7 +67,7 @@ P0~P3 항목은 먼저 세 플랫폼 수직 화면에서 필요한 부분을 구
 | 페인트·합성 | color·background, gradient·image, border·radius·outline·shadow, opacity·transform·filter, clipping·mask·blend·stacking·z-index | P0 → P4 |
 | 반응형·동적 상태 | `@media`, `@supports`, `@container`, 상태 선택자, prefers-* 환경, transition·animation·keyframes, scroll-linked 동작 | P1 → P4 |
 | 대체 요소·플랫폼 스타일 | replaced element 크기와 `object-fit`/`object-position`, SVG CSS, form control appearance·상태·focus, UA 기본 스타일 | P1 → P4 |
-| CSSOM 연결 | 기본 style/class 변경은 초기에, 전체 stylesheet 수명·계산 스타일·박스 조회와 관찰자 동작은 이후 단계에서 구현 | P0 → P4 |
+| CSSOM 연결 | 일반 `id`·`class` DOM 변경에 따른 재계산과 프레임워크 어댑터가 전달하는 초기 inline declaration은 첫 수직 CSS 경로에 포함할 수 있다. 공개 `setAttribute("style", ...)`, `Element.style`/`CSSStyleDeclaration`, CSSStyleSheet 편집, 계산 스타일·박스 조회와 관찰자는 각 동기화 계약을 정한 뒤 C29에서 연결한다. | P0 → P4 |
 
 ## 미지원과 오류 처리
 

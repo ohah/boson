@@ -67,7 +67,7 @@ spinon/
 
 Rust 코어, 런타임, C ABI는 분리합니다. 의존 방향은 `spinon-ffi → spinon-runtime → spinon-core`입니다. `spinon-runtime`은 세션·실행 스레드·큐·V8 호출을 맡고, `spinon-ffi`는 포인터 수명·버퍼 복사·C ABI 변환만 맡습니다. V8 객체와 Rust 내부 포인터를 경계 밖에 보관하지 않습니다.
 
-현재 S01 코어의 트리 모델은 DOM 노드 모델이 아닙니다. DOM façade 구현을 시작하기 전에 요소·텍스트가 순서대로 섞이는 자식 모델, 앱 문서의 표시 루트, 동기 DOM 변경·조회와 프레임 단위 GPU 적용의 분리를 설계하고 상태 대장 계약을 갱신합니다. 상세 후보와 미정 항목은 [DOM 호환 명세](../../spec/0007-dom-compatibility.md)에 둡니다.
+S01의 기존 `Tree`는 DOM 노드 모델이 아닙니다. R03에서 별도의 내부 `HostDocument` 코어를 추가해 요소·텍스트 혼합 순서, 동기 변경 묶음, 소유권과 문서/표시 revision을 구현했지만 DOM façade·V8 래퍼·Stylo와는 아직 연결하지 않았습니다. DOM façade는 [DOM 호환 명세](../../spec/0007-dom-compatibility.md)에 남은 루트 연결, 문자열 변환, 오류·수명 계약과 S03 경계가 정해진 뒤 진행합니다.
 
 ## CLI 언어 결정 제안
 

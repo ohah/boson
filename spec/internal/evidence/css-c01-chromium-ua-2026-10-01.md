@@ -13,7 +13,7 @@
 - 미디어: `prefers-color-scheme: light`, `prefers-reduced-motion: no-preference`, `forced-colors: none`
 - 실행기: Node.js 내장 WebSocket으로 Chromium DevTools Protocol 사용. 저장소에 브라우저 제어 패키지를 추가하지 않았다.
 
-실행 파일·환경·fixture·비교 baseline·CSS 프로필·수집 도구의 해시와 Chromium 관찰 결과는 [검증 절차를 강화한 JSON 스냅샷](../../../tests/fixtures/css/references/chromium-macos-arm64-154.0.8037.92-ua-profile-override-v1/ua-supported-elements.json)에 저장한다. 이전 `ua-v0` 탐색 결과는 selector 조회 9건이 CSS 규칙 적용을 입증하지 못해 현재 기준 자료에서 철회했다. 원본 입력은 [HTML fixture](../../../tests/fixtures/css/c01/supported-html-ua.html)다.
+실행 파일·환경·fixture·비교 baseline·CSS 프로필·수집 도구의 해시와 Chromium 관찰 결과는 [검증 절차를 강화한 JSON 스냅샷](https://github.com/ohah/spinon/blob/main/tests/fixtures/css/references/chromium-macos-arm64-154.0.8037.92-ua-profile-override-v1/ua-supported-elements.json)에 저장한다. 이전 `ua-v0` 탐색 결과는 selector 조회 9건이 CSS 규칙 적용을 입증하지 못해 현재 기준 자료에서 철회했다. 원본 입력은 [HTML fixture](https://github.com/ohah/spinon/blob/main/tests/fixtures/css/c01/supported-html-ua.html)다.
 
 ## 비교 입력과 판정
 
@@ -25,4 +25,4 @@ fixture selector 9개의 node ID와 CSS feature ID 19개는 고정 목록과 정
 
 ## 범위와 남은 일
 
-이 기록은 9개 HTML 요소의 구조 기본값에 한정한다. SVG 범위, 전체 CSS feature inventory, cascade 우선순위·상속·동적 변경, 레이아웃 좌표·텍스트 metrics, GPU 캡처, Android·iOS 결과는 측정하지 않았다. 이 한계 때문에 `C01`은 상태 대장에서 미완료로 유지한다. 전체 목표와 뒤이은 비교 층은 [CSS 호환 명세](../../0008-css-compatibility.md)와 [CSS 구현 계획](../../../docs/plans/css-rendering.md)을 따른다.
+이 기록은 9개 HTML 요소의 구조 기본값에 한정한다. SVG 범위, 전체 CSS feature inventory, cascade 우선순위·상속·동적 변경, 레이아웃 좌표·텍스트 metrics, GPU 캡처, Android·iOS 결과는 측정하지 않았다. 이 한계 때문에 `C01`은 상태 대장에서 미완료로 유지한다. 전체 목표와 뒤이은 비교 층은 [CSS 호환 명세](../../0008-css-compatibility.md)와 [CSS 구현 계획](https://github.com/ohah/spinon/blob/main/docs/plans/css-rendering.md)을 따른다.
