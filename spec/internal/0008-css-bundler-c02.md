@@ -6,7 +6,7 @@
 
 ## 고정 입력과 환경
 
-- 도구: Vite `8.3.1`, Rspack `2.2.7`, Node.js `24.20.0`, Bun `1.4.0`; 의존성은 스파이크 전용 잠금 파일에 고정한다.
+- 도구: Vite `8.3.1`, Rspack `2.2.7`, Node.js `24.20.0`, Bun `1.4.2`; 의존성은 스파이크 전용 잠금 파일에 고정한다.
 - 같은 HTML 진입점과 JavaScript 모듈을 두 빌드에 넣는다. 입력은 일반 CSS import, CSS Module의 `card`·`featured` 로컬 키, 로컬 `@import`, 공유 스타일, 동적 import로만 도달하는 기능 스타일, 로컬 SVG 이미지와 WOFF2 확장자 자원을 포함한다.
 - 외부 CSS `@import`와 외부 이미지 URL은 `.invalid` 도메인을 사용한다. 실험은 URL 문자열을 빌드 도구가 로컬 자원으로 바꾸거나 실제로 가져오지 않고 외부 참조로 남기는지 확인한다. 런타임 네트워크 정책 검증은 범위 밖이다.
 - 각 빌드는 production mode의 기본 CSS 최소화, CSS code splitting 활성화, 자원 인라인 비활성화, CSS·JS source map 생성을 사용한다. 출력물은 `spikes/css-bundler/.output/`에 만든다.

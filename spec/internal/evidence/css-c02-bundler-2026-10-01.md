@@ -6,7 +6,7 @@
 
 ## 환경과 실행
 
-- macOS arm64, Node.js `24.20.0`, Bun `1.4.0`
+- macOS arm64, Node.js `24.20.0`, Bun `1.4.2`
 - Vite `8.3.1`, Rspack `2.2.7`을 `spikes/css-bundler/bun.lock`에 고정
 - 양쪽 모두 기본 production CSS 최소화, CSS code splitting, 자원 인라인 비활성화, CSS·JavaScript source map 설정
 - fixture: 기본 CSS와 로컬 `@import`, CSS Module, 공유 CSS, `import()`로만 로드되는 기능 CSS, 로컬 SVG·WOFF2 파일, 외부 URL 두 종류, 누락 로컬 URL 진단 사례
