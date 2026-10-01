@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -114,6 +115,7 @@ const result = {
     host: `${process.platform}-${process.arch}`,
     node: process.version,
     versions: {
+      bun: execFileSync("bun", ["--version"], { encoding: "utf8" }).trim(),
       vite: await packageVersion("vite"),
       rspack: await packageVersion("@rspack/core"),
     },
