@@ -18,6 +18,19 @@ export default {
     assetModuleFilename: "assets/[name]-[contenthash][ext]",
   },
   devtool: "source-map",
+  optimization: {
+    splitChunks: {
+      chunks: "all",
+      cacheGroups: {
+        sharedRuntime: {
+          test: /[\\/]src[\\/]shared[\\/]runtime\.js$/,
+          name: "shared-runtime",
+          chunks: "all",
+          enforce: true,
+        },
+      },
+    },
+  },
   module: {
     rules: [
       {
@@ -32,7 +45,12 @@ export default {
     entrypoints: true,
     namedChunkGroups: true,
     chunks: true,
+    chunkModules: true,
     modules: true,
+    reasons: true,
+    moduleAssets: true,
+    providedExports: true,
+    source: true,
     errors: true,
     warnings: true,
   },

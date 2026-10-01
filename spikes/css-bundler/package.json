@@ -3,10 +3,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "compare": "node compare.mjs"
+    "compare": "node compare.mjs",
+    "test": "node --test"
   },
   "devDependencies": {
     "@rspack/core": "2.2.7",
+    "postcss": "8.5.28",
+    "postcss-value-parser": "4.2.0",
     "vite": "8.3.1"
   }
 }

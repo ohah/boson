@@ -1,5 +1,5 @@
 {
-  "model": "C02-M1..M7-v2",
+  "model": "C02-M1..M8-v3",
   "run": {
     "status": "실험 실행 완료",
     "host": "darwin-arm64",
@@ -62,13 +62,13 @@
       },
       {
         "file": "src/features/lazy.js",
-        "bytes": 173,
-        "sha256": "08ce3dbb8c24fb72deb18de533acfd2329d273d34c31a31257fe5d3c18e020ad"
+        "bytes": 292,
+        "sha256": "c557bc8df25bef86ad11d1b1a4135b7d65fe8411f35ee276b8ff7a7715e8619e"
       },
       {
         "file": "src/main.js",
-        "bytes": 536,
-        "sha256": "b9d2eb0f4f46d5b3457945292c0570a9222bcd0cc2feb27f86ac64edf28b8e4d"
+        "bytes": 648,
+        "sha256": "a7d15a1c427aade586450583ad4fa590195250ca66c16d62d2156a571623a509"
       },
       {
         "file": "src/module-default.js",
@@ -76,9 +76,14 @@
         "sha256": "c6bf83caf1f69b7809fe6fabc5b485e98a50e53e80ce0ac343d6e90c57ff6b7a"
       },
       {
+        "file": "src/shared/runtime.js",
+        "bytes": 59,
+        "sha256": "c7f113ce58117a20764c673bff8ff2e01abbc55bc8311f1007e9dbe39ef77c3f"
+      },
+      {
         "file": "src/styles/base.css",
-        "bytes": 411,
-        "sha256": "c2c6c3d59305af88cb1c852a12b39be1ecf1073a399f59f92775779225470ab8"
+        "bytes": 476,
+        "sha256": "b2d1f3a3fcccf2ca14c48882015e7537761709a14b3b9487750ec236e42ab467"
       },
       {
         "file": "src/styles/card.module.css",
@@ -100,16 +105,16 @@
   "outputs": {
     "vite": {
       "entry": {
-        "file": "assets/index-CgAyIRd6.js",
+        "file": "assets/index-BNmblTO2.js",
         "css": [
-          "assets/index-Dtgv3iLQ.css"
+          "assets/index-BiFF-K7F.css"
         ],
         "dynamicImports": [
           "src/features/lazy.js"
         ]
       },
       "dynamicEntry": {
-        "file": "assets/lazy-CSE4mHBe.js",
+        "file": "assets/lazy-801kYAAd.js",
         "css": [
           "assets/lazy-vAmwLnNw.css"
         ],
@@ -119,6 +124,7 @@
       },
       "graphEvidence": {
         "manifestKeys": [
+          "_shared-runtime-DUrMRXP1.js",
           "assets/feature.svg",
           "assets/fixture.woff2",
           "assets/module.svg",
@@ -131,8 +137,8 @@
       "assets": [
         {
           "file": ".vite/manifest.json",
-          "bytes": 1115,
-          "sha256": "37f8a78fbe983fb98b2e73353a3ee9e8d23e80dfe0b699e82a0feb9147834f83"
+          "bytes": 1330,
+          "sha256": "b67cb30e2277a637baea3b2cd66857f76e23af9a4f562b5e441ec7b81c7b391b"
         },
         {
           "file": "assets/feature-DyPHVK7W.svg",
@@ -145,29 +151,29 @@
           "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e"
         },
         {
-          "file": "assets/index-CgAyIRd6.js",
-          "bytes": 2400,
-          "sha256": "6737167534e7cb80a25cde36c37b308e8780af6c4db92b4b97093687c318eabc"
+          "file": "assets/index-BNmblTO2.js",
+          "bytes": 2518,
+          "sha256": "f700b6afecadf9f9fd22a2d794a5b5d37f3cfac9493ea6343ae088b9498d5915"
         },
         {
-          "file": "assets/index-CgAyIRd6.js.map",
-          "bytes": 1008,
-          "sha256": "d49d25bafacfe03d696c11d3f7e324d178dbe158922a2e9966f6c6f48446fbaa"
+          "file": "assets/index-BNmblTO2.js.map",
+          "bytes": 1169,
+          "sha256": "2067e8b4aacaad31ff27c6cfa864ab2e40362f53bc677f1774c05c153f45bf83"
         },
         {
-          "file": "assets/index-Dtgv3iLQ.css",
-          "bytes": 581,
-          "sha256": "e4de0769fb77f618732b12bf199691fe4566504dfe52ab952b4e85684985a5f1"
+          "file": "assets/index-BiFF-K7F.css",
+          "bytes": 641,
+          "sha256": "ac2c750d7f143592aeba0597fe89ee20e8a560ea800609684bf990af090773df"
         },
         {
-          "file": "assets/lazy-CSE4mHBe.js",
-          "bytes": 174,
-          "sha256": "d2d0019373a4873a066222b4877e0523b74656ee671836d5b40153951852441f"
+          "file": "assets/lazy-801kYAAd.js",
+          "bytes": 258,
+          "sha256": "7b3e06d4339d2763432f268ab4b4948da62130c9efde1a91573d4ba49754637b"
         },
         {
-          "file": "assets/lazy-CSE4mHBe.js.map",
-          "bytes": 420,
-          "sha256": "c926013dc6aef0f4f54094fffe0584de705090addc47e49dfceeee4267509330"
+          "file": "assets/lazy-801kYAAd.js.map",
+          "bytes": 588,
+          "sha256": "16067479d23c58c04e733926cb463ac9a6cde78e3ac090899e6dc279dba1de3a"
         },
         {
           "file": "assets/lazy-vAmwLnNw.css",
@@ -185,9 +191,19 @@
           "sha256": "83fa26018ae77528636dd0155cd0ed83053d2df97ec566f1391c6d3f369df02b"
         },
         {
+          "file": "assets/shared-runtime-DUrMRXP1.js",
+          "bytes": 97,
+          "sha256": "3e17ac8d086e0aa7aa760d5269f7736f4a429b822e4e6bc6968b71423428d5d7"
+        },
+        {
+          "file": "assets/shared-runtime-DUrMRXP1.js.map",
+          "bytes": 247,
+          "sha256": "a09b571a56639d2d57fdecd95ea1b0590aa4b87b4225d6531d06827cc8a3d0c4"
+        },
+        {
           "file": "index.html",
-          "bytes": 407,
-          "sha256": "47dda3abea9d482a44d09cd424b05fe515b34f2344f52da031b4f8e92d3cf099"
+          "bytes": 492,
+          "sha256": "73a2cb69af3a89a41e8ec3f12715f3c2869e1805dc03432e0bee20e995adf046"
         }
       ],
       "cssModules": {
@@ -203,6 +219,332 @@
           "card": true,
           "featured": true
         }
+      },
+      "adapterSnapshot": {
+        "contract": {
+          "name": "spinon.css-resource-adapter",
+          "version": "0.1.0-draft"
+        },
+        "build": {
+          "tool": "vite",
+          "toolVersion": "8.3.1",
+          "adapterVersion": "0.1.0-spike",
+          "mode": "production",
+          "status": "success",
+          "fixtureSha256": "ba92860790e294861ecbbb0b437d3b6e84a3a17a5044446948d682520226e314"
+        },
+        "resources": [
+          {
+            "id": "resource:assets/feature-DyPHVK7W.svg",
+            "kind": "image",
+            "outputPath": "assets/feature-DyPHVK7W.svg",
+            "mediaType": "image/svg+xml",
+            "bytes": 134,
+            "sha256": "32fa7605811d21d2040d656fd16fd43aa362f06519bc07db5e95ef37e534dad9",
+            "sourcePath": "assets/feature.svg"
+          },
+          {
+            "id": "resource:assets/fixture-Cb_KYlk7.woff2",
+            "kind": "font",
+            "outputPath": "assets/fixture-Cb_KYlk7.woff2",
+            "mediaType": "font/woff2",
+            "bytes": 102,
+            "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e",
+            "sourcePath": "assets/fixture.woff2"
+          },
+          {
+            "id": "resource:assets/index-BiFF-K7F.css",
+            "kind": "stylesheet",
+            "outputPath": "assets/index-BiFF-K7F.css",
+            "mediaType": "text/css",
+            "bytes": 641,
+            "sha256": "ac2c750d7f143592aeba0597fe89ee20e8a560ea800609684bf990af090773df",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/index-BNmblTO2.js",
+            "kind": "javascript",
+            "outputPath": "assets/index-BNmblTO2.js",
+            "mediaType": "text/javascript",
+            "bytes": 2518,
+            "sha256": "f700b6afecadf9f9fd22a2d794a5b5d37f3cfac9493ea6343ae088b9498d5915",
+            "sourcePath": "index.html"
+          },
+          {
+            "id": "resource:assets/index-BNmblTO2.js.map",
+            "kind": "source-map",
+            "outputPath": "assets/index-BNmblTO2.js.map",
+            "mediaType": "application/json",
+            "bytes": 1169,
+            "sha256": "2067e8b4aacaad31ff27c6cfa864ab2e40362f53bc677f1774c05c153f45bf83",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/lazy-801kYAAd.js",
+            "kind": "javascript",
+            "outputPath": "assets/lazy-801kYAAd.js",
+            "mediaType": "text/javascript",
+            "bytes": 258,
+            "sha256": "7b3e06d4339d2763432f268ab4b4948da62130c9efde1a91573d4ba49754637b",
+            "sourcePath": "src/features/lazy.js"
+          },
+          {
+            "id": "resource:assets/lazy-801kYAAd.js.map",
+            "kind": "source-map",
+            "outputPath": "assets/lazy-801kYAAd.js.map",
+            "mediaType": "application/json",
+            "bytes": 588,
+            "sha256": "16067479d23c58c04e733926cb463ac9a6cde78e3ac090899e6dc279dba1de3a",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/lazy-vAmwLnNw.css",
+            "kind": "stylesheet",
+            "outputPath": "assets/lazy-vAmwLnNw.css",
+            "mediaType": "text/css",
+            "bytes": 101,
+            "sha256": "824468f26bbb295865d89089eb22234d3b10279ffbea73741d6dade12fcfe5d8",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/module-lhmQVEjK.svg",
+            "kind": "image",
+            "outputPath": "assets/module-lhmQVEjK.svg",
+            "mediaType": "image/svg+xml",
+            "bytes": 141,
+            "sha256": "dc39c7ab124120bdd4fd7b72ce0b9e966fe50db2898f76a1e1c6d33da5c5cf1f",
+            "sourcePath": "assets/module.svg"
+          },
+          {
+            "id": "resource:assets/pattern-LUcythGg.svg",
+            "kind": "image",
+            "outputPath": "assets/pattern-LUcythGg.svg",
+            "mediaType": "image/svg+xml",
+            "bytes": 134,
+            "sha256": "83fa26018ae77528636dd0155cd0ed83053d2df97ec566f1391c6d3f369df02b",
+            "sourcePath": "assets/pattern.svg"
+          },
+          {
+            "id": "resource:assets/shared-runtime-DUrMRXP1.js",
+            "kind": "javascript",
+            "outputPath": "assets/shared-runtime-DUrMRXP1.js",
+            "mediaType": "text/javascript",
+            "bytes": 97,
+            "sha256": "3e17ac8d086e0aa7aa760d5269f7736f4a429b822e4e6bc6968b71423428d5d7",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/shared-runtime-DUrMRXP1.js.map",
+            "kind": "source-map",
+            "outputPath": "assets/shared-runtime-DUrMRXP1.js.map",
+            "mediaType": "application/json",
+            "bytes": 247,
+            "sha256": "a09b571a56639d2d57fdecd95ea1b0590aa4b87b4225d6531d06827cc8a3d0c4",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:index.html",
+            "kind": "html",
+            "outputPath": "index.html",
+            "mediaType": "text/html",
+            "bytes": 492,
+            "sha256": "73a2cb69af3a89a41e8ec3f12715f3c2869e1805dc03432e0bee20e995adf046",
+            "sourcePath": null
+          }
+        ],
+        "chunks": [
+          {
+            "id": "chunk:_shared-runtime-DUrMRXP1.js",
+            "kind": "shared",
+            "javascriptResourceIds": [
+              "resource:assets/shared-runtime-DUrMRXP1.js"
+            ],
+            "stylesheetResourceIds": [],
+            "assetResourceIds": []
+          },
+          {
+            "id": "chunk:index.html",
+            "kind": "entry",
+            "javascriptResourceIds": [
+              "resource:assets/index-BNmblTO2.js"
+            ],
+            "stylesheetResourceIds": [
+              "resource:assets/index-BiFF-K7F.css"
+            ],
+            "assetResourceIds": [
+              "resource:assets/fixture-Cb_KYlk7.woff2",
+              "resource:assets/module-lhmQVEjK.svg",
+              "resource:assets/pattern-LUcythGg.svg"
+            ]
+          },
+          {
+            "id": "chunk:src/features/lazy.js",
+            "kind": "dynamic",
+            "javascriptResourceIds": [
+              "resource:assets/lazy-801kYAAd.js"
+            ],
+            "stylesheetResourceIds": [
+              "resource:assets/lazy-vAmwLnNw.css"
+            ],
+            "assetResourceIds": [
+              "resource:assets/feature-DyPHVK7W.svg"
+            ]
+          }
+        ],
+        "stylesheets": [
+          {
+            "id": "stylesheet:src/features/feature.css",
+            "sourcePath": "src/features/feature.css",
+            "sourceSha256": "9ec7e4538652095978810a80561fc335ef9a3c58919c61a206135c809a41ee83",
+            "outputResourceIds": [
+              "resource:assets/lazy-vAmwLnNw.css"
+            ],
+            "imports": [],
+            "references": [
+              {
+                "property": "background-image",
+                "specifier": "../../assets/feature.svg",
+                "classification": "local",
+                "resourceKind": "image",
+                "targetSourcePath": "assets/feature.svg",
+                "source": {
+                  "file": "src/features/feature.css",
+                  "line": 3,
+                  "column": 25
+                },
+                "targetResourceId": "resource:assets/feature-DyPHVK7W.svg"
+              }
+            ]
+          },
+          {
+            "id": "stylesheet:src/styles/base.css",
+            "sourcePath": "src/styles/base.css",
+            "sourceSha256": "b2d1f3a3fcccf2ca14c48882015e7537761709a14b3b9487750ec236e42ab467",
+            "outputResourceIds": [
+              "resource:assets/index-BiFF-K7F.css"
+            ],
+            "imports": [
+              {
+                "specifier": "./tokens.css",
+                "classification": "local",
+                "targetSourcePath": "src/styles/tokens.css",
+                "conditions": null,
+                "source": {
+                  "file": "src/styles/base.css",
+                  "line": 1,
+                  "column": 9
+                }
+              },
+              {
+                "specifier": "https://styles.example.invalid/external.css",
+                "classification": "external",
+                "targetSourcePath": null,
+                "conditions": "layer(theme) supports(display: grid) screen and (min-width: 1px)",
+                "source": {
+                  "file": "src/styles/base.css",
+                  "line": 2,
+                  "column": 13
+                }
+              }
+            ],
+            "references": [
+              {
+                "property": "background-image",
+                "specifier": "../../assets/pattern.svg",
+                "classification": "local",
+                "resourceKind": "image",
+                "targetSourcePath": "assets/pattern.svg",
+                "source": {
+                  "file": "src/styles/base.css",
+                  "line": 11,
+                  "column": 25
+                },
+                "targetResourceId": "resource:assets/pattern-LUcythGg.svg"
+              },
+              {
+                "property": "background-image",
+                "specifier": "https://assets.example.invalid/external.svg",
+                "classification": "external",
+                "resourceKind": "image",
+                "targetSourcePath": null,
+                "source": {
+                  "file": "src/styles/base.css",
+                  "line": 16,
+                  "column": 25
+                },
+                "targetResourceId": null
+              },
+              {
+                "property": "src",
+                "specifier": "../../assets/fixture.woff2",
+                "classification": "local",
+                "resourceKind": "font",
+                "targetSourcePath": "assets/fixture.woff2",
+                "source": {
+                  "file": "src/styles/base.css",
+                  "line": 6,
+                  "column": 12
+                },
+                "targetResourceId": "resource:assets/fixture-Cb_KYlk7.woff2"
+              }
+            ]
+          },
+          {
+            "id": "stylesheet:src/styles/card.module.css",
+            "sourcePath": "src/styles/card.module.css",
+            "sourceSha256": "1387c011f7ad63c9020fc143d2735d306a416d58e1762d3b8c69390207d120c8",
+            "outputResourceIds": [
+              "resource:assets/index-BiFF-K7F.css"
+            ],
+            "imports": [],
+            "references": [
+              {
+                "property": "background-image",
+                "specifier": "../../assets/module.svg",
+                "classification": "local",
+                "resourceKind": "image",
+                "targetSourcePath": "assets/module.svg",
+                "source": {
+                  "file": "src/styles/card.module.css",
+                  "line": 2,
+                  "column": 25
+                },
+                "targetResourceId": "resource:assets/module-lhmQVEjK.svg"
+              }
+            ]
+          },
+          {
+            "id": "stylesheet:src/styles/shared.css",
+            "sourcePath": "src/styles/shared.css",
+            "sourceSha256": "5394747530313912842c936ed54380a88b3b3cb1cf97722de3df043bfcad768d",
+            "outputResourceIds": [
+              "resource:assets/index-BiFF-K7F.css"
+            ],
+            "imports": [],
+            "references": []
+          },
+          {
+            "id": "stylesheet:src/styles/tokens.css",
+            "sourcePath": "src/styles/tokens.css",
+            "sourceSha256": "a64a5e025446eeaddb0cc45399c342a14d7a988566d9cd9bcd38e183b6c645e4",
+            "outputResourceIds": [
+              "resource:assets/index-BiFF-K7F.css"
+            ],
+            "imports": [],
+            "references": []
+          }
+        ],
+        "cssModules": [
+          {
+            "sourcePath": "src/styles/card.module.css",
+            "apiShape": "named+default",
+            "exports": [
+              "card",
+              "featured"
+            ]
+          }
+        ],
+        "diagnostics": []
       },
       "defaultImportCompatibility": {
         "vite": {
@@ -228,12 +570,12 @@
       },
       "cssUrls": [
         {
-          "css": "assets/index-Dtgv3iLQ.css",
+          "css": "assets/index-BiFF-K7F.css",
           "value": "https://styles.example.invalid/external.css",
           "kind": "external-css-import"
         },
         {
-          "css": "assets/index-Dtgv3iLQ.css",
+          "css": "assets/index-BiFF-K7F.css",
           "value": "/assets/fixture-Cb_KYlk7.woff2",
           "file": "assets/fixture-Cb_KYlk7.woff2",
           "source": "assets/fixture.woff2",
@@ -243,7 +585,7 @@
           "kind": "font"
         },
         {
-          "css": "assets/index-Dtgv3iLQ.css",
+          "css": "assets/index-BiFF-K7F.css",
           "value": "/assets/pattern-LUcythGg.svg",
           "file": "assets/pattern-LUcythGg.svg",
           "source": "assets/pattern.svg",
@@ -253,12 +595,12 @@
           "kind": "image"
         },
         {
-          "css": "assets/index-Dtgv3iLQ.css",
+          "css": "assets/index-BiFF-K7F.css",
           "value": "https://assets.example.invalid/external.svg",
           "kind": "external"
         },
         {
-          "css": "assets/index-Dtgv3iLQ.css",
+          "css": "assets/index-BiFF-K7F.css",
           "value": "/assets/module-lhmQVEjK.svg",
           "file": "assets/module-lhmQVEjK.svg",
           "source": "assets/module.svg",
@@ -280,17 +622,24 @@
       ],
       "sourceMaps": [
         {
-          "file": "assets/index-CgAyIRd6.js.map",
+          "file": "assets/index-BNmblTO2.js.map",
           "kind": "js",
           "sources": [
             "../../../fixture/src/main.js"
           ]
         },
         {
-          "file": "assets/lazy-CSE4mHBe.js.map",
+          "file": "assets/lazy-801kYAAd.js.map",
           "kind": "js",
           "sources": [
             "../../../fixture/src/features/lazy.js"
+          ]
+        },
+        {
+          "file": "assets/shared-runtime-DUrMRXP1.js.map",
+          "kind": "js",
+          "sources": [
+            "../../../fixture/src/shared/runtime.js"
           ]
         }
       ]
@@ -301,8 +650,8 @@
           "main"
         ],
         "files": [
-          "assets/main-3c9c372b4c55277c.css",
-          "assets/main-5b49d8b3569dbb63.js"
+          "assets/main-c26f08abfbfd6eed.css",
+          "assets/main-eb178b71fa62f51b.js"
         ]
       },
       "dynamicEntry": {
@@ -310,7 +659,7 @@
           "feature"
         ],
         "files": [
-          "assets/feature-73d6be9fa8b4b6ef.js",
+          "assets/feature-2f8a315bea5c1a11.js",
           "assets/feature-c1363d6788e4f4e4.css"
         ]
       },
@@ -350,19 +699,19 @@
       },
       "assets": [
         {
+          "file": "assets/feature-2f8a315bea5c1a11.js",
+          "bytes": 290,
+          "sha256": "5d1a3acb8f5e62d158806461d740ced51fa809f4461502ff93d78b3b91c94a39"
+        },
+        {
+          "file": "assets/feature-2f8a315bea5c1a11.js.map",
+          "bytes": 604,
+          "sha256": "5f4684eefe79c53699c3a757e6fc1839072e86618c87e0e91678775c64b2ad60"
+        },
+        {
           "file": "assets/feature-4acfa6c1a34d713a.svg",
           "bytes": 134,
           "sha256": "32fa7605811d21d2040d656fd16fd43aa362f06519bc07db5e95ef37e534dad9"
-        },
-        {
-          "file": "assets/feature-73d6be9fa8b4b6ef.js",
-          "bytes": 240,
-          "sha256": "d459d560348b698c62aa57931575e666f9577124cf31e80d8f3109414a177c10"
-        },
-        {
-          "file": "assets/feature-73d6be9fa8b4b6ef.js.map",
-          "bytes": 433,
-          "sha256": "387777e1383747ca46a06e33260dfe51e43d5caa1214a196ff3557627e5fab04"
         },
         {
           "file": "assets/feature-c1363d6788e4f4e4.css",
@@ -380,24 +729,24 @@
           "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e"
         },
         {
-          "file": "assets/main-3c9c372b4c55277c.css",
-          "bytes": 639,
-          "sha256": "8ca3e4082c539dc89b8c6c1a3fbf2795f223622fc6be8e07ce552cb1aadce7a3"
+          "file": "assets/main-c26f08abfbfd6eed.css",
+          "bytes": 702,
+          "sha256": "668d078d3e456aacb537bc7be80a144d5dd3b36e7a298c7370ee9302a2944a6b"
         },
         {
-          "file": "assets/main-3c9c372b4c55277c.css.map",
-          "bytes": 1052,
-          "sha256": "5a4713bb019d4b92d01fa23b1d1d942639ea0015b171f7755424d2eb6456bbb6"
+          "file": "assets/main-c26f08abfbfd6eed.css.map",
+          "bytes": 1117,
+          "sha256": "7a8d2279e33ae0bf1c97f1240714ba362904b20d4a40dcc87aa7024c6182c454"
         },
         {
-          "file": "assets/main-5b49d8b3569dbb63.js",
-          "bytes": 3794,
-          "sha256": "f5cab0ebc36a51422ad7ab42875191f9168c5d7c24b0a216f06e525852d0b94a"
+          "file": "assets/main-eb178b71fa62f51b.js",
+          "bytes": 4272,
+          "sha256": "e4db2050ed800b8fb5ae67bbd24267a0c612e604abf4295eac26287a25aaf65a"
         },
         {
-          "file": "assets/main-5b49d8b3569dbb63.js.map",
-          "bytes": 18133,
-          "sha256": "5b55c09b19b4e363a44b88b04b31e33901dd6b1fb5dfae29538392275b48d790"
+          "file": "assets/main-eb178b71fa62f51b.js.map",
+          "bytes": 20383,
+          "sha256": "ce6a4b959744b737f25f07eb466e00802f44ddecac6f900287b4d9613259f0dc"
         },
         {
           "file": "assets/module-2ee38fa82c2335e7.svg",
@@ -408,6 +757,16 @@
           "file": "assets/pattern-04a6a611e3d795fa.svg",
           "bytes": 134,
           "sha256": "83fa26018ae77528636dd0155cd0ed83053d2df97ec566f1391c6d3f369df02b"
+        },
+        {
+          "file": "assets/shared-runtime-c9570856bafae184.js",
+          "bytes": 179,
+          "sha256": "0e92dcd3e93739034c16ddcb15195b57f9e6931dafb3fb796371a776eac2c414"
+        },
+        {
+          "file": "assets/shared-runtime-c9570856bafae184.js.map",
+          "bytes": 231,
+          "sha256": "ffcf7131abbbe675024335462051657cf819afc475dc7eed3af186de2a7fdf23"
         }
       ],
       "cssModules": {
@@ -422,6 +781,341 @@
         "jsReferences": {
           "card": true,
           "featured": true
+        }
+      },
+      "adapterSnapshot": {
+        "build": {
+          "tool": "rspack",
+          "toolVersion": "2.2.7",
+          "adapterVersion": "0.1.0-spike",
+          "mode": "production",
+          "status": "success",
+          "fixtureSha256": "ba92860790e294861ecbbb0b437d3b6e84a3a17a5044446948d682520226e314"
+        },
+        "resources": [
+          {
+            "id": "resource:assets/feature-2f8a315bea5c1a11.js",
+            "kind": "javascript",
+            "outputPath": "assets/feature-2f8a315bea5c1a11.js",
+            "mediaType": "text/javascript",
+            "bytes": 290,
+            "sha256": "5d1a3acb8f5e62d158806461d740ced51fa809f4461502ff93d78b3b91c94a39",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/feature-2f8a315bea5c1a11.js.map",
+            "kind": "source-map",
+            "outputPath": "assets/feature-2f8a315bea5c1a11.js.map",
+            "mediaType": "application/json",
+            "bytes": 604,
+            "sha256": "5f4684eefe79c53699c3a757e6fc1839072e86618c87e0e91678775c64b2ad60",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/feature-4acfa6c1a34d713a.svg",
+            "kind": "image",
+            "outputPath": "assets/feature-4acfa6c1a34d713a.svg",
+            "mediaType": "image/svg+xml",
+            "bytes": 134,
+            "sha256": "32fa7605811d21d2040d656fd16fd43aa362f06519bc07db5e95ef37e534dad9",
+            "sourcePath": "assets/feature.svg"
+          },
+          {
+            "id": "resource:assets/feature-c1363d6788e4f4e4.css",
+            "kind": "stylesheet",
+            "outputPath": "assets/feature-c1363d6788e4f4e4.css",
+            "mediaType": "text/css",
+            "bytes": 164,
+            "sha256": "0e4978ae40fc33d75bcedc23f16f23d228f555d1e9903cdf2ecc1c0178c0050a",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/feature-c1363d6788e4f4e4.css.map",
+            "kind": "source-map",
+            "outputPath": "assets/feature-c1363d6788e4f4e4.css.map",
+            "mediaType": "application/json",
+            "bytes": 279,
+            "sha256": "e160fad838356e4e74117281d037a63efe9dacd9c13c056f196f0e29ca89f4de",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/fixture-9f7b2b087618157b.woff2",
+            "kind": "font",
+            "outputPath": "assets/fixture-9f7b2b087618157b.woff2",
+            "mediaType": "font/woff2",
+            "bytes": 102,
+            "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e",
+            "sourcePath": "assets/fixture.woff2"
+          },
+          {
+            "id": "resource:assets/main-c26f08abfbfd6eed.css",
+            "kind": "stylesheet",
+            "outputPath": "assets/main-c26f08abfbfd6eed.css",
+            "mediaType": "text/css",
+            "bytes": 702,
+            "sha256": "668d078d3e456aacb537bc7be80a144d5dd3b36e7a298c7370ee9302a2944a6b",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/main-c26f08abfbfd6eed.css.map",
+            "kind": "source-map",
+            "outputPath": "assets/main-c26f08abfbfd6eed.css.map",
+            "mediaType": "application/json",
+            "bytes": 1117,
+            "sha256": "7a8d2279e33ae0bf1c97f1240714ba362904b20d4a40dcc87aa7024c6182c454",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/main-eb178b71fa62f51b.js",
+            "kind": "javascript",
+            "outputPath": "assets/main-eb178b71fa62f51b.js",
+            "mediaType": "text/javascript",
+            "bytes": 4272,
+            "sha256": "e4db2050ed800b8fb5ae67bbd24267a0c612e604abf4295eac26287a25aaf65a",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/main-eb178b71fa62f51b.js.map",
+            "kind": "source-map",
+            "outputPath": "assets/main-eb178b71fa62f51b.js.map",
+            "mediaType": "application/json",
+            "bytes": 20383,
+            "sha256": "ce6a4b959744b737f25f07eb466e00802f44ddecac6f900287b4d9613259f0dc",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/module-2ee38fa82c2335e7.svg",
+            "kind": "image",
+            "outputPath": "assets/module-2ee38fa82c2335e7.svg",
+            "mediaType": "image/svg+xml",
+            "bytes": 141,
+            "sha256": "dc39c7ab124120bdd4fd7b72ce0b9e966fe50db2898f76a1e1c6d33da5c5cf1f",
+            "sourcePath": "assets/module.svg"
+          },
+          {
+            "id": "resource:assets/pattern-04a6a611e3d795fa.svg",
+            "kind": "image",
+            "outputPath": "assets/pattern-04a6a611e3d795fa.svg",
+            "mediaType": "image/svg+xml",
+            "bytes": 134,
+            "sha256": "83fa26018ae77528636dd0155cd0ed83053d2df97ec566f1391c6d3f369df02b",
+            "sourcePath": "assets/pattern.svg"
+          },
+          {
+            "id": "resource:assets/shared-runtime-c9570856bafae184.js",
+            "kind": "javascript",
+            "outputPath": "assets/shared-runtime-c9570856bafae184.js",
+            "mediaType": "text/javascript",
+            "bytes": 179,
+            "sha256": "0e92dcd3e93739034c16ddcb15195b57f9e6931dafb3fb796371a776eac2c414",
+            "sourcePath": null
+          },
+          {
+            "id": "resource:assets/shared-runtime-c9570856bafae184.js.map",
+            "kind": "source-map",
+            "outputPath": "assets/shared-runtime-c9570856bafae184.js.map",
+            "mediaType": "application/json",
+            "bytes": 231,
+            "sha256": "ffcf7131abbbe675024335462051657cf819afc475dc7eed3af186de2a7fdf23",
+            "sourcePath": null
+          }
+        ],
+        "chunks": [
+          {
+            "id": "chunk:feature",
+            "kind": "dynamic",
+            "javascriptResourceIds": [
+              "resource:assets/feature-2f8a315bea5c1a11.js"
+            ],
+            "stylesheetResourceIds": [
+              "resource:assets/feature-c1363d6788e4f4e4.css"
+            ],
+            "assetResourceIds": [
+              "resource:assets/feature-4acfa6c1a34d713a.svg"
+            ]
+          },
+          {
+            "id": "chunk:main",
+            "kind": "entry",
+            "javascriptResourceIds": [
+              "resource:assets/main-eb178b71fa62f51b.js"
+            ],
+            "stylesheetResourceIds": [
+              "resource:assets/main-c26f08abfbfd6eed.css"
+            ],
+            "assetResourceIds": [
+              "resource:assets/fixture-9f7b2b087618157b.woff2",
+              "resource:assets/module-2ee38fa82c2335e7.svg",
+              "resource:assets/pattern-04a6a611e3d795fa.svg"
+            ]
+          },
+          {
+            "id": "chunk:shared-runtime",
+            "kind": "shared",
+            "javascriptResourceIds": [
+              "resource:assets/shared-runtime-c9570856bafae184.js"
+            ],
+            "stylesheetResourceIds": [],
+            "assetResourceIds": []
+          }
+        ],
+        "stylesheets": [
+          {
+            "id": "stylesheet:src/features/feature.css",
+            "sourcePath": "src/features/feature.css",
+            "sourceSha256": "9ec7e4538652095978810a80561fc335ef9a3c58919c61a206135c809a41ee83",
+            "outputResourceIds": [
+              "resource:assets/feature-c1363d6788e4f4e4.css"
+            ],
+            "imports": [],
+            "references": [
+              {
+                "property": "background-image",
+                "specifier": "../../assets/feature.svg",
+                "classification": "local",
+                "resourceKind": "image",
+                "targetSourcePath": "assets/feature.svg",
+                "source": {
+                  "file": "src/features/feature.css",
+                  "line": 3,
+                  "column": 25
+                },
+                "targetResourceId": "resource:assets/feature-4acfa6c1a34d713a.svg"
+              }
+            ]
+          },
+          {
+            "id": "stylesheet:src/styles/base.css",
+            "sourcePath": "src/styles/base.css",
+            "sourceSha256": "b2d1f3a3fcccf2ca14c48882015e7537761709a14b3b9487750ec236e42ab467",
+            "outputResourceIds": [
+              "resource:assets/main-c26f08abfbfd6eed.css"
+            ],
+            "imports": [
+              {
+                "specifier": "./tokens.css",
+                "classification": "local",
+                "targetSourcePath": "src/styles/tokens.css",
+                "conditions": null,
+                "source": {
+                  "file": "src/styles/base.css",
+                  "line": 1,
+                  "column": 9
+                }
+              },
+              {
+                "specifier": "https://styles.example.invalid/external.css",
+                "classification": "external",
+                "targetSourcePath": null,
+                "conditions": "layer(theme) supports(display: grid) screen and (min-width: 1px)",
+                "source": {
+                  "file": "src/styles/base.css",
+                  "line": 2,
+                  "column": 13
+                }
+              }
+            ],
+            "references": [
+              {
+                "property": "background-image",
+                "specifier": "../../assets/pattern.svg",
+                "classification": "local",
+                "resourceKind": "image",
+                "targetSourcePath": "assets/pattern.svg",
+                "source": {
+                  "file": "src/styles/base.css",
+                  "line": 11,
+                  "column": 25
+                },
+                "targetResourceId": "resource:assets/pattern-04a6a611e3d795fa.svg"
+              },
+              {
+                "property": "background-image",
+                "specifier": "https://assets.example.invalid/external.svg",
+                "classification": "external",
+                "resourceKind": "image",
+                "targetSourcePath": null,
+                "source": {
+                  "file": "src/styles/base.css",
+                  "line": 16,
+                  "column": 25
+                },
+                "targetResourceId": null
+              },
+              {
+                "property": "src",
+                "specifier": "../../assets/fixture.woff2",
+                "classification": "local",
+                "resourceKind": "font",
+                "targetSourcePath": "assets/fixture.woff2",
+                "source": {
+                  "file": "src/styles/base.css",
+                  "line": 6,
+                  "column": 12
+                },
+                "targetResourceId": "resource:assets/fixture-9f7b2b087618157b.woff2"
+              }
+            ]
+          },
+          {
+            "id": "stylesheet:src/styles/card.module.css",
+            "sourcePath": "src/styles/card.module.css",
+            "sourceSha256": "1387c011f7ad63c9020fc143d2735d306a416d58e1762d3b8c69390207d120c8",
+            "outputResourceIds": [
+              "resource:assets/main-c26f08abfbfd6eed.css"
+            ],
+            "imports": [],
+            "references": [
+              {
+                "property": "background-image",
+                "specifier": "../../assets/module.svg",
+                "classification": "local",
+                "resourceKind": "image",
+                "targetSourcePath": "assets/module.svg",
+                "source": {
+                  "file": "src/styles/card.module.css",
+                  "line": 2,
+                  "column": 25
+                },
+                "targetResourceId": "resource:assets/module-2ee38fa82c2335e7.svg"
+              }
+            ]
+          },
+          {
+            "id": "stylesheet:src/styles/shared.css",
+            "sourcePath": "src/styles/shared.css",
+            "sourceSha256": "5394747530313912842c936ed54380a88b3b3cb1cf97722de3df043bfcad768d",
+            "outputResourceIds": [
+              "resource:assets/main-c26f08abfbfd6eed.css"
+            ],
+            "imports": [],
+            "references": []
+          },
+          {
+            "id": "stylesheet:src/styles/tokens.css",
+            "sourcePath": "src/styles/tokens.css",
+            "sourceSha256": "a64a5e025446eeaddb0cc45399c342a14d7a988566d9cd9bcd38e183b6c645e4",
+            "outputResourceIds": [
+              "resource:assets/main-c26f08abfbfd6eed.css"
+            ],
+            "imports": [],
+            "references": []
+          }
+        ],
+        "cssModules": [
+          {
+            "sourcePath": "src/styles/card.module.css",
+            "apiShape": "named",
+            "exports": [
+              "card",
+              "featured"
+            ]
+          }
+        ],
+        "diagnostics": [],
+        "contract": {
+          "name": "spinon.css-resource-adapter",
+          "version": "0.1.0-draft"
         }
       },
       "defaultImportCompatibility": {
@@ -448,12 +1142,12 @@
       },
       "cssUrls": [
         {
-          "css": "assets/main-3c9c372b4c55277c.css",
+          "css": "assets/main-c26f08abfbfd6eed.css",
           "value": "https://styles.example.invalid/external.css",
           "kind": "external-css-import"
         },
         {
-          "css": "assets/main-3c9c372b4c55277c.css",
+          "css": "assets/main-c26f08abfbfd6eed.css",
           "value": "/assets/fixture-9f7b2b087618157b.woff2",
           "file": "assets/fixture-9f7b2b087618157b.woff2",
           "source": "assets/fixture.woff2",
@@ -463,7 +1157,7 @@
           "kind": "font"
         },
         {
-          "css": "assets/main-3c9c372b4c55277c.css",
+          "css": "assets/main-c26f08abfbfd6eed.css",
           "value": "/assets/pattern-04a6a611e3d795fa.svg",
           "file": "assets/pattern-04a6a611e3d795fa.svg",
           "source": "assets/pattern.svg",
@@ -473,12 +1167,12 @@
           "kind": "image"
         },
         {
-          "css": "assets/main-3c9c372b4c55277c.css",
+          "css": "assets/main-c26f08abfbfd6eed.css",
           "value": "https://assets.example.invalid/external.svg",
           "kind": "external"
         },
         {
-          "css": "assets/main-3c9c372b4c55277c.css",
+          "css": "assets/main-c26f08abfbfd6eed.css",
           "value": "/assets/module-2ee38fa82c2335e7.svg",
           "file": "assets/module-2ee38fa82c2335e7.svg",
           "source": "assets/module.svg",
@@ -500,7 +1194,7 @@
       ],
       "sourceMaps": [
         {
-          "file": "assets/feature-73d6be9fa8b4b6ef.js.map",
+          "file": "assets/feature-2f8a315bea5c1a11.js.map",
           "kind": "js",
           "sources": [
             "webpack:///./src/features/lazy.js"
@@ -514,7 +1208,7 @@
           ]
         },
         {
-          "file": "assets/main-3c9c372b4c55277c.css.map",
+          "file": "assets/main-c26f08abfbfd6eed.css.map",
           "kind": "css",
           "sources": [
             "webpack:///./src/styles/tokens.css",
@@ -524,10 +1218,11 @@
           ]
         },
         {
-          "file": "assets/main-5b49d8b3569dbb63.js.map",
+          "file": "assets/main-eb178b71fa62f51b.js.map",
           "kind": "js",
           "sources": [
             "webpack:///webpack/runtime/load_script",
+            "webpack:///webpack/runtime/on_chunk_loaded",
             "webpack:///webpack/runtime/css_loading",
             "webpack:///webpack/runtime/jsonp_chunk_loading",
             "webpack:///css ./src/styles/card.module.css",
@@ -539,6 +1234,13 @@
             "webpack:///webpack/runtime/has_own_property",
             "webpack:///webpack/runtime/public_path"
           ]
+        },
+        {
+          "file": "assets/shared-runtime-c9570856bafae184.js.map",
+          "kind": "js",
+          "sources": [
+            "webpack:///./src/shared/runtime.js"
+          ]
         }
       ]
     }
@@ -549,9 +1251,9 @@
       "condition": "두 production 빌드가 동일 입력 fixture에서 산출물을 만든다",
       "status": "통과",
       "details": {
-        "inputFileCount": 17,
-        "viteOutputCount": 12,
-        "rspackOutputCount": 12
+        "inputFileCount": 18,
+        "viteOutputCount": 14,
+        "rspackOutputCount": 14
       }
     },
     {
@@ -618,16 +1320,16 @@
     },
     {
       "id": "M3",
-      "condition": "로컬 @import 내용은 포함되고 외부 @import는 외부 참조로 남는다",
+      "condition": "로컬 @import 내용과 외부 @import 조건이 최종 CSS에 보존된다",
       "status": "통과",
       "details": {
         "vite": {
           "localImportApplied": true,
-          "externalImport": true
+          "externalImportAndConditions": true
         },
         "rspack": {
           "localImportApplied": true,
-          "externalImport": true
+          "externalImportAndConditions": true
         }
       }
     },
@@ -638,12 +1340,12 @@
       "details": {
         "vite": [
           {
-            "css": "assets/index-Dtgv3iLQ.css",
+            "css": "assets/index-BiFF-K7F.css",
             "value": "https://styles.example.invalid/external.css",
             "kind": "external-css-import"
           },
           {
-            "css": "assets/index-Dtgv3iLQ.css",
+            "css": "assets/index-BiFF-K7F.css",
             "value": "/assets/fixture-Cb_KYlk7.woff2",
             "file": "assets/fixture-Cb_KYlk7.woff2",
             "source": "assets/fixture.woff2",
@@ -653,7 +1355,7 @@
             "kind": "font"
           },
           {
-            "css": "assets/index-Dtgv3iLQ.css",
+            "css": "assets/index-BiFF-K7F.css",
             "value": "/assets/pattern-LUcythGg.svg",
             "file": "assets/pattern-LUcythGg.svg",
             "source": "assets/pattern.svg",
@@ -663,12 +1365,12 @@
             "kind": "image"
           },
           {
-            "css": "assets/index-Dtgv3iLQ.css",
+            "css": "assets/index-BiFF-K7F.css",
             "value": "https://assets.example.invalid/external.svg",
             "kind": "external"
           },
           {
-            "css": "assets/index-Dtgv3iLQ.css",
+            "css": "assets/index-BiFF-K7F.css",
             "value": "/assets/module-lhmQVEjK.svg",
             "file": "assets/module-lhmQVEjK.svg",
             "source": "assets/module.svg",
@@ -690,12 +1392,12 @@
         ],
         "rspack": [
           {
-            "css": "assets/main-3c9c372b4c55277c.css",
+            "css": "assets/main-c26f08abfbfd6eed.css",
             "value": "https://styles.example.invalid/external.css",
             "kind": "external-css-import"
           },
           {
-            "css": "assets/main-3c9c372b4c55277c.css",
+            "css": "assets/main-c26f08abfbfd6eed.css",
             "value": "/assets/fixture-9f7b2b087618157b.woff2",
             "file": "assets/fixture-9f7b2b087618157b.woff2",
             "source": "assets/fixture.woff2",
@@ -705,7 +1407,7 @@
             "kind": "font"
           },
           {
-            "css": "assets/main-3c9c372b4c55277c.css",
+            "css": "assets/main-c26f08abfbfd6eed.css",
             "value": "/assets/pattern-04a6a611e3d795fa.svg",
             "file": "assets/pattern-04a6a611e3d795fa.svg",
             "source": "assets/pattern.svg",
@@ -715,12 +1417,12 @@
             "kind": "image"
           },
           {
-            "css": "assets/main-3c9c372b4c55277c.css",
+            "css": "assets/main-c26f08abfbfd6eed.css",
             "value": "https://assets.example.invalid/external.svg",
             "kind": "external"
           },
           {
-            "css": "assets/main-3c9c372b4c55277c.css",
+            "css": "assets/main-c26f08abfbfd6eed.css",
             "value": "/assets/module-2ee38fa82c2335e7.svg",
             "file": "assets/module-2ee38fa82c2335e7.svg",
             "source": "assets/module.svg",
@@ -749,7 +1451,7 @@
       "details": {
         "vite": {
           "entryCss": [
-            "assets/index-Dtgv3iLQ.css"
+            "assets/index-BiFF-K7F.css"
           ],
           "dynamicCss": [
             "assets/lazy-vAmwLnNw.css"
@@ -761,7 +1463,7 @@
         },
         "rspack": {
           "entryCss": [
-            "assets/main-3c9c372b4c55277c.css"
+            "assets/main-c26f08abfbfd6eed.css"
           ],
           "dynamicCss": [
             "assets/feature-c1363d6788e4f4e4.css"
@@ -775,8 +1477,8 @@
     },
     {
       "id": "M6",
-      "condition": "source map 또는 빌드 진단이 CSS 원본 위치를 가리킨다",
-      "status": "원본 위치 공백",
+      "condition": "CSS 참조와 누락 로컬 자원의 원본 위치를 공통 계약에 보존한다",
+      "status": "통과",
       "details": {
         "viteCssMaps": [],
         "rspackCssMaps": [
@@ -788,7 +1490,7 @@
             ]
           },
           {
-            "file": "assets/main-3c9c372b4c55277c.css.map",
+            "file": "assets/main-c26f08abfbfd6eed.css.map",
             "kind": "css",
             "sources": [
               "webpack:///./src/styles/tokens.css",
@@ -800,7 +1502,7 @@
         ],
         "viteCssMapReferences": [
           {
-            "file": "assets/index-Dtgv3iLQ.css",
+            "file": "assets/index-BiFF-K7F.css",
             "sourceMappingUrl": null
           },
           {
@@ -814,11 +1516,76 @@
             "sourceMappingUrl": "feature-c1363d6788e4f4e4.css.map"
           },
           {
-            "file": "assets/main-3c9c372b4c55277c.css",
-            "sourceMappingUrl": "main-3c9c372b4c55277c.css.map"
+            "file": "assets/main-c26f08abfbfd6eed.css",
+            "sourceMappingUrl": "main-c26f08abfbfd6eed.css.map"
           }
         ],
         "viteMissingAssetDiagnostic": {
+          "buildRejected": true,
+          "reportsSource": true,
+          "reportsMissingResource": true,
+          "keepsMissingReference": false,
+          "line": 2,
+          "column": 25,
+          "sourceFile": "src/diagnostics/broken.css",
+          "warnings": [
+            "✗ Build failed in 5ms"
+          ],
+          "excerpt": "Build failed with 1 error:\n\n[plugin spinon-css-resource-adapter-vite-spike:source] <fixture>/src/diagnostics/broken.css:2:24\nRolldownError: CSS 로컬 자원을 찾을 수 없습니다: ./missing.svg",
+          "adapterSnapshot": {
+            "build": {
+              "tool": "vite",
+              "toolVersion": "8.3.1",
+              "adapterVersion": "0.1.0-spike",
+              "mode": "production",
+              "status": "failed",
+              "fixtureSha256": "ba92860790e294861ecbbb0b437d3b6e84a3a17a5044446948d682520226e314"
+            },
+            "resources": [],
+            "chunks": [],
+            "stylesheets": [
+              {
+                "id": "stylesheet:src/diagnostics/broken.css",
+                "sourcePath": "src/diagnostics/broken.css",
+                "sourceSha256": "51d35d03b07f7c0073906f256c9127d4f925e0da516ca93c6150f7564c573477",
+                "outputResourceIds": [],
+                "imports": [],
+                "references": [
+                  {
+                    "property": "background-image",
+                    "specifier": "./missing.svg",
+                    "classification": "unresolved",
+                    "resourceKind": "image",
+                    "targetSourcePath": null,
+                    "source": {
+                      "file": "src/diagnostics/broken.css",
+                      "line": 2,
+                      "column": 25
+                    }
+                  }
+                ]
+              }
+            ],
+            "cssModules": [],
+            "diagnostics": [
+              {
+                "severity": "error",
+                "code": "CSS_RESOURCE_NOT_FOUND",
+                "message": "CSS 로컬 자원을 찾을 수 없습니다: ./missing.svg",
+                "source": {
+                  "file": "src/diagnostics/broken.css",
+                  "line": 2,
+                  "column": 25
+                }
+              }
+            ],
+            "contract": {
+              "name": "spinon.css-resource-adapter",
+              "version": "0.1.0-draft"
+            }
+          }
+        },
+        "viteNativeMissingAssetDiagnostic": {
           "buildRejected": false,
           "reportsSource": false,
           "reportsMissingResource": true,
@@ -827,7 +1594,8 @@
           "column": null,
           "warnings": [
             "./missing.svg referenced in ./missing.svg didn't resolve at build time, it will remain unchanged to be resolved at runtime"
-          ]
+          ],
+          "adapterSnapshot": null
         },
         "rspackMissingAssetDiagnostic": {
           "buildRejected": true,
@@ -835,8 +1603,75 @@
           "reportsMissingResource": true,
           "sourceFile": "./src/diagnostics/broken.css",
           "line": 2,
-          "column": 24,
+          "column": 25,
+          "nativeColumnZeroBased": 24,
+          "adapterSnapshot": {
+            "build": {
+              "tool": "rspack",
+              "toolVersion": "2.2.7",
+              "adapterVersion": "0.1.0-spike",
+              "mode": "production",
+              "status": "failed",
+              "fixtureSha256": "ba92860790e294861ecbbb0b437d3b6e84a3a17a5044446948d682520226e314"
+            },
+            "resources": [],
+            "chunks": [],
+            "stylesheets": [
+              {
+                "id": "stylesheet:src/diagnostics/broken.css",
+                "sourcePath": "src/diagnostics/broken.css",
+                "sourceSha256": "51d35d03b07f7c0073906f256c9127d4f925e0da516ca93c6150f7564c573477",
+                "outputResourceIds": [],
+                "imports": [],
+                "references": [
+                  {
+                    "property": "background-image",
+                    "specifier": "./missing.svg",
+                    "classification": "unresolved",
+                    "resourceKind": "image",
+                    "targetSourcePath": null,
+                    "source": {
+                      "file": "src/diagnostics/broken.css",
+                      "line": 2,
+                      "column": 25
+                    }
+                  }
+                ]
+              }
+            ],
+            "cssModules": [],
+            "diagnostics": [
+              {
+                "severity": "error",
+                "code": "CSS_RESOURCE_NOT_FOUND",
+                "message": "CSS 로컬 자원을 찾을 수 없습니다: ./missing.svg",
+                "source": {
+                  "file": "src/diagnostics/broken.css",
+                  "line": 2,
+                  "column": 25
+                }
+              }
+            ],
+            "contract": {
+              "name": "spinon.css-resource-adapter",
+              "version": "0.1.0-draft"
+            }
+          },
           "excerpt": "  × Module not found: Can't resolve './missing.svg' in '<fixture>/src/diagnostics'\n   ╭─[2:24]\n 1 │ .broken {\n 2 │   background-image: url(\"./missing.svg\");\n   ·                         ───────────────\n 3 │ }\n   ╰────\n"
+        },
+        "adapterSourceLocations": {
+          "vite": {
+            "sourceCount": 5,
+            "positionedImports": 2,
+            "positionedUrls": 5,
+            "sourceMapsAreNotRequired": true
+          },
+          "rspack": {
+            "sourceCount": 5,
+            "positionedImports": 2,
+            "positionedUrls": 5,
+            "sourceMapsAreNotRequired": true
+          }
         }
       }
     },
@@ -846,12 +1681,120 @@
       "status": "통과",
       "details": {
         "vite": {
-          "cssImportPreserved": true,
+          "cssImportAndConditionsPreserved": true,
           "urlPreserved": true
         },
         "rspack": {
-          "cssImportPreserved": true,
+          "cssImportAndConditionsPreserved": true,
           "urlPreserved": true
+        }
+      }
+    },
+    {
+      "id": "M8",
+      "condition": "Vite·Rspack의 entry·dynamic·shared chunk가 임시 CSS 자원 어댑터 계약으로 정규화된다",
+      "status": "통과",
+      "details": {
+        "vite": {
+          "contract": {
+            "name": "spinon.css-resource-adapter",
+            "version": "0.1.0-draft"
+          },
+          "tool": "vite",
+          "status": "success",
+          "resourcesByKind": {
+            "font": 1,
+            "html": 1,
+            "image": 3,
+            "javascript": 3,
+            "source-map": 3,
+            "stylesheet": 2
+          },
+          "chunks": [
+            {
+              "kind": "shared",
+              "stylesheets": 0,
+              "assets": 0
+            },
+            {
+              "kind": "entry",
+              "stylesheets": 1,
+              "assets": 3
+            },
+            {
+              "kind": "dynamic",
+              "stylesheets": 1,
+              "assets": 1
+            }
+          ],
+          "stylesheetSources": [
+            "src/features/feature.css",
+            "src/styles/base.css",
+            "src/styles/card.module.css",
+            "src/styles/shared.css",
+            "src/styles/tokens.css"
+          ],
+          "cssModules": [
+            {
+              "sourcePath": "src/styles/card.module.css",
+              "apiShape": "named+default",
+              "exports": [
+                "card",
+                "featured"
+              ]
+            }
+          ],
+          "unresolvedDiagnostics": []
+        },
+        "rspack": {
+          "contract": {
+            "name": "spinon.css-resource-adapter",
+            "version": "0.1.0-draft"
+          },
+          "tool": "rspack",
+          "status": "success",
+          "resourcesByKind": {
+            "font": 1,
+            "image": 3,
+            "javascript": 3,
+            "source-map": 5,
+            "stylesheet": 2
+          },
+          "chunks": [
+            {
+              "kind": "dynamic",
+              "stylesheets": 1,
+              "assets": 1
+            },
+            {
+              "kind": "entry",
+              "stylesheets": 1,
+              "assets": 3
+            },
+            {
+              "kind": "shared",
+              "stylesheets": 0,
+              "assets": 0
+            }
+          ],
+          "stylesheetSources": [
+            "src/features/feature.css",
+            "src/styles/base.css",
+            "src/styles/card.module.css",
+            "src/styles/shared.css",
+            "src/styles/tokens.css"
+          ],
+          "cssModules": [
+            {
+              "sourcePath": "src/styles/card.module.css",
+              "apiShape": "named",
+              "exports": [
+                "card",
+                "featured"
+              ]
+            }
+          ],
+          "unresolvedDiagnostics": []
         }
       }
     }
@@ -867,7 +1810,7 @@
         ]
       },
       {
-        "file": "assets/main-3c9c372b4c55277c.css.map",
+        "file": "assets/main-c26f08abfbfd6eed.css.map",
         "kind": "css",
         "sources": [
           "webpack:///./src/styles/tokens.css",
@@ -879,7 +1822,7 @@
     ],
     "viteCssMapReferences": [
       {
-        "file": "assets/index-Dtgv3iLQ.css",
+        "file": "assets/index-BiFF-K7F.css",
         "sourceMappingUrl": null
       },
       {
@@ -893,11 +1836,76 @@
         "sourceMappingUrl": "feature-c1363d6788e4f4e4.css.map"
       },
       {
-        "file": "assets/main-3c9c372b4c55277c.css",
-        "sourceMappingUrl": "main-3c9c372b4c55277c.css.map"
+        "file": "assets/main-c26f08abfbfd6eed.css",
+        "sourceMappingUrl": "main-c26f08abfbfd6eed.css.map"
       }
     ],
     "viteMissingAssetDiagnostic": {
+      "buildRejected": true,
+      "reportsSource": true,
+      "reportsMissingResource": true,
+      "keepsMissingReference": false,
+      "line": 2,
+      "column": 25,
+      "sourceFile": "src/diagnostics/broken.css",
+      "warnings": [
+        "✗ Build failed in 5ms"
+      ],
+      "excerpt": "Build failed with 1 error:\n\n[plugin spinon-css-resource-adapter-vite-spike:source] <fixture>/src/diagnostics/broken.css:2:24\nRolldownError: CSS 로컬 자원을 찾을 수 없습니다: ./missing.svg",
+      "adapterSnapshot": {
+        "build": {
+          "tool": "vite",
+          "toolVersion": "8.3.1",
+          "adapterVersion": "0.1.0-spike",
+          "mode": "production",
+          "status": "failed",
+          "fixtureSha256": "ba92860790e294861ecbbb0b437d3b6e84a3a17a5044446948d682520226e314"
+        },
+        "resources": [],
+        "chunks": [],
+        "stylesheets": [
+          {
+            "id": "stylesheet:src/diagnostics/broken.css",
+            "sourcePath": "src/diagnostics/broken.css",
+            "sourceSha256": "51d35d03b07f7c0073906f256c9127d4f925e0da516ca93c6150f7564c573477",
+            "outputResourceIds": [],
+            "imports": [],
+            "references": [
+              {
+                "property": "background-image",
+                "specifier": "./missing.svg",
+                "classification": "unresolved",
+                "resourceKind": "image",
+                "targetSourcePath": null,
+                "source": {
+                  "file": "src/diagnostics/broken.css",
+                  "line": 2,
+                  "column": 25
+                }
+              }
+            ]
+          }
+        ],
+        "cssModules": [],
+        "diagnostics": [
+          {
+            "severity": "error",
+            "code": "CSS_RESOURCE_NOT_FOUND",
+            "message": "CSS 로컬 자원을 찾을 수 없습니다: ./missing.svg",
+            "source": {
+              "file": "src/diagnostics/broken.css",
+              "line": 2,
+              "column": 25
+            }
+          }
+        ],
+        "contract": {
+          "name": "spinon.css-resource-adapter",
+          "version": "0.1.0-draft"
+        }
+      }
+    },
+    "viteNativeMissingAssetDiagnostic": {
       "buildRejected": false,
       "reportsSource": false,
       "reportsMissingResource": true,
@@ -906,7 +1914,8 @@
       "column": null,
       "warnings": [
         "./missing.svg referenced in ./missing.svg didn't resolve at build time, it will remain unchanged to be resolved at runtime"
-      ]
+      ],
+      "adapterSnapshot": null
     },
     "rspackMissingAssetDiagnostic": {
       "buildRejected": true,
@@ -914,10 +1923,77 @@
       "reportsMissingResource": true,
       "sourceFile": "./src/diagnostics/broken.css",
       "line": 2,
-      "column": 24,
+      "column": 25,
+      "nativeColumnZeroBased": 24,
+      "adapterSnapshot": {
+        "build": {
+          "tool": "rspack",
+          "toolVersion": "2.2.7",
+          "adapterVersion": "0.1.0-spike",
+          "mode": "production",
+          "status": "failed",
+          "fixtureSha256": "ba92860790e294861ecbbb0b437d3b6e84a3a17a5044446948d682520226e314"
+        },
+        "resources": [],
+        "chunks": [],
+        "stylesheets": [
+          {
+            "id": "stylesheet:src/diagnostics/broken.css",
+            "sourcePath": "src/diagnostics/broken.css",
+            "sourceSha256": "51d35d03b07f7c0073906f256c9127d4f925e0da516ca93c6150f7564c573477",
+            "outputResourceIds": [],
+            "imports": [],
+            "references": [
+              {
+                "property": "background-image",
+                "specifier": "./missing.svg",
+                "classification": "unresolved",
+                "resourceKind": "image",
+                "targetSourcePath": null,
+                "source": {
+                  "file": "src/diagnostics/broken.css",
+                  "line": 2,
+                  "column": 25
+                }
+              }
+            ]
+          }
+        ],
+        "cssModules": [],
+        "diagnostics": [
+          {
+            "severity": "error",
+            "code": "CSS_RESOURCE_NOT_FOUND",
+            "message": "CSS 로컬 자원을 찾을 수 없습니다: ./missing.svg",
+            "source": {
+              "file": "src/diagnostics/broken.css",
+              "line": 2,
+              "column": 25
+            }
+          }
+        ],
+        "contract": {
+          "name": "spinon.css-resource-adapter",
+          "version": "0.1.0-draft"
+        }
+      },
       "excerpt": "  × Module not found: Can't resolve './missing.svg' in '<fixture>/src/diagnostics'\n   ╭─[2:24]\n 1 │ .broken {\n 2 │   background-image: url(\"./missing.svg\");\n   ·                         ───────────────\n 3 │ }\n   ╰────\n"
     },
-    "status": "차이 확인 · 원본 위치 보강 필요"
+    "adapterSourceLocations": {
+      "vite": {
+        "sourceCount": 5,
+        "positionedImports": 2,
+        "positionedUrls": 5,
+        "sourceMapsAreNotRequired": true
+      },
+      "rspack": {
+        "sourceCount": 5,
+        "positionedImports": 2,
+        "positionedUrls": 5,
+        "sourceMapsAreNotRequired": true
+      }
+    },
+    "status": "CSS source map 유무 차이 · 두 도구 모두 누락 자원의 원본 진단 위치 제공"
   },
   "scope": {
     "productApi": false,

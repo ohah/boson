@@ -4,7 +4,12 @@ import { readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { rspack } from "@rspack/core";
+import postcss from "postcss";
 import { build } from "vite";
+import { createAdapterSnapshot, CSS_RESOURCE_ADAPTER_VERSION } from "./adapter-contract.mjs";
+import { inspectCssSource } from "./css-source.mjs";
+import { createRspackResourceAdapter, createRspackSnapshot } from "./rspack-resource-adapter.mjs";
+import { createViteResourceAdapter } from "./vite-resource-adapter.mjs";
 import rspackConfig from "./rspack.config.mjs";
 import viteConfig from "./vite.config.mjs";
 
@@ -16,8 +21,15 @@ const rspackOutput = path.join(outputRoot, "rspack");
 const evidencePath = path.resolve(here, "../../spec/internal/evidence/css-c02-bundler-2026-10-01.json");
 
 await rm(outputRoot, { recursive: true, force: true });
-await build(structuredClone(viteConfig));
-const rspackResult = await runRspack(structuredClone(rspackConfig));
+const inputFiles = await inventory(fixture);
+const fixtureSha256 = sha256(JSON.stringify(inputFiles));
+const viteAdapter = createViteResourceAdapter({ fixtureRoot: fixture });
+await build({ ...createViteBuildConfig(), plugins: viteAdapter.plugins });
+const rspackAdapter = createRspackResourceAdapter({ fixtureRoot: fixture });
+const rspackResult = await runRspack({
+  ...structuredClone(rspackConfig),
+  plugins: [...(rspackConfig.plugins ?? []), rspackAdapter.plugin],
+});
 if (rspackResult.errors.length > 0) {
   throw new Error(`Rspack 빌드 실패:\n${JSON.stringify(rspackResult.errors, null, 2)}`);
 }
@@ -29,6 +41,20 @@ const viteEntryCss = viteEntry.css ?? [];
 const viteDynamicCss = viteDynamic.css ?? [];
 
 const rspackStats = rspackResult.stats;
+const viteSnapshot = await viteAdapter.snapshot({
+  manifest: JSON.parse(await readFile(path.join(viteOutput, ".vite", "manifest.json"), "utf8")),
+  outputDir: viteOutput,
+  fixtureSha256,
+  toolVersion: await packageVersion("vite"),
+});
+const rspackSnapshot = await createRspackSnapshot({
+  stats: rspackStats,
+  outputDir: rspackOutput,
+  fixtureRoot: fixture,
+  fixtureSha256,
+  toolVersion: await packageVersion("@rspack/core"),
+  cssModuleChunks: rspackAdapter.cssModuleChunks,
+});
 const rspackChunks = rspackStats.chunks ?? [];
 const rspackEntry = requireRspackChunk(rspackChunks, "main");
 const rspackDynamic = requireRspackChunk(rspackChunks, "feature");
@@ -51,10 +77,10 @@ const viteSourceMaps = await inspectSourceMaps(viteOutput);
 const rspackSourceMaps = await inspectSourceMaps(rspackOutput);
 const viteCssMapReferences = await inspectCssMapReferences(viteOutput);
 const rspackCssMapReferences = await inspectCssMapReferences(rspackOutput);
-const viteDiagnostic = await captureViteDiagnostic();
+const viteNativeDiagnostic = await captureViteDiagnostic({ withAdapter: false });
+const viteDiagnostic = await captureViteDiagnostic({ withAdapter: true });
 const rspackDiagnostic = await captureRspackDiagnostic();
 
-const inputFiles = await inventory(fixture);
 const viteFiles = await inventory(viteOutput);
 const rspackFiles = await inventory(rspackOutput);
 const rspackSourceModules = (rspackStats.modules ?? [])
@@ -66,7 +92,12 @@ const sourceLocation = {
   viteCssMapReferences,
   rspackCssMapReferences,
   viteMissingAssetDiagnostic: viteDiagnostic,
+  viteNativeMissingAssetDiagnostic: viteNativeDiagnostic,
   rspackMissingAssetDiagnostic: rspackDiagnostic,
+  adapterSourceLocations: {
+    vite: adapterSourceLocationSummary(viteSnapshot),
+    rspack: adapterSourceLocationSummary(rspackSnapshot),
+  },
 };
 const checks = [
   check("M1", "두 production 빌드가 동일 입력 fixture에서 산출물을 만든다", viteFiles.length > 0 && rspackFiles.length > 0, {
@@ -79,9 +110,9 @@ const checks = [
     rspack: rspackModules,
   }),
   check("M2a", "CSS Module default import 기본값과 Rspack 호환 설정 차이를 기록한다", cssModuleDefaultImport.vite.buildRejected === false && cssModuleDefaultImport.rspackDefault.buildRejected === true && cssModuleDefaultImport.rspackCompatible.buildRejected === false, cssModuleDefaultImport),
-  check("M3", "로컬 @import 내용은 포함되고 외부 @import는 외부 참조로 남는다", importedTokenCheck(viteEntryText) && importedTokenCheck(rspackEntryText) && externalImportCheck(viteEntryText) && externalImportCheck(rspackEntryText), {
-    vite: { localImportApplied: importedTokenCheck(viteEntryText), externalImport: externalImportCheck(viteEntryText) },
-    rspack: { localImportApplied: importedTokenCheck(rspackEntryText), externalImport: externalImportCheck(rspackEntryText) },
+  check("M3", "로컬 @import 내용과 외부 @import 조건이 최종 CSS에 보존된다", importedTokenCheck(viteEntryText) && importedTokenCheck(rspackEntryText) && externalImportCheck(viteEntryText) && externalImportCheck(rspackEntryText), {
+    vite: { localImportApplied: importedTokenCheck(viteEntryText), externalImportAndConditions: externalImportCheck(viteEntryText) },
+    rspack: { localImportApplied: importedTokenCheck(rspackEntryText), externalImportAndConditions: externalImportCheck(rspackEntryText) },
   }),
   check("M4", "CSS의 로컬 SVG·WOFF2 URL이 별도 산출 자원을 가리킨다", localAssetCheck(viteLocalUrls) && localAssetCheck(rspackLocalUrls), {
     vite: viteLocalUrls,
@@ -99,19 +130,23 @@ const checks = [
       sharedStyleOccurrences: { entry: countOccurrences(rspackEntryText, '--shared-marker:"shared"'), dynamic: countOccurrences(rspackDynamicText, '--shared-marker:"shared"') },
     },
   }),
-  check("M6", "source map 또는 빌드 진단이 CSS 원본 위치를 가리킨다", sourceLocationCheck(viteSourceMaps, rspackSourceMaps, viteDiagnostic, rspackDiagnostic), sourceLocation),
+  check("M6", "CSS 참조와 누락 로컬 자원의 원본 위치를 공통 계약에 보존한다", sourceLocationCheck(viteSnapshot, rspackSnapshot, viteDiagnostic, rspackDiagnostic), sourceLocation),
   check("M7", "외부 URL은 별도 번들 자원으로 내보내지 않고 CSS 참조로 보존한다", externalReferenceCheck(viteEntryText, viteFiles) && externalReferenceCheck(rspackEntryText, rspackFiles), {
     vite: externalReferenceSummary(viteEntryText),
     rspack: externalReferenceSummary(rspackEntryText),
+  }),
+  check("M8", "Vite·Rspack의 entry·dynamic·shared chunk가 임시 CSS 자원 어댑터 계약으로 정규화된다", adapterSnapshotCheck(viteSnapshot, rspackSnapshot), {
+    vite: adapterSnapshotSummary(viteSnapshot),
+    rspack: adapterSnapshotSummary(rspackSnapshot),
   }),
 ];
 
 const cssMapGap = sourceLocation.viteCssMaps.length === 0 || sourceLocation.rspackCssMaps.length === 0;
 const locationCheckPassed = checks.find((item) => item.id === "M6")?.status === "통과";
 const result = {
-  model: "C02-M1..M7-v2",
+  model: "C02-M1..M8-v3",
   run: {
-    status: checks.filter((item) => ["M1", "M2", "M2a", "M3", "M4", "M5", "M7"].includes(item.id)).every((item) => item.status === "통과") ? "실험 실행 완료" : "하드 조건 실패",
+    status: checks.every((item) => item.status === "통과") ? "실험 실행 완료" : "비교 조건 실패",
     host: `${process.platform}-${process.arch}`,
     node: process.version,
     versions: {
@@ -131,6 +166,7 @@ const result = {
       },
       assets: viteFiles,
       cssModules: viteModules,
+      adapterSnapshot: viteSnapshot,
       defaultImportCompatibility: cssModuleDefaultImport,
       cssUrls: viteLocalUrls,
       sourceMaps: viteSourceMaps,
@@ -141,6 +177,7 @@ const result = {
       graphEvidence: { sourceModules: rspackSourceModules },
       assets: rspackFiles,
       cssModules: rspackModules,
+      adapterSnapshot: rspackSnapshot,
       defaultImportCompatibility: cssModuleDefaultImport,
       cssUrls: rspackLocalUrls,
       sourceMaps: rspackSourceMaps,
@@ -208,6 +245,16 @@ function requireRspackChunk(chunks, name) {
   return chunk;
 }
 
+function createViteBuildConfig() {
+  const config = structuredClone(viteConfig);
+  config.build.rollupOptions.output = {
+    manualChunks(id) {
+      if (id.replaceAll("\\", "/").endsWith("/src/shared/runtime.js")) return "shared-runtime";
+    },
+  };
+  return config;
+}
+
 async function readAssets(directory, names) {
   const parts = [];
   for (const name of names) parts.push(await readFile(path.join(directory, name), "utf8"));
@@ -253,7 +300,16 @@ function importedTokenCheck(css) {
 }
 
 function externalImportCheck(css) {
-  return css.includes("https://styles.example.invalid/external.css");
+  const root = postcss.parse(css);
+  const importParams = [];
+  root.walkAtRules("import", (rule) => importParams.push(rule.params));
+  const params = importParams.find((value) => value.includes("https://styles.example.invalid/external.css"));
+  if (!params) return false;
+
+  const layerPreserved = /\blayer\(\s*theme\s*\)/i.test(params);
+  const supportsPreserved = /\bsupports\(\s*display\s*:\s*grid\s*\)/i.test(params);
+  const mediaPreserved = /\bscreen\s+and\s+\(\s*(?:min-width\s*:\s*1px|width\s*>=\s*1px)\s*\)/i.test(params);
+  return layerPreserved && supportsPreserved && mediaPreserved;
 }
 
 async function inspectCssUrls(directory, cssFiles) {
@@ -302,7 +358,7 @@ function externalReferenceCheck(css, files) {
 
 function externalReferenceSummary(css) {
   return {
-    cssImportPreserved: css.includes("https://styles.example.invalid/external.css"),
+    cssImportAndConditionsPreserved: externalImportCheck(css),
     urlPreserved: css.includes("https://assets.example.invalid/external.svg"),
   };
 }
@@ -350,11 +406,13 @@ async function inspectCssMapReferences(directory) {
   return references;
 }
 
-async function captureViteDiagnostic() {
+async function captureViteDiagnostic({ withAdapter = true } = {}) {
   const stderr = [];
+  const adapter = withAdapter ? createViteResourceAdapter({ fixtureRoot: fixture, failOnMissing: true }) : null;
   const config = {
     ...viteConfig,
     logLevel: "warn",
+    plugins: adapter?.plugins ?? [],
     build: {
       ...viteConfig.build,
       outDir: path.join(outputRoot, "vite-diagnostic"),
@@ -383,19 +441,28 @@ async function captureViteDiagnostic() {
       line: lineColumn.line,
       column: lineColumn.column,
       warnings: warningText.split("\n").filter(Boolean).map((warning) => warning.slice(0, 1000)),
+      adapterSnapshot: adapter ? diagnosticSnapshot("vite", await packageVersion("vite"), adapter.sources, fixtureSha256) : null,
     };
   } catch (error) {
     const message = String(error.message ?? error).replaceAll(fixture, "<fixture>");
-    const lineColumn = error.loc ?? parseSourceLocation(message);
+    const parsedLocation = parseSourceLocation(message);
+    const lineColumn = {
+      line: error.loc?.line ?? parsedLocation.line,
+      column: Number.isInteger(error.loc?.column) ? error.loc.column + 1 : Number.isInteger(parsedLocation.column) ? parsedLocation.column + 1 : null,
+    };
+    const sourcePath = [...(adapter?.sources.keys() ?? [])].find((candidate) => message.includes(candidate));
+    const sourceName = String(error.loc?.file ?? error.id ?? sourcePath ?? "").replaceAll(fixture, "<fixture>");
     return {
       buildRejected: true,
-      reportsSource: message.includes("broken.css"),
+      reportsSource: message.includes("broken.css") || sourceName.includes("broken.css"),
       reportsMissingResource: message.includes("missing.svg"),
       keepsMissingReference: false,
       line: lineColumn.line ?? null,
       column: lineColumn.column ?? null,
+      sourceFile: sourceName || null,
       warnings: stripAnsi(stderr.join("\n")).replaceAll(fixture, "<fixture>").split("\n").filter(Boolean).map((warning) => warning.slice(0, 1000)),
-      excerpt: message.slice(0, 1200),
+      excerpt: message.split("\n").slice(0, 4).join("\n").replaceAll(fixture, "<fixture>").slice(0, 1200),
+      adapterSnapshot: adapter ? diagnosticSnapshot("vite", await packageVersion("vite"), adapter.sources, fixtureSha256) : null,
     };
   } finally {
     process.stderr.write = originalStderrWrite;
@@ -413,15 +480,49 @@ async function captureRspackDiagnostic() {
   const message = String(first?.message ?? "").replaceAll(fixture, "<fixture>");
   const location = first?.loc ?? {};
   const sourceFile = String(first?.moduleName ?? "").replaceAll(fixture, "<fixture>");
+  const sourcePath = "src/diagnostics/broken.css";
+  const sourceCode = await readFile(path.join(fixture, sourcePath), "utf8");
+  const inspection = inspectCssSource({ code: sourceCode, sourcePath, rootDir: fixture });
+  const nativeLine = location.start?.line ?? location.line ?? parseSourceLocation(message).line;
+  const nativeColumn = location.start?.column ?? location.column ?? parseSourceLocation(message).column;
   return {
     buildRejected: errors.length > 0,
     reportsSource: message.includes("broken.css") || sourceFile.includes("broken.css"),
     reportsMissingResource: message.includes("missing.svg"),
     sourceFile: sourceFile || null,
-    line: location.start?.line ?? location.line ?? parseSourceLocation(message).line,
-    column: location.start?.column ?? location.column ?? parseSourceLocation(message).column,
+    line: nativeLine,
+    column: Number.isInteger(nativeColumn) ? nativeColumn + 1 : null,
+    nativeColumnZeroBased: nativeColumn ?? null,
+    adapterSnapshot: diagnosticSnapshot("rspack", await packageVersion("@rspack/core"), new Map([[sourcePath, { sourcePath, code: sourceCode, inspection }]]), fixtureSha256),
     excerpt: message.slice(0, 1200),
   };
+}
+
+function diagnosticSnapshot(tool, toolVersion, sourceRecords, diagnosticFixtureSha256) {
+  const stylesheets = [...sourceRecords.values()].map(({ sourcePath, code, inspection }) => ({
+    id: `stylesheet:${sourcePath}`,
+    sourcePath,
+    sourceSha256: sha256(Buffer.from(code)),
+    outputResourceIds: [],
+    imports: inspection.imports,
+    references: inspection.references,
+  }));
+  const diagnostics = stylesheets.flatMap((stylesheet) => sourceRecords.get(stylesheet.sourcePath).inspection.diagnostics);
+  return createAdapterSnapshot({
+    build: {
+      tool,
+      toolVersion,
+      adapterVersion: CSS_RESOURCE_ADAPTER_VERSION,
+      mode: "production",
+      status: "failed",
+      fixtureSha256: diagnosticFixtureSha256,
+    },
+    resources: [],
+    chunks: [],
+    stylesheets,
+    cssModules: [],
+    diagnostics,
+  });
 }
 
 async function compareCssModuleDefaultImport() {
@@ -481,16 +582,96 @@ function check(id, condition, passed, details) {
   return { id, condition, status: passed ? "통과" : id === "M6" ? "원본 위치 공백" : "관찰 차이", details };
 }
 
-function sourceLocationCheck(viteMaps, rspackMaps, viteDiagnostic, rspackDiagnostic) {
-  const viteHasCssSource = viteMaps.some((map) => map.kind === "css" && map.sources.some((source) => source.includes("base.css")));
-  const rspackHasCssSource = rspackMaps.some((map) => map.kind === "css" && map.sources.some((source) => source.includes("base.css")));
-  const viteReportsMissing = viteDiagnostic.reportsSource && viteDiagnostic.reportsMissingResource && viteDiagnostic.line !== null;
-  const rspackReportsMissing = rspackDiagnostic.reportsSource && rspackDiagnostic.reportsMissingResource && rspackDiagnostic.line !== null;
-  return (viteHasCssSource || viteReportsMissing) && (rspackHasCssSource || rspackReportsMissing);
+function sourceLocationCheck(viteSnapshot, rspackSnapshot, viteDiagnostic, rspackDiagnostic) {
+  const expectedSource = "src/diagnostics/broken.css";
+  const expectedDiagnostic = viteDiagnostic.adapterSnapshot.diagnostics.find((item) => item.code === "CSS_RESOURCE_NOT_FOUND");
+  const rspackDiagnosticRecord = rspackDiagnostic.adapterSnapshot.diagnostics.find((item) => item.code === "CSS_RESOURCE_NOT_FOUND");
+  const location = expectedDiagnostic?.source;
+  const sourceRecordsHavePositions = [viteSnapshot, rspackSnapshot].every((snapshot) =>
+    snapshot.stylesheets.length > 0 && snapshot.stylesheets.every((stylesheet) =>
+      [...stylesheet.imports, ...stylesheet.references].every((edge) => edge.source.file === stylesheet.sourcePath && edge.source.line > 0 && edge.source.column > 0)));
+  return sourceRecordsHavePositions
+    && location?.file === expectedSource
+    && location?.line === 2
+    && location?.column === 25
+    && rspackDiagnosticRecord?.source.file === location.file
+    && rspackDiagnosticRecord?.source.line === location.line
+    && rspackDiagnosticRecord?.source.column === location.column
+    && viteDiagnostic.buildRejected
+    && viteDiagnostic.reportsSource
+    && viteDiagnostic.reportsMissingResource
+    && viteDiagnostic.line === location.line
+    && viteDiagnostic.column === location.column
+    && rspackDiagnostic.buildRejected
+    && rspackDiagnostic.reportsSource
+    && rspackDiagnostic.reportsMissingResource
+    && rspackDiagnostic.line === location.line
+    && rspackDiagnostic.column === location.column;
+}
+
+function adapterSnapshotCheck(viteSnapshot, rspackSnapshot) {
+  const requiredSources = [
+    "src/features/feature.css",
+    "src/styles/base.css",
+    "src/styles/card.module.css",
+    "src/styles/shared.css",
+    "src/styles/tokens.css",
+  ];
+  const validToolSnapshots = viteSnapshot.contract.name === rspackSnapshot.contract.name
+    && viteSnapshot.contract.version === rspackSnapshot.contract.version
+    && viteSnapshot.build.tool === "vite"
+    && rspackSnapshot.build.tool === "rspack"
+    && viteSnapshot.build.fixtureSha256 === rspackSnapshot.build.fixtureSha256
+    && viteSnapshot.build.status === "success"
+    && rspackSnapshot.build.status === "success";
+  const sourceCoverage = [viteSnapshot, rspackSnapshot].every((snapshot) =>
+    requiredSources.every((sourcePath) => snapshot.stylesheets.some((item) => item.sourcePath === sourcePath)));
+  const cssModuleCoverage = [viteSnapshot, rspackSnapshot].every((snapshot) => {
+    const module = snapshot.cssModules.find((item) => item.sourcePath === "src/styles/card.module.css");
+    return module?.exports.includes("card") && module.exports.includes("featured");
+  });
+  const localAssetsResolved = [viteSnapshot, rspackSnapshot].every((snapshot) =>
+    snapshot.stylesheets.flatMap((item) => item.references)
+      .filter((edge) => edge.classification === "local")
+      .every((edge) => edge.targetSourcePath && edge.targetResourceId));
+  const stylesheetOutputsMapped = [viteSnapshot, rspackSnapshot].every((snapshot) =>
+    snapshot.stylesheets.every((stylesheet) => stylesheet.outputResourceIds.length > 0));
+  const chunksHaveStyles = [viteSnapshot, rspackSnapshot].every((snapshot) =>
+    snapshot.chunks.some((item) => item.kind === "entry" && item.stylesheetResourceIds.length > 0)
+      && snapshot.chunks.some((item) => item.kind === "dynamic" && item.stylesheetResourceIds.length > 0));
+  const chunksHaveSharedJavaScript = [viteSnapshot, rspackSnapshot].every((snapshot) =>
+    snapshot.chunks.some((item) => item.kind === "shared" && item.javascriptResourceIds.length > 0));
+  const importsKeepConditions = [viteSnapshot, rspackSnapshot].every((snapshot) =>
+    snapshot.stylesheets.some((stylesheet) => stylesheet.imports.some((edge) =>
+      edge.specifier === "https://styles.example.invalid/external.css"
+        && edge.conditions === "layer(theme) supports(display: grid) screen and (min-width: 1px)")));
+  return validToolSnapshots && sourceCoverage && cssModuleCoverage && localAssetsResolved && stylesheetOutputsMapped && chunksHaveStyles && chunksHaveSharedJavaScript && importsKeepConditions;
+}
+
+function adapterSnapshotSummary(snapshot) {
+  return {
+    contract: snapshot.contract,
+    tool: snapshot.build.tool,
+    status: snapshot.build.status,
+    resourcesByKind: Object.fromEntries([...new Set(snapshot.resources.map((item) => item.kind))].sort().map((kind) => [kind, snapshot.resources.filter((item) => item.kind === kind).length])),
+    chunks: snapshot.chunks.map((item) => ({ kind: item.kind, stylesheets: item.stylesheetResourceIds.length, assets: item.assetResourceIds.length })),
+    stylesheetSources: snapshot.stylesheets.map((item) => item.sourcePath),
+    cssModules: snapshot.cssModules,
+    unresolvedDiagnostics: snapshot.diagnostics.map(({ code, source }) => ({ code, source })),
+  };
+}
+
+function adapterSourceLocationSummary(snapshot) {
+  return {
+    sourceCount: snapshot.stylesheets.length,
+    positionedImports: snapshot.stylesheets.flatMap((item) => item.imports).length,
+    positionedUrls: snapshot.stylesheets.flatMap((item) => item.references).length,
+    sourceMapsAreNotRequired: true,
+  };
 }
 
 function parseSourceLocation(text) {
-  const match = text.match(/\[(\d+):(\d+)\]/);
+  const match = text.match(/\.css:(\d+):(\d+)/) ?? text.match(/\[(\d+):(\d+)\]/);
   if (!match) return { line: null, column: null };
   return { line: Number(match[1]), column: Number(match[2]) };
 }
