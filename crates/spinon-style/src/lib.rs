@@ -2,8 +2,13 @@
 
 use std::ffi::CStr;
 
+mod stylesheet_registry;
 mod stylo_dom;
 
+pub use stylesheet_registry::{
+    CssOrigin, CssParseDiagnostic, RegisteredStylesheet, StylesheetRegistry,
+    StylesheetRegistryError, StylesheetSource,
+};
 pub use stylo_dom::{StyloDocument, StyloDocumentView, StyloDomError, StyloElement, StyloNode};
 
 /// 지원 HTML 요소 기본 스타일 프로필의 초안 식별자입니다.
