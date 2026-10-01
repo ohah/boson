@@ -77,7 +77,7 @@ React / Vue / Svelte 어댑터 ─┐
 | 텍스트 변경 | Text 데이터 또는 제한된 textContent 알고리즘을 원자 적용합니다. 후속 조회는 성공 결과를 즉시 봅니다. | JS 문자열 변환·노드 종류·문서 세대를 확인한 뒤 실패하면 기존 내용을 보존합니다. |
 | 속성 변경 | 지원되는 요소의 문자열 속성 맵을 원자 갱신합니다. `id`·`class` 등 지원 CSS 선택자가 관찰하는 변경은 스타일 무효화 입력이 됩니다. | 속성 이름 검증과 CSS 연동은 공개 DOM·CSS 명세에 따릅니다. `style` 문자열이 CSSOM을 자동 제공하지 않습니다. |
 
-S01의 `spinon_core::Tree`는 연결된 트리와 단일 루트를 검증하는 실험 모델입니다. `Operation::Remove`는 하위 노드를 활성 맵에서 삭제합니다. 그러므로 이를 DOM의 `removeChild()` 구현으로 곧장 노출하면 분리 노드 재삽입과 JS 래퍼 객체 정체성 요구를 깨뜨립니다. R03의 별도 `HostDocument`는 혼합 노드·분리 수명·속성·소유권을 모델링하지만, 아직 V8 DOM façade나 Stylo adapter는 연결하지 않았습니다.
+S01의 `spinon_core::Tree`는 연결된 트리와 단일 루트를 검증하는 실험 모델입니다. `Operation::Remove`는 하위 노드를 활성 맵에서 삭제합니다. 그러므로 이를 DOM의 `removeChild()` 구현으로 곧장 노출하면 분리 노드 재삽입과 JS 래퍼 객체 정체성 요구를 깨뜨립니다. R03의 별도 `HostDocument`는 혼합 노드·분리 수명·속성·소유권을 모델링하며, C03에서 불변 snapshot을 Stylo DOM·selector trait에 연결했습니다. V8 DOM façade와 JS 래퍼 객체 정체성은 여전히 미구현이므로 Stylo adapter를 공개 DOM API 지원으로 간주하지 않습니다.
 
 DOM `insertBefore(node, referenceChild)` 경로에서는 `referenceChild`가 null이거나 지정 부모의 직접 자식인지 먼저 검증합니다. `referenceChild`가 이동할 `node` 자신이면 기존 다음 형제를 기준 위치로 삼아 같은 위치 삽입이 순서를 바꾸지 않게 합니다. 같은 부모 안에서 이동할 때 최종 인덱스는 이동할 노드를 뺀 자식 목록을 기준으로 계산합니다. 검증과 위치 계산이 끝나기 전에 기존 연결을 끊지 않습니다. 어댑터가 내부 위치 삽입을 호출할 때는 이미 검증된 최종 위치를 전달합니다. 실질 상태가 바뀌지 않는 호출은 문서·표시 revision을 올리지 않습니다.
 

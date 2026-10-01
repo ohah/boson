@@ -16,7 +16,7 @@
 
 **UA stylesheet**(User-Agent stylesheet)는 HTML 요소의 브라우저 기본 스타일 규칙이다. 앱 author CSS와 Tailwind Preflight/reset CSS와 구분되는 cascade 출처다. 웹 브라우저는 자체 UA stylesheet를 적용하지만, 모바일 Spinon GPU 트리에는 브라우저가 없으므로 지원 요소의 기본 규칙을 내장해야 한다.
 
-초기 구조 규칙 자원은 `spinon-style` 크레이트의 [`supported-elements-v0.css`](https://github.com/ohah/spinon/blob/main/crates/spinon-style/resources/ua/supported-elements-v0.css)에 두고 Rust 컴파일 시 바이너리에 포함한다. 현재 초안은 HTML namespace의 `div`, `span`, `a`, `img`, `button`, `input`, `p`, `ul`, `li`에 구조적 기본값을 제공한다. 버튼·입력의 OS별 모양과 기본 폰트, 링크 상태별 색·장식은 이 초안에 포함하지 않는다. 내장 자원이 존재하는 것과 Stylo에서 UA cascade 출처로 등록되어 화면에 적용되는 것은 별도 단계다. 등록·선택자 매칭·레이아웃·GPU 표시가 연결되기 전에는 기본 스타일이 동작한다고 주장하지 않는다. Chromium 버전과 요소별 기준값은 `C01`에서 고정하고, 그 기준에 맞춘 검증을 마칠 때까지 이 자원은 호환성 완료 근거가 아니다. Rust·네이티브 경계와 포인터 수명은 [내장 UA stylesheet 인터페이스](internal/0007-ua-stylesheet-resource.md)에 둔다.
+초기 구조 규칙 자원은 `spinon-style` 크레이트의 [`supported-elements-v0.css`](https://github.com/ohah/spinon/blob/main/crates/spinon-style/resources/ua/supported-elements-v0.css)에 두고 Rust 컴파일 시 바이너리에 포함한다. 현재 초안은 HTML namespace의 `div`, `span`, `a`, `img`, `button`, `input`, `p`, `ul`, `li`에 구조적 기본값을 제공한다. 버튼·입력의 OS별 모양과 기본 폰트, 링크 상태별 색·장식은 이 초안에 포함하지 않는다. C03은 Spinon snapshot을 Stylo DOM·selector 인터페이스에 연결했지만, 내장 자원을 UA cascade 출처로 등록해 계산 스타일과 화면에 적용하는 것은 별도 단계다. UA cascade 등록·레이아웃·GPU 표시가 연결되기 전에는 기본 스타일이 동작한다고 주장하지 않는다. Chromium 버전과 요소별 기준값은 `C01`에서 고정하고, 그 기준에 맞춘 검증을 마칠 때까지 이 자원은 호환성 완료 근거가 아니다. Rust·네이티브 경계와 포인터 수명은 [내장 UA stylesheet 인터페이스](internal/0007-ua-stylesheet-resource.md)에 둔다.
 
 
 ## 초기 Chromium 기준 스냅샷
