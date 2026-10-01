@@ -67,3 +67,5 @@ SPINON_IOS_SIMULATOR_UDID=ACA7BF91-E2D5-4CF7-909A-08D1AD95FF3D \
 첫 번째 언어 선택 실험: [V8 연동 비교](spikes/v8-language-bridge/README.md)
 
 CSS 빌드 변환과 Taffy 레이아웃의 최소 연결: [스타일·레이아웃 실험](spikes/style-layout/README.md)
+
+Vite·Rspack CSS 산출 그래프 비교: [CSS 번들러 실험](spikes/css-bundler/README.md)

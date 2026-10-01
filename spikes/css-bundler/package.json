@@ -1,0 +1,12 @@
+{
+  "name": "@spinon/spike-css-bundler",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "compare": "node compare.mjs"
+  },
+  "devDependencies": {
+    "@rspack/core": "2.2.7",
+    "vite": "8.3.1"
+  }
+}
