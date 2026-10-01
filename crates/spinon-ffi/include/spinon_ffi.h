@@ -8,6 +8,14 @@
 extern "C" {
 #endif
 
+/* 앱 바이너리에 포함된 기본 스타일 프로필입니다.
+   식별자는 NUL 종료 UTF-8 문자열이고 데이터 포인터는 읽기 전용입니다.
+   데이터 길이는 NUL을 포함하지 않으며 두 포인터는 프로세스 종료까지 유효합니다.
+   메모리를 해제하지 마세요. 현재 이 자원은 CSS 렌더 경로에 아직 연결되지 않았습니다. */
+const char *spinon_embedded_ua_stylesheet_profile_id(void);
+const uint8_t *spinon_embedded_ua_stylesheet_data(void);
+size_t spinon_embedded_ua_stylesheet_len(void);
+
 /* 실험용 앱 시작 API. 성공 0, 인자 오류 -1, V8 생성 실패 -2,
    버퍼 부족 -3, JavaScript 평가·이벤트 오류 -4를 반환합니다. */
 int32_t spinon_app_run(const char *source, char *output, size_t output_capacity);

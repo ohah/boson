@@ -1,6 +1,30 @@
+use spinon_style::{UA_STYLESHEET, UA_STYLESHEET_PROFILE_ID};
 #[cfg(feature = "r10-experiment")]
 use std::ffi::CString;
 use std::ffi::{CStr, c_char};
+
+/// 앱 바이너리에 내장된 기본 스타일 프로필 식별자를 반환합니다.
+///
+/// 반환 포인터는 읽기 전용이며 프로세스가 끝날 때까지 유효합니다.
+#[unsafe(no_mangle)]
+pub extern "C" fn spinon_embedded_ua_stylesheet_profile_id() -> *const c_char {
+    UA_STYLESHEET_PROFILE_ID.as_ptr()
+}
+
+/// 앱 바이너리에 내장된 기본 스타일 UTF-8 데이터의 시작 주소를 반환합니다.
+///
+/// 반환 포인터는 읽기 전용이며 프로세스가 끝날 때까지 유효합니다. 데이터 끝에는
+/// NUL 바이트가 없으며 길이는 `spinon_embedded_ua_stylesheet_len()`으로 얻습니다.
+#[unsafe(no_mangle)]
+pub extern "C" fn spinon_embedded_ua_stylesheet_data() -> *const u8 {
+    UA_STYLESHEET.as_ptr()
+}
+
+/// 앱 바이너리에 내장된 기본 스타일 UTF-8 데이터의 바이트 수를 반환합니다.
+#[unsafe(no_mangle)]
+pub extern "C" fn spinon_embedded_ua_stylesheet_len() -> usize {
+    UA_STYLESHEET.len()
+}
 
 mod runtime_session;
 

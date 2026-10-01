@@ -11,6 +11,7 @@ crate-type = ["staticlib", "rlib"]
 r10-experiment = ["dep:spinon-style-layout-spike"]
 
 [dependencies]
+spinon-style = { path = "../spinon-style" }
 spinon-runtime = { path = "../spinon-runtime" }
 spinon-style-layout-spike = { path = "../../spikes/style-layout", optional = true }
 

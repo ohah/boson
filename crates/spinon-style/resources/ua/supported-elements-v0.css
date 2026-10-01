@@ -1,0 +1,49 @@
+/*
+ * 스피논 지원 HTML 요소의 기본 스타일 프로필 초안입니다.
+ *
+ * Chromium Blink 기본 HTML 스타일시트의 제한된 구조 규칙을 참고했습니다.
+ * Chromium 호환 기준 revision은 C01에서 고정해야 하며, 이 파일은 Chromium
+ * 전체 UA stylesheet 복사본이나 완성된 CSS 지원을 뜻하지 않습니다.
+ * 버튼·입력 컨트롤의 플랫폼별 외형과 폰트 규칙은 별도 계약에 남깁니다.
+ *
+ * 참고: https://chromium.googlesource.com/chromium/src/+/3ae19953a97dab54ff57330d80764be8c86c70be/third_party/blink/renderer/core/html/resources/html.css
+ */
+
+@namespace "http://www.w3.org/1999/xhtml";
+
+div {
+  display: block;
+}
+
+span,
+a,
+img {
+  display: inline;
+}
+
+button,
+input {
+  display: inline-block;
+}
+
+p {
+  display: block;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+}
+
+ul {
+  display: block;
+  list-style-type: disc;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+  padding-inline-start: 40px;
+}
+
+li {
+  display: list-item;
+}
