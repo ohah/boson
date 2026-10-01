@@ -1,0 +1,767 @@
+{
+  "schema": "spinon-css-reference/v1",
+  "referenceId": "chromium-macos-arm64-154.0.8037.92-ua-v0",
+  "oracle": {
+    "name": "Chromium",
+    "product": "Google Chrome 154.0.8037.92",
+    "version": "154.0.8037.92",
+    "revision": "@334b65d254ccc35df4fca82706d1753227b01039",
+    "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "executableSha256": "a5087eafc7c5fc9107951b0d4b86b54a2cc46c275d0009476e9f61465f5f270e"
+  },
+  "environment": {
+    "os": "macOS 26.5.1",
+    "osBuild": "25F80",
+    "architecture": "arm64",
+    "flags": [
+      "--headless=new",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-background-networking",
+      "--lang=en-US",
+      "--remote-debugging-port=0",
+      "--user-data-dir=<temporary-profile>"
+    ],
+    "emulation": {
+      "cssViewportPx": {
+        "width": 800,
+        "height": 600
+      },
+      "deviceScaleFactor": 1,
+      "locale": "en-US",
+      "timeZone": "UTC",
+      "media": {
+        "prefersColorScheme": "light",
+        "prefersReducedMotion": "no-preference",
+        "forcedColors": "none"
+      }
+    },
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+  },
+  "fixture": {
+    "id": "C01-UAv0-supported-html-elements",
+    "path": "tests/fixtures/css/c01/supported-html-ua.html",
+    "sha256": "ebcd7b25c47a160ca4c5fd44324dd4a1968af8283e9e1b291ab7f768388d735a",
+    "authorStyleSheetCount": 0,
+    "cssProfile": "spinon-html-ua/0.1.0-draft",
+    "profileCssPath": "crates/spinon-style/resources/ua/supported-elements-v0.css",
+    "profileCssSha256": "bd15dd612a21cc8cb48e25eb38b86803868667df75cd56f111d7c476ddba3ebd",
+    "profileAuthorStyleSheetCount": 1
+  },
+  "observations": {
+    "chromiumDefault": [
+      {
+        "selector": "div",
+        "features": [
+          {
+            "id": "ua.display.div.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-div",
+            "tag": "div",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "block"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "span",
+        "features": [
+          {
+            "id": "ua.display.span.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-span",
+            "tag": "span",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "inline"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "a",
+        "features": [
+          {
+            "id": "ua.display.a.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-anchor",
+            "tag": "a",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "inline"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "img",
+        "features": [
+          {
+            "id": "ua.display.img.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-image",
+            "tag": "img",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "inline"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "features": [
+          {
+            "id": "ua.display.button.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-button",
+            "tag": "button",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "inline-block"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "features": [
+          {
+            "id": "ua.display.input.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-input",
+            "tag": "input",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "inline-block"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "p",
+        "features": [
+          {
+            "id": "ua.display.p.v0",
+            "property": "display"
+          },
+          {
+            "id": "ua.margin-block-start.p.v0",
+            "property": "margin-block-start"
+          },
+          {
+            "id": "ua.margin-block-end.p.v0",
+            "property": "margin-block-end"
+          },
+          {
+            "id": "ua.margin-inline-start.p.v0",
+            "property": "margin-inline-start"
+          },
+          {
+            "id": "ua.margin-inline-end.p.v0",
+            "property": "margin-inline-end"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-paragraph",
+            "tag": "p",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "block",
+              "margin-block-start": "16px",
+              "margin-block-end": "16px",
+              "margin-inline-start": "0px",
+              "margin-inline-end": "0px"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "ul",
+        "features": [
+          {
+            "id": "ua.display.ul.v0",
+            "property": "display"
+          },
+          {
+            "id": "ua.list-style-type.ul.v0",
+            "property": "list-style-type"
+          },
+          {
+            "id": "ua.margin-block-start.ul.v0",
+            "property": "margin-block-start"
+          },
+          {
+            "id": "ua.margin-block-end.ul.v0",
+            "property": "margin-block-end"
+          },
+          {
+            "id": "ua.margin-inline-start.ul.v0",
+            "property": "margin-inline-start"
+          },
+          {
+            "id": "ua.margin-inline-end.ul.v0",
+            "property": "margin-inline-end"
+          },
+          {
+            "id": "ua.padding-inline-start.ul.v0",
+            "property": "padding-inline-start"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-list",
+            "tag": "ul",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "block",
+              "list-style-type": "disc",
+              "margin-block-start": "16px",
+              "margin-block-end": "16px",
+              "margin-inline-start": "0px",
+              "margin-inline-end": "0px",
+              "padding-inline-start": "40px"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "li",
+        "features": [
+          {
+            "id": "ua.display.li.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-list-item",
+            "tag": "li",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "list-item"
+            }
+          }
+        ]
+      }
+    ],
+    "embeddedProfileAsAuthorRule": [
+      {
+        "selector": "div",
+        "features": [
+          {
+            "id": "ua.display.div.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-div",
+            "tag": "div",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "block"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "span",
+        "features": [
+          {
+            "id": "ua.display.span.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-span",
+            "tag": "span",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "inline"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "a",
+        "features": [
+          {
+            "id": "ua.display.a.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-anchor",
+            "tag": "a",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "inline"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "img",
+        "features": [
+          {
+            "id": "ua.display.img.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-image",
+            "tag": "img",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "inline"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "features": [
+          {
+            "id": "ua.display.button.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-button",
+            "tag": "button",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "inline-block"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "features": [
+          {
+            "id": "ua.display.input.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-input",
+            "tag": "input",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "inline-block"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "p",
+        "features": [
+          {
+            "id": "ua.display.p.v0",
+            "property": "display"
+          },
+          {
+            "id": "ua.margin-block-start.p.v0",
+            "property": "margin-block-start"
+          },
+          {
+            "id": "ua.margin-block-end.p.v0",
+            "property": "margin-block-end"
+          },
+          {
+            "id": "ua.margin-inline-start.p.v0",
+            "property": "margin-inline-start"
+          },
+          {
+            "id": "ua.margin-inline-end.p.v0",
+            "property": "margin-inline-end"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-paragraph",
+            "tag": "p",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "block",
+              "margin-block-start": "16px",
+              "margin-block-end": "16px",
+              "margin-inline-start": "0px",
+              "margin-inline-end": "0px"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "ul",
+        "features": [
+          {
+            "id": "ua.display.ul.v0",
+            "property": "display"
+          },
+          {
+            "id": "ua.list-style-type.ul.v0",
+            "property": "list-style-type"
+          },
+          {
+            "id": "ua.margin-block-start.ul.v0",
+            "property": "margin-block-start"
+          },
+          {
+            "id": "ua.margin-block-end.ul.v0",
+            "property": "margin-block-end"
+          },
+          {
+            "id": "ua.margin-inline-start.ul.v0",
+            "property": "margin-inline-start"
+          },
+          {
+            "id": "ua.margin-inline-end.ul.v0",
+            "property": "margin-inline-end"
+          },
+          {
+            "id": "ua.padding-inline-start.ul.v0",
+            "property": "padding-inline-start"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-list",
+            "tag": "ul",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "block",
+              "list-style-type": "disc",
+              "margin-block-start": "16px",
+              "margin-block-end": "16px",
+              "margin-inline-start": "0px",
+              "margin-inline-end": "0px",
+              "padding-inline-start": "40px"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "li",
+        "features": [
+          {
+            "id": "ua.display.li.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-list-item",
+            "tag": "li",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "list-item"
+            }
+          }
+        ]
+      }
+    ],
+    "comparison": {
+      "method": "정확한 selector match 집합과 computed CSS 값 비교",
+      "passed": 28,
+      "failed": 0,
+      "features": [
+        {
+          "id": "selector.div.matches.v0",
+          "reference": [
+            "ua-div"
+          ],
+          "profile": [
+            "ua-div"
+          ],
+          "equal": true
+        },
+        {
+          "id": "ua.display.div.v0",
+          "selector": "div",
+          "nodeId": "ua-div",
+          "property": "display",
+          "reference": "block",
+          "profile": "block",
+          "equal": true
+        },
+        {
+          "id": "selector.span.matches.v0",
+          "reference": [
+            "ua-span"
+          ],
+          "profile": [
+            "ua-span"
+          ],
+          "equal": true
+        },
+        {
+          "id": "ua.display.span.v0",
+          "selector": "span",
+          "nodeId": "ua-span",
+          "property": "display",
+          "reference": "inline",
+          "profile": "inline",
+          "equal": true
+        },
+        {
+          "id": "selector.a.matches.v0",
+          "reference": [
+            "ua-anchor"
+          ],
+          "profile": [
+            "ua-anchor"
+          ],
+          "equal": true
+        },
+        {
+          "id": "ua.display.a.v0",
+          "selector": "a",
+          "nodeId": "ua-anchor",
+          "property": "display",
+          "reference": "inline",
+          "profile": "inline",
+          "equal": true
+        },
+        {
+          "id": "selector.img.matches.v0",
+          "reference": [
+            "ua-image"
+          ],
+          "profile": [
+            "ua-image"
+          ],
+          "equal": true
+        },
+        {
+          "id": "ua.display.img.v0",
+          "selector": "img",
+          "nodeId": "ua-image",
+          "property": "display",
+          "reference": "inline",
+          "profile": "inline",
+          "equal": true
+        },
+        {
+          "id": "selector.button.matches.v0",
+          "reference": [
+            "ua-button"
+          ],
+          "profile": [
+            "ua-button"
+          ],
+          "equal": true
+        },
+        {
+          "id": "ua.display.button.v0",
+          "selector": "button",
+          "nodeId": "ua-button",
+          "property": "display",
+          "reference": "inline-block",
+          "profile": "inline-block",
+          "equal": true
+        },
+        {
+          "id": "selector.input.matches.v0",
+          "reference": [
+            "ua-input"
+          ],
+          "profile": [
+            "ua-input"
+          ],
+          "equal": true
+        },
+        {
+          "id": "ua.display.input.v0",
+          "selector": "input",
+          "nodeId": "ua-input",
+          "property": "display",
+          "reference": "inline-block",
+          "profile": "inline-block",
+          "equal": true
+        },
+        {
+          "id": "selector.p.matches.v0",
+          "reference": [
+            "ua-paragraph"
+          ],
+          "profile": [
+            "ua-paragraph"
+          ],
+          "equal": true
+        },
+        {
+          "id": "ua.display.p.v0",
+          "selector": "p",
+          "nodeId": "ua-paragraph",
+          "property": "display",
+          "reference": "block",
+          "profile": "block",
+          "equal": true
+        },
+        {
+          "id": "ua.margin-block-start.p.v0",
+          "selector": "p",
+          "nodeId": "ua-paragraph",
+          "property": "margin-block-start",
+          "reference": "16px",
+          "profile": "16px",
+          "equal": true
+        },
+        {
+          "id": "ua.margin-block-end.p.v0",
+          "selector": "p",
+          "nodeId": "ua-paragraph",
+          "property": "margin-block-end",
+          "reference": "16px",
+          "profile": "16px",
+          "equal": true
+        },
+        {
+          "id": "ua.margin-inline-start.p.v0",
+          "selector": "p",
+          "nodeId": "ua-paragraph",
+          "property": "margin-inline-start",
+          "reference": "0px",
+          "profile": "0px",
+          "equal": true
+        },
+        {
+          "id": "ua.margin-inline-end.p.v0",
+          "selector": "p",
+          "nodeId": "ua-paragraph",
+          "property": "margin-inline-end",
+          "reference": "0px",
+          "profile": "0px",
+          "equal": true
+        },
+        {
+          "id": "selector.ul.matches.v0",
+          "reference": [
+            "ua-list"
+          ],
+          "profile": [
+            "ua-list"
+          ],
+          "equal": true
+        },
+        {
+          "id": "ua.display.ul.v0",
+          "selector": "ul",
+          "nodeId": "ua-list",
+          "property": "display",
+          "reference": "block",
+          "profile": "block",
+          "equal": true
+        },
+        {
+          "id": "ua.list-style-type.ul.v0",
+          "selector": "ul",
+          "nodeId": "ua-list",
+          "property": "list-style-type",
+          "reference": "disc",
+          "profile": "disc",
+          "equal": true
+        },
+        {
+          "id": "ua.margin-block-start.ul.v0",
+          "selector": "ul",
+          "nodeId": "ua-list",
+          "property": "margin-block-start",
+          "reference": "16px",
+          "profile": "16px",
+          "equal": true
+        },
+        {
+          "id": "ua.margin-block-end.ul.v0",
+          "selector": "ul",
+          "nodeId": "ua-list",
+          "property": "margin-block-end",
+          "reference": "16px",
+          "profile": "16px",
+          "equal": true
+        },
+        {
+          "id": "ua.margin-inline-start.ul.v0",
+          "selector": "ul",
+          "nodeId": "ua-list",
+          "property": "margin-inline-start",
+          "reference": "0px",
+          "profile": "0px",
+          "equal": true
+        },
+        {
+          "id": "ua.margin-inline-end.ul.v0",
+          "selector": "ul",
+          "nodeId": "ua-list",
+          "property": "margin-inline-end",
+          "reference": "0px",
+          "profile": "0px",
+          "equal": true
+        },
+        {
+          "id": "ua.padding-inline-start.ul.v0",
+          "selector": "ul",
+          "nodeId": "ua-list",
+          "property": "padding-inline-start",
+          "reference": "40px",
+          "profile": "40px",
+          "equal": true
+        },
+        {
+          "id": "selector.li.matches.v0",
+          "reference": [
+            "ua-list-item"
+          ],
+          "profile": [
+            "ua-list-item"
+          ],
+          "equal": true
+        },
+        {
+          "id": "ua.display.li.v0",
+          "selector": "li",
+          "nodeId": "ua-list-item",
+          "property": "display",
+          "reference": "list-item",
+          "profile": "list-item",
+          "equal": true
+        }
+      ]
+    }
+  }
+}

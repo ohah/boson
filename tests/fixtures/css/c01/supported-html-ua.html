@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=800, initial-scale=1">
+  <title>Spinon C01 supported HTML UA baseline</title>
+</head>
+<body>
+  <div id="ua-div"></div>
+  <span id="ua-span"></span>
+  <a id="ua-anchor" href="#reference">link</a>
+  <img id="ua-image" alt="reference image">
+  <button id="ua-button" type="button">button</button>
+  <input id="ua-input" type="text" value="input">
+  <p id="ua-paragraph">paragraph</p>
+  <ul id="ua-list"><li id="ua-list-item">item</li></ul>
+  <pre id="reference-result"></pre>
+  <script>
+    (() => {
+      const cases = [
+        { selector: "div", features: [{ id: "ua.display.div.v0", property: "display" }] },
+        { selector: "span", features: [{ id: "ua.display.span.v0", property: "display" }] },
+        { selector: "a", features: [{ id: "ua.display.a.v0", property: "display" }] },
+        { selector: "img", features: [{ id: "ua.display.img.v0", property: "display" }] },
+        { selector: "button", features: [{ id: "ua.display.button.v0", property: "display" }] },
+        { selector: "input", features: [{ id: "ua.display.input.v0", property: "display" }] },
+        {
+          selector: "p",
+          features: [
+            { id: "ua.display.p.v0", property: "display" },
+            { id: "ua.margin-block-start.p.v0", property: "margin-block-start" },
+            { id: "ua.margin-block-end.p.v0", property: "margin-block-end" },
+            { id: "ua.margin-inline-start.p.v0", property: "margin-inline-start" },
+            { id: "ua.margin-inline-end.p.v0", property: "margin-inline-end" },
+          ],
+        },
+        {
+          selector: "ul",
+          features: [
+            { id: "ua.display.ul.v0", property: "display" },
+            { id: "ua.list-style-type.ul.v0", property: "list-style-type" },
+            { id: "ua.margin-block-start.ul.v0", property: "margin-block-start" },
+            { id: "ua.margin-block-end.ul.v0", property: "margin-block-end" },
+            { id: "ua.margin-inline-start.ul.v0", property: "margin-inline-start" },
+            { id: "ua.margin-inline-end.ul.v0", property: "margin-inline-end" },
+            { id: "ua.padding-inline-start.ul.v0", property: "padding-inline-start" },
+          ],
+        },
+        { selector: "li", features: [{ id: "ua.display.li.v0", property: "display" }] },
+      ];
+      window.__SPINON_C01_CASES__ = cases;
+      const observe = () => cases.map(({ selector, features }) => {
+        const matches = Array.from(document.querySelectorAll(selector));
+        return {
+          selector,
+          features,
+          matches: matches.map((element) => ({
+            id: element.id,
+            tag: element.localName,
+            namespace: element.namespaceURI,
+            computed: Object.fromEntries(
+              features.map(({ property }) => [
+                property,
+                getComputedStyle(element).getPropertyValue(property),
+              ]),
+            ),
+          })),
+        };
+      });
+      window.__SPINON_C01_OBSERVE__ = observe;
+      const observation = {
+        fixtureId: "C01-UAv0-supported-html-elements",
+        viewport: {
+          width: window.innerWidth,
+          height: window.innerHeight,
+          deviceScaleFactor: window.devicePixelRatio,
+        },
+        locale: navigator.language,
+        intlLocale: Intl.DateTimeFormat().resolvedOptions().locale,
+        documentLanguage: document.documentElement.lang,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        userAgent: navigator.userAgent,
+        media: {
+          prefersColorSchemeDark: matchMedia("(prefers-color-scheme: dark)").matches,
+          prefersReducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+          forcedColors: matchMedia("(forced-colors: active)").matches,
+        },
+        authorStyleSheetCount: document.styleSheets.length,
+        elements: observe(),
+      };
+      const bytes = new TextEncoder().encode(JSON.stringify(observation));
+      let binary = "";
+      for (const byte of bytes) binary += String.fromCharCode(byte);
+      document.querySelector("#reference-result").textContent = btoa(binary);
+    })();
+  </script>
+</body>
+</html>
