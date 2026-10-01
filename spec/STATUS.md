@@ -1,10 +1,10 @@
 # 스피논 구현 상태와 API 명세 대장
 
-**기준:** 2026-09-30 · **명세 버전:** `0.1.0-draft` · **현재 제품 지원 완료:** 없음
+**기준:** 2026-10-01 · **명세 버전:** `0.1.0-draft` · **현재 제품 지원 완료:** 없음
 
 Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발 기반이다. 제품 기능 상태를 대신하지 않으며, 이 초기화만으로 아래 항목을 완료 처리하지 않는다.
 
-이 문서가 구현 상태의 공식 원본이다. 웹 미리보기의 체크박스는 개인 브라우저에 저장되는 탐색 도구이며 공식 완료 판정이 아니다. 아래 78개 상위 항목은 현재 로드맵과 같은 ID를 사용한다. 뒤의 JS API 세부 체크리스트는 이 상위 항목에 속한 하위 작업이다. `- [ ]`는 미완료이며, PoC가 있어도 제품 API의 지원 완료를 뜻하지 않는다.
+이 문서가 구현 상태의 공식 원본이다. 웹 미리보기의 체크박스는 개인 브라우저에 저장되는 탐색 도구이며 공식 완료 판정이 아니다. 아래 78개 상위 항목은 현재 로드맵과 같은 ID를 사용한다. 뒤의 JS API와 CSS 세부 체크리스트는 이 상위 항목에 속한 하위 작업이다. `- [ ]`는 미완료이며, PoC가 있어도 제품 API의 지원 완료를 뜻하지 않는다.
 
 ![스피논 구현 관문 의존 관계: 기초 검증, 첫 앱, 병렬 품질 개선과 생태계, 출시](/roadmap.svg)
 
@@ -132,6 +132,59 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 - [ ] **J16 미검토 브라우저 API 판정** — `XMLHttpRequest`, `requestIdleCallback`, `navigator.geolocation`, `navigator.mediaDevices`, `clipboard`, `share` 등을 라이브러리 요구와 플랫폼 권한 기준으로 조사해 포함·제외·추후 검토를 정한다. 현재 미검토 항목을 지원 또는 영구 제외로 오인하게 두지 않는다. 상위: R12, X08, X10, X16.
 - [ ] **J17 브라우저·Node 전용 경계 진단** — `window`/탭 탐색, Service Worker, Worker 계열, Canvas 계열, `process`/`fs`/`Buffer`/`setImmediate`와 실행 위치 표시의 지원 여부 및 빌드·런타임 진단을 정의한다. 백그라운드 기본 실행은 Worker API를 뜻하지 않으며 Worker와 향후 제한적 UI 실행은 별도 지원 표에 기록한다. 내부 GPU 렌더링과 앱 공개 Canvas/WebGPU를 구분한다. 상위: R01, R12, X06, X10, X16.
 - [ ] **J18 프레임워크·번들러 적합성** — React 첫 호스트 경로를 확정한 뒤 Vue·Svelte 어댑터, React/Vue/Svelte의 사용 라이브러리·전이 의존성, Vite·Rspack의 웹/모바일 산출물을 별도 매트릭스와 실행 사례로 검증한다. 상위: R07, S05, X02, X03, X04, X05, X16.
+
+## CSS 구현 체크리스트
+
+아래 `C01`~`C30`은 R01·R11·S02·S10·U01~U04·U09·X09·X16에 속한 CSS 세부 작업이다. 최종 목표는 [CSS 호환 명세](0008-css-compatibility.md)에 정의한 기준 Chromium CSS 동작 100% 호환이다. 우선순위는 작업 순서이며 영구 제외를 뜻하지 않는다. 실제 상태는 이 목록만 갱신하고, 명세 문서에는 별도 진행 체크를 만들지 않는다. 모든 항목은 미완료다.
+
+### P0 · 기준과 첫 스타일 경로
+
+- [ ] **C01 기준 브라우저와 CSS 기능 inventory** — 웹 oracle로 실행할 Chromium revision/build·OS 이미지·플래그와 갱신 정책, 다른 웹 엔진을 추가할 때의 별도 행렬, fixture별 viewport·device scale·locale·글꼴·미디어/선호 상태, CSSWG/WPT 입력 버전, 지원 HTML/SVG 문서 범위와 UA stylesheet, 속성·값·선택자·at-rule별 안정 ID를 고정한다. 각 fixture에 선택자·cascade·정규화한 계산값 비교, CSS px 상자·줄 좌표의 최대 절대 오차, GPU 캡처의 채널 차이·상이 픽셀 수를 나눠 기대 결과와 한계를 기록한다. 한계는 테스트 전에 고정하고 CSS 의미 차이와 GPU·OS 래스터 차이를 분류한다. 상위: R01, R16, X16.
+  - 초기 oracle 부분 근거: [Chromium 비교 기록](internal/evidence/css-c01-chromium-ua-2026-10-01.md), [9개 요소 fixture](../tests/fixtures/css/c01/supported-html-ua.html), [28개 항목 JSON](../tests/fixtures/css/references/chromium-macos-arm64-154.0.8037.92-ua-v0/ua-supported-elements.json). 전체 C01 범위는 미완료입니다.
+- [ ] **C02 번들러 CSS 산출 경로** — Vite·Rspack의 CSS import·CSS Modules·URL 에셋·기능 진입점별 CSS 의존성과 원본 진단 위치를 보존한다. 번들 내 `@import`와 `url()`의 로컬 폰트·이미지 참조는 CSS 노드에서 나가는 타입 있는 그래프 edge와 해시로 기록하고, JS 런타임이 생성하는 inline style·CSS 규칙은 해당 JS 청크에 포함한다. 외부 네트워크 URL은 OTA 자원과 구분하고, 로더 미구현 상태에서 모바일 요청을 보내지 않는다. 자원 추출은 독립 실험이 가능하지만 기능 그래프 직렬화는 R15·X01·D02 계약을 따른다. Lightning CSS의 prefix·minify·syntax lowering은 Stylo/Chromium 동등성 fixture를 통과한 기능만 허용하며, 미지원 규칙을 조용히 제거하지 않는다. 상위: R11, U01, X01~X03, D02.
+- [ ] **C03 Spinon DOM용 Stylo adapter** — Stylo `0.22.0`을 고정해 문서·요소·노드 조회와 DOM trait, 속성·class·namespace·상태·조상/형제 순회를 연결한다. Blitz DOM 의존 없이 계산 스타일을 얻고 플랫폼 빌드를 확인한다. 상위: R03, S02, S10.
+- [ ] **C04 stylesheet·selector·cascade** — 스타일시트 등록 순서와 출처, 내장 UA stylesheet의 UA cascade 등록, inline style, 선택자 매칭, specificity·importance·source order, 초기값·상속·CSS-wide keyword, cascade layer, 번들 내 `@import` 해석·기준 URL·media/supports/layer 순서·순환·실패, `@namespace`·`@scope`를 구현한다. 번들 내 import와 로컬 `url()` 자원은 OTA 그래프 edge로 추적한다. 외부 네트워크 `@import`·`url()`을 요청하는 CSS 자원 로더는 현재 미구현이며 모바일에서 불러오지 않는다. 빌드가 찾은 참조와 실행 중 확인된 참조는 미지원 항목으로 진단한다. 상위: R01, S02, U02.
+  - [ ] **미구현 하위 항목 · 외부 CSS URL 자원 로더** — 원격 stylesheet·폰트·이미지의 로딩은 현재 지원하지 않는다. 추후 구현 여부를 정할 때 허용 scheme·출처·교차 출처 규칙·상대 URL 기준·캐시·취소·오류·오프라인 동작을 별도 계약으로 확정한다. R12/J06은 네트워크 보안 경계 참고 항목이며 이 로더가 이미 구현됐다는 뜻이 아니다.
+  - [ ] **미구현 하위 항목 · 내장 UA stylesheet 적용** — 구조 기본 규칙 초안은 `crates/spinon-style/resources/ua/supported-elements-v0.css`로 작성해 Rust 바이너리에 포함하고, 내부 FFI에서 프로필 ID·읽기 전용 데이터·바이트 수를 제공한다. 아직 Stylo의 UA cascade 출처에 등록하거나 문서 트리·레이아웃·GPU에 적용하지 않았다. C01에서 Chromium 기준과 요소 범위를 고정하고 Android·iOS fixture로 비교하기 전까지 동작 완료로 표시하지 않는다. 인터페이스: [내장 UA stylesheet 인터페이스](internal/0007-ua-stylesheet-resource.md).
+- [ ] **C05 사용자 지정 속성과 재계산** — `var()` 대체·순환·fallback·상속, `@property`, 스타일 변경 무효화, dirty subtree 범위, 제거·이동한 노드의 cache 수명을 구현한다. 상위: S02, U02, X16.
+- [ ] **C06 값·단위 변환** — px·%·em·rem·절대/상대 font 단위와 `calc()`·`min()`·`max()`·`clamp()`의 계산 기준·오류를 구현한다. viewport·container·dynamic viewport 단위는 별도 하위 적합성 사례를 둔다. 상위: S10, U02, U09.
+- [ ] **C07 상자 모델·기본 크기** — `box-sizing`, width/height·min/max, margin·padding·border width, aspect ratio와 기본값을 계산하고 Chromium used value 및 geometry와 비교한다. 상위: S10, S02, U02.
+- [ ] **C08 첫 화면 Block·기본 페인트** — `display:none/block`, 기본 Block 흐름, 카운터 화면의 색·배경색·기본 글꼴 값과 GPU 장면 연결을 구현한다. 이는 Block·CSS 전체 지원 완료가 아니다. 상위: S10, S04, S07.
+
+### P1 · 일반 모바일 앱 레이아웃과 텍스트
+
+- [ ] **C09 Block formatting** — margin collapse, formatting context, shrink-to-fit, 흐름·포함 블록 등 Block 배치의 Chromium 차이를 속성·fixture 단위로 닫는다. 상위: S02, U02, X16.
+- [ ] **C10 Flexbox** — basis·grow·shrink·wrap·order·축·정렬·gap·기준선·분수 좌표·min-size 자동값과 재배치를 검증한다. 상위: S02, U03, X16.
+- [ ] **C11 CSS Grid** — explicit/implicit track, repeat·named lines/areas, auto placement, minmax·fit-content, spanning·fractional tracks와 정렬을 검증한다. 상위: S02, X09, X16.
+- [ ] **C12 위치 지정과 쌓임** — static·relative·absolute·fixed·sticky, containing block, inset, stacking context, `z-index`와 viewport·scroll interaction을 구현한다. Taffy fallback 매핑만으로 완료하지 않는다. 상위: S02, U02, X16.
+- [ ] **C13 overflow·scroll·클리핑** — visible·clip·hidden·scroll·auto, scroll container, overscroll·scrollbar·scroll snap과 clip geometry를 구현한다. 상위: S02, U07, E06.
+- [ ] **C14 내재 크기와 대체 요소 기초** — min-content·max-content·fit-content·auto, percentage resolution, 이미지·버튼 등 replaced element의 intrinsic sizing을 검증한다. 상위: S02, U05, X16.
+- [ ] **C15 인라인·실제 텍스트 레이아웃** — inline formatting context, 줄 상자, 공백·단어 분리·줄바꿈·baseline을 shaping 결과에 연결한다. 합성 텍스트 measure로 대체하지 않는다. 상위: U04, S07, X16.
+- [ ] **C16 글꼴과 텍스트 속성** — `font-family/size/weight/style`, line-height, `@font-face`, fallback·font loading, letter/word spacing, text-align·decoration·transform·overflow를 검증한다. 상위: U04, U05, E02.
+- [ ] **C17 방향과 논리 속성** — `direction`, bidi·RTL, writing-mode, logical margin/padding/inset/border·정렬 속성을 layout·text·hit-test에 연결한다. 상위: U04, S02, X16.
+- [ ] **C18 이미지·replaced paint 규칙** — `object-fit/object-position`, 종횡비, 배경 이미지와 비동기 decode 뒤 재레이아웃·자원 실패를 처리한다. 상위: U05, E02, D02.
+- [ ] **C19 기본 페인트 속성** — color·opacity·background-color와 CSS 색상 형식·계산값을 GPU 출력·hit-test·접근성 대비 fixture와 연결한다. 상위: S04, S07, E02.
+
+### P2 · 반응형·상태·복합 페인트
+
+- [ ] **C20 상태 선택자와 가상 요소** — hover·active·focus·disabled 등 DOM 상태 선택자, structural selector·pseudo-element와 이벤트 상태 전이를 구현한다. 상위: S04, U06, X16.
+- [ ] **C21 조건부·반응형 규칙** — `@media`, `@supports`, `@container`, prefers-* 조건과 화면·환경 변화 때 cascade/layout invalidation을 처리한다. 상위: U09, X16.
+- [ ] **C22 backgrounds·gradient·border decoration** — 다중 배경·gradient, border style/color/radius/image, outline과 box-shadow를 GPU 장면에 구현한다. 상위: S04, E02, X16.
+- [ ] **C23 transform·clip·compositing** — transform·transform-origin·2D/3D·perspective, clip/mask, filter·blend, opacity와 stacking/compositing 순서를 구현한다. 상위: S04, E02, X16.
+- [ ] **C24 animation·transition** — transition·keyframes·animation 속성, frame timing, 취소·reduced motion·백그라운드 복귀와 스타일 revision 동작을 정의하고 구현한다. 상위: E06, X16.
+- [ ] **C25 generated content·목록 표현** — `content`, `::before/::after`, counter·marker, list-style 및 생성 상자의 layout·접근성 의미를 구현한다. 상위: U08, U04, X16.
+
+### P3 · 고급·전통 CSS 기능군
+
+- [ ] **C26 표·float·다단** — table formatting, caption/cell sizing, float·clear, multicolumn·column balancing을 추가하고 앱 UI 결과를 비교한다. 상위: S02, X16.
+- [ ] **C27 고급 Grid·containment·스크롤 연동** — subgrid·masonry 등 기준 Chromium에 포함된 Grid 동작, containment·content-visibility·scroll-linked animation과 anchor positioning을 분류·구현한다. 상위: S02, X09, X16.
+- [ ] **C28 SVG·폼 컨트롤 CSS** — SVG presentation/style, appearance·accent color·placeholder·selection·focus ring 등 HTML/SVG 요소의 UA style과 상태를 구현한다. 상위: R01, U06, U08, X16.
+- [ ] **C29 CSSOM과 런타임 변경** — style/class 변경·stylesheet 생명주기·계산 스타일·박스 조회, 관찰자와 동기화 시점을 DOM façade와 연결한다. 상위: R03, S03, U02, X06.
+
+### P4 · 100% 기준 적합성 종료
+
+- [ ] **C30 기준 구현 전체 CSS 적합성** — C01에서 고정한 Chromium inventory의 속성·값·선택자·at-rule·상태·동적 변경을 자동화하고 남은 차이를 닫는다. 전체 적합성 근거, Android·iOS 검증, 진단 결과와 버전 정책이 연결되기 전에는 100% 완료를 주장하지 않는다. 상위: R01, S02, U01~U09, X09, X16, D06.
+
 
 ## 기존 PoC의 위치
 

@@ -13,7 +13,7 @@ React / Vue / Svelte 어댑터 · DOM façade · Fetch API
                     ↕ 엔진 내부 C ABI
                  native/v8
                     ↓ Rust API
-       spinon-core → 스타일 → 레이아웃 → 장면 → GPU 프레임
+       spinon-core → spinon-style(Stylo) → spinon-layout(Taffy + 확장) → 장면 → GPU 프레임
 
 Android / iOS 호스트 → spinon-ffi (플랫폼 C ABI) → spinon-runtime
 Fetch 요청 → NetworkHost → 네트워크 전송 계층 → Android / iOS 호스트
@@ -31,7 +31,9 @@ Fetch 요청 → NetworkHost → 네트워크 전송 계층 → Android / iOS �
 | 플랫폼 모듈 레지스트리 | 앱에 포함된 버전 있는 JS 모듈과 Android/iOS 호스트 구현을 빌드 시 연결하고 플랫폼별 기능을 공개 | V8 핸들·Rust 포인터의 공개, 임의 네이티브 라이브러리의 무검증 로딩 |
 | JavaScript 네트워크 호스트 | 제안된 `fetch`·`Request`·`Response` 표면을 네트워크 호스트 계약에 연결 | Rust UI 트리와 GPU 렌더링 |
 | 네트워크 전송 계층 | URLSession·Android 네트워크 구현 또는 공통 전송 구현을 같은 계약 뒤에서 검증 | DOM 노드와 UI 장면 |
-| Rust 코어 | 안정적인 노드 ID, 문서·UI 트리, 스타일, 레이아웃 결과, 장면 변경 배치의 순서, 공통 우선순위 선택기 | JS 객체와 플랫폼 객체, V8 세션 수명 |
+| Rust 코어 | 안정적인 노드 ID, 문서·UI 트리, 변경 배치와 revision, 공통 우선순위 선택기 | JS 객체와 플랫폼 객체, V8 세션 수명 |
+| `spinon-style` | 내장 UA CSS 자원과 이후 Stylo DOM 어댑터·계산 스타일 | 레이아웃 계산과 GPU 표시 |
+| `spinon-layout` | 계산 스타일에서 Taffy 및 추가 알고리즘으로 연결, 텍스트·이미지 측정 | CSS cascade와 페인트 속성 |
 | GPU 렌더러 | 그리기 명령, 텍스트·이미지·클리핑·합성, 프레임 제출 | 컴포넌트 상태와 JS 객체 |
 | 플랫폼 호스트 | GPU 표면·입력·IME·접근성 연결, 폰트/이미지 자원과 표시 완료 신호 | 프레임워크의 컴포넌트 상태 |
 
@@ -51,19 +53,21 @@ JSI는 React Native가 채택한 JavaScript↔C++ 인터페이스다. 스피논�
 
 초기 레이아웃 구현에는 Taffy를 `LayoutEngine` 경계 뒤에 둔다. Taffy는 Block·Flexbox·Grid 배치 계산에 사용하고, 폰트/이미지 측정은 플랫폼과 스피논의 별도 책임으로 둔다. 기존 작은 행·열 엔진은 PoC 비교 기준으로 보존한다. Taffy 버전은 실제 코어 크레이트를 만들 때 고정하고, 부분 갱신 비용과 모바일 크기를 측정한 뒤 계속 사용할지 판정한다. Taffy를 사용하지 않으면 이 배치 알고리즘과 테스트·유지보수를 스피논에서 직접 맡아야 한다.
 
-CSS 파서는 처음부터 만들지 않는다. 빌드 단계에서 Lightning CSS로 스타일시트를 읽고 지원 문법을 모바일용 스타일 데이터로 변환하는 경로를 먼저 검증한다. 웹 빌드는 브라우저 CSS를 사용한다. 모바일 런타임에는 선택자 매칭, 우선순위, 상속, 변수·단위 계산이 여전히 필요하다. 동적 스타일시트 문자열을 런타임에서 받는 기능은 별도 범위로 두고, 필요할 때 `cssparser` 같은 문법 파서를 검토한다. Lightning CSS를 모바일 앱에 통째로 포함할지는 초기 결정에 넣지 않는다.
+CSS 계산은 모바일에서 Stylo를 사용하고 레이아웃과 GPU 페인트는 별도 모듈이 소유한다. `spinon-style`은 지원 요소의 기본 스타일 자원을 컴파일 시 포함하고 내부 FFI에서 읽기 전용으로 제공한다. 이 자원은 Stylo의 UA cascade나 실제 렌더 경로에 아직 연결되지 않았다. Spinon 소유 문서 트리용 adapter를 별도로 구현한다. Blitz DOM은 런타임 의존성으로 넣지 않는다. Taffy는 검증된 Block·Flexbox·Grid 경로에 적용하되 전체 CSS 목표에 필요한 알고리즘을 추가할 수 있도록 `spinon-layout` 경계를 유지한다.
 
-첫 React 카운터에 필요한 블록·Flex·크기·간격·색·글꼴 계산은 수직 구현에 포함한다. 실사용 UI 단계의 CSS 작업은 이 최소 경로를 확장하는 작업이다. 단일 번들 실행을 ESM 청크·동적 import 지원의 증거로 사용하지 않는다.
+Vite·Rspack은 CSS import·모듈·로컬 에셋·청크 관계를 보존한다. 웹은 브라우저 CSS를 사용하고 모바일은 번들 CSS를 Stylo에 전달해 선택자·cascade·상속·computed style을 계산한다. 외부 네트워크 CSS `@import`·`url()` 로더는 미구현이며 모바일에서 요청하지 않는다. Lightning CSS 변환은 Chromium 결과와 의미가 같은지 검증한 범위에서만 사용한다. 전체 CSS 목표, UA 규칙, 기능 범위와 비교 기준은 [CSS 호환 명세](../spec/0008-css-compatibility.md), 작업 순서는 [CSS 구현 계획](plans/css-rendering.md)에 둔다.
 
-Tailwind CSS는 별도 모바일 런타임이 아니라 빌드 도구로 취급한다. Tailwind가 생성한 CSS를 Lightning CSS 변환 경로에 넣고, 스피논이 지원하는 선언·선택자·변수·계층에 한해 모바일 스타일로 만든다. 초기에는 작은 유틸리티 집합을 웹·Android·iOS에서 비교하며 범위를 늘린다. Tailwind 전체 호환을 전제로 하지 않는다.
+첫 화면은 우선순위 P0의 기본 선택자·상자 모델·Flex·색·글꼴에서 시작한다. Grid·전체 inline formatting·반응형·애니메이션·표·float·다단·고급 페인트로 범위를 확장해 고정 Chromium inventory 전체를 검증한다. 단일 번들 실행을 ESM 청크·동적 import 지원의 증거로 사용하지 않는다.
 
-[스타일·레이아웃 실험](../spikes/style-layout/README.md)은 Lightning CSS AST → 제한된 스타일 데이터 → Taffy 계산 경로를 확인한다. 모바일 호스트 통합과 웹 CSS 동등성은 별도 단계다.
+Tailwind CSS는 별도 모바일 런타임이 아니라 빌드 도구로 취급한다. Tailwind가 만든 CSS는 일반 CSS와 같은 Stylo·레이아웃·GPU 경로를 사용한다. 작은 유틸리티 집합부터 연결하고 실제 생성 CSS의 속성·선택자·값이 적합성을 통과할 때만 지원을 표시한다. 전용 지시문·플러그인은 CSS 속성 호환과 별도 빌드 통합 항목이다.
+
+[기존 스타일·레이아웃 실험](../spikes/style-layout/README.md)은 Lightning CSS AST → 제한된 스타일 데이터 → Taffy의 대안 경로를 조사한 자료다. 이 AST 변환은 제품 경로로 선택하지 않았다. 제품 CSS 파싱·계산은 Stylo이며 Lightning CSS는 동등성 확인이 필요한 빌드 변환 후보로 남긴다.
 
 제한된 DOM 호환을 추가하면 순서가 하나 더 생긴다. [R01·R03](../spec/STATUS.md)에서 앱 문서 루트, 혼합 요소·텍스트 트리, 동기 논리 변경·조회, 렌더러 소유권을 먼저 정한 뒤 V8 바인딩과 프레임워크 어댑터를 구현한다. DOM façade는 `packages/runtime/dom`에 분리하는 계획이다. 현재 S01 트리를 그대로 공개하거나 React 어댑터와 별도 UI 트리를 만들지 않는다.
 
 ## 다음 구현 단계
 
-1. iOS 실기기에서 JIT 없는 V8 실행을 확인하고, 웹 호스트 계약 초안과 [네 구현 비교](plans/benchmark.md)의 작은 기준 화면·계측 조건을 먼저 준비한다. GPU 표면·텍스트·입력·접근성 연결의 최소 성립 조건과 Vue·Svelte, Taffy, Lightning CSS 경계를 작은 실험으로 확인한다.
+1. iOS 실기기에서 JIT 없는 V8 실행을 확인하고, 웹 호스트 계약 초안과 [네 구현 비교](plans/benchmark.md)의 작은 기준 화면·계측 조건을 먼저 준비한다. GPU 표면·텍스트·입력·접근성 연결의 최소 성립 조건과 Vue·Svelte 어댑터와 Stylo·Taffy 연결을 작은 비교 fixture로 검증한다.
 2. 현재 [동적 트리 PoC](../spikes/dynamic-tree/README.md)의 Rust 파일에서 트리·커밋·런타임·FFI 책임을 분리한다. DOM 목표 범위를 확정한 경우에만 혼합 요소·텍스트 노드와 동기 DOM 트리 계약을 추가한다. PoC 결과와 코드는 비교 기준으로 보존한다.
 3. 이벤트 ID와 JS 콜백의 등록·해제 수명을 명시하고 React 어댑터와 선택된 DOM façade를 같은 Rust 트리에 연결한다. DOM façade를 사용하지 않는 React 카운터도 독립 실행되어야 한다. 같은 카운터 화면이 세 플랫폼에서 동작하면 네 구현을 처음 비교한다.
 4. 스타일·텍스트·입력·목록 기능을 추가할 때마다 같은 사용자 시나리오로 다시 비교한다. 그 결과를 토대로 부분 갱신, 스레드 스케줄러, GPU 프레임 제출 방식을 개선한다.
