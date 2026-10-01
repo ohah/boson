@@ -8,6 +8,7 @@
 
 - 현재 checkout에는 `spikes/stylo-style`과 `spikes/blitz-stylo-layout` 경로가 없다. `spikes/style-layout`은 Lightning CSS AST와 Taffy `0.14.0`을 시험하며 Stylo DOM/cascade 연결은 하지 않는다.
 - 제품 workspace는 Stylo [`0.22.0`](https://crates.io/crates/stylo/0.22.0), `stylo_dom 0.22.0`, `selectors 0.41.0`을 고정했다. C03에서 Selector DOM adapter를 구현하고 모바일 Rust target 컴파일을 확인했다. stylesheet cascade·computed style·Taffy 변환·GPU 표시 근거는 아직 없다.
+- C04 첫 코드 조각은 `spinon-style::StylesheetRegistry`의 UTF-8 입력, Stylo origin, 등록 순서와 parser 진단 보존이다. 외부 `@import`를 처리할 로더는 제공하지 않는다. 이 목록은 Stylist cascade·computed style과 다르며, C01의 Chromium 비교 fixture를 확장한 뒤 계산 단계로 이어간다.
 - R10은 Taffy의 트리 갱신·좌표·합성 텍스트 측정을 비교했다. 실제 글꼴 shaping·줄바꿈·GPU 화면을 검증하지 않았다.
 - C02 production 추출과 fixture 전용 adapter prototype은 [Vite `8.3.1`·Rspack `2.2.7` 기록](../../spec/internal/evidence/css-c02-bundler-2026-10-01.md)에 있다. 양쪽 production build에서 CSS Module named import, 조건 suffix가 있는 로컬·외부 `@import`, SVG·WOFF2 자원, entry/dynamic/shared chunk를 확인했다. Vite 기본 CSS Module 객체 import는 통과하고 Rspack은 `namedExports: false` 설정으로 맞출 수 있다. Rspack stats는 CSS source/module graph와 원본 위치를 주고 Vite manifest는 chunk·CSS·asset 연결을 준다. 번들러별 collector가 [내부 계약 후보](../../spec/internal/0011-css-resource-adapter-c02.md)의 공통 snapshot으로 정규화한다. Vite 기본 경고에는 원본 CSS 위치가 없지만 fixture adapter가 입력 CSS parser 위치를 보존해 Rspack의 `2:24` raw column과 정규화된 1-based `2:25`를 맞췄다. 이 prototype은 상대 경로 fixture만 처리하며 package resolver, 최종 graph 직렬화, 제품 패키지/API, 모바일/OTA 연결을 구현하지 않았으므로 C02는 미완료다.
 - R03은 `HostDocument`·불변 snapshot의 내부 코어 모델을 `spinon-core`에 추가했고, C03은 snapshot을 Stylo `0.22.0` DOM·selector trait에 연결했다. 공개 DOM façade와 스타일 변환 계층, 계산 스타일→Taffy 경계는 별도 작업이다.
@@ -39,7 +40,7 @@ flowchart TD
 | 모듈 | 소유할 구현 |
 | --- | --- |
 | `crates/spinon-core` | R03 `HostDocument` 내부 트리·안정 핸들·속성·요소 상태·문서/표시 revision snapshot. 기존 S01 `Tree`와 레이아웃 모듈은 아직 분리됨 |
-| `crates/spinon-style` | Stylo [`0.22.0`](https://crates.io/crates/stylo/0.22.0) HostDocument DOM trait adapter, 이후 stylesheet와 origin 관리, selector/cascade/inheritance, computed style 캐시와 무효화, 미지원 진단 |
+| `crates/spinon-style` | Stylo [`0.22.0`](https://crates.io/crates/stylo/0.22.0) HostDocument DOM trait adapter와 stylesheet 파싱·출처·등록 순서. 후속 작업에서 selector/cascade/inheritance, computed style 캐시와 무효화, 미지원 진단을 연결 |
 | `crates/spinon-layout` | Stylo computed value→레이아웃 style 변환, Taffy 노드 ID 대응, 텍스트·이미지 measure callback, dirty subtree 갱신, 좌표 정책 |
 | `crates/spinon-render` | 페인트 속성 변환, GPU 장면, stacking·clip·composite·hit-test |
 | Vite·Rspack 패키지 | CSS import·CSS Modules·에셋 참조·원본 위치·JS 청크별 CSS 의존성을 웹·모바일 산출물에 연결 |
