@@ -32,7 +32,7 @@ Fetch 요청 → NetworkHost → 네트워크 전송 계층 → Android / iOS �
 | JavaScript 네트워크 호스트 | 제안된 `fetch`·`Request`·`Response` 표면을 네트워크 호스트 계약에 연결 | Rust UI 트리와 GPU 렌더링 |
 | 네트워크 전송 계층 | URLSession·Android 네트워크 구현 또는 공통 전송 구현을 같은 계약 뒤에서 검증 | DOM 노드와 UI 장면 |
 | Rust 코어 (`crates/spinon-core`) | 안정적인 노드 ID, 문서·UI 트리, 자식 순서, 구조 revision, 원자 변경 묶음, 공통 우선순위 선택기 | 계산 스타일·CSS cascade, 레이아웃 프레임, JS 객체와 플랫폼 객체, V8 세션 수명 |
-| `spinon-style` | 내장 UA CSS 자원과 이후 Stylo DOM 어댑터·계산 스타일 | 레이아웃 계산과 GPU 표시 |
+| `spinon-style` | 내장 UA CSS 자원, C03 Stylo DOM adapter, 이후 stylesheet·cascade·계산 스타일 | 레이아웃 계산과 GPU 표시 |
 | 레이아웃 (`crates/spinon-layout`) | 코어 트리와 계산 스타일 스냅샷, `LayoutEngine` 경계, Taffy Flex 계산·프레임 결과 | CSS 파싱·cascade, 폰트/이미지 측정, 장면·GPU 자원 |
 | GPU 렌더러 | 그리기 명령, 텍스트·이미지·클리핑·합성, 프레임 제출 | 컴포넌트 상태와 JS 객체 |
 | 플랫폼 호스트 | GPU 표면·입력·IME·접근성 연결, 폰트/이미지 자원과 표시 완료 신호 | 프레임워크의 컴포넌트 상태 |
@@ -53,7 +53,7 @@ JSI는 React Native가 채택한 JavaScript↔C++ 인터페이스다. 스피논�
 
 `crates/spinon-layout`은 `spinon-core::Tree`와 계산 스타일 맵에서 순서가 보존된 스냅샷을 만들고 `LayoutEngine` 경계 뒤에서 Taffy를 호출한다. workspace는 Taffy `0.14.0`을 고정하며 현재 `std`, `flexbox`, `taffy_tree` 기능만 연결한다. 구현 범위는 고정/auto 크기, row/column, LTR/RTL, padding, gap, flex-grow의 작은 Flex subset이다. 결과는 구조 revision과 함께 소수 좌표 프레임으로 반환한다. CSS 파싱·cascade, flex-shrink, wrap, Grid·Block, 실제 폰트·이미지 측정과 CSS px↔dp/point 변환은 이 경계의 책임이 아니며 아직 지원하지 않는다. 기존 작은 행·열 엔진과 같은 입력 fixture를 비교 기준으로 보존한다. 매 계산마다 Taffy 트리를 다시 만들므로 부분 갱신 비용, 모바일 바이너리 크기와 성능은 이후 검증 과제다. 전체 동작·오류 계약은 [내부 레이아웃 인터페이스](../spec/internal/0009-layout-engine.md)에 둔다.
 
-CSS 계산은 모바일에서 Stylo를 사용하고 레이아웃과 GPU 페인트는 별도 모듈이 소유한다. `spinon-style`은 지원 요소의 기본 스타일 자원을 컴파일 시 포함하고 내부 FFI에서 읽기 전용으로 제공한다. 이 자원은 Stylo의 UA cascade나 실제 렌더 경로에 아직 연결되지 않았다. Spinon 소유 문서 트리용 adapter를 별도로 구현한다. Blitz DOM은 런타임 의존성으로 넣지 않는다. Taffy는 검증된 Block·Flexbox·Grid 경로에 적용하되 전체 CSS 목표에 필요한 알고리즘을 추가할 수 있도록 `spinon-layout` 경계를 유지한다.
+CSS 계산은 모바일에서 Stylo를 사용하고 레이아웃과 GPU 페인트는 별도 모듈이 소유한다. `spinon-style`은 지원 요소의 기본 스타일 자원을 컴파일 시 포함하고 내부 FFI에서 읽기 전용으로 제공한다. C03에서 Spinon 소유 `HostDocumentSnapshot`을 Stylo DOM·selector 인터페이스에 연결했지만, UA cascade 등록·stylesheet 계산·실제 렌더 경로는 아직 연결하지 않았다. Blitz DOM은 런타임 의존성으로 넣지 않는다. Taffy는 검증된 Block·Flexbox·Grid 경로에 적용하되 전체 CSS 목표에 필요한 알고리즘을 추가할 수 있도록 `spinon-layout` 경계를 유지한다.
 
 Vite·Rspack은 CSS import·모듈·로컬 에셋·청크 관계를 보존한다. 웹은 브라우저 CSS를 사용하고 모바일은 번들 CSS를 Stylo에 전달해 선택자·cascade·상속·computed style을 계산한다. 외부 네트워크 CSS `@import`·`url()` 로더는 미구현이며 모바일에서 요청하지 않는다. Lightning CSS 변환은 Chromium 결과와 의미가 같은지 검증한 범위에서만 사용한다. 전체 CSS 목표, UA 규칙, 기능 범위와 비교 기준은 [CSS 호환 명세](../spec/0008-css-compatibility.md), 작업 순서는 [CSS 구현 계획](plans/css-rendering.md)에 둔다.
 
