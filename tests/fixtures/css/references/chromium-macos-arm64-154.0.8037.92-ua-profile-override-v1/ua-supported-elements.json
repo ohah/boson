@@ -1,6 +1,10 @@
 {
   "schema": "spinon-css-reference/v1",
-  "referenceId": "chromium-macos-arm64-154.0.8037.92-ua-v0",
+  "referenceId": "chromium-macos-arm64-154.0.8037.92-ua-profile-override-v1",
+  "captureTool": {
+    "path": "tools/css-reference/capture.mjs",
+    "sha256": "11a5ae1c278337f505ab02db283e0095c8cc89fa7eb620b6500438e5b5bbcd08"
+  },
   "oracle": {
     "name": "Chromium",
     "product": "Google Chrome 154.0.8037.92",
@@ -13,6 +17,7 @@
     "os": "macOS 26.5.1",
     "osBuild": "25F80",
     "architecture": "arm64",
+    "nodeVersion": "v24.20.0",
     "flags": [
       "--headless=new",
       "--no-first-run",
@@ -22,6 +27,10 @@
       "--remote-debugging-port=0",
       "--user-data-dir=<temporary-profile>"
     ],
+    "defaultFontSize": {
+      "root": "16px",
+      "body": "16px"
+    },
     "emulation": {
       "cssViewportPx": {
         "width": 800,
@@ -46,7 +55,11 @@
     "cssProfile": "spinon-html-ua/0.1.0-draft",
     "profileCssPath": "crates/spinon-style/resources/ua/supported-elements-v0.css",
     "profileCssSha256": "bd15dd612a21cc8cb48e25eb38b86803868667df75cd56f111d7c476ddba3ebd",
-    "profileAuthorStyleSheetCount": 1
+    "comparisonBaseline": {
+      "authorStyleSheetCount": 1,
+      "cssSha256": "30d17e85b60dd647e16023361f9a3a0ee8ad13a2d816f097d65be37547072cf2"
+    },
+    "profileAuthorStyleSheetCount": 2
   },
   "observations": {
     "chromiumDefault": [
@@ -267,6 +280,348 @@
             "namespace": "http://www.w3.org/1999/xhtml",
             "computed": {
               "display": "list-item"
+            }
+          }
+        ]
+      }
+    ],
+    "selectorCoverage": [
+      {
+        "selector": "div",
+        "expectedNodeIds": [
+          "ua-div"
+        ],
+        "chromiumNodeIds": [
+          "ua-div"
+        ],
+        "profileNodeIds": [
+          "ua-div"
+        ],
+        "exactFixtureNodes": true
+      },
+      {
+        "selector": "span",
+        "expectedNodeIds": [
+          "ua-span"
+        ],
+        "chromiumNodeIds": [
+          "ua-span"
+        ],
+        "profileNodeIds": [
+          "ua-span"
+        ],
+        "exactFixtureNodes": true
+      },
+      {
+        "selector": "a",
+        "expectedNodeIds": [
+          "ua-anchor"
+        ],
+        "chromiumNodeIds": [
+          "ua-anchor"
+        ],
+        "profileNodeIds": [
+          "ua-anchor"
+        ],
+        "exactFixtureNodes": true
+      },
+      {
+        "selector": "img",
+        "expectedNodeIds": [
+          "ua-image"
+        ],
+        "chromiumNodeIds": [
+          "ua-image"
+        ],
+        "profileNodeIds": [
+          "ua-image"
+        ],
+        "exactFixtureNodes": true
+      },
+      {
+        "selector": "button",
+        "expectedNodeIds": [
+          "ua-button"
+        ],
+        "chromiumNodeIds": [
+          "ua-button"
+        ],
+        "profileNodeIds": [
+          "ua-button"
+        ],
+        "exactFixtureNodes": true
+      },
+      {
+        "selector": "input",
+        "expectedNodeIds": [
+          "ua-input"
+        ],
+        "chromiumNodeIds": [
+          "ua-input"
+        ],
+        "profileNodeIds": [
+          "ua-input"
+        ],
+        "exactFixtureNodes": true
+      },
+      {
+        "selector": "p",
+        "expectedNodeIds": [
+          "ua-paragraph"
+        ],
+        "chromiumNodeIds": [
+          "ua-paragraph"
+        ],
+        "profileNodeIds": [
+          "ua-paragraph"
+        ],
+        "exactFixtureNodes": true
+      },
+      {
+        "selector": "ul",
+        "expectedNodeIds": [
+          "ua-list"
+        ],
+        "chromiumNodeIds": [
+          "ua-list"
+        ],
+        "profileNodeIds": [
+          "ua-list"
+        ],
+        "exactFixtureNodes": true
+      },
+      {
+        "selector": "li",
+        "expectedNodeIds": [
+          "ua-list-item"
+        ],
+        "chromiumNodeIds": [
+          "ua-list-item"
+        ],
+        "profileNodeIds": [
+          "ua-list-item"
+        ],
+        "exactFixtureNodes": true
+      }
+    ],
+    "comparisonBaseline": [
+      {
+        "selector": "div",
+        "features": [
+          {
+            "id": "ua.display.div.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-div",
+            "tag": "div",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "table"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "span",
+        "features": [
+          {
+            "id": "ua.display.span.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-span",
+            "tag": "span",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "table"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "a",
+        "features": [
+          {
+            "id": "ua.display.a.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-anchor",
+            "tag": "a",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "table"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "img",
+        "features": [
+          {
+            "id": "ua.display.img.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-image",
+            "tag": "img",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "table"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "button",
+        "features": [
+          {
+            "id": "ua.display.button.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-button",
+            "tag": "button",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "block"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "input",
+        "features": [
+          {
+            "id": "ua.display.input.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-input",
+            "tag": "input",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "block"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "p",
+        "features": [
+          {
+            "id": "ua.display.p.v0",
+            "property": "display"
+          },
+          {
+            "id": "ua.margin-block-start.p.v0",
+            "property": "margin-block-start"
+          },
+          {
+            "id": "ua.margin-block-end.p.v0",
+            "property": "margin-block-end"
+          },
+          {
+            "id": "ua.margin-inline-start.p.v0",
+            "property": "margin-inline-start"
+          },
+          {
+            "id": "ua.margin-inline-end.p.v0",
+            "property": "margin-inline-end"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-paragraph",
+            "tag": "p",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "table",
+              "margin-block-start": "0px",
+              "margin-block-end": "0px",
+              "margin-inline-start": "1px",
+              "margin-inline-end": "1px"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "ul",
+        "features": [
+          {
+            "id": "ua.display.ul.v0",
+            "property": "display"
+          },
+          {
+            "id": "ua.list-style-type.ul.v0",
+            "property": "list-style-type"
+          },
+          {
+            "id": "ua.margin-block-start.ul.v0",
+            "property": "margin-block-start"
+          },
+          {
+            "id": "ua.margin-block-end.ul.v0",
+            "property": "margin-block-end"
+          },
+          {
+            "id": "ua.margin-inline-start.ul.v0",
+            "property": "margin-inline-start"
+          },
+          {
+            "id": "ua.margin-inline-end.ul.v0",
+            "property": "margin-inline-end"
+          },
+          {
+            "id": "ua.padding-inline-start.ul.v0",
+            "property": "padding-inline-start"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-list",
+            "tag": "ul",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "table",
+              "list-style-type": "none",
+              "margin-block-start": "0px",
+              "margin-block-end": "0px",
+              "margin-inline-start": "1px",
+              "margin-inline-end": "1px",
+              "padding-inline-start": "0px"
+            }
+          }
+        ]
+      },
+      {
+        "selector": "li",
+        "features": [
+          {
+            "id": "ua.display.li.v0",
+            "property": "display"
+          }
+        ],
+        "matches": [
+          {
+            "id": "ua-list-item",
+            "tag": "li",
+            "namespace": "http://www.w3.org/1999/xhtml",
+            "computed": {
+              "display": "table"
             }
           }
         ]
@@ -496,37 +851,19 @@
       }
     ],
     "comparison": {
-      "method": "정확한 selector match 집합과 computed CSS 값 비교",
-      "passed": 28,
+      "method": "고정된 author baseline을 덮는 프로필의 computed CSS 값 정확 비교",
+      "passed": 19,
       "failed": 0,
       "features": [
-        {
-          "id": "selector.div.matches.v0",
-          "reference": [
-            "ua-div"
-          ],
-          "profile": [
-            "ua-div"
-          ],
-          "equal": true
-        },
         {
           "id": "ua.display.div.v0",
           "selector": "div",
           "nodeId": "ua-div",
           "property": "display",
           "reference": "block",
+          "baseline": "table",
+          "baselineDiffers": true,
           "profile": "block",
-          "equal": true
-        },
-        {
-          "id": "selector.span.matches.v0",
-          "reference": [
-            "ua-span"
-          ],
-          "profile": [
-            "ua-span"
-          ],
           "equal": true
         },
         {
@@ -535,17 +872,9 @@
           "nodeId": "ua-span",
           "property": "display",
           "reference": "inline",
+          "baseline": "table",
+          "baselineDiffers": true,
           "profile": "inline",
-          "equal": true
-        },
-        {
-          "id": "selector.a.matches.v0",
-          "reference": [
-            "ua-anchor"
-          ],
-          "profile": [
-            "ua-anchor"
-          ],
           "equal": true
         },
         {
@@ -554,17 +883,9 @@
           "nodeId": "ua-anchor",
           "property": "display",
           "reference": "inline",
+          "baseline": "table",
+          "baselineDiffers": true,
           "profile": "inline",
-          "equal": true
-        },
-        {
-          "id": "selector.img.matches.v0",
-          "reference": [
-            "ua-image"
-          ],
-          "profile": [
-            "ua-image"
-          ],
           "equal": true
         },
         {
@@ -573,17 +894,9 @@
           "nodeId": "ua-image",
           "property": "display",
           "reference": "inline",
+          "baseline": "table",
+          "baselineDiffers": true,
           "profile": "inline",
-          "equal": true
-        },
-        {
-          "id": "selector.button.matches.v0",
-          "reference": [
-            "ua-button"
-          ],
-          "profile": [
-            "ua-button"
-          ],
           "equal": true
         },
         {
@@ -592,17 +905,9 @@
           "nodeId": "ua-button",
           "property": "display",
           "reference": "inline-block",
+          "baseline": "block",
+          "baselineDiffers": true,
           "profile": "inline-block",
-          "equal": true
-        },
-        {
-          "id": "selector.input.matches.v0",
-          "reference": [
-            "ua-input"
-          ],
-          "profile": [
-            "ua-input"
-          ],
           "equal": true
         },
         {
@@ -611,17 +916,9 @@
           "nodeId": "ua-input",
           "property": "display",
           "reference": "inline-block",
+          "baseline": "block",
+          "baselineDiffers": true,
           "profile": "inline-block",
-          "equal": true
-        },
-        {
-          "id": "selector.p.matches.v0",
-          "reference": [
-            "ua-paragraph"
-          ],
-          "profile": [
-            "ua-paragraph"
-          ],
           "equal": true
         },
         {
@@ -630,6 +927,8 @@
           "nodeId": "ua-paragraph",
           "property": "display",
           "reference": "block",
+          "baseline": "table",
+          "baselineDiffers": true,
           "profile": "block",
           "equal": true
         },
@@ -639,6 +938,8 @@
           "nodeId": "ua-paragraph",
           "property": "margin-block-start",
           "reference": "16px",
+          "baseline": "0px",
+          "baselineDiffers": true,
           "profile": "16px",
           "equal": true
         },
@@ -648,6 +949,8 @@
           "nodeId": "ua-paragraph",
           "property": "margin-block-end",
           "reference": "16px",
+          "baseline": "0px",
+          "baselineDiffers": true,
           "profile": "16px",
           "equal": true
         },
@@ -657,6 +960,8 @@
           "nodeId": "ua-paragraph",
           "property": "margin-inline-start",
           "reference": "0px",
+          "baseline": "1px",
+          "baselineDiffers": true,
           "profile": "0px",
           "equal": true
         },
@@ -666,17 +971,9 @@
           "nodeId": "ua-paragraph",
           "property": "margin-inline-end",
           "reference": "0px",
+          "baseline": "1px",
+          "baselineDiffers": true,
           "profile": "0px",
-          "equal": true
-        },
-        {
-          "id": "selector.ul.matches.v0",
-          "reference": [
-            "ua-list"
-          ],
-          "profile": [
-            "ua-list"
-          ],
           "equal": true
         },
         {
@@ -685,6 +982,8 @@
           "nodeId": "ua-list",
           "property": "display",
           "reference": "block",
+          "baseline": "table",
+          "baselineDiffers": true,
           "profile": "block",
           "equal": true
         },
@@ -694,6 +993,8 @@
           "nodeId": "ua-list",
           "property": "list-style-type",
           "reference": "disc",
+          "baseline": "none",
+          "baselineDiffers": true,
           "profile": "disc",
           "equal": true
         },
@@ -703,6 +1004,8 @@
           "nodeId": "ua-list",
           "property": "margin-block-start",
           "reference": "16px",
+          "baseline": "0px",
+          "baselineDiffers": true,
           "profile": "16px",
           "equal": true
         },
@@ -712,6 +1015,8 @@
           "nodeId": "ua-list",
           "property": "margin-block-end",
           "reference": "16px",
+          "baseline": "0px",
+          "baselineDiffers": true,
           "profile": "16px",
           "equal": true
         },
@@ -721,6 +1026,8 @@
           "nodeId": "ua-list",
           "property": "margin-inline-start",
           "reference": "0px",
+          "baseline": "1px",
+          "baselineDiffers": true,
           "profile": "0px",
           "equal": true
         },
@@ -730,6 +1037,8 @@
           "nodeId": "ua-list",
           "property": "margin-inline-end",
           "reference": "0px",
+          "baseline": "1px",
+          "baselineDiffers": true,
           "profile": "0px",
           "equal": true
         },
@@ -739,17 +1048,9 @@
           "nodeId": "ua-list",
           "property": "padding-inline-start",
           "reference": "40px",
+          "baseline": "0px",
+          "baselineDiffers": true,
           "profile": "40px",
-          "equal": true
-        },
-        {
-          "id": "selector.li.matches.v0",
-          "reference": [
-            "ua-list-item"
-          ],
-          "profile": [
-            "ua-list-item"
-          ],
           "equal": true
         },
         {
@@ -758,6 +1059,8 @@
           "nodeId": "ua-list-item",
           "property": "display",
           "reference": "list-item",
+          "baseline": "table",
+          "baselineDiffers": true,
           "profile": "list-item",
           "equal": true
         }

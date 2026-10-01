@@ -23,7 +23,7 @@
 
 C01의 첫 비교 산출물은 Chrome `154.0.8037.92`, Chromium revision `@334b65d254ccc35df4fca82706d1753227b01039`, macOS `26.5.1` (`25F80`, arm64)에서 수집했다. viewport는 `800×600` CSS px, 배율 `1`, locale `en-US`, time zone `UTC`, 미디어 상태는 light/no-preference/forced-colors none이다. 재현 조건과 브라우저·fixture·스타일 파일 해시는 [초기 비교 기록](internal/evidence/css-c01-chromium-ua-2026-10-01.md)과 그 기록이 가리키는 JSON에 있다.
 
-초기 fixture는 UA 자원에 선언된 9개 HTML 태그 selector와 19개 computed CSS 값을 비교한다. selector 집합 9개를 포함한 28개 정확 비교는 통과했다. 이 산출물은 `C01` 전체가 아니다. SVG와 전체 feature inventory, cascade origin, layout·text·GPU 비교, Android·iOS 결과는 미측정이며 100% 호환을 주장하지 않는다.
+초기 fixture는 9개 HTML 요소를 확인하고, computed value 19개를 정확 비교한다. 프로필 선언이 실제로 적용되는지 확인하기 위해 각 기대 계산값과 다른 author baseline을 먼저 넣고, 그 뒤 내장 CSS를 author stylesheet로 추가했다. baseline과 프로필 계산값을 모두 스냅샷에 보존하며, 19개 값은 모두 기준 Chromium 계산값과 일치했다. 9개 요소 ID는 별도의 fixture 범위 검사로 통과했다. 앞선 `ua-v0` 탐색 결과의 selector 집합 9개는 CSS 선언 적용을 입증하지 못해 비교 근거에서 제외하고 현재 기준 자료에서는 철회했다. 이 결과도 `C01` 전체가 아니다. SVG와 전체 feature inventory, UA cascade origin, layout·text·GPU 비교, Android·iOS 결과는 미측정이며 100% 호환을 주장하지 않는다.
 
 ## 구현 책임
 
