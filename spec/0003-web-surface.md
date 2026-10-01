@@ -14,7 +14,7 @@
 | `<span>`, `<input>`, `<img>`, `<p>`, `<a>`, `<ul>`, `<li>` | 실사용 UI | 각각 인라인, 입력, 이미지, 문단, 링크, 목록 의미 | 태그별 속성·이벤트·접근성 세부 계약과 기본 외형 |
 
 
-지원 HTML 요소에 적용할 구조적 UA 규칙은 [`spinon-style` 내장 stylesheet 초안](../crates/spinon-style/resources/ua/supported-elements-v0.css)으로 관리한다. 이 자원은 Rust 바이너리에 포함되지만 Stylo cascade나 화면에는 아직 연결되지 않았다. 폼 컨트롤의 외형·링크 상태별 표현도 미구현이다. 세부 범위는 [CSS 호환 명세](0008-css-compatibility.md)와 [구현 상태 대장](STATUS.md)의 C01·C04를 따른다.
+지원 HTML 요소에 적용할 구조적 UA 규칙은 [`spinon-style` 내장 stylesheet 초안](https://github.com/ohah/spinon/blob/main/crates/spinon-style/resources/ua/supported-elements-v0.css)으로 관리한다. 이 자원은 Rust 바이너리에 포함되지만 Stylo cascade나 화면에는 아직 연결되지 않았다. 폼 컨트롤의 외형·링크 상태별 표현도 미구현이다. 세부 범위는 [CSS 호환 명세](0008-css-compatibility.md)와 [구현 상태 대장](STATUS.md)의 C01·C04를 따른다.
 
 첫 수직 구현 외의 요소를 조용히 일반 `<div>`처럼 바꾸지 않는다. 지원되지 않는 요소와 화면에 영향을 주는 속성은 빌드 또는 개발 실행에서 진단한다. 제한된 `document`·노드 API 후보는 [DOM 호환 명세](0007-dom-compatibility.md)에 별도로 제안한다. 이 제안은 전체 브라우저 DOM이나 모든 태그 조회 기능이 있다는 뜻이 아니다.
 

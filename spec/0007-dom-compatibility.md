@@ -60,13 +60,15 @@ DOM 호환 계층만으로 `react-dom`이나 브라우저 DOM을 직접 호출�
 
 일반 속성 메서드가 있다고 해서 `style` 속성이나 CSSOM이 자동 지원되는 것은 아니다. `style` 속성의 설정·조회와 렌더링 반영은 CSS 선언 파싱·무효화 규칙을 정하기 전까지 지원으로 표시하지 않는다. `Element.style`/`CSSStyleDeclaration`은 별도 계약이 필요하다. 지원하는 `id`·`class` 속성을 바꾸면 그 값에 의존하는 지원 선택자와 화면을 언제 다시 계산하는지도 명시해야 한다.
 
+CSSOM은 모바일 CSS 렌더링의 선행 조건이 아니다. 첫 CSS 경로는 번들 stylesheet와 요소·속성·상태를 Stylo에 연결하고 CSS 계산 결과를 렌더 파이프라인에 전달한다. 초기 inline declaration은 프레임워크 호스트 어댑터가 내부 입력으로 제공할 수 있지만, 그것만으로 앱 코드가 `element.style`이나 `CSSStyleSheet`를 호출할 수 있지는 않다. 전체 CSSOM 표면은 [C29](STATUS.md#css-구현-체크리스트)에서 별도로 계약한다. 공개 `setAttribute("style", ...)`, `Element.style`/`CSSStyleDeclaration`, stylesheet rule 편집, `getComputedStyle()`과 박스 조회는 해당 동작·무효화·동기화 규칙이 정해지기 전까지 미지원이다. `id`·`class` 등 일반 지원 속성의 CSS 재계산은 C03~C05의 단계별 계약에 둔다.
+
 ## Rust 트리와 DOM 모델의 차이
 
 현재 S01의 `spinon-core`는 안정적 ID와 원자 변경 묶음을 검증하는 최소 실험이다. 현재 `Node`는 노드마다 태그와 선택적 텍스트를 보관하고 자식 목록에는 다른 노드 ID를 둔다. 따라서 요소의 자식 위치마다 텍스트 노드가 끼어드는 DOM의 순서, `Element`와 `Text`의 서로 다른 노드 종류, 노드 객체의 연결·분리 수명을 표현하지 못한다. 또한 S01의 전체 변경 묶음 커밋은 개별 DOM 메서드의 동기 성공·오류 결과를 정의하지 않는다.
 
-DOM 호환 계층에 연결하기 전 Rust 모델은 최소한 문서·요소·텍스트 노드 종류와 순서가 보존되는 혼합 자식 목록을 표현해야 한다. 노드 ID의 문서 범위, 분리 노드의 존속, JS 래퍼 객체 정체성, 속성 저장, 동기 읽기·쓰기, 오류 대응도 정의해야 한다. S01의 내부 배치 API가 DOM 의미를 이미 구현했다고 간주하지 않는다.
+S01의 `Tree`는 DOM에 연결할 수 없지만, R03의 별도 [`HostDocument`](internal/0003-shared-host-contract.md)는 요소·텍스트 혼합 순서, namespace·속성·상태, 분리 노드 수명, 소유권, 동기 변경 묶음과 revision snapshot을 내부 `0.2.0-draft`로 구현했다. 이 모델은 JS 래퍼 객체 정체성·GC, Web IDL 변환, 공개 DOM 예외, 루트 연결과 Stylo trait를 제공하지 않는다. S01을 DOM 의미로 간주하지 않는다.
 
-이 공통 모델의 첫 내부 제안은 [R03 공통 문서·호스트 계약](internal/0003-shared-host-contract.md)에 기록했다. 하나의 `HostDocument`와 내부 `HostRoot`, 순서가 섞인 요소·텍스트 노드, 소유권이 겹치지 않는 어댑터별 하위 트리, 동기 논리 변경과 revision에 묶인 비동기 출력을 제안한다. 이 문서는 검토용 내부 초안이며, 아래 공개 결정과 지원 범위를 확정하지 않는다. 특히 현재 S01 `Remove`는 하위 트리를 폐기하므로 DOM `removeChild()`의 분리·재삽입 의미에 바로 연결할 수 없다.
+이 공통 모델은 [R03 공통 문서·호스트 계약](internal/0003-shared-host-contract.md)과 `crates/spinon-core/src/document.rs`에 구현되어 있다. 하나의 `HostDocument`와 내부 `HostRoot`, 순서가 섞인 요소·텍스트 노드, 소유권이 겹치지 않는 어댑터별 하위 트리, 동기 논리 변경과 revision snapshot을 제공한다. 실행 근거는 [R03 HostDocument 비교 모델](internal/evidence/r03-host-document-precomparison-2026-10-01.md)이다. 이 내부 모델은 아래 공개 DOM 결정과 지원 범위를 확정하지 않는다.
 
 ## 구현 전 결정과 검증 관문
 
