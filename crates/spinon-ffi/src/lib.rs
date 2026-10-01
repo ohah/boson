@@ -52,6 +52,11 @@ fn write_report(output: *mut c_char, output_capacity: usize, report: &str) -> bo
 /// V8를 만들고 예제 JavaScript를 평가한 뒤 네이티브 콜백과 역방향 JS 이벤트를 실행합니다.
 ///
 /// 앱 빌드 연결을 검증하는 내부 smoke 경로이며 제품 공개 API가 아닙니다.
+///
+/// # Safety
+///
+/// `source`는 NUL 종료된 읽기 가능한 C 문자열을 가리켜야 합니다. `output`은
+/// `output_capacity` 바이트만큼 쓸 수 있는 메모리를 가리켜야 합니다.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn spinon_app_run(
     source: *const c_char,
@@ -78,6 +83,10 @@ pub unsafe extern "C" fn spinon_app_run(
 }
 
 /// 실제 V8 세션에서 우선순위 선택과 동일 등급 FIFO를 확인하는 내부 진단 함수입니다.
+///
+/// # Safety
+///
+/// `output`은 `output_capacity` 바이트만큼 쓸 수 있는 메모리를 가리켜야 합니다.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn spinon_runtime_priority_probe(
     output: *mut c_char,
@@ -97,6 +106,10 @@ pub unsafe extern "C" fn spinon_runtime_priority_probe(
 }
 
 /// 명시적으로 실행된 개발용 Taffy 실험의 결과를 호출자 버퍼에 씁니다.
+///
+/// # Safety
+///
+/// `output`은 `output_capacity` 바이트만큼 쓸 수 있는 메모리를 가리켜야 합니다.
 #[cfg(feature = "r10-experiment")]
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn spinon_taffy_r10_run(
@@ -136,6 +149,10 @@ pub unsafe extern "C" fn spinon_taffy_r10_run(
 }
 
 /// 일반 빌드에서는 Taffy 실험 코드를 연결하지 않고, 명시 실행 요청에 비활성 이유를 돌려줍니다.
+///
+/// # Safety
+///
+/// `output`은 `output_capacity` 바이트만큼 쓸 수 있는 메모리를 가리켜야 합니다.
 #[cfg(not(feature = "r10-experiment"))]
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn spinon_taffy_r10_run(

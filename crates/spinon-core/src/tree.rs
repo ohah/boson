@@ -336,8 +336,10 @@ impl Tree {
                 CommitErrorKind::InvalidIndex { index, child_count },
             ));
         }
-        if parent.is_none() && from_parent.is_some() && self.root.is_some() {
-            let root = self.root.expect("root was checked");
+        if parent.is_none()
+            && from_parent.is_some()
+            && let Some(root) = self.root
+        {
             return Err(CommitError::operation(
                 operation_index,
                 CommitErrorKind::RootAlreadyExists(root),
@@ -427,12 +429,9 @@ impl Tree {
 
     fn validate(&self) -> Result<(), CommitErrorKind> {
         if self.nodes.is_empty() {
-            return if self.root.is_none() {
-                Ok(())
-            } else {
-                Err(CommitErrorKind::UnattachedNodes(vec![
-                    self.root.expect("root is present"),
-                ]))
+            return match self.root {
+                None => Ok(()),
+                Some(root) => Err(CommitErrorKind::UnattachedNodes(vec![root])),
             };
         }
 
