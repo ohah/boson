@@ -4,7 +4,7 @@
 
 ## 먼저 읽을 문서
 
-- [필수 프로젝트 규칙](docs/project-rules.md)
+- [필수 프로젝트 규칙과 Rust 코드 구조·도구 규칙](docs/project-rules.md)
 - [개발·문서 명령](README.md)
 - [공식 명세 인덱스](spec/README.md)
 - [구현 상태와 완료 판정](spec/STATUS.md)

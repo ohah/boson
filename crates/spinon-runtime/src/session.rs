@@ -258,19 +258,19 @@ fn actor_loop(
                 } else {
                     ERR_JAVASCRIPT
                 };
-                let report = operation_report(
+                let report = operation_report(OperationReport {
                     sequence,
-                    "eval",
+                    operation: "eval",
                     status,
                     caller_thread_id,
                     owner_thread_id,
-                    callbacks.callback_thread_id,
+                    callback_thread_id: callbacks.callback_thread_id,
                     queue_wait_us,
                     v8_call_us,
                     cancel_requested,
-                    &callbacks,
-                    &error,
-                );
+                    callbacks: &callbacks,
+                    error: &error,
+                });
                 let _ = reply.send(OperationResponse { status, report });
             }
             Command::Dispatch {
@@ -306,19 +306,19 @@ fn actor_loop(
                 } else {
                     ERR_JAVASCRIPT
                 };
-                let report = operation_report(
+                let report = operation_report(OperationReport {
                     sequence,
-                    "dispatch",
+                    operation: "dispatch",
                     status,
                     caller_thread_id,
                     owner_thread_id,
-                    callbacks.callback_thread_id,
+                    callback_thread_id: callbacks.callback_thread_id,
                     queue_wait_us,
                     v8_call_us,
                     cancel_requested,
-                    &callbacks,
-                    &error,
-                );
+                    callbacks: &callbacks,
+                    error: &error,
+                });
                 let _ = reply.send(OperationResponse { status, report });
             }
         }
@@ -371,9 +371,9 @@ fn finish_execution(
     cancelled
 }
 
-fn operation_report(
+struct OperationReport<'a> {
     sequence: u64,
-    operation: &str,
+    operation: &'a str,
     status: i32,
     caller_thread_id: u64,
     owner_thread_id: u64,
@@ -381,9 +381,24 @@ fn operation_report(
     queue_wait_us: u128,
     v8_call_us: u128,
     cancel_requested: bool,
-    callbacks: &CallbackState,
-    error: &str,
-) -> String {
+    callbacks: &'a CallbackState,
+    error: &'a str,
+}
+
+fn operation_report(report: OperationReport<'_>) -> String {
+    let OperationReport {
+        sequence,
+        operation,
+        status,
+        caller_thread_id,
+        owner_thread_id,
+        callback_thread_id,
+        queue_wait_us,
+        v8_call_us,
+        cancel_requested,
+        callbacks,
+        error,
+    } = report;
     let error = if error.is_empty() { "none" } else { error };
     format!(
         "seq={sequence} op={operation} status={status} caller_tid={caller_thread_id} owner_tid={owner_thread_id} callback_tid={callback_thread_id} queue_wait_us={queue_wait_us} v8_call_us={v8_call_us} cancel_requested={cancel_requested} callback_count={} created_nodes={} last_node_id={} error={error}",
@@ -796,8 +811,8 @@ impl Drop for RuntimeSession {
 #[cfg(test)]
 mod tests {
     use super::{
-        CallbackState, Command, ERR_CANCELLED, ERR_QUEUE_FULL, EnqueueError, OK, QUEUE_CAPACITY,
-        RuntimeSession, TaskPriority, TaskScheduler, operation_report,
+        CallbackState, Command, ERR_CANCELLED, ERR_QUEUE_FULL, EnqueueError, OK, OperationReport,
+        QUEUE_CAPACITY, RuntimeSession, TaskPriority, TaskScheduler, operation_report,
     };
     use std::ffi::{CStr, c_char, c_void};
     use std::hash::{Hash, Hasher};
@@ -936,7 +951,19 @@ mod tests {
             last_node_id: 7,
             callback_thread_id: 42,
         };
-        let report = operation_report(3, "dispatch", 0, 10, 42, 42, 11, 29, false, &callbacks, "");
+        let report = operation_report(OperationReport {
+            sequence: 3,
+            operation: "dispatch",
+            status: 0,
+            caller_thread_id: 10,
+            owner_thread_id: 42,
+            callback_thread_id: 42,
+            queue_wait_us: 11,
+            v8_call_us: 29,
+            cancel_requested: false,
+            callbacks: &callbacks,
+            error: "",
+        });
         assert!(report.contains("caller_tid=10"));
         assert!(report.contains("owner_tid=42"));
         assert!(report.contains("callback_tid=42"));

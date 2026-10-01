@@ -38,3 +38,17 @@
 | 5 | 경계·고갈·플랫폼 범위 | 마지막 nonzero NodeId, 두 revision의 소진, 전체 snapshot 복사와 미구현 GC·Owner 발급·플랫폼/Stylo 연결을 점검했다. 고갈도 원자 거부로 시험하고 미검증 범위를 내부 계약에 남겼다. | `node_id_allocator_uses_the_last_nonzero_id_then_stops`, `revision_exhaustion_never_publishes_a_partial_candidate`, 3 target `cargo check` |
 
 검토 후 남은 제품 게이트는 Stylo DOM trait 연결, C03 적합성 fixture, OwnerId 발급·복구, 노드 회수/메모리 상한, 비용을 개선할 불변·부분 snapshot, V8/Android/iOS 앱 통합이다. 이 R03 코어 결과만으로 DOM 또는 CSS 지원을 완료 표시하지 않는다.
+
+## 모듈화·Rust 도구 추가 적대적 검증 5회 — 2026-10-01
+
+이번 재검토는 기존 동작 검증을 재사용하지 않고 `document.rs` 구조 분리, Rust 관례, FFI 안전 경계와 빌드 도구 규칙을 별도 공격 관점으로 확인했다.
+
+| 회차 | 공격 관점 | 발견과 조치 | 확인 근거 |
+| --- | --- | --- | --- |
+| 1 | 1,666줄 문서 모듈의 변경 영향과 책임 혼합 | 공개 모듈 facade, 자료형, 변경 적용, snapshot 조회, 테스트로 나눴다. 내부 자료형 접근은 하위 모듈에 한정했고 공개 API 재수출은 기존 경로를 유지했다. | `document.rs` 167줄, `document/types.rs` 482줄, `document/mutation.rs` 422줄, `document/snapshot.rs` 140줄, `document/tests.rs` 491줄; 코어 테스트 27개 통과 |
+| 2 | API 이름이 표준 trait와 혼동되는지 | `DomString::from_str`는 `FromStr` 구현처럼 보인다는 Clippy 지적을 받았다. `from_rust_str`로 이름을 바꾸고 `From<&str>`·`From<String>` 변환은 유지했다. | 전체 워크스페이스 Clippy 및 테스트 통과 |
+| 3 | 진단 출력 인자 순서·누락 위험 | 11개 위치 인자를 받던 런타임 진단 포맷 함수를 `OperationReport` 입력 구조체로 바꿨다. 기존 보고 필드를 명시적으로 옮기고 호출 스레드·대기 시간·V8 시간 회귀 단언을 유지했다. | `report_exposes_caller_owner_callback_threads_and_timings`; 런타임 테스트 6개 통과 |
+| 4 | unwrap과 FFI 포인터 계약의 안전성 | 레거시 트리의 검사 후 `expect` 두 곳을 분기 기반으로 바꾸고, 공개 unsafe C 함수에 포인터 길이·문자열 계약을 `# Safety`로 문서화했다. | 기본 및 `r10-experiment` FFI Clippy 통과; 전체 Clippy `-D warnings` 통과 |
+| 5 | 규칙 중복·포매터 설정·플랫폼별 컴파일 누락 | `AGENTS.md`는 규칙 문서 링크만 유지하고 상세 규칙은 `docs/project-rules.md`에 모았다. 루트 `rustfmt.toml`에 Edition 2024와 100열 폭을 고정했다. | `cargo fmt --all -- --check`, `git diff --check`, 전체 테스트 59개, iOS 기기·시뮬레이터 및 Android ARM64 `cargo check` 통과 |
+
+전체 Clippy 명령은 `cargo clippy --locked --workspace --all-targets -- -D warnings`이고, 실험 feature의 추가 경로는 `cargo clippy --locked -p spinon-ffi --all-targets --all-features -- -D warnings`로 확인했다. 이 검증은 Rust 워크스페이스 기준이며 모바일 앱 실행·V8 통합·Stylo 통합을 대신하지 않는다.
