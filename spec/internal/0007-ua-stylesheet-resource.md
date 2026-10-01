@@ -12,6 +12,8 @@
 - 프로필 ID: `spinon-html-ua/0.1.0-draft`
 - 출처 참고: [Chromium Blink `html.css`](https://chromium.googlesource.com/chromium/src/+/3ae19953a97dab54ff57330d80764be8c86c70be/third_party/blink/renderer/core/html/resources/html.css)
 
+위 Chromium 소스 revision은 이 초안의 규칙을 작성할 때 참고한 입력이다. C01의 고정 oracle revision `@334b65d254ccc35df4fca82706d1753227b01039`과는 서로 다르며, 이 파일을 해당 oracle의 UA stylesheet 복사본으로 간주하지 않는다. 비교되는 동작은 C01 fixture의 Chromium 관찰값으로 별도 확인한다.
+
 초안은 HTML namespace를 지정하고 지원 요소의 구조 기본값만 담는다.
 
 | 요소 | 내장 선언 |
@@ -36,6 +38,20 @@
 | `spinon_embedded_ua_stylesheet_len()` | CSS 바이트 길이 | 종단 NUL을 포함하지 않음 |
 
 호출자는 데이터 포인터를 수정하거나 해제하지 않는다. CSS를 문자열로 다룰 때는 길이를 사용하며, 임의의 NUL 종료 문자열로 가정하지 않는다. 자원은 고정 데이터이므로 조회 함수는 플랫폼별 차이 없이 같은 내용을 반환한다.
+
+사용 예시는 포인터와 길이를 짝으로 넘기는 방식만 보여준다. `consume_ua_css`는 호출 측에서 구현할 소비자를 나타내며 현재 제공되는 Spinon API가 아니다.
+
+```c
+#include "spinon_ffi.h"
+
+void consume_ua_css(const uint8_t *css, size_t css_length);
+
+void register_default_ua_style(void) {
+  const uint8_t *css = spinon_embedded_ua_stylesheet_data();
+  size_t css_length = spinon_embedded_ua_stylesheet_len();
+  consume_ua_css(css, css_length); /* NUL 검색이나 free를 하지 않습니다. */
+}
+```
 
 ## 아직 연결하지 않은 런타임 동작
 
