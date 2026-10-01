@@ -250,10 +250,11 @@ fn stale_generation_and_stale_revision_are_rejected() {
     let mut document = HostDocument::new().unwrap();
     let mut other = HostDocument::new().unwrap();
     let foreign = other.reserve_node_handle().unwrap();
+    let retryable = document.reserve_node_handle().unwrap();
 
     let mut batch = DocumentChangeBatch::new(owner(5), DocumentRevision(2));
     batch.push(DocumentOperation::CreateText {
-        node: document.reserve_node_handle().unwrap(),
+        node: retryable,
         data: "x".into(),
     });
     assert!(matches!(
@@ -272,6 +273,17 @@ fn stale_generation_and_stale_revision_are_rejected() {
         DocumentErrorKind::StaleGeneration { .. }
     ));
     assert_eq!(document.document_revision().get(), 0);
+
+    let mut retry = DocumentChangeBatch::new(owner(5), document.document_revision());
+    retry.push(DocumentOperation::CreateText {
+        node: retryable,
+        data: "재시도".into(),
+    });
+    document.commit(retry).unwrap();
+    assert!(matches!(
+        document.snapshot().node(retryable).unwrap().kind(),
+        HostNodeKind::Text(data) if data.to_string_lossy() == "재시도"
+    ));
 }
 
 #[test]

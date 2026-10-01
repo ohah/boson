@@ -39,11 +39,12 @@ React / Vue / Svelte 어댑터 ─┐
 | 타입·메서드 | 계약 |
 | --- | --- |
 | `HostDocument::new()` | 프로세스 안에서 겹치지 않는 문서 generation을 할당합니다. 식별자가 모두 소진되면 `GenerationExhausted`를 반환합니다. |
-| `reserve_node_handle()` | 문서 generation과 단조 증가 `NodeId`로 된 핸들을 예약합니다. 예약 자체는 문서 revision을 바꾸지 않습니다. 생성 묶음이 실패하면 예약 ID는 유지되어 재시도할 수 있고, 성공한 ID는 제거·분리 뒤에도 재사용하지 않습니다. |
+| `reserve_node_handle()` | 문서 generation과 단조 증가 `NodeId`로 된 핸들만 예약합니다. 예약만으로 `HostNode`를 만들거나 `OwnerId`를 정하지 않으며 문서 revision도 바꾸지 않습니다. 따라서 JavaScript `document.createElement()`와 직접 대응하지 않습니다. 실제 노드 종류·이름·소유자는 `CreateElement`/`CreateText`를 커밋할 때 정합니다. 실패 묶음의 핸들은 재시도할 수 있도록 예약 상태로 남습니다. |
+| `cancel_node_handle_reservation(handle)` | 아직 노드로 생성되지 않은 예약을 취소합니다. 문서 generation이 다르면 `StaleGeneration`, 이미 소비·취소된 동일 generation 핸들이면 `false`를 반환합니다. 취소한 ID도 다시 사용하지 않고 revision을 바꾸지 않습니다. |
 | `DocumentChangeBatch::new(owner, base_revision)` | 한 `OwnerId`와 현재 `DocumentRevision`에 대한 변경 묶음을 만듭니다. 작업은 입력 순서대로 임시 후보에 적용합니다. |
 | `commit(batch)` | 모든 작업이 유효할 때만 후보 상태와 revision을 한 번에 공개합니다. 오류가 나면 노드·루트 자식·속성·두 revision을 보존합니다. 현재 revision과 기준이 다르면 묶음 전체를 거부합니다. |
 | `snapshot()` | 연결·분리 노드와 두 revision을 복사한 읽기 전용 `HostDocumentSnapshot`을 만듭니다. 현재 구현은 전체 맵을 복사하며 부분 snapshot이나 성능 보장은 없습니다. |
-| `DocumentOperation` | 요소·텍스트 생성, `insertBefore` 형태 삽입/이동, 직접 자식 분리, 텍스트 변경, namespace가 있는 속성 설정/제거, 6개 요소 상태 설정을 제공합니다. |
+| `DocumentOperation` | 요소·텍스트 생성, `insertBefore` 형태 삽입/이동, 직접 자식 분리, 텍스트 변경, namespace가 있는 속성 설정/제거, 6개 요소 상태 설정을 제공합니다. 성공한 생성 커밋은 분리 노드를 동기 논리 트리에 추가하고 문서 revision을 올립니다. |
 
 `DocumentRevision`은 성공한 문서 상태 변경 묶음마다 한 번 증가합니다. `RenderTreeRevision`은 변경 전이나 후에 내부 `HostRoot`와 연결된 트리에 영향을 준 변경 묶음마다 한 번 증가합니다. 분리 노드 생성·수정은 문서 revision만 올립니다. 빈 묶음과 실질적으로 같은 순서를 만드는 삽입·같은 값 쓰기는 두 revision을 바꾸지 않습니다. 연결 노드의 모든 속성·텍스트·상태 변경은 현재 보수적으로 표시 revision도 올립니다.
 
@@ -57,7 +58,7 @@ React / Vue / Svelte 어댑터 ─┐
 
 현재 구현 한계:
 
-- 제거한 노드는 폐기하지 않으며 별도 `dispose`·GC·V8 래퍼 회수 기능이 없습니다. 문서 수명 동안 노드 맵과 예약 ID는 증가할 수 있습니다.
+- 제거한 노드는 폐기하지 않으며 별도 `dispose`·GC·V8 래퍼 회수 기능이 없습니다. 문서 수명 동안 노드 맵은 증가할 수 있습니다. 취소하지 않은 예약은 `cancel_node_handle_reservation()` 또는 문서 종료 전까지 예약 집합에 남습니다.
 - `DocumentGeneration`은 한 프로세스에서만 유일합니다. 핸들을 프로세스 밖에 보존하거나 재시작 후 재사용하는 계약은 없습니다.
 - `OwnerId::new()`는 호출자가 번호를 공급하는 내부 생성자입니다. 런타임이 OwnerId를 발급·회수하는 정책이 아직 없어, 현재 소유권 검사는 협력하는 내부 어댑터 간 일관성 검사이며 신뢰 경계나 권한 보안 경계가 아닙니다.
 - 소유자별 revision·재동기화가 없어 서로 다른 어댑터의 동시 변경은 전역 revision 충돌로 거부될 수 있습니다. 충돌 정책은 R06 검증 전까지 미확정입니다.
@@ -182,6 +183,7 @@ frame_id, sequence, event_kind, coordinates
 
 - 공개 의미 제안: [0002 UI 트리·이벤트](../0002-ui-tree-events.md), [0007 모바일 DOM 호환](../0007-dom-compatibility.md)
 - 표준 참고: [Web IDL DOMString](https://webidl.spec.whatwg.org/#idl-DOMString), [WHATWG DOM의 pre-insert 알고리즘](https://dom.spec.whatwg.org/#concept-node-pre-insert), [WHATWG DOM의 removeChild 알고리즘](https://dom.spec.whatwg.org/#concept-node-pre-remove), [Selectors Level 4 편집자 초안](https://drafts.csswg.org/selectors-4/#the-empty-pseudo)
+- `reserve_node_handle()`는 WHATWG `Document.createElement()`의 동작을 구현하지 않습니다. 공개 JS 메서드의 이름·유효 이름 검사·HTML 이름 정규화·반환 객체는 [DOM Standard의 `createElement()`](https://dom.spec.whatwg.org/#dom-document-createelement)에 맞춰 별도 façade 계약에서 정합니다.
 - 현재 실험과 차이: [0002 Rust 트리 코어](0002-rust-tree-core.md)
 - 제품 작업 상태: [공식 상태 대장 R03](../STATUS.md#1-위험-검증)
 - 다음 구현 관문: [모노레포 구현 계획](https://github.com/ohah/spinon/blob/main/docs/plans/implementation.md), [GPU 렌더러 구현 계획](https://github.com/ohah/spinon/blob/main/docs/plans/renderer.md)
