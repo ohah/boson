@@ -16,7 +16,7 @@
 
 초기 Chromium oracle은 Chrome `154.0.8037.92` / Chromium revision `@334b65d254ccc35df4fca82706d1753227b01039`, macOS `26.5.1` (`25F80`, arm64)로 고정했다. viewport `800×600` CSS px, device scale factor `1`, locale `en-US`, time zone `UTC`, light/no-preference/forced-colors none을 CDP에서 명시한다. 실행 파일·fixture·CSS 자원의 SHA-256 및 전체 관찰값은 [C01 비교 기록](../../spec/internal/evidence/css-c01-chromium-ua-2026-10-01.md)과 연결된 JSON 스냅샷에 보존한다.
 
-Node.js 내장 WebSocket과 Chromium DevTools Protocol로 9개 HTML 요소의 selector 집합 및 19개 CSS 선언을 관찰한다. 원본 Chromium UA 계산값과 `supported-elements-v0.css`를 author stylesheet로 주입한 결과를 selector·computed value 정확 일치로 대조해 28개 항목이 모두 일치했다. 이 방식은 UA cascade origin, Rust FFI, Stylo, 레이아웃, 글꼴, GPU 픽셀 또는 Android·iOS 동작을 검증하지 않는다. SVG와 전체 CSS inventory도 아직 고정하지 않았으므로 C01은 미완료다.
+Node.js 내장 WebSocket과 Chromium DevTools Protocol로 9개 HTML 요소를 확인한다. 초기 Chromium UA 계산값과 다른 값으로 시작하는 author baseline을 먼저 적용한 뒤 `supported-elements-v0.css`를 추가해, 19개 computed CSS 선언이 baseline을 덮고 기준값과 일치하는지 비교한다. baseline·프로필·기준 계산값을 모두 저장하고, capture tool·브라우저·입력 해시와 실행 조건을 고정한다. 19개 값은 모두 일치했고 9개 요소 ID는 별도 fixture 범위 검사로 통과했다. 예전 `ua-v0`의 selector 집합 9개는 규칙 적용 여부를 증명하지 못해 현재 비교 자료에서 철회했다. 새 비교도 UA cascade origin, Rust FFI, Stylo, 레이아웃, 글꼴, GPU 픽셀 또는 Android·iOS 동작을 검증하지 않는다. SVG와 전체 CSS inventory도 아직 고정하지 않았으므로 C01은 미완료다.
 
 ## 소유 모듈과 데이터 흐름
 

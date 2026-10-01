@@ -222,6 +222,28 @@ mod tests {
         1
     }
 
+    #[test]
+    fn embedded_ua_stylesheet_ffi_returns_stable_read_only_bytes() {
+        let profile_id_pointer = super::spinon_embedded_ua_stylesheet_profile_id();
+        assert_eq!(
+            profile_id_pointer,
+            super::spinon_embedded_ua_stylesheet_profile_id()
+        );
+        let profile_id = unsafe { CStr::from_ptr(profile_id_pointer) };
+        assert_eq!(profile_id.to_bytes(), b"spinon-html-ua/0.1.0-draft");
+
+        let data = super::spinon_embedded_ua_stylesheet_data();
+        assert_eq!(data, super::spinon_embedded_ua_stylesheet_data());
+        let length = super::spinon_embedded_ua_stylesheet_len();
+        assert_eq!(length, super::spinon_embedded_ua_stylesheet_len());
+        assert!(!data.is_null());
+        assert!(length > 0);
+        let bytes = unsafe { std::slice::from_raw_parts(data, length) };
+        assert_eq!(bytes, super::UA_STYLESHEET.as_bytes());
+        assert!(!bytes.contains(&0));
+        assert!(std::str::from_utf8(bytes).is_ok());
+    }
+
     #[cfg(feature = "r10-experiment")]
     #[test]
     fn taffy_experiment_writes_a_machine_readable_success_report() {

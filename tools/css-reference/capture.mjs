@@ -11,6 +11,50 @@ const fixtureRelativePath = 'tests/fixtures/css/c01/supported-html-ua.html';
 const fixturePath = join(repositoryRoot, fixtureRelativePath);
 const uaCssRelativePath = 'crates/spinon-style/resources/ua/supported-elements-v0.css';
 const uaCssPath = join(repositoryRoot, uaCssRelativePath);
+const captureScriptRelativePath = 'tools/css-reference/capture.mjs';
+const comparisonBaselineCss = `
+* {
+  display: table;
+  list-style-type: none;
+  margin-block-start: 0px;
+  margin-block-end: 0px;
+  margin-inline-start: 1px;
+  margin-inline-end: 1px;
+  padding-inline-start: 0px;
+}`;
+const expectedSelectorIds = {
+  div: ['ua-div'],
+  span: ['ua-span'],
+  a: ['ua-anchor'],
+  img: ['ua-image'],
+  button: ['ua-button'],
+  input: ['ua-input'],
+  p: ['ua-paragraph'],
+  ul: ['ua-list'],
+  li: ['ua-list-item'],
+};
+const expectedComputedFeatureIds = [
+  'ua.display.div.v0',
+  'ua.display.span.v0',
+  'ua.display.a.v0',
+  'ua.display.img.v0',
+  'ua.display.button.v0',
+  'ua.display.input.v0',
+  'ua.display.p.v0',
+  'ua.margin-block-start.p.v0',
+  'ua.margin-block-end.p.v0',
+  'ua.margin-inline-start.p.v0',
+  'ua.margin-inline-end.p.v0',
+  'ua.display.ul.v0',
+  'ua.list-style-type.ul.v0',
+  'ua.margin-block-start.ul.v0',
+  'ua.margin-block-end.ul.v0',
+  'ua.margin-inline-start.ul.v0',
+  'ua.margin-inline-end.ul.v0',
+  'ua.padding-inline-start.ul.v0',
+  'ua.display.li.v0',
+];
+const expectedProfileCssSha256 = 'bd15dd612a21cc8cb48e25eb38b86803868667df75cd56f111d7c476ddba3ebd';
 const defaultChromiumPaths = process.platform === 'darwin'
   ? ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome']
   : process.platform === 'linux'
@@ -243,19 +287,57 @@ try {
       timeZone: observation.timeZone,
     })}`);
   }
+  if (observation.media.prefersColorSchemeDark !== false
+    || observation.media.prefersReducedMotion !== false
+    || observation.media.forcedColors !== false) {
+    throw new Error(`미디어 상태가 고정값과 다릅니다: ${JSON.stringify(observation.media)}`);
+  }
   if (observation.authorStyleSheetCount !== 0) {
     throw new Error(`fixture에 author stylesheet가 있습니다: ${observation.authorStyleSheetCount}`);
   }
+  const observedSelectors = observation.elements.map((element) => element.selector);
+  const expectedSelectors = Object.keys(expectedSelectorIds);
+  if (JSON.stringify(observedSelectors) !== JSON.stringify(expectedSelectors)) {
+    throw new Error(`fixture 선택자 목록이 고정 입력과 다릅니다: ${JSON.stringify(observedSelectors)}`);
+  }
+  const observedFeatureIds = observation.elements.flatMap((element) => element.features.map((feature) => feature.id));
+  if (JSON.stringify(observedFeatureIds) !== JSON.stringify(expectedComputedFeatureIds)) {
+    throw new Error(`fixture CSS feature inventory가 고정 입력과 다릅니다: ${JSON.stringify(observedFeatureIds)}`);
+  }
+  const fontEvaluation = await pageDevTools.send('Runtime.evaluate', {
+    expression: `({
+      root: getComputedStyle(document.documentElement).fontSize,
+      body: getComputedStyle(document.body).fontSize,
+    })`,
+    returnByValue: true,
+  });
+  const defaultFontSizes = fontEvaluation.result?.value;
+  if (fontEvaluation.exceptionDetails || defaultFontSizes?.root !== '16px' || defaultFontSizes?.body !== '16px') {
+    throw new Error(`기본 글꼴 크기가 고정값과 다릅니다: ${JSON.stringify(defaultFontSizes)}`);
+  }
 
   const profileCss = await readFile(uaCssPath, 'utf8');
+  const profileCssSha256 = createHash('sha256').update(profileCss).digest('hex');
+  if (profileCssSha256 !== expectedProfileCssSha256) {
+    throw new Error(`고정된 CSS 프로필이 바뀌었습니다. 새 프로필·feature inventory·reference-id를 정하세요: ${profileCssSha256}`);
+  }
+  const baselineCssSha256 = createHash('sha256').update(comparisonBaselineCss).digest('hex');
   const profileEvaluation = await pageDevTools.send('Runtime.evaluate', {
     expression: `(() => {
+      const baseline = document.createElement('style');
+      baseline.id = 'spinon-c01-baseline-under-test';
+      baseline.textContent = ${JSON.stringify(comparisonBaselineCss)};
+      document.head.appendChild(baseline);
+      const baselineAuthorStyleSheetCount = document.styleSheets.length;
+      const baselineElements = window.__SPINON_C01_OBSERVE__();
       const style = document.createElement('style');
       style.id = 'spinon-ua-profile-under-test';
       style.textContent = ${JSON.stringify(profileCss)};
       document.head.appendChild(style);
       return {
+        baselineAuthorStyleSheetCount,
         authorStyleSheetCount: document.styleSheets.length,
+        baselineElements,
         elements: window.__SPINON_C01_OBSERVE__(),
       };
     })()`,
@@ -265,45 +347,67 @@ try {
   if (profileEvaluation.exceptionDetails || !profileObservation) {
     throw new Error('내장 UA stylesheet 프로필의 관찰값을 읽지 못했습니다.');
   }
+  if (profileObservation.baselineAuthorStyleSheetCount !== 1 || profileObservation.authorStyleSheetCount !== 2) {
+    throw new Error(`비교 stylesheet 수가 예상과 다릅니다: ${JSON.stringify({
+      baseline: profileObservation.baselineAuthorStyleSheetCount,
+      profile: profileObservation.authorStyleSheetCount,
+    })}`);
+  }
 
   const comparedFeatures = [];
+  const selectorCoverage = [];
   for (const referenceElement of observation.elements) {
+    const baselineElement = profileObservation.baselineElements.find((item) => item.selector === referenceElement.selector);
     const profileElement = profileObservation.elements.find((item) => item.selector === referenceElement.selector);
+    const expectedIds = expectedSelectorIds[referenceElement.selector];
     const referenceIds = referenceElement.matches.map((item) => item.id);
+    const baselineIds = baselineElement?.matches.map((item) => item.id) ?? [];
     const profileIds = profileElement?.matches.map((item) => item.id) ?? [];
-    comparedFeatures.push({
-      id: `selector.${referenceElement.selector}.matches.v0`,
-      reference: referenceIds,
-      profile: profileIds,
-      equal: JSON.stringify(referenceIds) === JSON.stringify(profileIds),
+    const exactFixtureNodes = Boolean(expectedIds)
+      && JSON.stringify(referenceIds) === JSON.stringify(expectedIds)
+      && JSON.stringify(baselineIds) === JSON.stringify(expectedIds)
+      && JSON.stringify(profileIds) === JSON.stringify(expectedIds);
+    selectorCoverage.push({
+      selector: referenceElement.selector,
+      expectedNodeIds: expectedIds ?? [],
+      chromiumNodeIds: referenceIds,
+      profileNodeIds: profileIds,
+      exactFixtureNodes,
     });
+    if (!exactFixtureNodes) {
+      throw new Error(`fixture 선택자 범위가 예상과 다릅니다: ${JSON.stringify(selectorCoverage.at(-1))}`);
+    }
     for (const referenceNode of referenceElement.matches) {
+      const baselineNode = baselineElement?.matches.find((item) => item.id === referenceNode.id);
       const profileNode = profileElement?.matches.find((item) => item.id === referenceNode.id);
       for (const feature of referenceElement.features) {
         const expected = referenceNode.computed[feature.property];
+        const baseline = baselineNode?.computed[feature.property] ?? null;
         const actual = profileNode?.computed[feature.property] ?? null;
+        const baselineDiffers = baseline !== expected;
         comparedFeatures.push({
           id: feature.id,
           selector: referenceElement.selector,
           nodeId: referenceNode.id,
           property: feature.property,
           reference: expected,
+          baseline,
+          baselineDiffers,
           profile: actual,
           equal: actual === expected,
         });
       }
     }
   }
-  const failedFeatures = comparedFeatures.filter((feature) => !feature.equal);
+  const failedFeatures = comparedFeatures.filter((feature) => !feature.equal || !feature.baselineDiffers);
   if (failedFeatures.length > 0) {
     throw new Error(`Chromium과 UA 프로필이 다릅니다: ${JSON.stringify(failedFeatures)}`);
   }
 
   const fixtureBytes = await readFile(fixturePath);
   const fixtureSha256 = createHash('sha256').update(fixtureBytes).digest('hex');
-  const profileCssSha256 = createHash('sha256').update(profileCss).digest('hex');
   const platformId = process.platform === 'darwin' ? 'macos' : process.platform;
-  const referenceId = `chromium-${platformId}-${process.arch}-${version}-ua-v0`;
+  const referenceId = `chromium-${platformId}-${process.arch}-${version}-ua-profile-override-v1`;
   const outputDirectory = join(repositoryRoot, 'tests/fixtures/css/references', referenceId);
   const outputPath = join(outputDirectory, 'ua-supported-elements.json');
   try {
@@ -327,6 +431,10 @@ try {
   const snapshot = {
     schema: 'spinon-css-reference/v1',
     referenceId,
+    captureTool: {
+      path: captureScriptRelativePath,
+      sha256: await sha256File(fileURLToPath(import.meta.url)),
+    },
     oracle: {
       name: 'Chromium',
       product: versionResult.stdout.trim(),
@@ -339,7 +447,9 @@ try {
       os: hostVersion,
       osBuild: hostBuild,
       architecture: process.arch,
+      nodeVersion: process.version,
       flags,
+      defaultFontSize: defaultFontSizes,
       emulation: {
         cssViewportPx: { width: 800, height: 600 },
         deviceScaleFactor: 1,
@@ -361,13 +471,19 @@ try {
       cssProfile: 'spinon-html-ua/0.1.0-draft',
       profileCssPath: uaCssRelativePath,
       profileCssSha256,
+      comparisonBaseline: {
+        authorStyleSheetCount: profileObservation.baselineAuthorStyleSheetCount,
+        cssSha256: baselineCssSha256,
+      },
       profileAuthorStyleSheetCount: profileObservation.authorStyleSheetCount,
     },
     observations: {
       chromiumDefault: observation.elements,
+      selectorCoverage,
+      comparisonBaseline: profileObservation.baselineElements,
       embeddedProfileAsAuthorRule: profileObservation.elements,
       comparison: {
-        method: '정확한 selector match 집합과 computed CSS 값 비교',
+        method: '고정된 author baseline을 덮는 프로필의 computed CSS 값 정확 비교',
         passed: comparedFeatures.length,
         failed: failedFeatures.length,
         features: comparedFeatures,
@@ -379,7 +495,7 @@ try {
   await writeFile(outputPath, `${JSON.stringify(snapshot, null, 2)}\n`, { flag: 'wx' });
   console.log(`Chromium ${version} (${browserVersion.revision}) 기준 저장: ${outputPath}`);
   console.log(`바이너리 SHA-256: ${snapshot.oracle.executableSha256}`);
-  console.log(`비교: Chromium 기본값과 내장 프로필 ${comparedFeatures.length}개 항목 일치`);
+  console.log(`비교: 내장 프로필 computed CSS ${comparedFeatures.length}개 값 일치; fixture selector ${selectorCoverage.length}개 확인`);
   console.log('실행 조건: macOS, arm64, 800×600 CSS px, scale=1, en-US, UTC, light/no-preference');
 } finally {
   pageDevTools?.close();
