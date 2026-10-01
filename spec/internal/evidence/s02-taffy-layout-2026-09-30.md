@@ -79,7 +79,7 @@ mise exec -- cargo check -p spinon-layout --target aarch64-linux-android --locke
 SPINON_DOC_BASE=/spinon/docs/ mise exec -- bun run docs:build
 ```
 
-Rust workspace 전체 테스트, 레이아웃 crate Clippy, iOS simulator/Android Rust target 교차 검사가 통과했습니다. RSPress `2.0.22` 문서 빌드도 통과했습니다. workspace 전체 Clippy는 기존 `spinon-core/src/tree.rs`의 `unnecessary_unwrap` 두 건에서 실패했습니다. 레이아웃 crate Clippy는 비교용으로 포함한 기존 PoC 모듈의 해당 lint만 모듈 범위에서 허용해 새 코드의 `-D warnings` 검사를 통과합니다.
+Rust workspace 전체 테스트, 레이아웃 crate Clippy, iOS simulator/Android Rust target 교차 검사가 통과했습니다. 기존 PR 기준에서는 RSPress `2.0.22` 문서 빌드도 통과했습니다. 최신 `main` 재기반 후 문서 빌드 결과는 아래 별도 검증 기록을 참고합니다. workspace 전체 Clippy는 기존 `spinon-core/src/tree.rs`의 `unnecessary_unwrap` 두 건에서 실패했습니다. 레이아웃 crate Clippy는 비교용으로 포함한 기존 PoC 모듈의 해당 lint만 모듈 범위에서 허용해 새 코드의 `-D warnings` 검사를 통과합니다.
 
 ## 적대적 검증 5회
 
@@ -100,3 +100,17 @@ Rust workspace 전체 테스트, 레이아웃 crate Clippy, iOS simulator/Androi
 ## 제한과 남은 검증
 
 이 결과는 세 fixture의 기하 일치만 증명합니다. 브라우저 비교는 Headless Chrome 한 엔진에 한정하며 WebKit·Firefox 차이는 확인하지 않았습니다. CSS 전체 Flexbox 적합성, 글꼴 shaping·intrinsic sizing, CSS px↔Android dp/iOS point 변환, iOS·Android 제품 경로 연결, 접근성·클리핑·스크롤, 동시 변경에서 stale style snapshot 회피, Taffy 부분 갱신, 처리 시간·메모리·모바일 바이너리 크기는 검증하지 않았습니다. 따라서 이 근거만으로 S02 또는 공개 CSS 지원을 완료 처리하지 않습니다.
+
+## 최신 main 재기반 후 적대적 검토 5회 · 2026-10-01
+
+재기반 기준은 `9507ad327e41647459a2badc1391d9651703abb0`입니다.
+
+1. **명세 ID와 링크 충돌:** 최신 `main`에서 내부 명세 `0007`은 UA stylesheet, `0008`은 CSS 번들러 계약에 이미 사용 중임을 확인했습니다. 레이아웃 계약을 `0009-layout-engine.md`로 옮기고 내부 색인·상태 대장·아키텍처·구현 계획 링크를 함께 갱신했습니다.
+2. **워크스페이스 통합:** 최신 `main`의 `spinon-style` 구성원을 보존하면서 `spinon-layout`을 추가하고 잠금 파일과 크레이트 의존 경계를 확인했습니다. 전체 Bun·Cargo 검증은 통과했습니다.
+3. **입력·오류 경계:** ID 중복, 연결 오류, 순환, 스타일 누락, 음수·NaN·무한대, viewport와 루트 크기 불일치가 Taffy 전달 전에 거부되는지 구현과 14개 레이아웃 테스트에서 확인했습니다. 성공 결과만 전체 프레임 묶음으로 반환합니다.
+4. **브라우저 기준의 한계:** Rust 테스트와 HTML 측정 페이지가 같은 내장 JSON fixture를 읽는 것을 확인했습니다. 정수 fixture의 0.5 CSS px와 소수 fixture의 0.01 CSS px 허용치는 구분하며, Chromium 한 엔진의 고정 사례 비교만 주장합니다. 기존 작은 엔진 비교는 정수 LTR 사례에 한정됩니다.
+5. **제품 범위·플랫폼 주장:** Android/iOS 대상 검사는 Rust 크레이트의 `cargo check`입니다. 앱 호스트·Stylo·GPU 통합은 끝나지 않았으므로 S02 체크를 유지했고 공개 CSS 지원이나 모바일 화면 동작으로 표현하지 않았습니다.
+
+## 최신 main 재기반 후 빌드 검증
+
+`mise exec -- bun run test`, 레이아웃 Clippy, `cargo fmt --all -- --check`, Android/iOS 대상 `cargo check`, `git diff --check`는 통과했습니다. RSPress 문서 빌드는 실패했습니다. 실패 링크는 `spec/0003-web-surface.md`, `spec/0008-css-compatibility.md`, `spec/STATUS.md`, C01·C02 기존 근거 문서의 저장소 밖 파일 링크입니다. 같은 명령이 기준 커밋 `9507ad3`에서도 같은 경로로 실패했으며, 새 `0009-layout-engine.md`의 링크 오류는 보고되지 않았습니다. 따라서 문서 빌드 통과로 기록하지 않습니다.
