@@ -1,0 +1,5 @@
+@import "./tokens.css";
+
+.package-theme {
+  --resolver-package-marker: "package-export-css";
+}

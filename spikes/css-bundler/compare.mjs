@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { rspack } from "@rspack/core";
@@ -18,9 +18,10 @@ const fixture = path.join(here, "fixture");
 const outputRoot = path.join(here, ".output");
 const viteOutput = path.join(outputRoot, "vite");
 const rspackOutput = path.join(outputRoot, "rspack");
-const evidencePath = path.resolve(here, "../../spec/internal/evidence/css-c02-bundler-2026-10-01.json");
+const evidencePath = path.resolve(here, "../../spec/internal/evidence/css-c02-bundler-2026-10-02.json");
 
 await rm(outputRoot, { recursive: true, force: true });
+await prepareResolverPackages();
 const inputFiles = await inventory(fixture);
 const fixtureSha256 = sha256(JSON.stringify(inputFiles));
 const viteAdapter = createViteResourceAdapter({ fixtureRoot: fixture });
@@ -139,12 +140,16 @@ const checks = [
     vite: adapterSnapshotSummary(viteSnapshot),
     rspack: adapterSnapshotSummary(rspackSnapshot),
   }),
+  check("M9", "alias와 package exports로 선택한 CSS를 실제 빌드 graph·entry CSS에 연결한다", resolverParityCheck(viteSnapshot, rspackSnapshot, viteEntryText, rspackEntryText), {
+    vite: resolverParitySummary(viteSnapshot, viteEntryText),
+    rspack: resolverParitySummary(rspackSnapshot, rspackEntryText),
+  }),
 ];
 
 const cssMapGap = sourceLocation.viteCssMaps.length === 0 || sourceLocation.rspackCssMaps.length === 0;
 const locationCheckPassed = checks.find((item) => item.id === "M6")?.status === "통과";
 const result = {
-  model: "C02-M1..M8-v3",
+  model: "C02-M1..M9-v4",
   run: {
     status: checks.every((item) => item.status === "통과") ? "실험 실행 완료" : "비교 조건 실패",
     host: `${process.platform}-${process.arch}`,
@@ -371,6 +376,14 @@ async function inventory(directory) {
     result.push({ file, bytes: bytes.byteLength, sha256: sha256(bytes) });
   }
   return result;
+}
+
+async function prepareResolverPackages() {
+  const packageSource = path.join(here, "package-fixtures", "@fixture", "theme");
+  const packageTarget = path.join(fixture, "node_modules", "@fixture", "theme");
+  await rm(packageTarget, { recursive: true, force: true });
+  await mkdir(path.dirname(packageTarget), { recursive: true });
+  await cp(packageSource, packageTarget, { recursive: true });
 }
 
 async function listFiles(directory, prefix = "") {
@@ -646,6 +659,48 @@ function adapterSnapshotCheck(viteSnapshot, rspackSnapshot) {
       edge.specifier === "https://styles.example.invalid/external.css"
         && edge.conditions === "layer(theme) supports(display: grid) screen and (min-width: 1px)")));
   return validToolSnapshots && sourceCoverage && cssModuleCoverage && localAssetsResolved && stylesheetOutputsMapped && chunksHaveStyles && chunksHaveSharedJavaScript && importsKeepConditions;
+}
+
+function resolverParityCheck(viteSnapshot, rspackSnapshot, viteEntryText, rspackEntryText) {
+  const requiredSources = [
+    "src/alias/theme.css",
+    "node_modules/@fixture/theme/dist/theme.css",
+    "node_modules/@fixture/theme/dist/tokens.css",
+  ];
+  const snapshots = [viteSnapshot, rspackSnapshot];
+  const sourceCoverage = snapshots.every((snapshot) => requiredSources.every((sourcePath) =>
+    snapshot.stylesheets.filter((stylesheet) => stylesheet.sourcePath === sourcePath).length === 1));
+  const entryChunks = snapshots.map((snapshot) => snapshot.chunks.find((chunk) => chunk.kind === "entry"));
+  const entryCssCoverage = snapshots.every((snapshot, index) => requiredSources.every((sourcePath) => {
+    const stylesheet = snapshot.stylesheets.find((item) => item.sourcePath === sourcePath);
+    return stylesheet?.outputResourceIds.length > 0
+      && stylesheet.outputResourceIds.every((id) => entryChunks[index]?.stylesheetResourceIds.includes(id));
+  }));
+  const markersPreserved = [viteEntryText, rspackEntryText].every((css) =>
+    css.includes("alias-css") && css.includes("package-export-css") && css.includes("package-css-import"));
+  return sourceCoverage && entryCssCoverage && markersPreserved;
+}
+
+function resolverParitySummary(snapshot, entryCss) {
+  const expected = [
+    "src/alias/theme.css",
+    "node_modules/@fixture/theme/dist/theme.css",
+    "node_modules/@fixture/theme/dist/tokens.css",
+  ];
+  const entry = snapshot.chunks.find((chunk) => chunk.kind === "entry");
+  return {
+    resolvedSources: expected.map((sourcePath) => ({
+      sourcePath,
+      count: snapshot.stylesheets.filter((item) => item.sourcePath === sourcePath).length,
+      connectedToEntryCss: snapshot.stylesheets.find((item) => item.sourcePath === sourcePath)?.outputResourceIds
+        .every((id) => entry?.stylesheetResourceIds.includes(id)) ?? false,
+    })),
+    expectedMarkers: {
+      alias: entryCss.includes("alias-css"),
+      packageExport: entryCss.includes("package-export-css"),
+      packageCssImport: entryCss.includes("package-css-import"),
+    },
+  };
 }
 
 function adapterSnapshotSummary(snapshot) {

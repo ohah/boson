@@ -1,5 +1,7 @@
 import "./styles/base.css";
 import "./styles/shared.css";
+import "@theme/theme.css";
+import "@fixture/theme/theme.css";
 import { card, featured } from "./styles/card.module.css";
 import { sharedRuntimeValue } from "./shared/runtime.js";
 

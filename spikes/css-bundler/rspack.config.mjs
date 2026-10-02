@@ -6,6 +6,11 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 export default {
   context: path.join(here, "fixture"),
   mode: "production",
+  resolve: {
+    alias: {
+      "@theme": path.join(here, "fixture/src/alias"),
+    },
+  },
   entry: {
     main: "./src/main.js",
   },

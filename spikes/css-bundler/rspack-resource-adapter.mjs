@@ -123,6 +123,6 @@ export async function createRspackSnapshot({ stats, outputDir, fixtureRoot, fixt
 
 function moduleSourcePath(name) {
   const normalized = normalizeBundlerSourcePath(name);
-  if (!normalized.startsWith("src/") || !/\.css$/i.test(normalized)) return null;
+  if (!/^(?:src|node_modules)\/.+\.css$/i.test(normalized)) return null;
   return normalized;
 }
