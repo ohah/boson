@@ -19,7 +19,8 @@
     (() => {
       const inventory = window.__SPINON_C01_INVENTORY__;
       if (inventory?.schema !== "spinon-css-feature-inventory/v1"
-        || inventory.fixtureId !== "C01-UAv0-supported-html-elements") {
+        || inventory.fixtureId !== "C01-UAv0-supported-html-elements"
+        || inventory.profileId !== "spinon-html-ua/0.1.0-draft") {
         throw new Error("C01 feature inventory가 주입되지 않았거나 fixture와 맞지 않습니다.");
       }
       const cases = inventory.elements;
@@ -47,6 +48,7 @@
         fixtureId: inventory.fixtureId,
         inventoryId: inventory.inventoryId,
         inventorySchema: inventory.schema,
+        profileId: inventory.profileId,
         viewport: {
           width: window.innerWidth,
           height: window.innerHeight,

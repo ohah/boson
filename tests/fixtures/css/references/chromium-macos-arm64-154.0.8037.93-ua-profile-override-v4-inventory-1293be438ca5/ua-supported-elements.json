@@ -1,13 +1,13 @@
 {
   "schema": "spinon-css-reference/v1",
-  "referenceId": "chromium-macos-arm64-154.0.8037.93-ua-profile-override-v3-inventory-1293be438ca5",
+  "referenceId": "chromium-macos-arm64-154.0.8037.93-ua-profile-override-v4-inventory-1293be438ca5",
   "captureTool": {
     "path": "tools/css-reference/capture.mjs",
-    "sha256": "27526139d45e99263befa637b809fccb5ffe8f06982c80243344e0a3834b199c",
+    "sha256": "879f9f19a429657f4c09fef03a55faaa609973a2c0660ae0eadf0d946b12b0af",
     "supportModules": [
       {
         "path": "tools/css-reference/inventory.mjs",
-        "sha256": "0dbedb10e3b3d0a21681b07888def12ffebbc768e927879901da60cbfe15c6cc"
+        "sha256": "19fe7982efc211fc55596fb6fefcf8eb319dcf98410a8249b9e07da268831c84"
       }
     ]
   },
@@ -56,7 +56,7 @@
   "fixture": {
     "id": "C01-UAv0-supported-html-elements",
     "path": "tests/fixtures/css/c01/supported-html-ua.html",
-    "sha256": "b0c2b424eacc22db1c83d5d1fe01a309ad005c1049624ba2a4ecb11f41e099d8",
+    "sha256": "dba2edfd1268afdb9f32d9ad725191e903ef2af30e1a549e29279f1576ff3863",
     "authorStyleSheetCount": 0,
     "cssProfile": "spinon-html-ua/0.1.0-draft",
     "profileCssPath": "crates/spinon-style/resources/ua/supported-elements-v0.css",
@@ -318,6 +318,7 @@
         "profileNodeIds": [
           "ua-div"
         ],
+        "htmlNodesOnly": true,
         "exactFixtureNodes": true
       },
       {
@@ -331,6 +332,7 @@
         "profileNodeIds": [
           "ua-span"
         ],
+        "htmlNodesOnly": true,
         "exactFixtureNodes": true
       },
       {
@@ -344,6 +346,7 @@
         "profileNodeIds": [
           "ua-anchor"
         ],
+        "htmlNodesOnly": true,
         "exactFixtureNodes": true
       },
       {
@@ -357,6 +360,7 @@
         "profileNodeIds": [
           "ua-image"
         ],
+        "htmlNodesOnly": true,
         "exactFixtureNodes": true
       },
       {
@@ -370,6 +374,7 @@
         "profileNodeIds": [
           "ua-button"
         ],
+        "htmlNodesOnly": true,
         "exactFixtureNodes": true
       },
       {
@@ -383,6 +388,7 @@
         "profileNodeIds": [
           "ua-input"
         ],
+        "htmlNodesOnly": true,
         "exactFixtureNodes": true
       },
       {
@@ -396,6 +402,7 @@
         "profileNodeIds": [
           "ua-paragraph"
         ],
+        "htmlNodesOnly": true,
         "exactFixtureNodes": true
       },
       {
@@ -409,6 +416,7 @@
         "profileNodeIds": [
           "ua-list"
         ],
+        "htmlNodesOnly": true,
         "exactFixtureNodes": true
       },
       {
@@ -422,6 +430,7 @@
         "profileNodeIds": [
           "ua-list-item"
         ],
+        "htmlNodesOnly": true,
         "exactFixtureNodes": true
       }
     ],
