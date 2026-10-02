@@ -8,6 +8,9 @@ export default {
   base: "/",
   configFile: false,
   logLevel: "error",
+  resolve: {
+    alias: [{ find: /^@theme\//, replacement: `${path.join(here, "fixture/src/alias")}/` }],
+  },
   build: {
     outDir: path.join(here, ".output", "vite"),
     emptyOutDir: true,

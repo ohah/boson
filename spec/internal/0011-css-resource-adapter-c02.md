@@ -67,7 +67,7 @@ Vite·Rspack의 서로 다른 build graph를 CSS 자원과 청크 관계를 비�
 | `build` | 번들러·번들러 버전과 수집기 버전을 기록한다. `status`는 `success` 또는 `failed`다. `fixtureSha256`은 비교 fixture 전체를 상대 경로순으로 나열한 파일 경로·바이트 수·파일 SHA-256 목록의 digest다. 단일 build가 실제 소비한 resolver graph나 설정 파일의 digest를 뜻하지 않는다. |
 | `resources` | 빌드 출력물의 상대 POSIX 경로, 종류, MIME, 실제 바이트 수와 SHA-256을 기록한다. 가능한 경우 입력 자원의 상대 경로를 `sourcePath`로 연결한다. 절대 경로와 OS별 구분자는 내보내지 않는다. `source-map`은 비교·진단 전용 산출물이며 chunk·앱 패키지·OTA 자원에 넣지 않는다. |
 | `chunks` | `entry`·`dynamic`·`shared` 종류와 그 청크에 실제 연결된 JavaScript, stylesheet, 로컬 이미지·폰트 자원 ID를 기록한다. 서로 다른 번들러의 파일명이나 해시는 같을 필요가 없다. |
-| `stylesheets` | 빌드가 소비한 각 원본 CSS 파일과 산출 CSS 파일 연결, 로컬·외부 `@import`, `url()` 참조를 기록한다. CSS 입력 파일은 청크 병합 뒤에도 독립된 source record로 남는다. |
+| `stylesheets` | 빌드가 소비한 각 원본 CSS 파일과 산출 CSS 파일 연결, 로컬·외부 `@import`, `url()` 참조를 기록한다. CSS 입력 파일은 청크 병합 뒤에도 독립된 source record로 남는다. `sourcePath`는 fixture 루트 안 파일의 정규화된 상대 POSIX 경로이며 fixture의 `node_modules/`도 포함한다. |
 | `imports` | 원본 specifier, `local`·`external`·`data`·`fragment`·`unresolved`·`dynamic` 분류, 해석된 원본 stylesheet 경로(로컬일 때), 1부터 시작하는 원본 `line`·`column`을 기록한다. `conditions`는 specifier 뒤에 남은 media/layer/supports 조건 문자열이며, 파싱·cascade 의미를 보증하지 않는다. |
 | `references` | `url()` 원본 specifier, `local`·`external`·`data`·`fragment`·`unresolved`·`dynamic` 분류, 입력 자원 경로와 출력 자원 ID(해석 가능한 로컬 자원일 때), 원본 시작 위치를 기록한다. 상대 경로는 해당 stylesheet 파일을 기준으로 해석한다. |
 | `cssModules` | 원본 모듈 경로, 번들러가 제공하는 export 키와 export 모양을 기록한다. 생성 class 문자열은 번들러별로 다르며 비교 계약의 안정 ID로 쓰지 않는다. |
@@ -76,6 +76,8 @@ Vite·Rspack의 서로 다른 build graph를 CSS 자원과 청크 관계를 비�
 `id` 값은 한 snapshot 내부 참조용이다. 같은 파일이 다른 빌드에서 같은 ID를 가져야 한다고 약속하지 않는다. source 위치의 `column`은 사람이 읽는 1-based 열이며, 범위를 추가하면 끝 위치는 exclusive로 정의한다.
 
 스파이크는 현재 fixture의 상대 경로와 루트 상대 경로만 직접 해석한다. 실제 제품 어댑터는 alias, package export, query suffix, symlink, package exports 조건별 resolver, bundler plugin이 제공하는 가상 모듈을 자체 파일 경로 조합으로 추측하지 않고 해당 번들러의 resolver/module graph 결과에서 받아야 한다. 이 차이가 닫히기 전에는 이 스파이크를 임의의 앱 CSS를 지원하는 adapter로 소개하지 않는다. 한 입력이 여러 출력 자원으로 변환되는 경우도 번들러 edge를 따라 정확한 `targetResourceId`를 골라야 하며, source path 하나로 출력 ID 하나를 추측하지 않는다.
+
+C02.1의 resolver 비교 fixture는 `node_modules/`도 fixture 내부에 실제 파일로 저장해 안정적인 상대 경로 키를 만든다. 이 실험은 두 번들러가 alias와 package `exports`로 선택한 CSS 모듈을 snapshot에 보존하는지만 확인한다. symlink로 fixture 밖을 가리키는 패키지, plugin 가상 모듈, query별 모듈 정체성과 조건부 package exports는 여전히 미검증이다.
 
 ## 수집 및 실패 동작
 
