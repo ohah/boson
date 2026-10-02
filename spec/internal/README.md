@@ -26,6 +26,9 @@
 - [C01.2 · Chromium 단위·Flexbox·Grid 기준](./evidence/css-c01-layout-2026-10-02.md) — Chrome 154.0.8037.95의 `rem`·`em`·퍼센트·분수 Flexbox/Grid 기준값 41개와 CSS px 좌표 오차 계약. Spinon/Taffy 비교는 포함하지 않음.
 - [C02 · Vite·Rspack CSS 산출 비교](./evidence/css-c02-bundler-2026-10-01.md) — production fixture의 CSS Modules·자원·청크, 기본 진단 차이와 공통 snapshot 원본 위치 근거.
 - [C02.1 · Vite·Rspack CSS resolver 비교](./evidence/css-c02-resolver-2026-10-02.md) — fixture alias·package `exports`로 선택한 CSS 및 내부 `@import`의 production graph·snapshot 연결 근거.
+- [C02.2 · 공통 모듈 그래프 계약 검증기](./evidence/css-c02-module-graph-contract-2026-10-02.md) — 0014 snapshot 검증·digest·최종 ESM AST parser와 통합 suite 결과.
+- [C02.2 · Vite module graph adapter](./evidence/css-c02-vite-module-graph-2026-10-02.md) — Vite 8.3.1/Rolldown 1.2.12 fixture의 입력 graph·출력 ESM·resource digest 근거.
+- [C02.2 · Rspack module graph adapter](./evidence/css-c02-rspack-module-graph-2026-10-02.md) — Rspack 2.2.7 fixture의 입력 graph·ESM profile 판정·출력 bytes 근거.
 - [C03 · HostDocument Stylo DOM adapter](./evidence/css-c03-stylo-dom-adapter-2026-10-01.md) — Stylo DOM/selector trait 구현, 고정 snapshot fixture, 실제 selector matcher 결과와 대상별 컴파일 결과.
 - [C04 · stylesheet 입력 목록](./evidence/css-c04-stylesheet-registry-2026-10-01.md) — Stylo 출처·등록 순서·진단 보존과 처리기가 없는 `@import`의 경계 검증.
 - [R15 · 청크 OTA 호환 모델](./evidence/r15-ota-chunk-model-2026-10-02.md) — 기존 OTA·C02 문서 사이의 그래프·기능 rollout·runtime 호환·서명/rollback 경계를 정리한 설계 추적 근거. 실행 기능 검증은 포함하지 않음.
