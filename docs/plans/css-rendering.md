@@ -11,6 +11,7 @@
 - C04 첫 코드 조각은 `spinon-style::StylesheetRegistry`의 UTF-8 입력, Stylo origin, 등록 순서와 parser 진단 보존이다. 외부 `@import`를 처리할 로더는 제공하지 않는다. 이 목록은 Stylist cascade·computed style과 다르며, C01의 Chromium 비교 fixture를 확장한 뒤 계산 단계로 이어간다.
 - R10은 Taffy의 트리 갱신·좌표·합성 텍스트 측정을 비교했다. 실제 글꼴 shaping·줄바꿈·GPU 화면을 검증하지 않았다.
 - C02 production 추출과 fixture 전용 adapter prototype은 [Vite `8.3.1`·Rspack `2.2.7` 기록](../../spec/internal/evidence/css-c02-bundler-2026-10-01.md)에 있다. 양쪽 production build에서 CSS Module named import, 조건 suffix가 있는 로컬·외부 `@import`, SVG·WOFF2 자원, entry/dynamic/shared chunk를 확인했다. Vite 기본 CSS Module 객체 import는 통과하고 Rspack은 `namedExports: false` 설정으로 맞출 수 있다. Rspack stats는 CSS source/module graph와 원본 위치를 주고 Vite manifest는 chunk·CSS·asset 연결을 준다. 번들러별 collector가 [내부 계약 후보](../../spec/internal/0011-css-resource-adapter-c02.md)의 공통 snapshot으로 정규화한다. Vite 기본 경고에는 원본 CSS 위치가 없지만 fixture adapter가 입력 CSS parser 위치를 보존해 Rspack의 `2:24` raw column과 정규화된 1-based `2:25`를 맞췄다. 후속 [C02.1 비교](../../spec/internal/evidence/css-c02-resolver-2026-10-02.md)는 fixture alias, package `exports`, package 내부 상대 `@import`가 실제 두 번들러의 production graph에서 snapshot과 entry CSS로 이어짐을 확인했다. 이 prototype은 fixture에 한정되며 symlink·plugin 가상 모듈·조건별 exports, 최종 graph 직렬화, 제품 패키지/API, 모바일/OTA 연결은 구현하지 않았으므로 C02는 미완료다.
+- C02의 다음 하위 작업은 [0014 모듈 그래프 adapter 계약](../../spec/internal/0014-c02-bundler-module-graph.md)으로 분리한다. 입력 resolver graph와 최종 emitted ESM graph는 별개로 수집하며 원본 요청 문자열을 출력 specifier로 대신 쓰지 않는다. 공통 계약이 고정된 뒤 Vite와 Rspack adapter·fixture를 별도 worktree에서 구현한다. Rspack의 기본 runtime output은 실제 ESM import edge를 만들지 않을 수 있으므로 설정 플래그가 아니라 최종 산출 JS를 검사하고 비호환이면 명시적으로 실패 처리한다. 성공·실패 fixture와 evidence가 완성되기 전에는 C02.2를 완료로 표시하지 않는다.
 - R03은 `HostDocument`·불변 snapshot의 내부 코어 모델을 `spinon-core`에 추가했고, C03은 snapshot을 Stylo `0.22.0` DOM·selector trait에 연결했다. 공개 DOM façade와 스타일 변환 계층, 계산 스타일→Taffy 경계는 별도 작업이다.
 
 
@@ -70,9 +71,10 @@ Taffy는 현재 제공하는 Block·Flexbox·Grid 알고리즘에 적용한다. 
 1. R03의 내부 `HostDocumentSnapshot`이 C03 adapter의 입력이다. 기존 S01 `Tree`를 직접 연결하지 않는다. 현재 HostDocument는 혼합 노드·속성·namespace·상태·revision을 갖고 Stylo DOM·selector trait adapter와 연결됐지만, V8 DOM façade와 계산 스타일은 없다.
 2. C03 DOM traversal·namespace adapter와 selector matcher fixture는 완료했다. C04의 CSS oracle·cascade·inline declaration 및 첫 화면 판정은 C01 comparator와 C02 bundle CSS resource 계약을 통과한 입력에 연결한다. S10 계산값과 `spinon-layout` 연결은 별도 구현·판정으로 남는다.
 3. `C02`의 CSS 자원 추출 실험과 `C01`의 Chromium fixture 형식은 서로 독립적이다. 기능 진입점→CSS·폰트·이미지 의존 그래프의 최종 직렬화는 R15·X01·D02의 매니페스트 계약을 따른다.
-4. `C05` 스타일 무효화, `C06` 값·단위, `C07` box model이 정해진 뒤 `C08`~`C14` layout adapter를 진행한다. layout 입력 자료형과 invalidation boundary가 고정된 뒤 Flex·Grid·positioning 알고리즘을 분리해 진행한다.
-5. `C15`~`C19` 텍스트·페인트 작업은 같은 computed-style snapshot과 revision 계약을 사용한다. 텍스트 측정과 GPU painter는 레이아웃 속성 변환과 독립적으로 개발할 수 있지만, 공통 fixture를 합칠 때만 완료를 판정한다.
-6. 반응형·상태 선택자·애니메이션은 frame scheduling과 CSS invalidation 순서에 의존하므로 `C20`~`C25` 구현 전에 상태 변경·스타일 갱신·GPU 제출의 revision 순서를 고정한다.
+4. C02.2의 Vite·Rspack adapter는 [0014](../../spec/internal/0014-c02-bundler-module-graph.md)의 동일 snapshot 검증기와 R15 투영 규칙을 사용한다. 각 어댑터는 별도 fixture/output 디렉터리를 소유하고, 공용 contract·validator·비교 fixture·상태 대장은 하나의 변경 주체만 수정한다. 실패 profile은 성공 graph로 승격하지 않는다.
+5. `C05` 스타일 무효화, `C06` 값·단위, `C07` box model이 정해진 뒤 `C08`~`C14` layout adapter를 진행한다. layout 입력 자료형과 invalidation boundary가 고정된 뒤 Flex·Grid·positioning 알고리즘을 분리해 진행한다.
+6. `C15`~`C19` 텍스트·페인트 작업은 같은 computed-style snapshot과 revision 계약을 사용한다. 텍스트 측정과 GPU painter는 레이아웃 속성 변환과 독립적으로 개발할 수 있지만, 공통 fixture를 합칠 때만 완료를 판정한다.
+7. 반응형·상태 선택자·애니메이션은 frame scheduling과 CSS invalidation 순서에 의존하므로 `C20`~`C25` 구현 전에 상태 변경·스타일 갱신·GPU 제출의 revision 순서를 고정한다.
 
 병렬 작업 중 공용 DOM trait, computed-style snapshot, Taffy node ID와 CSS 자원 revision을 여러 작업이 동시에 바꾸지 않는다. 각 인터페이스는 선행 작업 하나가 소유하고, 병렬 작업은 버전이 있는 내부 계약에 맞춘다.
 
