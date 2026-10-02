@@ -16,6 +16,7 @@
 | [0010 · C03 Stylo DOM adapter](0010-stylo-dom-adapter-c03.md) | HostDocument snapshot에서 Stylo 문서·노드·요소·선택자 DOM으로의 변환 계약 | 내부 구현 계약 초안 `0.1.0-draft` · C03 구현 완료, 계산 스타일 제외 |
 | [0011 · C02 CSS 자원 어댑터](0011-css-resource-adapter-c02.md) | Vite·Rspack 산출을 빌드 단위 공통 CSS 자원 snapshot으로 정규화 | 내부 계약 후보 `0.1.0-draft` · fixture 스파이크 전용 · 제품 API 아님 |
 | [0012 · C04 stylesheet 입력 목록](0012-stylesheet-registry-c04.md) | Stylo stylesheet 파싱, CSS 출처·등록 순서와 parser 진단 보존 | 내부 구현 계약 초안 `0.1.0-draft` · cascade 계산 미연결 |
+| [0016 · C04 기본 stylesheet cascade](0016-c04-basic-cascade.md) | 불변 HostDocument revision의 UA·author·inline cascade와 whitelist computed-style snapshot | fixture 전용 내부 구현 계약 `0.1.0-draft` · Chromium 비교 통과 · 제품/API 연결 미완료 |
 | [0013 · R15 청크 OTA 호환 모델](0013-r15-ota-chunk-compatibility.md) | 바이너리 호환 ID, 단일 target ESM specifier 매핑이 있는 기능·청크·자원 그래프, typed edge diff·영향 scope·최초/불확실 기준 fallback, 객체 차등 전달·전체 그래프 사전 확보·target별 stale/CAS publish 경계, 로컬 영속 저장·객체 재검증·용량 보호, 서명·압축 제한·상향 sequence rollback 및 offline authorization 미결정 | 내부 설계 제안 `0.1.0-draft` · 배포/로더/API 미구현 |
 | [0014 · C02 번들러 모듈 그래프 adapter](0014-c02-bundler-module-graph.md) | 입력 resolver graph와 최종 emitted ESM graph를 분리해 기능·청크·specifier 대응 및 추출 실패를 기록 | 내부 실험 계약 `0.1.0-draft` · 구현·제품 API 미완료 |
 | [R13 · 플랫폼 생명주기·GPU 복구](r13-platform-gpu-recovery.md) | wgpu 실험 ABI, 플랫폼 표면 수명과 복구 경계 | 실험 전용 |
@@ -31,6 +32,7 @@
 - [C02.2 · Rspack module graph adapter](./evidence/css-c02-rspack-module-graph-2026-10-02.md) — Rspack 2.2.7 fixture의 입력 graph·ESM profile 판정·출력 bytes 근거.
 - [C03 · HostDocument Stylo DOM adapter](./evidence/css-c03-stylo-dom-adapter-2026-10-01.md) — Stylo DOM/selector trait 구현, 고정 snapshot fixture, 실제 selector matcher 결과와 대상별 컴파일 결과.
 - [C04 · stylesheet 입력 목록](./evidence/css-c04-stylesheet-registry-2026-10-01.md) — Stylo 출처·등록 순서·진단 보존과 처리기가 없는 `@import`의 경계 검증.
+- [C04.1 · 기본 cascade slice](./evidence/css-c04-basic-cascade-2026-10-03.md) — fixed Chromium reference의 computed value 80개와 Stylo 내부 cascade 비교 및 제한.
 - [R15 · 청크 OTA 호환 모델](./evidence/r15-ota-chunk-model-2026-10-02.md) — 기존 OTA·C02 문서 사이의 그래프·기능 rollout·runtime 호환·서명/rollback 경계를 정리한 설계 추적 근거. 실행 기능 검증은 포함하지 않음.
 
 - [R10 · Taffy 적합성 실험](./evidence/taffy-r10-2026-09-28.md) — 시뮬레이터·에뮬레이터 로그, 화면 캡처, fixture 범위와 해석 한계.

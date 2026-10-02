@@ -1,0 +1,217 @@
+{
+  "schema": "spinon-css-c04-cascade-reference/v1",
+  "referenceId": "chromium-darwin-arm64-25.5.0-macos-26.5.1-154.0.8037.95-c04-cascade-v1-cb1e77476585-29b38ffc9b17-0e231fc4dc01-0cf4a1587190-affc6715a14a",
+  "fixture": {
+    "path": "tests/fixtures/css/c04/cascade-input.v1.json",
+    "sha256": "cb1e774765851d6a51fd0fb41c99c3f888cb882921dde72fc26363853f0a79d1",
+    "documentBaseUrl": "https://spinon.invalid/c04/document.html"
+  },
+  "stylesheets": [
+    {
+      "id": "c04-author",
+      "path": "tests/fixtures/css/c04/basic-cascade.css",
+      "baseUrl": "https://spinon.invalid/c04/basic-cascade.css",
+      "sha256": "3d62f1417ecc609f9ad352c5f9ea09d9ffa9b96dfa8701814a2a84279219fdd1"
+    },
+    {
+      "id": "c04-author-later",
+      "path": "tests/fixtures/css/c04/basic-cascade-later.css",
+      "baseUrl": "https://spinon.invalid/c04/basic-cascade-later.css",
+      "sha256": "f8b39475d9d1f8edb53241a56ac614e3867089c2a5af8b836115064efb7b8815"
+    }
+  ],
+  "capture": {
+    "path": "tools/css-reference/capture-c04-cascade.mjs",
+    "sha256": "0e231fc4dc017c9d41186d9b29c96a7dc3c8fffeaaf77b417f446297310814b7",
+    "nodeVersion": "v24.20.0",
+    "operatingSystem": {
+      "platform": "darwin",
+      "architecture": "arm64",
+      "release": "25.5.0",
+      "kernelVersion": "Darwin Kernel Version 25.5.0: Mon Apr 27 20:41:15 PDT 2026; root:xnu-12377.121.6~2/RELEASE_ARM64_T6041",
+      "productVersion": "26.5.1",
+      "buildVersion": "25F80"
+    },
+    "networkMode": "offline",
+    "timeZone": "UTC"
+  },
+  "browser": {
+    "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "version": "Chrome/154.0.8037.95",
+    "revision": "@05d469856e75794131cc2e5d9b2f6b6f10a70388",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "javascriptVersion": "15.4.80.19",
+    "sha256": "affc6715a14a423f5207014ae4b86ddad028e70b04b13572d60d35d8ac728f91"
+  },
+  "viewport": {
+    "widthCssPx": 800,
+    "heightCssPx": 600,
+    "deviceScaleFactor": 1,
+    "screenMedia": true,
+    "lightColorScheme": true,
+    "locale": "en-US",
+    "timeZone": "UTC"
+  },
+  "observations": [
+    {
+      "fixtureId": "scope",
+      "properties": {
+        "display": "block",
+        "color": "rgb(17, 34, 51)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "ua-default",
+      "properties": {
+        "display": "block",
+        "color": "rgb(1, 2, 3)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "author-vs-ua",
+      "properties": {
+        "display": "inline",
+        "color": "rgb(1, 2, 3)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "specificity",
+      "properties": {
+        "display": "block",
+        "color": "rgb(0, 0, 255)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "source-order",
+      "properties": {
+        "display": "block",
+        "color": "rgb(0, 0, 255)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "important",
+      "properties": {
+        "display": "block",
+        "color": "rgb(255, 0, 0)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "inline",
+      "properties": {
+        "display": "block",
+        "color": "rgb(0, 128, 0)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "inline-important",
+      "properties": {
+        "display": "block",
+        "color": "rgb(0, 128, 0)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "invalid-inline",
+      "properties": {
+        "display": "block",
+        "color": "rgb(1, 2, 3)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "parent-color",
+      "properties": {
+        "display": "block",
+        "color": "rgb(9, 17, 25)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "inherit",
+      "properties": {
+        "display": "inline",
+        "color": "rgb(9, 17, 25)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "unset-inherited",
+      "properties": {
+        "display": "inline",
+        "color": "rgb(9, 17, 25)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "initial",
+      "properties": {
+        "display": "block",
+        "color": "rgb(0, 0, 0)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "unset-non-inherited",
+      "properties": {
+        "display": "inline",
+        "color": "rgb(1, 2, 3)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "media",
+      "properties": {
+        "display": "block",
+        "color": "rgb(0, 0, 255)",
+        "font-size": "18px",
+        "font-weight": "400",
+        "margin-top": "0px"
+      }
+    },
+    {
+      "fixtureId": "margin",
+      "properties": {
+        "display": "block",
+        "color": "rgb(1, 2, 3)",
+        "font-size": "18px",
+        "font-weight": "700",
+        "margin-top": "3px"
+      }
+    }
+  ]
+}

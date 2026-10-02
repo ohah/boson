@@ -10,9 +10,12 @@ use style::{
     context::QuirksMode,
     error_reporting::{ContextualParseError, ParseErrorReporter},
     media_queries::MediaList,
+    properties::{PropertyDeclarationBlock, parse_style_attribute},
     servo_arc::Arc,
-    shared_lock::SharedRwLock,
-    stylesheets::{AllowImportRules, DocumentStyleSheet, Origin, Stylesheet, UrlExtraData},
+    shared_lock::{Locked, SharedRwLock},
+    stylesheets::{
+        AllowImportRules, CssRuleType, DocumentStyleSheet, Origin, Stylesheet, UrlExtraData,
+    },
 };
 use url::Url;
 
@@ -150,8 +153,12 @@ pub struct StylesheetRegistry {
 impl StylesheetRegistry {
     /// 빈 stylesheet 목록을 만듭니다.
     pub fn new() -> Self {
+        Self::with_shared_lock(SharedRwLock::new())
+    }
+
+    pub(crate) fn with_shared_lock(shared_lock: SharedRwLock) -> Self {
         Self {
-            shared_lock: SharedRwLock::new(),
+            shared_lock,
             ids: HashSet::new(),
             stylesheets: Vec::new(),
         }
@@ -222,6 +229,34 @@ impl StylesheetRegistry {
     pub fn is_empty(&self) -> bool {
         self.stylesheets.is_empty()
     }
+
+    pub(crate) fn iter_stylo_sheets(
+        &self,
+    ) -> impl ExactSizeIterator<Item = (CssOrigin, &DocumentStyleSheet)> {
+        self.stylesheets
+            .iter()
+            .map(|registered| (registered.origin, &registered.sheet))
+    }
+}
+
+pub(super) fn parse_inline_style_attribute(
+    source: &str,
+    base_url: &Url,
+    shared_lock: &SharedRwLock,
+    quirks_mode: QuirksMode,
+) -> (
+    Arc<Locked<PropertyDeclarationBlock>>,
+    Vec<CssParseDiagnostic>,
+) {
+    let diagnostics = ParseDiagnostics::default();
+    let declarations = parse_style_attribute(
+        source,
+        &UrlExtraData::from(base_url.clone()),
+        Some(&diagnostics),
+        quirks_mode,
+        CssRuleType::Style,
+    );
+    (Arc::new(shared_lock.wrap(declarations)), diagnostics.take())
 }
 
 impl Default for StylesheetRegistry {

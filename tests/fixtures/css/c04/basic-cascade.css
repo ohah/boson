@@ -1,0 +1,79 @@
+@namespace "http://www.w3.org/1999/xhtml";
+
+#scope {
+  color: rgb(17, 34, 51);
+  font-size: 18px;
+}
+
+div {
+  color: rgb(1, 2, 3);
+}
+
+#specificity {
+  color: rgb(0, 0, 255);
+}
+
+.specificity {
+  color: rgb(0, 128, 0);
+}
+
+#source-order {
+  color: rgb(255, 0, 0);
+}
+
+#important {
+  color: rgb(0, 0, 255);
+}
+
+.important {
+  color: rgb(255, 0, 0) !important;
+}
+
+#inline {
+  color: rgb(255, 0, 0);
+}
+
+#inline-important {
+  color: rgb(255, 0, 0) !important;
+}
+
+#parent-color {
+  color: rgb(9, 17, 25);
+}
+
+#inherit {
+  color: inherit;
+}
+
+#unset-inherited {
+  color: unset;
+}
+
+#initial {
+  color: initial;
+}
+
+#unset-non-inherited {
+  display: unset;
+}
+
+#author-vs-ua {
+  display: inline;
+}
+
+@media screen and (min-width: 700px) {
+  #media {
+    color: rgb(0, 0, 255);
+  }
+}
+
+@media screen and (max-width: 700px) {
+  #media {
+    color: rgb(255, 0, 0);
+  }
+}
+
+#margin {
+  margin-top: 3px;
+  font-weight: 700;
+}

@@ -14,5 +14,8 @@ stylo = "=0.22.0"
 stylo_dom = "=0.22.0"
 url = "2.5"
 
+[dev-dependencies]
+serde_json = "=1.0.151"
+
 [lints.rust]
 unsafe_code = "deny"

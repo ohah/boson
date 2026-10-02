@@ -334,6 +334,16 @@ fn invalid_roots_and_foreign_generations_are_rejected_or_hidden() {
         ),
         Err(StyloDomError::InvalidRoot)
     ));
+    assert!(matches!(
+        StyloDocumentView::new_with_base_url(
+            snapshot.clone(),
+            fixture.root,
+            true,
+            QuirksMode::NoQuirks,
+            "relative/document.html",
+        ),
+        Err(StyloDomError::InvalidDocumentBaseUrl)
+    ));
 
     let mut other_document = HostDocument::new().unwrap();
     let foreign = other_document.reserve_node_handle().unwrap();

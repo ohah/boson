@@ -7,6 +7,7 @@ use std::{
 use spinon_core::{HostDocumentSnapshot, HostNodeHandle, HostNodeKind, HostParent, NodeId};
 use style::context::QuirksMode;
 use style::shared_lock::SharedRwLock;
+use url::Url;
 
 use crate::stylo_dom::{element::StyloElementData, node::StyloNode};
 
@@ -19,6 +20,8 @@ pub enum StyloDomError {
     InvalidRoot,
     /// HTML 요소에 ASCII 대소문자만 다른 no-namespace 속성이 중복됩니다.
     AmbiguousHtmlAttributeNames { node: NodeId },
+    /// 문서 base URL을 절대 URL로 파싱할 수 없습니다.
+    InvalidDocumentBaseUrl,
 }
 
 impl fmt::Display for StyloDomError {
@@ -29,6 +32,9 @@ impl fmt::Display for StyloDomError {
                 formatter,
                 "HTML 요소 {node}에 대소문자만 다른 속성 이름이 중복됩니다"
             ),
+            Self::InvalidDocumentBaseUrl => {
+                formatter.write_str("문서 base URL은 올바른 절대 URL이어야 합니다")
+            }
         }
     }
 }
@@ -46,6 +52,7 @@ pub struct StyloDocumentView {
     members: BTreeSet<NodeId>,
     elements: BTreeMap<NodeId, StyloElementData>,
     shared_lock: SharedRwLock,
+    document_base_url: Url,
 }
 
 impl StyloDocumentView {
@@ -56,6 +63,25 @@ impl StyloDocumentView {
         is_html_document: bool,
         quirks_mode: QuirksMode,
     ) -> Result<Self, StyloDomError> {
+        Self::new_with_base_url(
+            snapshot,
+            root,
+            is_html_document,
+            quirks_mode,
+            "https://spinon.invalid/document.html",
+        )
+    }
+
+    /// 문서 URL을 기준으로 inline style 속성을 파싱하는 Stylo view를 만듭니다.
+    pub fn new_with_base_url(
+        snapshot: HostDocumentSnapshot,
+        root: HostNodeHandle,
+        is_html_document: bool,
+        quirks_mode: QuirksMode,
+        document_base_url: &str,
+    ) -> Result<Self, StyloDomError> {
+        let document_base_url =
+            Url::parse(document_base_url).map_err(|_| StyloDomError::InvalidDocumentBaseUrl)?;
         if snapshot.parent(root) != Some(HostParent::Root)
             || !matches!(
                 snapshot.node(root).map(|node| node.kind()),
@@ -67,6 +93,7 @@ impl StyloDocumentView {
 
         let mut members = BTreeSet::new();
         let mut elements = BTreeMap::new();
+        let shared_lock = SharedRwLock::new();
         let mut pending = vec![root];
 
         while let Some(handle) = pending.pop() {
@@ -86,7 +113,13 @@ impl StyloDocumentView {
                 }
                 elements.insert(
                     handle.id(),
-                    StyloElementData::from_host_element(element, is_html_document),
+                    StyloElementData::from_host_element(
+                        element,
+                        is_html_document,
+                        &document_base_url,
+                        &shared_lock,
+                        quirks_mode,
+                    ),
                 );
             }
             if let Some(children) = snapshot.children(handle) {
@@ -101,7 +134,8 @@ impl StyloDocumentView {
             quirks_mode,
             members,
             elements,
-            shared_lock: SharedRwLock::new(),
+            shared_lock,
+            document_base_url,
         })
     }
 
@@ -142,6 +176,10 @@ impl StyloDocumentView {
     /// 이 view가 사용하는 문서 모드입니다.
     pub const fn is_html_document(&self) -> bool {
         self.is_html_document
+    }
+
+    pub fn document_base_url(&self) -> &Url {
+        &self.document_base_url
     }
 
     pub(super) fn snapshot(&self) -> &HostDocumentSnapshot {
