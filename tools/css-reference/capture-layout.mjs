@@ -345,7 +345,6 @@ try {
   await pageDevTools.send('Emulation.setUserAgentOverride', {
     userAgent: browserVersion.userAgent,
     acceptLanguage: 'en-US',
-    platform: 'MacIntel',
   });
   await pageDevTools.send('Emulation.setTimezoneOverride', { timezoneId: 'UTC' });
   await pageDevTools.send('Emulation.setEmulatedMedia', {
