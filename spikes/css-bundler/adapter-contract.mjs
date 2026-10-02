@@ -50,6 +50,14 @@ export function assertAdapterSnapshot(snapshot) {
   requireValue(typeof snapshot?.build?.mode === "string" && snapshot.build.mode.length > 0, "build.mode가 비었습니다.");
   requireValue(["success", "failed"].includes(snapshot?.build?.status), "build.status가 올바르지 않습니다.");
   requireValue(/^[a-f0-9]{64}$/.test(snapshot?.build?.fixtureSha256 ?? ""), "build.fixtureSha256은 SHA-256이어야 합니다.");
+  const hasJoinProfile = snapshot.build.profile !== undefined || snapshot.build.buildProfileSha256 !== undefined;
+  if (hasJoinProfile) {
+    requireValue(typeof snapshot.build.captureId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(snapshot.build.captureId), "결합 profile의 build.captureId는 UUID여야 합니다.");
+    requireValue(snapshot.build.profile && typeof snapshot.build.profile === "object" && !Array.isArray(snapshot.build.profile), "build.profile 객체가 필요합니다.");
+    requireValue(/^[a-f0-9]{64}$/.test(snapshot.build.buildProfileSha256 ?? ""), "build.buildProfileSha256은 SHA-256이어야 합니다.");
+  } else {
+    requireValue(snapshot.build.captureId === undefined, "build.captureId를 쓰려면 build.profile과 buildProfileSha256가 필요합니다.");
+  }
   for (const diagnostic of snapshot.diagnostics) {
     requireValue(diagnostic && typeof diagnostic === "object", "diagnostic 객체가 필요합니다.");
     requireValue(diagnosticSeverities.has(diagnostic.severity), `잘못된 진단 severity: ${diagnostic.severity}`);

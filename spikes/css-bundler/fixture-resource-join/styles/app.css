@@ -1,0 +1,10 @@
+@import "./tokens.css";
+
+@font-face {
+  font-family: "C02 Join Fixture";
+  src: url("../assets/fixture.woff2") format("woff2");
+}
+
+.application {
+  background-image: url("../assets/background.svg");
+}

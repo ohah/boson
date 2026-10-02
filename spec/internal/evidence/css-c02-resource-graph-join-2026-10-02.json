@@ -1,0 +1,237 @@
+{
+  "environment": {
+    "node": "v24.20.0",
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "vite": {
+    "captureId": "4e577250-6e69-4968-85e0-0895747f00fc",
+    "tool": "vite",
+    "toolVersion": "8.3.1",
+    "mode": "production",
+    "fixtureSha256": "ad2946ed004051106cafbe9c7aa928511d681f864920e055c0dfa9fbe39e3c8a",
+    "buildProfileSha256": "bbcef3f2c5b2b86f8044bcdacea14a674b55ace50d05a93dbd217fe31921386b",
+    "resourceGraphSha256": "02121128e4f8a17fd0d578853ec1d0f4347d5c5507c946841586b89d928d0880",
+    "sourceGraphSha256": "df415de70b5575729fafe59fbc479dd0a398f5da82130eb7ba757947761fad36",
+    "outputGraphSha256": "0d794958b25ce93c9e8b876514abb506d60af93e7b03930efb3c28a1bb57e816",
+    "moduleGraphSha256": "7338b5cd2dbd8e6b4bd67c3940cb834a51da6c100c06785e69b9676def152a45",
+    "joinedGraphSha256": "7b02bb8c0b3bb0ab1d862b7fa48e50bf7e692b31a36f1f3b09eae4cbfbaaf251",
+    "features": [
+      {
+        "id": "lazy-feature",
+        "entrySourceKey": "features/lazy.js"
+      },
+      {
+        "id": "main",
+        "entrySourceKey": "index.js"
+      }
+    ],
+    "chunkCount": 4,
+    "resourceEdgeCount": 3,
+    "resources": [
+      {
+        "id": "resource:assets/background.svg",
+        "kind": "image",
+        "outputPath": "assets/background.svg",
+        "mediaType": "image/svg+xml",
+        "bytes": 108,
+        "sha256": "803e39f6f41ec1d831a13c2c21d789da72ed48172d99c7c46b9ec55664dfdec2"
+      },
+      {
+        "id": "resource:assets/fixture.woff2",
+        "kind": "font",
+        "outputPath": "assets/fixture.woff2",
+        "mediaType": "font/woff2",
+        "bytes": 102,
+        "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e"
+      },
+      {
+        "id": "resource:assets/icon.js",
+        "kind": "javascript",
+        "outputPath": "assets/icon.js",
+        "mediaType": "text/javascript",
+        "bytes": 160,
+        "sha256": "c24696c6bf7861e8efe9ea3d855afd9d7798a9ef6fbc9436702e91af8f7b7fe7"
+      },
+      {
+        "id": "resource:assets/icon.svg",
+        "kind": "image",
+        "outputPath": "assets/icon.svg",
+        "mediaType": "image/svg+xml",
+        "bytes": 109,
+        "sha256": "970052ddcb980e5ec5a31174e68700234bb58b53e69b27387dc3b5b8a7ead4b8"
+      },
+      {
+        "id": "resource:assets/lazy.css",
+        "kind": "stylesheet",
+        "outputPath": "assets/lazy.css",
+        "mediaType": "text/css",
+        "bytes": 57,
+        "sha256": "fdc87da50465017ff1bc72cbb43a6e53257fd867be4a9b14bead4143c5e81bdd"
+      },
+      {
+        "id": "resource:assets/lazy.js",
+        "kind": "javascript",
+        "outputPath": "assets/lazy.js",
+        "mediaType": "text/javascript",
+        "bytes": 277,
+        "sha256": "57aa43b41b89b90518c8fd1991d5197edd3790df99cbfec4155933b26707c0c4"
+      },
+      {
+        "id": "resource:assets/lazy.svg",
+        "kind": "image",
+        "outputPath": "assets/lazy.svg",
+        "mediaType": "image/svg+xml",
+        "bytes": 108,
+        "sha256": "d170ebce4812d66fdadb6252eb7579fddeb2496713d679cc0ed6b7a11c545b9d"
+      },
+      {
+        "id": "resource:assets/main.css",
+        "kind": "stylesheet",
+        "outputPath": "assets/main.css",
+        "mediaType": "text/css",
+        "bytes": 204,
+        "sha256": "15961f3fe6476a7fb4ecf6426095d5e434f2963718ab428591a16bf6fdab023e"
+      },
+      {
+        "id": "resource:assets/main.js",
+        "kind": "javascript",
+        "outputPath": "assets/main.js",
+        "mediaType": "text/javascript",
+        "bytes": 375,
+        "sha256": "8801310a38fb3aa9362687a64c77f49a8c5bdb665bf1a1636eeb13ee6fc9e651"
+      },
+      {
+        "id": "resource:assets/preload-helper.js",
+        "kind": "javascript",
+        "outputPath": "assets/preload-helper.js",
+        "mediaType": "text/javascript",
+        "bytes": 2478,
+        "sha256": "03f3d8e060817b72b6c93f0ddf2ea3be2b74c698a081334d9eeb1f7f8ffbead2"
+      }
+    ]
+  },
+  "rspack": {
+    "captureId": "3bb1c612-b045-44f6-998a-cae94192d92c",
+    "tool": "rspack",
+    "toolVersion": "2.2.7",
+    "mode": "production",
+    "fixtureSha256": "ad2946ed004051106cafbe9c7aa928511d681f864920e055c0dfa9fbe39e3c8a",
+    "buildProfileSha256": "8d77c15427008535968549e4dafffff1e550a7ac06d4a1b455c1266ca3c9cf8d",
+    "resourceGraphSha256": "fbd84367d8607222fa2a4a2c3f7225893b34f23a0b4e6aaf433cb14112c822e7",
+    "sourceGraphSha256": "167055038366fdade6fb7ad1999eb0756efad974855cf503843d4d62cfdd8498",
+    "outputGraphSha256": "d080ab56b6e29635f0dca0935905cb4b38d616753e205ba54707c1eff5656d06",
+    "moduleGraphSha256": "45b132720a9472b011e7e746546a5abb870972603bf4000dad539f9e43259b4f",
+    "joinedGraphSha256": "9bb3184ea2979ad5921b365ade1f6ba1a41ad3b008a4dc2170c9fef6f1130845",
+    "features": [
+      {
+        "id": "lazy-feature",
+        "entrySourceKey": "features/lazy.js"
+      },
+      {
+        "id": "main",
+        "entrySourceKey": "index.js"
+      }
+    ],
+    "chunkCount": 5,
+    "resourceEdgeCount": 4,
+    "resources": [
+      {
+        "id": "resource:251.js",
+        "kind": "javascript",
+        "outputPath": "251.js",
+        "mediaType": "text/javascript",
+        "bytes": 51,
+        "sha256": "cc1b8a312407a267fb23f89dd9be90627dbd7bd977e609dfe999cb3b8fa7d5be"
+      },
+      {
+        "id": "resource:assets/background.svg",
+        "kind": "image",
+        "outputPath": "assets/background.svg",
+        "mediaType": "image/svg+xml",
+        "bytes": 108,
+        "sha256": "803e39f6f41ec1d831a13c2c21d789da72ed48172d99c7c46b9ec55664dfdec2"
+      },
+      {
+        "id": "resource:assets/fixture.woff2",
+        "kind": "font",
+        "outputPath": "assets/fixture.woff2",
+        "mediaType": "font/woff2",
+        "bytes": 102,
+        "sha256": "bc54552e1d3e1337b484a8b1fce3d2126cf7669c27fe1bf523b659a404bf251e"
+      },
+      {
+        "id": "resource:assets/icon.svg",
+        "kind": "image",
+        "outputPath": "assets/icon.svg",
+        "mediaType": "image/svg+xml",
+        "bytes": 109,
+        "sha256": "970052ddcb980e5ec5a31174e68700234bb58b53e69b27387dc3b5b8a7ead4b8"
+      },
+      {
+        "id": "resource:assets/lazy.svg",
+        "kind": "image",
+        "outputPath": "assets/lazy.svg",
+        "mediaType": "image/svg+xml",
+        "bytes": 108,
+        "sha256": "d170ebce4812d66fdadb6252eb7579fddeb2496713d679cc0ed6b7a11c545b9d"
+      },
+      {
+        "id": "resource:features/icon.js",
+        "kind": "javascript",
+        "outputPath": "features/icon.js",
+        "mediaType": "text/javascript",
+        "bytes": 66,
+        "sha256": "700cdb788f8f397560f8e496c7c0e9afe1beda3a297032728200aec89d50479d"
+      },
+      {
+        "id": "resource:features/lazy.css",
+        "kind": "stylesheet",
+        "outputPath": "features/lazy.css",
+        "mediaType": "text/css",
+        "bytes": 54,
+        "sha256": "3c4fad115dfd67c6a170efffb7fe97f83cb62833870c374b0725ce24f80be9ef"
+      },
+      {
+        "id": "resource:features/lazy.js",
+        "kind": "javascript",
+        "outputPath": "features/lazy.js",
+        "mediaType": "text/javascript",
+        "bytes": 104,
+        "sha256": "92848507fe316fae4d717a3d80aabfbf2f0141cb88d09730ea106398cc8e267e"
+      },
+      {
+        "id": "resource:icon.js",
+        "kind": "javascript",
+        "outputPath": "icon.js",
+        "mediaType": "text/javascript",
+        "bytes": 92,
+        "sha256": "0e4733a71f7ef960df9691f52aaffa90fa299c769d8facbee0f0a43a6fad623f"
+      },
+      {
+        "id": "resource:index.js",
+        "kind": "javascript",
+        "outputPath": "index.js",
+        "mediaType": "text/javascript",
+        "bytes": 78,
+        "sha256": "9a686005e90aeb0311ed4d987ec438cce390edda2bedde4e4fa80bcd53d51b40"
+      },
+      {
+        "id": "resource:styles/app.css",
+        "kind": "stylesheet",
+        "outputPath": "styles/app.css",
+        "mediaType": "text/css",
+        "bytes": 146,
+        "sha256": "2df0e752a59020100c9ddf5c09573c1dc1ee692a68171df11e63c050070e9abb"
+      },
+      {
+        "id": "resource:styles/tokens.css",
+        "kind": "stylesheet",
+        "outputPath": "styles/tokens.css",
+        "mediaType": "text/css",
+        "bytes": 35,
+        "sha256": "dad4426d7a97423d5be893f0a0835826f4db509c2b6c85fd72e066e8c4b8729c"
+      }
+    ]
+  }
+}

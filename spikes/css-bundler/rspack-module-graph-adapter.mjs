@@ -49,11 +49,11 @@ export async function buildRspackModuleGraph({
   });
   const [toolVersion, buildProfile] = await Promise.all([
     rspackVersion(),
-    createBuildProfile(profileFingerprint, features),
+    createRspackBuildProfile(profileFingerprint, features),
   ]);
   const buildProfileSha256 = computeBuildProfileSha256(buildProfile);
   await reserveOutputDirectory({ fixtureRoot: canonicalFixtureRoot, outputDir });
-  const stats = await runCompiler(config);
+  const stats = await runRspackCompiler(config);
   let compilationGraph = captureState.value;
   try {
     const postBuildFixtureSnapshot = await captureFixtureSnapshot(canonicalFixtureRoot);
@@ -97,15 +97,22 @@ export function createRspackModuleGraphPlugin({ fixtureRoot, captureState, virtu
   return {
     apply(compiler) {
       compiler.hooks.thisCompilation.tap("SpinonRspackModuleGraphAdapter", (compilation) => {
+        captureState.compilation = compilation;
         compilation.hooks.afterSeal.tapPromise("SpinonRspackModuleGraphAdapter", async () => {
-          captureState.value = await captureRspackCompilationGraph(compilation, fixtureRoot, {
+          const graph = await captureRspackCompilationGraph(compilation, fixtureRoot, {
             virtualSourceByPath,
             fixtureSourceByPath,
           });
+          captureState.value = graph;
+          captureState.valueCompilation = compilation;
         });
       });
     },
   };
+}
+
+export async function captureRspackFixtureSnapshot(fixtureRoot) {
+  return captureFixtureSnapshot(await realpath(fixtureRoot));
 }
 
 export async function captureRspackCompilationGraph(compilation, fixtureRoot, {
@@ -483,8 +490,10 @@ export async function createRspackModuleGraphSnapshot({
   toolVersion,
   fixtureSha256,
   buildProfileSha256,
+  captureId,
+  supportedFeatureEntrypoints = [{ id: "main", entrySourceKey: "src/main.js", chunkKind: "entry" }],
 }) {
-  assertSupportedFeatureInputs(features);
+  assertSupportedFeatureInputs(features, supportedFeatureEntrypoints);
   const diagnostics = [...(compilationGraph?.diagnostics ?? [])];
   if (buildHasErrors && (stats?.errors ?? []).length > 0) {
     for (const error of stats.errors) {
@@ -795,15 +804,16 @@ export async function createRspackModuleGraphSnapshot({
 
   const normalizedFeatures = [];
   for (const feature of features) {
+    const supportedFeature = supportedFeatureEntrypoints.find((item) => item.id === feature.id);
     const sourceModule = normalizedSourceModules.find((module) => module.key === feature.entrySourceKey);
     const entryCandidates = sourceModule?.outputChunkIds
       .map((id) => chunkRows.get(id))
-      .filter((chunk) => chunk && chunk.kind === "entry") ?? [];
+      .filter((chunk) => chunk && chunk.kind === supportedFeature.chunkKind) ?? [];
     if (!sourceModule || entryCandidates.length !== 1) {
       diagnostics.push(diagnostic(
         entryCandidates.length > 1 ? "C02_GRAPH_TARGET_AMBIGUOUS" : "C02_GRAPH_UNRESOLVED_IMPORT",
         "feature-entry",
-        `명시된 feature entry source가 Rspack entry chunk 하나로 연결되지 않았습니다: ${feature.entrySourceKey}`,
+        `명시된 feature entry source가 Rspack ${supportedFeature.chunkKind} chunk 하나로 연결되지 않았습니다: ${feature.entrySourceKey}`,
         feature.entrySourceKey,
       ));
       continue;
@@ -828,6 +838,7 @@ export async function createRspackModuleGraphSnapshot({
       fixtureSha256,
       profile: buildProfile,
       buildProfileSha256,
+      ...(captureId ? { captureId } : {}),
     },
     sourceGraph,
     features: normalizedFeatures,
@@ -1225,12 +1236,31 @@ function chunkKind(chunk) {
   return "static";
 }
 
-function assertSupportedFeatureInputs(features) {
-  if (Array.isArray(features)
-    && features.length === 1
-    && features[0]?.id === "main"
-    && features[0]?.entrySourceKey === "src/main.js") return;
-  throw new Error('Rspack profile은 현재 단일 entry "main" -> "src/main.js" feature만 지원합니다.');
+function assertSupportedFeatureInputs(features, supportedFeatureEntrypoints = [
+  { id: "main", entrySourceKey: "src/main.js", chunkKind: "entry" },
+]) {
+  const validFeatureDefinitions = Array.isArray(supportedFeatureEntrypoints)
+    && supportedFeatureEntrypoints.length > 0
+    && supportedFeatureEntrypoints.every((item) => item
+      && typeof item.id === "string" && item.id.length > 0
+      && typeof item.entrySourceKey === "string" && item.entrySourceKey.length > 0
+      && ["entry", "dynamic"].includes(item.chunkKind))
+    && new Set(supportedFeatureEntrypoints.map((item) => item.id)).size === supportedFeatureEntrypoints.length;
+  if (!validFeatureDefinitions) throw new Error("Rspack profile의 지원 feature 정의가 올바르지 않습니다.");
+
+  const featureDefinitionsMatch = Array.isArray(features)
+    && features.length === supportedFeatureEntrypoints.length
+    && features.every((feature, index) => feature?.id === supportedFeatureEntrypoints[index].id
+      && feature?.entrySourceKey === supportedFeatureEntrypoints[index].entrySourceKey);
+  if (featureDefinitionsMatch) return;
+
+  if (supportedFeatureEntrypoints.length === 1
+    && supportedFeatureEntrypoints[0].id === "main"
+    && supportedFeatureEntrypoints[0].entrySourceKey === "src/main.js"
+    && supportedFeatureEntrypoints[0].chunkKind === "entry") {
+    throw new Error('Rspack profile은 현재 단일 entry "main" -> "src/main.js" feature만 지원합니다.');
+  }
+  throw new Error(`Rspack profile의 지원 feature entry가 올바르지 않습니다: ${supportedFeatureEntrypoints.map((item) => item.entrySourceKey).join(", ")}`);
 }
 
 function resourceId(outputPath) {
@@ -1298,7 +1328,7 @@ function diagnosticSourceKey(source) {
   return source === null ? "" : `${source.file}:${source.line}:${source.column}`;
 }
 
-async function runCompiler(config) {
+export async function runRspackCompiler(config) {
   const compiler = rspack(config);
   return new Promise((resolve, reject) => {
     compiler.run((error, stats) => {
@@ -1320,7 +1350,7 @@ async function runCompiler(config) {
   });
 }
 
-async function rspackVersion() {
+export async function rspackVersion() {
   const resolved = fileURLToPath(import.meta.resolve("@rspack/core"));
   const packagePath = path.resolve(path.dirname(resolved), "..", "package.json");
   const packageJson = JSON.parse(await readFile(packagePath, "utf8"));
@@ -1616,7 +1646,7 @@ function hasNativeModuleSyntax(ast) {
   return false;
 }
 
-async function createBuildProfile(effectiveOptions, features) {
+export async function createRspackBuildProfile(effectiveOptions, features, additionalConfigSources = []) {
   const adapterDirectory = path.dirname(fileURLToPath(import.meta.url));
   const configSources = [
     ["spikes/css-bundler/rspack-module-graph-adapter.mjs", "rspack-module-graph-adapter.mjs"],
@@ -1625,6 +1655,7 @@ async function createBuildProfile(effectiveOptions, features) {
     ["spikes/css-bundler/adapter-support.mjs", "adapter-support.mjs"],
     ["spikes/css-bundler/package.json", "package.json"],
     ["spikes/css-bundler/bun.lock", "bun.lock"],
+    ...additionalConfigSources,
   ];
   const sources = await Promise.all(configSources.map(async ([relativePath, localPath]) => ({
     path: relativePath,

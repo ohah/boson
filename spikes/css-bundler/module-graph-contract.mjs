@@ -141,7 +141,7 @@ export function assertModuleGraphSnapshot(snapshot) {
   requireValue(snapshot?.contract?.version === MODULE_GRAPH_CONTRACT.version, "contract.version이 올바르지 않습니다.");
   requireOnlyKeys(snapshot.contract, ["name", "version"], "contract");
   requireValue(typeof snapshot.build === "object" && snapshot.build !== null, "build 객체가 필요합니다.");
-  requireOnlyKeys(snapshot.build, ["tool", "toolVersion", "adapterVersion", "outputProfile", "status", "fixtureSha256", "profile", "buildProfileSha256"], "build");
+  requireOnlyKeys(snapshot.build, ["tool", "toolVersion", "adapterVersion", "outputProfile", "status", "fixtureSha256", "profile", "buildProfileSha256", "captureId"], "build");
   requireValue(bundlerTools.has(snapshot.build.tool), "build.tool은 vite 또는 rspack이어야 합니다.");
   requireValue(typeof snapshot.build.toolVersion === "string" && snapshot.build.toolVersion.length > 0, "build.toolVersion이 비었습니다.");
   requireValue(typeof snapshot.build.adapterVersion === "string" && snapshot.build.adapterVersion.length > 0, "build.adapterVersion이 비었습니다.");
@@ -150,6 +150,7 @@ export function assertModuleGraphSnapshot(snapshot) {
   requireSha256(snapshot.build.fixtureSha256, "build.fixtureSha256");
   requireSha256(snapshot.build.buildProfileSha256, "build.buildProfileSha256");
   requireValue(snapshot.build.buildProfileSha256 === computeBuildProfileSha256(snapshot.build.profile), "build.buildProfileSha256가 정규 profile 내용과 다릅니다.");
+  if (snapshot.build.captureId !== undefined) requireValue(isUuid(snapshot.build.captureId), "build.captureId는 UUID여야 합니다.");
   requireValue(Array.isArray(snapshot.features), "features 배열이 필요합니다.");
   requireValue(Array.isArray(snapshot.diagnostics), "diagnostics 배열이 필요합니다.");
 
@@ -739,6 +740,10 @@ function requireModuleKey(value, name) {
 
 function requireSha256(value, name) {
   requireValue(/^[a-f0-9]{64}$/.test(value ?? ""), `${name}은 소문자 SHA-256이어야 합니다.`);
+}
+
+function isUuid(value) {
+  return typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
 function requireUniqueStrings(values, message) {

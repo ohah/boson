@@ -23,11 +23,17 @@ export const VITE_GRAPH_FEATURES = Object.freeze([
   { id: "lazy-feature", entrySourceKey: "features/lazy.js" },
 ]);
 
-export function createViteGraphBuildConfig({ fixtureRoot, outputDir, plugins = [], write = true }) {
+export function createViteGraphBuildConfig({
+  fixtureRoot,
+  outputDir,
+  plugins = [],
+  write = true,
+  outputProfile = VITE_GRAPH_OUTPUT_PROFILE,
+}) {
   const root = path.resolve(fixtureRoot);
   if (write && !outputDir) throw new Error("Vite graph fixture build에는 임시 outputDir가 필요합니다.");
   if (write && outputDir) assertDisjointBuildPaths(root, path.resolve(outputDir));
-  return {
+  const config = {
     root,
     mode: "production",
     configFile: false,
@@ -43,23 +49,28 @@ export function createViteGraphBuildConfig({ fixtureRoot, outputDir, plugins = [
       write,
       outDir: outputDir ? path.resolve(outputDir) : undefined,
       emptyOutDir: true,
-      minify: VITE_GRAPH_OUTPUT_PROFILE.minify,
-      target: VITE_GRAPH_OUTPUT_PROFILE.target,
-      cssCodeSplit: VITE_GRAPH_OUTPUT_PROFILE.cssCodeSplit,
-      modulePreload: { polyfill: VITE_GRAPH_OUTPUT_PROFILE.modulePreloadPolyfill },
+      minify: outputProfile.minify,
+      target: outputProfile.target,
+      cssCodeSplit: outputProfile.cssCodeSplit,
+      manifest: outputProfile.manifest ?? false,
+      modulePreload: { polyfill: outputProfile.modulePreloadPolyfill },
       assetsInlineLimit: 0,
       sourcemap: false,
       rollupOptions: {
         input: { main: path.join(root, "index.js") },
         output: {
-          format: VITE_GRAPH_OUTPUT_PROFILE.format,
-          entryFileNames: VITE_GRAPH_OUTPUT_PROFILE.entryFileNames,
-          chunkFileNames: VITE_GRAPH_OUTPUT_PROFILE.chunkFileNames,
-          assetFileNames: VITE_GRAPH_OUTPUT_PROFILE.assetFileNames,
+          format: outputProfile.format,
+          entryFileNames: outputProfile.entryFileNames,
+          chunkFileNames: outputProfile.chunkFileNames,
+          assetFileNames: outputProfile.assetFileNames,
         },
       },
     },
   };
+  if (outputProfile.preserveEntrySignatures !== undefined) {
+    config.build.rollupOptions.preserveEntrySignatures = outputProfile.preserveEntrySignatures;
+  }
+  return config;
 }
 
 export function assertDisjointBuildPaths(fixtureRoot, outputDir) {
