@@ -896,6 +896,7 @@ dependencies = [
  "cssparser",
  "euclid",
  "selectors",
+ "serde_json",
  "spinon-core",
  "stylo",
  "stylo_dom",

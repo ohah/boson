@@ -1,0 +1,92 @@
+{
+  "schema": "spinon-css-c04-cascade-fixture/v1",
+  "fixtureId": "C04-basic-cascade-v1",
+  "documentBaseUrl": "https://spinon.invalid/c04/document.html",
+  "viewport": {
+    "widthCssPx": 800,
+    "heightCssPx": 600,
+    "deviceScaleFactor": 1,
+    "mediaType": "screen",
+    "colorScheme": "light",
+    "locale": "en-US",
+    "timeZone": "UTC"
+  },
+  "authorStylesheets": [
+    {
+      "id": "c04-author",
+      "baseUrl": "https://spinon.invalid/c04/basic-cascade.css",
+      "source": "basic-cascade.css"
+    },
+    {
+      "id": "c04-author-later",
+      "baseUrl": "https://spinon.invalid/c04/basic-cascade-later.css",
+      "source": "basic-cascade-later.css"
+    }
+  ],
+  "properties": ["display", "color", "font-size", "font-weight", "margin-top"],
+  "tree": {
+    "fixtureId": "scope",
+    "tag": "div",
+    "attributes": { "id": "scope" },
+    "children": [
+      { "fixtureId": "ua-default", "tag": "div", "attributes": { "id": "ua-default" } },
+      { "fixtureId": "author-vs-ua", "tag": "div", "attributes": { "id": "author-vs-ua" } },
+      { "fixtureId": "specificity", "tag": "div", "attributes": { "id": "specificity", "class": "specificity" } },
+      { "fixtureId": "source-order", "tag": "div", "attributes": { "id": "source-order" } },
+      { "fixtureId": "important", "tag": "div", "attributes": { "id": "important", "class": "important" } },
+      { "fixtureId": "inline", "tag": "div", "attributes": { "id": "inline", "STYLE": "color: rgb(0, 128, 0);" } },
+      { "fixtureId": "inline-important", "tag": "div", "attributes": { "id": "inline-important", "style": "color: rgb(0, 128, 0) !important;" } },
+      { "fixtureId": "invalid-inline", "tag": "div", "attributes": { "id": "invalid-inline", "style": "color: rgb(1, 2);" } },
+      {
+        "fixtureId": "parent-color",
+        "tag": "div",
+        "attributes": { "id": "parent-color" },
+        "children": [
+          { "fixtureId": "inherit", "tag": "span", "attributes": { "id": "inherit" } },
+          { "fixtureId": "unset-inherited", "tag": "span", "attributes": { "id": "unset-inherited" } }
+        ]
+      },
+      { "fixtureId": "initial", "tag": "div", "attributes": { "id": "initial" } },
+      { "fixtureId": "unset-non-inherited", "tag": "div", "attributes": { "id": "unset-non-inherited" } },
+      { "fixtureId": "media", "tag": "div", "attributes": { "id": "media" } },
+      { "fixtureId": "margin", "tag": "div", "attributes": { "id": "margin" } }
+    ]
+  },
+  "observations": [
+    "scope",
+    "ua-default",
+    "author-vs-ua",
+    "specificity",
+    "source-order",
+    "important",
+    "inline",
+    "inline-important",
+    "invalid-inline",
+    "parent-color",
+    "inherit",
+    "unset-inherited",
+    "initial",
+    "unset-non-inherited",
+    "media",
+    "margin"
+  ],
+  "covered": [
+    "내장 UA 규칙과 author 규칙의 origin 우선순위",
+    "선택자 specificity",
+    "같은 specificity의 source order",
+    "!important",
+    "inline style attribute",
+    "상속·inherit·initial·unset",
+    "고정 screen viewport의 @media 조건"
+  ],
+  "excluded": [
+    "@import 로딩·순환·실패",
+    "cascade layer 및 @scope",
+    "CSS custom property와 var()",
+    "동적 stylesheet 변경·style invalidation",
+    "CSSOM 공개 API",
+    "Taffy 레이아웃·GPU 표시",
+    "글꼴 파일·실제 font metrics",
+    "Android·iOS 적합성"
+  ]
+}

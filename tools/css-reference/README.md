@@ -14,6 +14,16 @@ node tools/css-reference/capture.mjs
 
 inventory 단위 검증은 `mise exec -- bun run test:css-reference`로 실행합니다. 전체 기본 테스트 명령 `bun run test`에도 포함됩니다.
 
+## C04 기본 cascade 기준 수집
+
+`cascade-input.v1.json`이 문서 트리·관찰 속성·stylesheet 목록과 순서·viewport를 정합니다. capture 도구는 그 입력에서 HTML을 만들고 Chromium DevTools Protocol로 `800×600` CSS px, scale `1`, `screen`, light, `en-US`, `UTC`를 고정합니다. 렌더러 네트워크를 오프라인으로 설정해 외부 자원이 기준 결과에 섞이지 않게 합니다. 브라우저 실행 파일·revision, fixture·stylesheet·도구의 SHA-256, Node.js·OS 버전 및 16개 요소의 computed style을 reference JSON에 기록합니다. reference ID에는 캡처 도구와 브라우저 실행 파일의 해시 접두부를 포함합니다.
+
+```sh
+mise exec -- node tools/css-reference/capture-c04-cascade.mjs
+```
+
+기존 reference 경로는 덮어쓰지 않습니다. 이 기준은 CSS 의미의 제한된 cascade slice만 비교하며 layout·font shaping·GPU pixels·Android/iOS 동작이나 전체 CSS 지원을 뜻하지 않습니다. 계산 결과 비교는 `mise exec -- cargo test -p spinon-style`에서 같은 fixture와 고정 reference를 읽어 수행합니다.
+
 ## C01 레이아웃 기준 수집
 
 `layout-units-flex-grid.html`과 [`layout-inventory.v1.json`](../../tests/fixtures/css/c01/layout-inventory.v1.json)은 `rem`·`em`, content-box 기준 퍼센트 크기, 분수 Flexbox 성장·줄바꿈, 분수 Grid track의 Chromium 기준을 정의합니다. computed CSS 값은 앞뒤 공백 제거 후 문자열 정확 일치로 비교하고, 각 노드의 `x`·`y`·`width`·`height` 최대 절대 오차는 각각 `0.5 CSS px`로 제한합니다. 평균값으로 개별 노드의 실패를 상쇄하지 않습니다.

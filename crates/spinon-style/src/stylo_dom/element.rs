@@ -2,10 +2,15 @@ use std::{cell::Cell, fmt, hash::Hash, ops::Deref};
 
 use selectors::matching::ElementSelectorFlags;
 use spinon_core::{ElementState as HostElementState, HostElement, HostNodeHandle};
-use style::{Atom, LocalName, Namespace, data::ElementDataWrapper, values::AtomIdent};
+use style::{
+    Atom, LocalName, Namespace, data::ElementDataWrapper, properties::PropertyDeclarationBlock,
+    servo_arc::Arc, shared_lock::Locked, values::AtomIdent,
+};
 use stylo_dom::ElementState;
+use url::Url;
 
 use super::StyloDocumentView;
+use crate::stylesheet_registry::{CssParseDiagnostic, parse_inline_style_attribute};
 
 pub(super) fn atom_text<T>(atom: &T) -> &str
 where
@@ -37,10 +42,18 @@ pub(super) struct StyloElementData {
     pub children_to_process: Cell<isize>,
     pub data_present: Cell<bool>,
     pub style_data: ElementDataWrapper,
+    pub inline_style: Option<Arc<Locked<PropertyDeclarationBlock>>>,
+    pub inline_style_diagnostics: Vec<CssParseDiagnostic>,
 }
 
 impl StyloElementData {
-    pub fn from_host_element(element: &HostElement, is_html_document: bool) -> Self {
+    pub fn from_host_element(
+        element: &HostElement,
+        is_html_document: bool,
+        document_base_url: &Url,
+        shared_lock: &style::shared_lock::SharedRwLock,
+        quirks_mode: style::context::QuirksMode,
+    ) -> Self {
         let attributes = element
             .attributes()
             .iter()
@@ -53,6 +66,23 @@ impl StyloElementData {
 
         let html_name_matching =
             is_html_document && element.namespace() == "http://www.w3.org/1999/xhtml";
+        let style_attribute = attributes.iter().find(|attribute| {
+            atom_text(&attribute.namespace.0).is_empty()
+                && attribute_name_matches(&attribute.local_name, "style", html_name_matching)
+        });
+        let (inline_style, inline_style_diagnostics) = if html_name_matching {
+            style_attribute.map_or((None, Vec::new()), |attribute| {
+                let (declarations, diagnostics) = parse_inline_style_attribute(
+                    &attribute.value,
+                    document_base_url,
+                    shared_lock,
+                    quirks_mode,
+                );
+                (Some(declarations), diagnostics)
+            })
+        } else {
+            (None, Vec::new())
+        };
         let id = attributes
             .iter()
             .find(|attribute| {
@@ -102,6 +132,8 @@ impl StyloElementData {
             children_to_process: Cell::new(0),
             data_present: Cell::new(false),
             style_data: ElementDataWrapper::default(),
+            inline_style,
+            inline_style_diagnostics,
         }
     }
 }

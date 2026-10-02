@@ -54,7 +54,10 @@ impl<'a> TElement for StyloElement<'a> {
     }
 
     fn style_attribute(&self) -> Option<ArcBorrow<'_, Locked<PropertyDeclarationBlock>>> {
-        None
+        self.data()
+            .inline_style
+            .as_ref()
+            .map(|declarations| declarations.borrow_arc())
     }
 
     fn animation_rule(
