@@ -6,7 +6,7 @@ use spinon_core::{ChangeBatch, NodeId, Revision, Tree};
 
 use crate::{
     FlexDirection, LayoutDimension, LayoutEdges, LayoutEngine, LayoutError, LayoutGap, LayoutInput,
-    LayoutNode, LayoutStyle, TaffyLayoutEngine, TextDirection, Viewport,
+    LayoutNode, LayoutSourceRevision, LayoutStyle, TaffyLayoutEngine, TextDirection, Viewport,
 };
 
 #[derive(Debug, Deserialize)]
@@ -109,7 +109,7 @@ fn parse_fixture(marker: &str) -> Fixture {
 fn to_input(fixture: &Fixture) -> LayoutInput {
     LayoutInput {
         root: node_id(fixture.root),
-        tree_revision: Revision::default(),
+        source_revision: LayoutSourceRevision::Tree(Revision::default()),
         viewport: Viewport {
             width: fixture.viewport.width,
             height: fixture.viewport.height,
@@ -262,7 +262,7 @@ fn fractional_dimensions_are_not_rounded_by_the_layout_engine() {
     child_node.style.width = LayoutDimension::Fixed(50.25);
     let input = LayoutInput {
         root,
-        tree_revision: Revision::default(),
+        source_revision: LayoutSourceRevision::Tree(Revision::default()),
         viewport: Viewport {
             width: 100.5,
             height: 80.5,
@@ -470,8 +470,11 @@ fn input_snapshot_reads_the_core_tree_and_keeps_child_order() {
     assert_eq!(input.nodes[1].id, second_child);
     assert_eq!(input.nodes[0].children, vec![first_child, second_child]);
     let output = TaffyLayoutEngine.compute(&input).unwrap();
-    assert_eq!(input.tree_revision().get(), 1);
-    assert_eq!(output.tree_revision, input.tree_revision());
+    assert!(matches!(
+        input.source_revision(),
+        LayoutSourceRevision::Tree(revision) if revision.get() == 1
+    ));
+    assert_eq!(output.source_revision, input.source_revision());
     assert_eq!(output.frames[&first_child].x, 0.0);
     assert_eq!(output.frames[&second_child].x, 20.0);
 

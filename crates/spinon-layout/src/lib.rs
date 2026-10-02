@@ -1,13 +1,17 @@
-use std::collections::{BTreeMap, BTreeSet, HashMap};
-use std::error::Error;
-use std::fmt;
+mod error;
+mod host_document;
+mod tree_input;
 
-use spinon_core::{NodeId, Revision, Tree};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
+
+use spinon_core::{DocumentGeneration, DocumentRevision, NodeId, RenderTreeRevision, Revision};
 use taffy::prelude::{
     AlignItems, AvailableSpace, Dimension, Display, FlexDirection as TaffyFlexDirection, FlexWrap,
     LengthPercentage, Rect, Size, Style, TaffyTree,
 };
 use taffy::style::{BoxSizing, Direction as TaffyDirection};
+
+pub use error::LayoutError;
 
 /// 루트 기준으로 계산할 고정 화면 크기입니다.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -91,56 +95,18 @@ pub struct LayoutNode {
 #[derive(Clone, Debug, PartialEq)]
 pub struct LayoutInput {
     root: NodeId,
-    tree_revision: Revision,
+    source_revision: LayoutSourceRevision,
     viewport: Viewport,
     nodes: Vec<LayoutNode>,
 }
 
 impl LayoutInput {
-    /// 코어 트리의 자식 순서를 보존하면서 완전한 스타일 스냅샷을 만듭니다.
-    pub fn from_tree(
-        tree: &Tree,
-        viewport: Viewport,
-        styles: &BTreeMap<NodeId, LayoutStyle>,
-    ) -> Result<Self, LayoutError> {
-        let root = tree.root().ok_or(LayoutError::EmptyTree)?;
-        let mut core_nodes = tree.nodes().collect::<Vec<_>>();
-        core_nodes.sort_by_key(|node| node.id());
-
-        for &id in styles.keys() {
-            if tree.node(id).is_none() {
-                return Err(LayoutError::UnknownStyleNode(id));
-            }
-        }
-
-        let mut nodes = Vec::with_capacity(core_nodes.len());
-        for node in core_nodes {
-            let style = styles
-                .get(&node.id())
-                .copied()
-                .ok_or(LayoutError::MissingStyle(node.id()))?;
-            nodes.push(LayoutNode {
-                id: node.id(),
-                children: node.children().to_vec(),
-                style,
-            });
-        }
-
-        let input = Self {
-            root,
-            tree_revision: tree.revision(),
-            viewport,
-            nodes,
-        };
-        Ok(input)
-    }
-
     pub const fn root(&self) -> NodeId {
         self.root
     }
 
-    pub const fn tree_revision(&self) -> Revision {
-        self.tree_revision
+    pub const fn source_revision(&self) -> LayoutSourceRevision {
+        self.source_revision
     }
 
     pub const fn viewport(&self) -> Viewport {
@@ -149,6 +115,25 @@ impl LayoutInput {
 
     pub fn nodes(&self) -> &[LayoutNode] {
         &self.nodes
+    }
+}
+
+/// 레이아웃 입력을 만든 코어 snapshot의 revision 출처입니다.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum LayoutSourceRevision {
+    /// S01의 단순 트리 snapshot입니다.
+    Tree(Revision),
+    /// 혼합 노드를 지원하는 HostDocument snapshot입니다.
+    HostDocument {
+        generation: DocumentGeneration,
+        document: DocumentRevision,
+        render_tree: RenderTreeRevision,
+    },
+}
+
+impl Default for LayoutSourceRevision {
+    fn default() -> Self {
+        Self::Tree(Revision::default())
     }
 }
 
@@ -164,85 +149,9 @@ pub struct LayoutFrame {
 /// 성공한 한 번의 계산에서 반환한 모든 노드의 프레임입니다.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct LayoutOutput {
-    pub tree_revision: Revision,
+    pub source_revision: LayoutSourceRevision,
     pub frames: BTreeMap<NodeId, LayoutFrame>,
 }
-
-/// 입력 검증, Taffy 계산 또는 결과 변환 실패입니다.
-#[derive(Clone, Debug, PartialEq)]
-pub enum LayoutError {
-    InvalidViewport,
-    EmptyTree,
-    MissingRoot(NodeId),
-    MissingStyle(NodeId),
-    UnknownStyleNode(NodeId),
-    DuplicateNode(NodeId),
-    MissingChild { parent: NodeId, child: NodeId },
-    DuplicateChild { parent: NodeId, child: NodeId },
-    RootHasParent(NodeId),
-    MultipleParents(NodeId),
-    DetachedNode(NodeId),
-    Cycle(NodeId),
-    UnreachableNode(NodeId),
-    RootSizeMismatch { axis: &'static str },
-    InvalidStyle { node: NodeId, field: &'static str },
-    Taffy(String),
-    TaffyPanicked,
-    MissingComputedLayout(NodeId),
-    NonFiniteFrame(NodeId),
-}
-
-impl fmt::Display for LayoutError {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::InvalidViewport => {
-                write!(formatter, "화면 크기는 0보다 큰 유한한 값이어야 합니다")
-            }
-            Self::EmptyTree => write!(formatter, "레이아웃할 코어 트리에 루트가 없습니다"),
-            Self::MissingRoot(id) => write!(formatter, "루트 노드 {id}를 찾을 수 없습니다"),
-            Self::MissingStyle(id) => write!(formatter, "노드 {id}의 계산된 스타일이 없습니다"),
-            Self::UnknownStyleNode(id) => {
-                write!(formatter, "스타일의 노드 {id}가 코어 트리에 없습니다")
-            }
-            Self::DuplicateNode(id) => write!(formatter, "노드 ID {id}가 중복되었습니다"),
-            Self::MissingChild { parent, child } => {
-                write!(formatter, "노드 {parent}의 자식 {child}를 찾을 수 없습니다")
-            }
-            Self::DuplicateChild { parent, child } => {
-                write!(formatter, "노드 {parent}에 자식 {child}가 중복되었습니다")
-            }
-            Self::RootHasParent(id) => {
-                write!(formatter, "루트 노드 {id}는 다른 노드의 자식일 수 없습니다")
-            }
-            Self::MultipleParents(id) => write!(formatter, "노드 {id}에 부모가 둘 이상 있습니다"),
-            Self::DetachedNode(id) => write!(formatter, "루트가 아닌 노드 {id}에 부모가 없습니다"),
-            Self::Cycle(id) => write!(formatter, "노드 {id}에서 순환 참조를 발견했습니다"),
-            Self::UnreachableNode(id) => {
-                write!(formatter, "노드 {id}는 루트에서 도달할 수 없습니다")
-            }
-            Self::RootSizeMismatch { axis } => {
-                write!(formatter, "루트의 {axis} 크기는 viewport와 같아야 합니다")
-            }
-            Self::InvalidStyle { node, field } => {
-                write!(formatter, "노드 {node}의 {field} 값이 유효하지 않습니다")
-            }
-            Self::Taffy(message) => {
-                write!(formatter, "Taffy 레이아웃 계산에 실패했습니다: {message}")
-            }
-            Self::TaffyPanicked => {
-                write!(formatter, "Taffy 레이아웃 계산이 panic으로 중단되었습니다")
-            }
-            Self::MissingComputedLayout(id) => {
-                write!(formatter, "노드 {id}의 계산된 레이아웃을 찾을 수 없습니다")
-            }
-            Self::NonFiniteFrame(id) => {
-                write!(formatter, "노드 {id}의 계산 결과가 유한하지 않습니다")
-            }
-        }
-    }
-}
-
-impl Error for LayoutError {}
 
 /// 입력 트리를 검증하고 논리 단위 프레임을 반환하는 내부 엔진 경계입니다.
 pub trait LayoutEngine {
@@ -550,7 +459,7 @@ fn collect_frames(
         }
     }
     Ok(LayoutOutput {
-        tree_revision: input.tree_revision,
+        source_revision: input.source_revision,
         frames,
     })
 }

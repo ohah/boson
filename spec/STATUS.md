@@ -1,6 +1,6 @@
 # 스피논 구현 상태와 API 명세 대장
 
-**기준:** 2026-10-02 · **명세 버전:** `0.1.0-draft` · **현재 제품 지원 완료:** 없음
+**기준:** 2026-10-03 · **명세 버전:** `0.1.0-draft` · **현재 제품 지원 완료:** 없음
 
 Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발 기반이다. 제품 기능 상태를 대신하지 않으며, 이 초기화만으로 아래 항목을 완료 처리하지 않는다.
 
@@ -40,7 +40,8 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 
 ## 2. 세 플랫폼 수직 구현
 - [x] **S01 Rust 코어의 최소 모듈** — `spinon-core`에 노드 ID·트리·원자 변경 묶음·revision을 분리하고 실패 시 이전 상태 보존을 구현했다. V8 부팅 FFI는 별도 crate다. 내부 인터페이스: [0002 Rust 트리 코어](internal/0002-rust-tree-core.md) · 실행 근거: [Rust 코어 검증 기록](internal/0002-rust-tree-core-evidence.md) · 범위: Rust 라이브러리만. 이벤트·V8 연결은 R03/R06 후속 범위다.
-- [ ] **S02 Taffy 레이아웃 연결** — 부분 구현: `spinon-layout`이 코어 트리의 자식 순서·구조 revision과 계산 스타일을 스냅샷으로 받아 Taffy `0.14.0` Flex subset을 실행하고 프레임을 반환한다. Chromium Headless 154 기준의 7노드 정수 fixture와 보존한 행/열 PoC가 같은 좌표를 냈고, 별도 151.5 CSS px 소수 Flex fixture는 세 자식에 50.5 CSS px씩 배분되어 Chrome과 Taffy 결과가 허용 오차 0.01 CSS px 안에서 일치했다. 기존 PoC는 소수 fixture 대상이 아니다. 이는 전체 CSS 지원이나 세 플랫폼 제품 동작이 아니다. 폰트·이미지 측정, CSS px↔dp/point 변환, Android/iOS GPU 연동, 전체 계산 비용·바이너리 크기·부분 갱신은 남아 있다. 관련 제안: [0003-web-surface.md](0003-web-surface.md) · 내부 인터페이스: [0009 레이아웃 엔진 `0.1.0-draft`](internal/0009-layout-engine.md) · 실행 근거: [S02 비교 기록](internal/evidence/s02-taffy-layout-2026-09-30.md) · 상태: 미완료
+- [ ] **S02 Taffy 레이아웃 연결** — 부분 구현: `spinon-layout`이 코어 트리의 자식 순서·구조 revision과 계산 스타일을 스냅샷으로 받아 Taffy `0.14.0` Flex subset을 실행하고 프레임을 반환한다. Chromium Headless 154 기준의 7노드 정수 fixture와 보존한 행/열 PoC가 같은 좌표를 냈고, 별도 151.5 CSS px 소수 Flex fixture는 세 자식에 50.5 CSS px씩 배분되어 Chrome과 Taffy 결과가 허용 오차 0.01 CSS px 안에서 일치했다. 기존 PoC는 소수 fixture 대상이 아니다. 이는 전체 CSS 지원이나 세 플랫폼 제품 동작이 아니다. 폰트·이미지 측정, CSS px↔dp/point 변환, Android/iOS GPU 연동, 전체 계산 비용·바이너리 크기·부분 갱신은 남아 있다. 관련 제안: [0003-web-surface.md](0003-web-surface.md) · 내부 인터페이스: [0009 레이아웃 엔진 `0.2.0-draft`](internal/0009-layout-engine.md) · 실행 근거: [S02 비교 기록](internal/evidence/s02-taffy-layout-2026-09-30.md) · 상태: 미완료
+  - [x] **S02.1 HostDocument 레이아웃 입력 투영** — `LayoutInput::from_host_document`가 지정한 HostRoot 직속 요소 하위 트리를 node ID·자식 순서 그대로 계산 입력으로 투영하고 `DocumentGeneration`·`DocumentRevision`·`RenderTreeRevision`을 결과에 보존한다. 누락·범위 밖 스타일, 다른 세대·비루트 handle과 텍스트 노드를 실패 처리한다. 기존 Tree adapter와 입력·Taffy 프레임을 정확 비교했다. 계산 스타일은 계속 호출자가 제공하며 CSS cascade·UA stylesheet·Block/inline 동작을 연결한 것으로 보지 않는다. 내부 계약: [0009 `0.2.0-draft`](internal/0009-layout-engine.md) · [실행 근거](internal/evidence/s02-host-document-layout-input-2026-10-03.md).
 - [ ] **S03 V8 호스트 바인딩** — Isolate·Context 수명, JS 노드 명령·이벤트 콜백·타이머·마이크로태스크·예외를 C++↔Rust에 연결한다. 엔진별 어댑터 내부와 앱 개발자가 쓰는 플랫폼 모듈 계약을 분리한다. DOM 호환 계층을 진행할 때 JS `Document`·`Node`·`Element` API도 이 경계를 통해 같은 Rust 문서 트리에 연결한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · [0003-web-surface.md](0003-web-surface.md) · [0007-dom-compatibility.md](0007-dom-compatibility.md) · 세부 작업: [JS API 구현 체크리스트](#javascript-api-구현-체크리스트) · API 명세: 미작성 · 근거: 없음 · 실험: 연결 실험
 - [ ] **S04 Android·iOS GPU 적용기** — 같은 변경 배치를 GPU 장면에 반영하고 플랫폼 입력을 노드 이벤트로 돌려준다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음 · PoC: 네이티브 뷰 연결 PoC
 - [ ] **S05 React 첫 어댑터** — React 호스트 작업을 스피논 명령으로 변환해 상태 변경·이벤트 해제를 확인한다. DOM 호환 계층과 트리를 공유할 때의 렌더러 소유권 규칙도 정한다. 완료 전에 제거된 노드를 가리키는 지연 이벤트의 처리 규칙을 확정한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · [0007-dom-compatibility.md](0007-dom-compatibility.md) · API 명세: 미작성 · 근거: 없음
