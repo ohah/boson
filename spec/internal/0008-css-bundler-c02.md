@@ -25,7 +25,7 @@
 | M6 | CSS 원본 위치 | CSS 원본에서 얻은 import·URL 참조 위치와 미해결 로컬 자원 진단을 공통 계약의 파일·줄·열로 보존한다. source map 유무와 원본 목록은 보조 관찰값으로 별도 기록한다. |
 | M7 | 외부 URL 보존 | 외부 `.invalid` URL이 외부 참조로 출력되며 로컬 해시 자원으로 변환되지 않는다. 실험 코드는 외부 네트워크 요청 기능을 제공하지 않는다. |
 | M8 | 자원 어댑터 snapshot | 두 번들러 결과가 버전 있는 내부 계약을 통과하고, 끊긴 resource ID·절대 경로·잘못된 source 위치 없이 CSS 모듈·source·entry/dynamic/shared chunk·자원 관계와 `@import` 조건 suffix를 기록한다. |
-| M9 | 번들러 기본 resolver로 찾은 CSS 입력 | fixture의 Vite/Rspack alias와 `package.json` `exports`를 통해 가져온 CSS가 두 snapshot에 fixture 상대 경로로 각각 한 번 기록되고, entry chunk의 산출 CSS와 marker가 연결된다. 실제 번들러 빌드 그래프가 선택한 입력을 비교하며 adapter의 상대 경로 추측으로 대체하지 않는다. |
+| M9 | 번들러 기본 resolver로 찾은 CSS 입력 | fixture의 Vite/Rspack alias와 `package.json` `exports`를 통해 가져온 CSS가 두 snapshot에 fixture 상대 경로로 각각 한 번 기록되고, entry chunk의 산출 CSS와 marker가 연결된다. Vite transform hook과 Rspack stats의 실제 CSS module 경로도 기록해 직접 import된 alias/package CSS가 native build graph에 들어왔음을 확인한다. |
 
 M1~M9는 비교의 하드 조건이다. M2a는 기본 설정 차이를 관찰하고 Rspack 호환 옵션도 별도로 시험한다. M6의 정규 원본 위치는 번들러 source map에 의존하지 않고 어댑터가 입력 CSS의 파서 위치를 보존해 만든다. 번들러 고유 진단이 다른 경우 원래 동작과 어댑터 진단을 나눠 기록한다. source map은 디버깅 보조 산출물이며 공통 계약의 필수 입력이 아니다. M9는 fixture 안에 실파일로 둔 패키지만 대상으로 하며 symlink 패키지, plugin 가상 모듈, package exports 조건 조합, fixture 밖 의존성 탐색은 판정하지 않는다. 렌더링 픽셀, Stylo 계산값, DOM runtime 적용, OTA manifest 통합, Android·iOS 빌드는 이 비교에서 주장하지 않는다. 조건 하나라도 실패하면 비교 명령도 실패하고 원본 산출물·도구 오류를 조사한다. 실제 기본 동작이 다르면 그 차이를 결과에 남긴다.
 

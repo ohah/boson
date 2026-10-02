@@ -1652,7 +1652,7 @@
           "column": 25,
           "sourceFile": "src/diagnostics/broken.css",
           "warnings": [
-            "✗ Build failed in 5ms"
+            "✗ Build failed in 6ms"
           ],
           "excerpt": "Build failed with 1 error:\n\n[plugin spinon-css-resource-adapter-vite-spike:source] <fixture>/src/diagnostics/broken.css:2:24\nRolldownError: CSS 로컬 자원을 찾을 수 없습니다: ./missing.svg",
           "adapterSnapshot": {
@@ -1933,6 +1933,14 @@
       "status": "통과",
       "details": {
         "vite": {
+          "resolverGraphSources": [
+            "node_modules/@fixture/theme/dist/theme.css",
+            "src/alias/theme.css",
+            "src/features/feature.css",
+            "src/styles/base.css",
+            "src/styles/card.module.css",
+            "src/styles/shared.css"
+          ],
           "resolvedSources": [
             {
               "sourcePath": "src/alias/theme.css",
@@ -1957,6 +1965,17 @@
           }
         },
         "rspack": {
+          "resolverGraphSources": [
+            "external \"https:/styles.example.invalid/external.css\"",
+            "node_modules/@fixture/theme/dist/theme.css",
+            "node_modules/@fixture/theme/dist/tokens.css",
+            "src/alias/theme.css",
+            "src/features/feature.css",
+            "src/styles/base.css",
+            "src/styles/card.module.css",
+            "src/styles/shared.css",
+            "src/styles/tokens.css"
+          ],
           "resolvedSources": [
             {
               "sourcePath": "src/alias/theme.css",
@@ -2035,7 +2054,7 @@
       "column": 25,
       "sourceFile": "src/diagnostics/broken.css",
       "warnings": [
-        "✗ Build failed in 5ms"
+        "✗ Build failed in 6ms"
       ],
       "excerpt": "Build failed with 1 error:\n\n[plugin spinon-css-resource-adapter-vite-spike:source] <fixture>/src/diagnostics/broken.css:2:24\nRolldownError: CSS 로컬 자원을 찾을 수 없습니다: ./missing.svg",
       "adapterSnapshot": {

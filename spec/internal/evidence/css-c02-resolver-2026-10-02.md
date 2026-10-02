@@ -16,8 +16,8 @@ Vite·Rspack의 production 빌드에서 alias와 package `exports`가 선택한 
 | 비교 조건 | 결과 | 관찰 |
 | --- | --- | --- |
 | M1~M8 기존 산출·CSS Module·에셋·chunk·진단 조건 | 통과 | 이전 C02 fixture의 모든 조건을 확장된 같은 빌드에서 다시 통과했다. |
-| M9 alias CSS | 통과 | 두 빌드 모두 `src/alias/theme.css`를 정확히 한 번 수집하고 entry CSS에 `alias-css` marker와 출력 resource 연결을 기록했다. |
-| M9 package exports CSS | 통과 | 두 빌드 모두 `@fixture/theme/theme.css`가 선택한 `node_modules/@fixture/theme/dist/theme.css`와 그 상대 `tokens.css`를 정확히 한 번 수집했다. 둘 다 entry CSS resource에 연결됐고 `package-export-css`, `package-css-import` marker가 산출 CSS에 남았다. |
+| M9 alias CSS | 통과 | Vite transform hook과 Rspack stats 모두 `src/alias/theme.css`를 native CSS module로 관찰했다. 두 snapshot은 이 파일을 정확히 한 번 수집하고 entry CSS에 `alias-css` marker와 출력 resource 연결을 기록했다. |
+| M9 package exports CSS | 통과 | Vite transform hook과 Rspack stats 모두 `@fixture/theme/theme.css`가 선택한 `node_modules/@fixture/theme/dist/theme.css`를 native CSS module로 관찰했다. Rspack stats는 상대 `tokens.css` edge도 확인했다. 두 snapshot은 theme·tokens 파일을 정확히 한 번 수집했고 entry CSS에 연결했다. `package-export-css`, `package-css-import` marker가 산출 CSS에 남았다. |
 | 공통 snapshot 경로·참조 검증 | 통과 | package 파일을 포함한 모든 입력·자원 경로가 fixture 상대 POSIX 경로로 남았고 snapshot 참조 검증을 통과했다. |
 
 Vite snapshot은 `assets/index-33ooq19t.css`, Rspack snapshot은 `assets/main-4f1fcee2f0886748.css`를 entry CSS 출력으로 연결했다. 파일명은 빌드 해시에 따라 달라질 수 있으며 비교 식별자로 사용하지 않는다. 비교기는 source path 문자열만 확인하지 않고 두 빌드의 최종 entry CSS에 marker가 있는지도 확인한다.
