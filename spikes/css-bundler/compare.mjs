@@ -10,6 +10,7 @@ import { createAdapterSnapshot, CSS_RESOURCE_ADAPTER_VERSION } from "./adapter-c
 import { inspectCssSource } from "./css-source.mjs";
 import { createRspackResourceAdapter, createRspackSnapshot } from "./rspack-resource-adapter.mjs";
 import { createViteResourceAdapter } from "./vite-resource-adapter.mjs";
+import { sourcePathFromId } from "./adapter-support.mjs";
 import rspackConfig from "./rspack.config.mjs";
 import viteConfig from "./vite.config.mjs";
 
@@ -140,9 +141,9 @@ const checks = [
     vite: adapterSnapshotSummary(viteSnapshot),
     rspack: adapterSnapshotSummary(rspackSnapshot),
   }),
-  check("M9", "alias와 package exports로 선택한 CSS를 실제 빌드 graph·entry CSS에 연결한다", resolverParityCheck(viteSnapshot, rspackSnapshot, viteEntryText, rspackEntryText), {
-    vite: resolverParitySummary(viteSnapshot, viteEntryText),
-    rspack: resolverParitySummary(rspackSnapshot, rspackEntryText),
+  check("M9", "alias와 package exports로 선택한 CSS를 실제 빌드 graph·entry CSS에 연결한다", resolverParityCheck(viteSnapshot, rspackSnapshot, viteEntryText, rspackEntryText, viteAdapter.transformedCssSources, rspackSourceModules, fixture), {
+    vite: resolverParitySummary(viteSnapshot, viteEntryText, viteAdapter.transformedCssSources),
+    rspack: resolverParitySummary(rspackSnapshot, rspackEntryText, rspackSourceModules, fixture),
   }),
 ];
 
@@ -661,7 +662,7 @@ function adapterSnapshotCheck(viteSnapshot, rspackSnapshot) {
   return validToolSnapshots && sourceCoverage && cssModuleCoverage && localAssetsResolved && stylesheetOutputsMapped && chunksHaveStyles && chunksHaveSharedJavaScript && importsKeepConditions;
 }
 
-function resolverParityCheck(viteSnapshot, rspackSnapshot, viteEntryText, rspackEntryText) {
+function resolverParityCheck(viteSnapshot, rspackSnapshot, viteEntryText, rspackEntryText, viteTransformedCssSources, rspackSourceModules, fixtureRoot) {
   const requiredSources = [
     "src/alias/theme.css",
     "node_modules/@fixture/theme/dist/theme.css",
@@ -678,17 +679,30 @@ function resolverParityCheck(viteSnapshot, rspackSnapshot, viteEntryText, rspack
   }));
   const markersPreserved = [viteEntryText, rspackEntryText].every((css) =>
     css.includes("alias-css") && css.includes("package-export-css") && css.includes("package-css-import"));
-  return sourceCoverage && entryCssCoverage && markersPreserved;
+  const viteGraphSources = new Set(viteTransformedCssSources);
+  const rspackGraphSources = new Set(rspackSourceModules
+    .map((module) => sourcePathFromId(module.name, fixtureRoot))
+    .filter(Boolean));
+  const resolverGraphCoverage = [
+    "src/alias/theme.css",
+    "node_modules/@fixture/theme/dist/theme.css",
+  ].every((sourcePath) => viteGraphSources.has(sourcePath))
+    && requiredSources.every((sourcePath) => rspackGraphSources.has(sourcePath));
+  return sourceCoverage && entryCssCoverage && markersPreserved && resolverGraphCoverage;
 }
 
-function resolverParitySummary(snapshot, entryCss) {
+function resolverParitySummary(snapshot, entryCss, graphSources, fixtureRoot = null) {
   const expected = [
     "src/alias/theme.css",
     "node_modules/@fixture/theme/dist/theme.css",
     "node_modules/@fixture/theme/dist/tokens.css",
   ];
   const entry = snapshot.chunks.find((chunk) => chunk.kind === "entry");
+  const resolverGraphSources = graphSources instanceof Set
+    ? [...graphSources].sort()
+    : graphSources.map((module) => sourcePathFromId(module.name, fixtureRoot)).filter(Boolean).sort();
   return {
+    resolverGraphSources,
     resolvedSources: expected.map((sourcePath) => ({
       sourcePath,
       count: snapshot.stylesheets.filter((item) => item.sourcePath === sourcePath).length,

@@ -17,6 +17,7 @@ export function createViteResourceAdapter({ fixtureRoot, failOnMissing = false }
   const sources = new Map();
   const cssModules = new Map();
   const outputChunks = [];
+  const transformedCssSources = new Set();
   const root = path.resolve(fixtureRoot);
 
   async function addSource(sourcePath, code = null) {
@@ -37,10 +38,12 @@ export function createViteResourceAdapter({ fixtureRoot, failOnMissing = false }
       sources.clear();
       cssModules.clear();
       outputChunks.length = 0;
+      transformedCssSources.clear();
     },
     async transform(code, id) {
       const sourcePath = sourcePathFromId(id, root);
       if (!sourcePath || path.posix.extname(sourcePath).toLowerCase() !== ".css") return null;
+      transformedCssSources.add(sourcePath);
       await addSource(sourcePath, code);
       const record = sources.get(sourcePath);
       const missing = record.inspection.diagnostics[0];
@@ -98,6 +101,7 @@ export function createViteResourceAdapter({ fixtureRoot, failOnMissing = false }
     sources,
     cssModules,
     outputChunks,
+    transformedCssSources,
     addSource,
     async snapshot({ manifest, outputDir, fixtureSha256, toolVersion, status = "success" }) {
       return createViteSnapshot({ adapter: this, manifest, outputDir, fixtureSha256, toolVersion, status });
