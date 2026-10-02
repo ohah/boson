@@ -1,9 +1,9 @@
 {
   "schema": "spinon-css-reference/v1",
-  "referenceId": "chromium-macos-arm64-macos-26.5.1-25f80-154.0.8037.95-layout-v1-778a2065ac58-inventory-ef6d0b87a506-capture-f7221694922b-bin-affc6715a14a",
+  "referenceId": "chromium-macos-arm64-macos-26.5.1-25f80-154.0.8037.95-layout-v1-778a2065ac58-inventory-ef6d0b87a506-capture-85a34bd9a1a2-bin-affc6715a14a",
   "captureTool": {
     "path": "tools/css-reference/capture-layout.mjs",
-    "sha256": "f7221694922b0a2fe1aa0408d98097476bdf0c95e8220998b4d975e08de2798b",
+    "sha256": "85a34bd9a1a2988bf76565ac2bb60eca65d26d3a35fa3f9c9faaee070155a1f6",
     "inventorySha256": "ef6d0b87a506e5418d8db75c3f8faabf8626690b16e7504f54500ee59de6e1ff"
   },
   "oracle": {
