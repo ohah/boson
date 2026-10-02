@@ -1,6 +1,6 @@
 # 내부 인터페이스 0009 · 레이아웃 엔진
 
-**버전:** `0.1.0-draft` · **상태:** 구현 초안 · **구현:** `crates/spinon-layout` · **대상:** Rust 코어 내부
+**버전:** `0.2.0-draft` · **상태:** 구현 초안 · **구현:** `crates/spinon-layout` · **대상:** Rust 코어 내부
 
 이 문서는 코어 트리와 레이아웃 계산기 사이의 입력·출력 계약을 정합니다. 앱 작성자용 CSS 지원이나 공개 API를 선언하지 않습니다.
 
@@ -9,18 +9,31 @@
 - `spinon-core::Tree`가 노드 ID, 태그, 자식 순서와 구조 revision을 소유합니다.
 - `LayoutInput::from_tree`는 그 트리와 호출자가 제공한 계산 스타일 맵을 읽어 불변 스냅샷을 만듭니다. 코어 트리를 다시 만들지 않으며 자식 순서를 보존합니다.
 - 모든 트리 노드에 스타일이 하나씩 있어야 합니다. 누락 스타일과 트리에 없는 노드의 추가 스타일은 `from_tree`가 오류로 반환합니다. 길이 값·루트 크기·수동 구성 입력의 그래프는 `LayoutEngine::compute`에서 검증합니다.
-- 스냅샷은 `Tree::revision()`을 담고 `LayoutOutput`이 같은 revision을 돌려줍니다. 이는 구조 revision만 식별합니다. 스타일 revision·환경 revision은 아직 없으므로 호출자는 더 새로운 스타일·환경 입력에 낡은 결과를 적용하지 않도록 관리해야 합니다.
+- `LayoutInput::from_host_document`는 `HostDocumentSnapshot`에서 지정한 HostRoot 직속 요소 하위 트리와 호출자가 제공한 계산 스타일 맵을 읽어 같은 입력 노드 형식으로 투영합니다. 요소의 자식 순서를 보존하며 코어 문서를 복제하거나 다시 만들지 않습니다.
+- HostDocument 입력의 선택 하위 트리에 텍스트 노드가 있으면 입력 전체를 `UnsupportedTextNode`로 거부합니다. 텍스트를 무시하거나 요소의 자식 순서를 바꾸지 않습니다. 스타일 누락과 선택한 하위 트리 밖 스타일은 각각 `MissingStyle`, `UnknownStyleNode`로 반환합니다.
+- `LayoutSourceRevision`은 입력 출처를 구분합니다. `Tree` 입력은 구조 `Revision`을, HostDocument 입력은 `DocumentGeneration`·`DocumentRevision`·`RenderTreeRevision`을 함께 보존하고 `LayoutOutput`이 같은 값을 돌려줍니다. viewport·계산 스타일의 독립 revision은 아직 없으므로 호출자는 최신 입력에 오래된 결과를 적용하지 않도록 관리해야 합니다.
 - `LayoutEngine`은 엔진과 무관한 내부 경계이며 현재 구현은 `TaffyLayoutEngine`입니다. Taffy 타입은 이 크레이트 밖으로 노출하지 않습니다.
 
 ```rust
 let input = LayoutInput::from_tree(&tree, viewport, &computed_styles)?;
 let output = TaffyLayoutEngine.compute(&input)?;
-assert_eq!(output.tree_revision, input.tree_revision());
+assert_eq!(output.source_revision, input.source_revision());
 ```
 
-## 입력 계약 `0.1.0-draft`
+HostDocument 입력은 `HostDocumentSnapshot`, 해당 snapshot에 속한 HostRoot 직속 요소 handle, 같은 요소 하위 트리의 스타일 맵을 받습니다. HostDocument 원본의 generation·node ID·자식 순서·revision은 그대로 유지합니다. 이 변환은 CSS cascade 결과를 만들지 않으며 `LayoutStyle`은 여전히 호출자가 전달합니다.
 
-한 계산 입력은 루트 ID, 양수·유한 viewport, 트리 revision, 모든 노드의 스타일을 포함합니다. 루트의 고정 너비·높이는 viewport와 정확히 같아야 합니다. viewport와 스타일 값은 같은 좌표 단위를 사용합니다. 이 계약은 CSS px을 Android dp나 iOS point로 변환하지 않습니다.
+```rust
+let snapshot = document.snapshot();
+let input = LayoutInput::from_host_document(&snapshot, root, viewport, &layout_styles)?;
+let output = TaffyLayoutEngine.compute(&input)?;
+assert_eq!(output.source_revision, input.source_revision());
+```
+
+예시의 `root`는 `snapshot`에서 유효한 HostRoot 직속 요소 handle이며 선택한 subtree에는 텍스트 노드가 없습니다.
+
+## 입력 계약 `0.2.0-draft`
+
+한 계산 입력은 루트 ID, 양수·유한 viewport, 출처 revision, 모든 요소 노드의 스타일을 포함합니다. 루트의 고정 너비·높이는 viewport와 정확히 같아야 합니다. viewport와 스타일 값은 같은 좌표 단위를 사용합니다. 이 계약은 CSS px을 Android dp나 iOS point로 변환하지 않습니다.
 
 현재 표현 가능한 스타일은 다음과 같습니다.
 
@@ -34,7 +47,7 @@ assert_eq!(output.tree_revision, input.tree_revision());
 | `flex_grow` | 0 이상 유한 값 |
 | 표시·정렬 기본값 | 모든 노드는 Flex 컨테이너, `align-items: stretch`, `flex-wrap: nowrap`, `flex-shrink: 0`, border-box |
 
-입력에는 중복 ID, 없는 자식, 중복 자식, 복수 부모, 루트의 부모, 고립 노드와 순환을 허용하지 않습니다. `LayoutInput` 필드는 외부에서 바꿀 수 없고 `from_tree`가 코어 스냅샷을 만듭니다. 엔진은 Taffy에 전달하기 전에 연결 그래프와 계산 스타일을 검증합니다.
+입력에는 중복 ID, 없는 자식, 중복 자식, 복수 부모, 루트의 부모, 고립 노드와 순환을 허용하지 않습니다. `LayoutInput` 필드는 외부에서 바꿀 수 없고 `from_tree` 또는 `from_host_document`가 코어 snapshot을 투영합니다. 엔진은 Taffy에 전달하기 전에 연결 그래프와 계산 스타일을 검증합니다.
 
 ## 출력 계약
 
@@ -50,6 +63,8 @@ assert_eq!(output.tree_revision, input.tree_revision());
 | viewport가 0 이하·NaN·무한대 | `InvalidViewport` |
 | 트리의 루트 또는 노드별 계산 스타일이 없음 | `EmptyTree`, `MissingStyle` |
 | 스타일 맵에 코어 트리 외 노드가 있음 | `UnknownStyleNode` |
+| HostDocument root가 현재 snapshot의 HostRoot 직속 요소가 아님 | `InvalidHostDocumentRoot` |
+| 선택한 HostDocument 하위 트리에 텍스트 노드가 있음 | `UnsupportedTextNode` |
 | 입력 ID·연결 그래프가 잘못됨 | 해당 `MissingRoot`, `DuplicateNode`, `MissingChild`, `DuplicateChild`, `RootHasParent`, `MultipleParents`, `DetachedNode`, `Cycle`, `UnreachableNode` |
 | 루트 크기가 viewport와 다름 | `RootSizeMismatch` |
 | 음수 또는 유한하지 않은 길이·간격·grow | `InvalidStyle` |
@@ -60,10 +75,10 @@ assert_eq!(output.tree_revision, input.tree_revision());
 
 ## 현재 미지원
 
-이 인터페이스는 CSS parser/cascade, selector, 상속, CSS 변수·단위, percentage, margin, border, min/max constraints, flex shrink, wrapping, 정렬 선택, position, overflow·scroll, Grid, Block, 글꼴 shaping, 텍스트/이미지 intrinsic measurement를 제공하지 않습니다. `Auto` leaf의 콘텐츠 기반 측정도 없습니다. 그러므로 일반 웹 Flexbox 동등성, 완성된 CSS 엔진 또는 사용자 UI 지원으로 해석하면 안 됩니다.
+이 인터페이스는 CSS parser/cascade 결과를 직접 받거나 변환하지 않습니다. CSS parser/cascade, selector, 상속, CSS 변수·단위, percentage, margin, border, min/max constraints, flex shrink, wrapping, 정렬 선택, position, overflow·scroll, Grid, Block, 글꼴 shaping, 텍스트/이미지 intrinsic measurement를 제공하지 않습니다. HostDocument의 텍스트 노드를 레이아웃 입력으로 받지 않으며 `Auto` leaf의 콘텐츠 기반 측정도 없습니다. 그러므로 일반 웹 Flexbox 동등성, 완성된 CSS 엔진 또는 사용자 UI 지원으로 해석하면 안 됩니다.
 
 ## 의존성과 비교 기준
 
 제품 workspace는 `taffy = 0.14.0`을 정확히 고정하고 기본 기능을 끈 뒤 `std`, `flexbox`, `taffy_tree`만 켭니다. Lightning CSS 파서나 웹뷰는 런타임 의존성에 포함되지 않습니다. 이전 행·열 PoC는 `spikes/dynamic-tree/rust/tree.rs`에 보존하며, 공유된 정수 LTR fixture에서 Taffy 결과와 비교합니다. 별도의 151.5 CSS px 너비에 flex-grow 자식 셋을 둔 소수 분배 fixture는 Chromium과 Taffy만 비교합니다. 기존 엔진은 정수 크기와 제한된 행·열만 처리하므로 이 비교는 작은 fixture의 회귀 확인이지 브라우저/CSS 전체 적합성이나 속도 비교가 아닙니다.
 
-fixture와 브라우저 좌표, 테스트 결과는 [S02 근거](evidence/s02-taffy-layout-2026-09-30.md)에 기록합니다. 이 구현은 `spec/STATUS.md`의 S02 완료 표시나 공개 Flex/CSS API 지원을 뜻하지 않습니다.
+기존 Tree 입력과 HostDocument 입력의 projection·revision 보존·Taffy 출력 동등성은 [HostDocument 입력 비교 모델](evidence/s02-host-document-layout-input-2026-10-03.md)에 기록합니다. 브라우저 좌표 비교는 [기존 S02 근거](evidence/s02-taffy-layout-2026-09-30.md)에 둡니다. 이 구현은 `spec/STATUS.md`의 S02 완료 표시, C04 runtime cascade 연결 또는 공개 Flex/CSS API 지원을 뜻하지 않습니다.
