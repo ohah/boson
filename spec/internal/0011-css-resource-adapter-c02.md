@@ -75,6 +75,10 @@ Vite·Rspack의 서로 다른 build graph를 CSS 자원과 청크 관계를 비�
 
 `id` 값은 한 snapshot 내부 참조용이다. 같은 파일이 다른 빌드에서 같은 ID를 가져야 한다고 약속하지 않는다. source 위치의 `column`은 사람이 읽는 1-based 열이며, 범위를 추가하면 끝 위치는 exclusive로 정의한다.
 
+### C02.3 결합 capture metadata
+
+독립 C02.1 snapshot에는 이 절의 필드가 없어도 된다. C02.3 결합 대상으로 내보내는 성공 snapshot에는 `build.captureId`(UUID), `build.profile`, `build.buildProfileSha256`를 추가한다. profile 내용과 digest는 같은 build에서 만든 0014 snapshot의 값과 완전히 같아야 한다. capture 함수는 하나의 production build 실행에 두 collector를 함께 설치하고 같은 capture ID를 양쪽에 전달한다. 이 metadata만으로 분리 build가 같은 실행이었다고 추정하지 않는다. [0015](0015-c02-resource-graph-join.md)의 조인 검증도 JavaScript 출력 자원 전체의 경로·종류·크기·SHA-256이 일치하는지 확인한다.
+
 스파이크는 현재 fixture의 상대 경로와 루트 상대 경로만 직접 해석한다. 실제 제품 어댑터는 alias, package export, query suffix, symlink, package exports 조건별 resolver, bundler plugin이 제공하는 가상 모듈을 자체 파일 경로 조합으로 추측하지 않고 해당 번들러의 resolver/module graph 결과에서 받아야 한다. 이 차이가 닫히기 전에는 이 스파이크를 임의의 앱 CSS를 지원하는 adapter로 소개하지 않는다. 한 입력이 여러 출력 자원으로 변환되는 경우도 번들러 edge를 따라 정확한 `targetResourceId`를 골라야 하며, source path 하나로 출력 ID 하나를 추측하지 않는다.
 
 C02.1의 resolver 비교 fixture는 `node_modules/`도 fixture 내부에 실제 파일로 저장해 안정적인 상대 경로 키를 만든다. 이 실험은 두 번들러가 alias와 package `exports`로 선택한 CSS 모듈을 snapshot에 보존하는지만 확인한다. symlink로 fixture 밖을 가리키는 패키지, plugin 가상 모듈, query별 모듈 정체성과 조건부 package exports는 여전히 미검증이다.

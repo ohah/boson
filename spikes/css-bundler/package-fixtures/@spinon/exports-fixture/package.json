@@ -1,0 +1,10 @@
+{
+  "name": "@spinon/exports-fixture",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.js"
+    }
+  }
+}

@@ -12,7 +12,7 @@ Vite·Rspack production build에서 입력 모듈 의존성과 최종 출력 청
 
 ## 결과와 성공 조건
 
-결과에는 `vite` 또는 `rspack` adapter·번들러 버전, 고정된 output profile, fixture digest, 재계산 가능한 build profile과 digest, build status, 진단, 입력 graph, 출력 graph가 들어간다. 입력 및 출력 graph의 추출 상태는 각각 `complete` 또는 `incomplete`로 기록한다. 지원하지 않는 profile은 `failed`와 안정된 진단 코드로 반환하고 부분 결과를 R15 입력으로 사용할 수 없게 한다. Snapshot 필드는 이 문서에 적힌 닫힌 내부 형식을 따른다. adapter 진단용 임시 필드는 정규화 snapshot 안에 추가하지 않는다.
+결과에는 `vite` 또는 `rspack` adapter·번들러 버전, 고정된 output profile, fixture digest, 재계산 가능한 build profile과 digest, build status, 진단, 입력 graph, 출력 graph가 들어간다. 입력 및 출력 graph의 추출 상태는 각각 `complete` 또는 `incomplete`로 기록한다. 지원하지 않는 profile은 `failed`와 안정된 진단 코드로 반환하고 부분 결과를 R15 입력으로 사용할 수 없게 한다. Snapshot 필드는 이 문서에 적힌 닫힌 내부 형식을 따른다. adapter 진단용 임시 필드는 정규화 snapshot 안에 추가하지 않는다. 같은 build에서 0011 resource adapter와 함께 capture하는 경우에만 `build.captureId`(UUID)를 추가한다.
 
 성공으로 기록하려면 다음 조건을 모두 충족해야 한다.
 

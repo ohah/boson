@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { lstat, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { cp, lstat, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { parse } from "acorn";
-import test from "node:test";
+import test, { after } from "node:test";
 import {
   assertR15JavaScriptGraphInput,
   computeBuildProfileSha256,
@@ -23,7 +23,14 @@ import {
 import { createRspackGraphConfig, RSPACK_GRAPH_PROFILE_NAMES } from "./rspack-graph.config.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const fixtureRoot = path.join(here, "fixture-rspack-graph");
+const fixtureSourceRoot = path.join(here, "fixture-rspack-graph");
+const packageFixtureRoot = path.join(here, "package-fixtures", "@spinon", "exports-fixture");
+const fixtureContainer = await mkdtemp(path.join(tmpdir(), "spinon-rspack-graph-fixture-"));
+after(async () => rm(fixtureContainer, { recursive: true, force: true }));
+const fixtureRoot = path.join(fixtureContainer, "fixture");
+await cp(fixtureSourceRoot, fixtureRoot, { recursive: true });
+await cp(path.join(here, "package-fixtures", "rspack-project.json"), path.join(fixtureRoot, "package.json"));
+await cp(packageFixtureRoot, path.join(fixtureRoot, "node_modules", "@spinon", "exports-fixture"), { recursive: true });
 
 test("modern-module 출력은 실제 ESM edge·resource digest와 입력 graph를 분리한다", async () => {
   const outputDir = await temporaryOutput("modern");

@@ -7,7 +7,18 @@ export const RSPACK_GRAPH_PROFILE_NAMES = Object.freeze({
   modernModule: "modern-module-preserve-modules",
 });
 
-export function createRspackGraphConfig({ profile, outputDir, fixtureRoot, graphPlugin, virtualModules = {} }) {
+export function createRspackGraphConfig({
+  profile,
+  outputDir,
+  fixtureRoot,
+  graphPlugin,
+  virtualModules = {},
+  entry = { main: "src/main.js" },
+  preserveModulesRoot = "src",
+  additionalPlugins = [],
+  additionalPluginNames = [],
+  additionalModuleRules = [],
+}) {
   const profileName = typeof profile === "string" ? profile : profile?.name;
   if (!Object.values(RSPACK_GRAPH_PROFILE_NAMES).includes(profileName)) {
     throw new Error(`지원하지 않는 Rspack 출력 profile입니다: ${profileName}`);
@@ -15,6 +26,31 @@ export function createRspackGraphConfig({ profile, outputDir, fixtureRoot, graph
   if (typeof outputDir !== "string" || typeof fixtureRoot !== "string") {
     throw new Error("outputDir와 fixtureRoot 경로가 필요합니다.");
   }
+  if (!entry || typeof entry !== "object" || Array.isArray(entry) || Object.keys(entry).length === 0) {
+    throw new Error("entry에는 하나 이상의 이름 있는 경로가 필요합니다.");
+  }
+  if (typeof preserveModulesRoot !== "string" || path.isAbsolute(preserveModulesRoot) || preserveModulesRoot.split(/[\\/]/).includes("..")) {
+    throw new Error("preserveModulesRoot는 fixture 내부 상대 경로여야 합니다.");
+  }
+  if (!Array.isArray(additionalPlugins) || !Array.isArray(additionalPluginNames)
+    || additionalPlugins.length !== additionalPluginNames.length
+    || additionalPlugins.some((plugin) => !plugin || typeof plugin.apply !== "function")
+    || additionalPluginNames.some((name) => typeof name !== "string" || name.length === 0)) {
+    throw new Error("추가 plugin 구현과 profile 이름 배열이 일치해야 합니다.");
+  }
+  if (!Array.isArray(additionalModuleRules) || additionalModuleRules.some((rule) =>
+    !rule || !(rule.test instanceof RegExp) || rule.type !== "asset/resource")) {
+    throw new Error("추가 module rule은 명시적인 asset/resource 규칙이어야 합니다.");
+  }
+
+  const normalizedEntry = Object.fromEntries(Object.entries(entry).map(([name, source]) => {
+    if (typeof source !== "string" || source.length === 0 || path.isAbsolute(source) || source.split(/[\\/]/).includes("..")) {
+      throw new Error(`entry 경로가 fixture 내부 상대 경로가 아닙니다: ${source}`);
+    }
+    const sourceKey = source.replace(/^\.\//, "").replaceAll("\\", "/");
+    return [name, `./${sourceKey}`];
+  }));
+  const profileEntry = Object.fromEntries(Object.entries(normalizedEntry).map(([name, source]) => [name, source.slice(2)]));
 
   const output = {
     path: outputDir,
@@ -43,7 +79,7 @@ export function createRspackGraphConfig({ profile, outputDir, fixtureRoot, graph
       chunkFilename: "[name].js",
       library: {
         type: "modern-module",
-        preserveModules: path.join(fixtureRoot, "src"),
+        preserveModules: path.join(fixtureRoot, preserveModulesRoot),
       },
     });
   }
@@ -52,7 +88,7 @@ export function createRspackGraphConfig({ profile, outputDir, fixtureRoot, graph
     context: fixtureRoot,
     mode: "production",
     target: ["web", "es2022"],
-    entry: { main: "./src/main.js" },
+    entry: normalizedEntry,
     resolve: {
       alias: {
         "@graph": path.join(fixtureRoot, "src"),
@@ -87,11 +123,12 @@ export function createRspackGraphConfig({ profile, outputDir, fixtureRoot, graph
       splitChunks: false,
     },
     module: {
-      rules: [{ test: /\.css$/i, type: "css/auto" }],
+      rules: [{ test: /\.css$/i, type: "css/auto" }, ...additionalModuleRules],
     },
     plugins: [
       ...(hasVirtualModules ? [new rspack.experiments.VirtualModulesPlugin(virtualModules)] : []),
       graphPlugin,
+      ...additionalPlugins,
     ],
     stats: {
       all: false,
@@ -114,7 +151,7 @@ export function createRspackGraphConfig({ profile, outputDir, fixtureRoot, graph
       context: "fixtureRoot",
       mode: "production",
       target: ["web", "es2022"],
-      entry: { main: "src/main.js" },
+      entry: profileEntry,
       resolve: {
         alias: { "@graph": "src" },
         aliasFields: ["browser"],
@@ -139,13 +176,19 @@ export function createRspackGraphConfig({ profile, outputDir, fixtureRoot, graph
       },
       externals: [],
       externalsPresets: { web: true },
-      output: profileOutputFingerprint(profileName),
+      output: profileOutputFingerprint(profileName, preserveModulesRoot.replaceAll("\\", "/").replace(/^\.\//, "")),
       experiments: { outputModule: profileName === RSPACK_GRAPH_PROFILE_NAMES.module },
       optimization: { runtimeChunk: false, splitChunks: false },
-      module: { rules: [{ test: "\\.css$", type: "css/auto" }] },
+      module: {
+        rules: [
+          { test: "\\.css$", type: "css/auto" },
+          ...additionalModuleRules.map((rule) => ({ test: String(rule.test), type: rule.type })),
+        ],
+      },
       plugins: [
         ...(hasVirtualModules ? ["RspackVirtualModulesPlugin:fixture-manifest"] : []),
         "SpinonRspackModuleGraphAdapter:capture-only",
+        ...additionalPluginNames,
       ],
       devtool: false,
       stats: {
@@ -164,7 +207,7 @@ export function createRspackGraphConfig({ profile, outputDir, fixtureRoot, graph
   };
 }
 
-function profileOutputFingerprint(profileName) {
+function profileOutputFingerprint(profileName, preserveModulesRoot = "src") {
   const common = {
     clean: false,
     publicPath: "./",
@@ -193,7 +236,7 @@ function profileOutputFingerprint(profileName) {
     return {
       ...common,
       libraryType: "modern-module",
-      preserveModulesRoot: "src",
+      preserveModulesRoot,
       filename: "[name].js",
       chunkFilename: "[name].js",
     };

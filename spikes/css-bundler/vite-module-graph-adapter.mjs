@@ -340,7 +340,7 @@ function moduleKey(id) {
     },
   };
 
-  function snapshot({ fixtureSha256, profile, viteVersion, buildStatus = "success" }) {
+  function snapshot({ fixtureSha256, profile, viteVersion, captureId = undefined, buildStatus = "success" }) {
     if (buildStatus === "success" && !buildFailed && writeBundleCallCount !== 1) {
       addDiagnostic(outputDiagnostics, "C02_GRAPH_CAPTURE_INCOMPLETE", "output", `고정 output profile은 writeBundle 1회를 요구하지만 ${writeBundleCallCount}회를 관찰했습니다.`);
     }
@@ -365,6 +365,7 @@ function moduleKey(id) {
         fixtureSha256,
         profile,
         buildProfileSha256: computeBuildProfileSha256(profile),
+        ...(captureId === undefined ? {} : { captureId }),
       },
       sourceGraph,
       features: failed ? [] : mapFeatures(features, sourceModules, output.chunks),
@@ -759,6 +760,7 @@ function summarizePlannedViteConfig(config) {
       target: config.build?.target,
       minify: config.build?.minify,
       cssCodeSplit: config.build?.cssCodeSplit,
+      manifest: stableConfigValue(config.build?.manifest),
       assetsInlineLimit: config.build?.assetsInlineLimit,
       sourcemap: config.build?.sourcemap,
       modulePreload: stableConfigValue(config.build?.modulePreload),
@@ -877,7 +879,7 @@ function validateResolvedViteConfig(config, expected, fixtureRoot, outputProfile
   }
   if (config.build.assetsDir !== "assets" || config.build.cssMinify !== false || config.build.polyfillModulePreload !== true
     || config.build.lib !== false || config.build.ssr !== false || config.build.ssrEmitAssets !== false || config.build.emitAssets !== true
-    || config.build.copyPublicDir !== true || config.build.manifest !== false || config.build.ssrManifest !== false
+    || config.build.copyPublicDir !== true || config.build.manifest !== (outputProfile.manifest ?? false) || config.build.manifest !== expected.build.manifest || config.build.ssrManifest !== false
     || config.build.watch != null || config.build.cssTarget !== "esnext") {
     fail("configResolved build의 resource/format defaults가 pinned fixture profile과 다릅니다.");
   }

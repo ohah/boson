@@ -1,12 +1,15 @@
 import fs from "node:fs/promises";
+import { constants, realpathSync } from "node:fs";
 import path from "node:path";
 import { createAdapterSnapshot, CSS_RESOURCE_ADAPTER_VERSION, CSS_RESOURCE_CONTRACT } from "./adapter-contract.mjs";
 import { inspectCssSource, resolveLocalCssImport } from "./css-source.mjs";
 import {
   chunkId,
   normalizeBundlerSourcePath,
-  outputResources,
+  listFiles,
+  mediaTypeForPath,
   resourceId,
+  resourceKindFromOutput,
   sha256,
   sourcePathFromId,
 } from "./adapter-support.mjs";
@@ -18,7 +21,7 @@ export function createViteResourceAdapter({ fixtureRoot, failOnMissing = false }
   const cssModules = new Map();
   const outputChunks = [];
   const transformedCssSources = new Set();
-  const root = path.resolve(fixtureRoot);
+  const root = realpathSync(path.resolve(fixtureRoot));
 
   async function addSource(sourcePath, code = null) {
     if (sources.has(sourcePath)) return;
@@ -41,7 +44,7 @@ export function createViteResourceAdapter({ fixtureRoot, failOnMissing = false }
       transformedCssSources.clear();
     },
     async transform(code, id) {
-      const sourcePath = sourcePathFromId(id, root);
+      const sourcePath = sourcePathForViteId(id, root);
       if (!sourcePath || path.posix.extname(sourcePath).toLowerCase() !== ".css") return null;
       transformedCssSources.add(sourcePath);
       await addSource(sourcePath, code);
@@ -63,7 +66,7 @@ export function createViteResourceAdapter({ fixtureRoot, failOnMissing = false }
     name: `${ADAPTER_NAME}:module-exports`,
     enforce: "post",
     transform(code, id) {
-      const sourcePath = sourcePathFromId(id, root);
+      const sourcePath = sourcePathForViteId(id, root);
       if (!sourcePath || !/\.module\.css$/i.test(sourcePath)) return null;
       const exports = [...code.matchAll(/\bexport\s+const\s+([A-Za-z_$][\w$]*)\s*=/g)].map((match) => match[1]);
       const hasDefault = /\bexport\s+default\b/.test(code);
@@ -89,7 +92,7 @@ export function createViteResourceAdapter({ fixtureRoot, failOnMissing = false }
           isEntry: output.isEntry,
           isDynamicEntry: output.isDynamicEntry,
           modulePaths: Object.keys(output.modules)
-            .map((id) => sourcePathFromId(id, root))
+            .map((id) => sourcePathForViteId(id, root))
             .filter(Boolean),
         });
       }
@@ -103,23 +106,43 @@ export function createViteResourceAdapter({ fixtureRoot, failOnMissing = false }
     outputChunks,
     transformedCssSources,
     addSource,
-    async snapshot({ manifest, outputDir, fixtureSha256, toolVersion, status = "success" }) {
-      return createViteSnapshot({ adapter: this, manifest, outputDir, fixtureSha256, toolVersion, status });
+    async snapshot({ manifest, outputDir, fixtureSha256, toolVersion, status = "success", captureMetadata = null }) {
+      return createViteSnapshot({ adapter: this, manifest, outputDir, fixtureSha256, toolVersion, status, captureMetadata });
     },
   };
 }
 
-export async function createViteSnapshot({ adapter, manifest, outputDir, fixtureSha256, toolVersion, status }) {
-  const sourceByOutputPath = new Map();
-  for (const entry of Object.values(manifest ?? {})) {
-    if (entry.src && entry.file) sourceByOutputPath.set(entry.file, normalizeBundlerSourcePath(entry.src));
+function sourcePathForViteId(id, root) {
+  const withoutQuery = String(id).split("?", 1)[0].replaceAll("\\", "/");
+  const absolutePath = path.isAbsolute(withoutQuery) ? path.resolve(withoutQuery) : path.resolve(root, withoutQuery);
+  let canonicalPath = absolutePath;
+  try {
+    canonicalPath = realpathSync(absolutePath);
+  } catch {
+    // Vite virtual ID와 없는 경로는 sourcePathFromId 또는 CSS 원본 판정에서 거부합니다.
   }
-  const resources = await outputResources(outputDir, sourceByOutputPath);
+  return sourcePathFromId(canonicalPath, root);
+}
+
+export async function createViteSnapshot({ adapter, manifest, outputDir, fixtureSha256, toolVersion, status, captureMetadata = null }) {
+  const manifestEntries = validateViteManifest(manifest, adapter.outputChunks);
+  const sourceByOutputPath = new Map();
+  for (const { src, file } of manifestEntries) {
+    if (src) {
+      if (sourceByOutputPath.has(file)) throw new Error(`Vite manifest output source 소유 관계가 중복됩니다: ${file}`);
+      sourceByOutputPath.set(file, src);
+    }
+  }
+  const resources = await readViteOutputResources(outputDir, sourceByOutputPath);
   const resourcesByPath = new Map(resources.map((resource) => [resource.outputPath, resource]));
+  for (const { key, file } of manifestEntries) {
+    if (!resourcesByPath.has(file)) throw new Error(`Vite manifest가 없는 output을 가리킵니다: ${key} -> ${file}`);
+  }
   const sourceResourceByPath = new Map(resources.filter((resource) => resource.sourcePath).map((resource) => [resource.sourcePath, resource]));
-  const chunkByJsFile = new Map(adapter.outputChunks.map((chunk) => [chunk.fileName, chunk]));
-  const manifestEntries = Object.entries(manifest ?? {}).filter(([, entry]) => chunkByJsFile.has(entry.file));
-  const manifestByJsFile = new Map(manifestEntries.map(([key, entry]) => [entry.file, { key, entry }]));
+  const chunkByJsFile = new Map(adapter.outputChunks.map((chunk) => [normalizeBundlerSourcePath(chunk.fileName), chunk]));
+  const manifestByJsFile = new Map(manifestEntries
+    .filter(({ file }) => chunkByJsFile.has(file))
+    .map((manifestEntry) => [manifestEntry.file, manifestEntry]));
   const missingManifestChunks = [...chunkByJsFile.keys()].filter((fileName) => !manifestByJsFile.has(fileName));
   if (missingManifestChunks.length > 0) {
     throw new Error(`Vite manifest에 출력 chunk가 없습니다: ${missingManifestChunks.join(", ")}`);
@@ -127,18 +150,26 @@ export async function createViteSnapshot({ adapter, manifest, outputDir, fixture
   const chunks = [];
   const outputBySource = new Map();
 
-  for (const [, item] of manifestByJsFile) {
-    const { key, entry } = item;
-    const chunk = chunkByJsFile.get(entry.file);
-    const kind = entry.isEntry ? "entry" : entry.isDynamicEntry ? "dynamic" : "shared";
-    const javascriptResourceIds = [entry.file].map(resourceId).filter((id) => resourcesByPath.has(id.slice("resource:".length)));
-    const stylesheetResourceIds = (entry.css ?? []).map(resourceId).filter((id) => resourcesByPath.has(id.slice("resource:".length)));
-    const assetResourceIds = (entry.assets ?? [])
-      .map(resourceId)
-      .filter((id) => {
-        const resource = resourcesByPath.get(id.slice("resource:".length));
-        return resource && ["font", "image", "other"].includes(resource.kind);
-      });
+  for (const [file, item] of manifestByJsFile) {
+    const { key, entry, css, assets } = item;
+    const chunk = chunkByJsFile.get(file);
+    const kind = entry.isEntry === true ? "entry" : entry.isDynamicEntry === true ? "dynamic" : "shared";
+    if (!resourcesByPath.has(file)) throw new Error(`Vite manifest JS output이 없습니다: ${file}`);
+    const javascriptResourceIds = [resourceId(file)];
+    const stylesheetResourceIds = css.map((outputPath) => {
+      const resource = resourcesByPath.get(outputPath);
+      if (!resource || resource.kind !== "stylesheet") {
+        throw new Error(`Vite manifest CSS output이 없거나 stylesheet가 아닙니다: ${outputPath}`);
+      }
+      return resource.id;
+    });
+    const assetResourceIds = assets.map((outputPath) => {
+      const resource = resourcesByPath.get(outputPath);
+      if (!resource || !["font", "image", "other"].includes(resource.kind)) {
+        throw new Error(`Vite manifest asset output이 없거나 지원하지 않는 종류입니다: ${outputPath}`);
+      }
+      return resource.id;
+    });
     const id = chunkId(key);
     chunks.push({ id, kind, javascriptResourceIds, stylesheetResourceIds, assetResourceIds });
     for (const sourcePath of chunk?.modulePaths ?? []) {
@@ -166,13 +197,122 @@ export async function createViteSnapshot({ adapter, manifest, outputDir, fixture
   const cssModules = [...adapter.cssModules.values()];
   return createAdapterSnapshot({
     contract: CSS_RESOURCE_CONTRACT,
-    build: { tool: "vite", toolVersion, adapterVersion: CSS_RESOURCE_ADAPTER_VERSION, mode: "production", status, fixtureSha256 },
+    build: {
+      tool: "vite",
+      toolVersion,
+      adapterVersion: CSS_RESOURCE_ADAPTER_VERSION,
+      mode: "production",
+      status,
+      fixtureSha256,
+      ...(captureMetadata ?? {}),
+    },
     resources,
     chunks,
     stylesheets,
     cssModules,
     diagnostics,
   });
+}
+
+function validateViteManifest(manifest, outputChunks) {
+  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
+    throw new Error("Vite production manifest는 object여야 합니다.");
+  }
+  const outputChunkFiles = new Set();
+  for (const chunk of outputChunks) {
+    const file = normalizeBundlerSourcePath(chunk.fileName);
+    if (outputChunkFiles.has(file)) throw new Error(`Vite output chunk file이 중복됩니다: ${file}`);
+    outputChunkFiles.add(file);
+  }
+
+  const manifestEntries = [];
+  const manifestOwnerByChunkFile = new Map();
+  for (const [key, entry] of Object.entries(manifest)) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry) || typeof entry.file !== "string") {
+      throw new Error(`Vite manifest entry.file이 없습니다: ${key}`);
+    }
+    const file = normalizeManifestPath(entry.file, `manifest ${key}.file`);
+    const normalizedOutputs = {};
+    for (const field of ["css", "assets"]) {
+      if (entry[field] !== undefined && (!Array.isArray(entry[field]) || entry[field].some((value) => typeof value !== "string"))) {
+        throw new Error(`Vite manifest ${field} 목록이 올바르지 않습니다: ${key}`);
+      }
+      normalizedOutputs[field] = (entry[field] ?? []).map((value, index) => normalizeManifestPath(value, `manifest ${key}.${field}[${index}]`));
+    }
+    if (entry.src !== undefined && typeof entry.src !== "string") {
+      throw new Error(`Vite manifest entry.src가 문자열이 아닙니다: ${key}`);
+    }
+    for (const field of ["isEntry", "isDynamicEntry"]) {
+      if (entry[field] !== undefined && typeof entry[field] !== "boolean") {
+        throw new Error(`Vite manifest ${field} 값이 boolean이 아닙니다: ${key}`);
+      }
+    }
+    const src = entry.src === undefined ? null : normalizeManifestPath(entry.src, `manifest ${key}.src`);
+    if (manifestOwnerByChunkFile.has(file) && outputChunkFiles.has(file)) {
+      throw new Error(`Vite manifest JS chunk owner가 중복됩니다: ${file}`);
+    }
+    if (outputChunkFiles.has(file)) manifestOwnerByChunkFile.set(file, key);
+    manifestEntries.push({ key, entry, file, src, css: normalizedOutputs.css, assets: normalizedOutputs.assets });
+  }
+  return manifestEntries;
+}
+
+function normalizeManifestPath(value, label) {
+  const normalized = normalizeBundlerSourcePath(value);
+  const segments = normalized.split("/");
+  if (!normalized || path.posix.isAbsolute(normalized) || path.win32.isAbsolute(normalized)
+    || normalized.includes("\0") || segments.some((segment) => !segment || segment === ".." || segment === ".")) {
+    throw new Error(`Vite ${label}는 안전한 상대 POSIX 경로여야 합니다: ${value}`);
+  }
+  return normalized;
+}
+
+async function readViteOutputResources(outputDir, sourceByOutputPath) {
+  const rootMetadata = await fs.lstat(outputDir);
+  if (!rootMetadata.isDirectory() || rootMetadata.isSymbolicLink()) {
+    throw new Error(`Vite output root는 symlink가 아닌 디렉터리여야 합니다: ${outputDir}`);
+  }
+  const canonicalRoot = await fs.realpath(outputDir);
+  const resources = [];
+  for (const outputPath of await listFiles(canonicalRoot)) {
+    if (outputPath.startsWith(".vite/")) continue;
+    const bytes = await readViteOutputFile(canonicalRoot, outputPath);
+    resources.push({
+      id: resourceId(outputPath),
+      kind: resourceKindFromOutput(outputPath),
+      outputPath,
+      mediaType: mediaTypeForPath(outputPath),
+      bytes: bytes.byteLength,
+      sha256: sha256(bytes),
+      sourcePath: sourceByOutputPath.get(outputPath) ?? null,
+    });
+  }
+  return resources.sort((left, right) => left.outputPath < right.outputPath ? -1 : left.outputPath > right.outputPath ? 1 : 0);
+}
+
+async function readViteOutputFile(outputRoot, outputPath) {
+  const segments = outputPath.split("/");
+  let current = outputRoot;
+  for (let index = 0; index < segments.length; index += 1) {
+    current = path.join(current, segments[index]);
+    const metadata = await fs.lstat(current);
+    const isFinal = index === segments.length - 1;
+    if (metadata.isSymbolicLink()) throw new Error(`Vite output symlink는 resource로 읽지 않습니다: ${outputPath}`);
+    if (!isFinal && !metadata.isDirectory()) throw new Error(`Vite output 경로 중간 항목이 디렉터리가 아닙니다: ${outputPath}`);
+    if (isFinal && !metadata.isFile()) throw new Error(`Vite output resource가 일반 파일이 아닙니다: ${outputPath}`);
+  }
+  const handle = await fs.open(current, constants.O_RDONLY | constants.O_NOFOLLOW);
+  try {
+    const openedMetadata = await handle.stat();
+    const pathMetadata = await fs.lstat(current);
+    if (!openedMetadata.isFile() || pathMetadata.isSymbolicLink()
+      || openedMetadata.dev !== pathMetadata.dev || openedMetadata.ino !== pathMetadata.ino) {
+      throw new Error(`Vite output resource가 검증 후 바뀌었습니다: ${outputPath}`);
+    }
+    return await handle.readFile();
+  } finally {
+    await handle.close();
+  }
 }
 
 function propagateImportedStylesheets(sources, outputBySource) {
