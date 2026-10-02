@@ -1,0 +1,503 @@
+{
+  "schema": "spinon-css-reference/v1",
+  "referenceId": "chromium-macos-arm64-macos-26.5.1-25f80-154.0.8037.95-layout-v1-778a2065ac58-inventory-ef6d0b87a506-capture-f7221694922b-bin-affc6715a14a",
+  "captureTool": {
+    "path": "tools/css-reference/capture-layout.mjs",
+    "sha256": "f7221694922b0a2fe1aa0408d98097476bdf0c95e8220998b4d975e08de2798b",
+    "inventorySha256": "ef6d0b87a506e5418d8db75c3f8faabf8626690b16e7504f54500ee59de6e1ff"
+  },
+  "oracle": {
+    "name": "Chromium",
+    "product": "Google Chrome 154.0.8037.95",
+    "version": "154.0.8037.95",
+    "revision": "@05d469856e75794131cc2e5d9b2f6b6f10a70388",
+    "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "executableSha256": "affc6715a14a423f5207014ae4b86ddad028e70b04b13572d60d35d8ac728f91"
+  },
+  "environment": {
+    "os": "macOS 26.5.1",
+    "osBuild": "25F80",
+    "architecture": "arm64",
+    "nodeVersion": "v24.20.0",
+    "flags": [
+      "--headless=new",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-background-networking",
+      "--lang=en-US",
+      "--remote-debugging-port=0",
+      "--user-data-dir=<temporary-profile>"
+    ],
+    "emulation": {
+      "cssViewportPx": {
+        "width": 800,
+        "height": 600
+      },
+      "deviceScaleFactor": 1,
+      "locale": "en-US",
+      "timeZone": "UTC",
+      "media": {
+        "prefersColorScheme": "light",
+        "prefersReducedMotion": "no-preference",
+        "forcedColors": "none"
+      }
+    }
+  },
+  "fixture": {
+    "id": "C01-layout-units-flex-grid-v1",
+    "path": "tests/fixtures/css/c01/layout-units-flex-grid.html",
+    "sha256": "778a2065ac587621a978f367e67cf1372b517e4316a2942723c40d82b6352659",
+    "inventoryPath": "tests/fixtures/css/c01/layout-inventory.v1.json",
+    "inventoryId": "C01-layout-units-flex-grid-v1",
+    "inventorySha256": "ef6d0b87a506e5418d8db75c3f8faabf8626690b16e7504f54500ee59de6e1ff",
+    "completeness": "partial",
+    "comparison": {
+      "computedValues": "계산 CSSStyleDeclaration 값의 앞뒤 공백 제거 후 문자열 정확 일치",
+      "nodeGeometry": {
+        "unit": "CSS px",
+        "coordinates": [
+          "x",
+          "y",
+          "width",
+          "height"
+        ],
+        "perCoordinateMaximumAbsoluteError": 0.5,
+        "aggregateAveragesAllowed": false
+      }
+    },
+    "uncovered": [
+      "전체 HTML·SVG 및 CSSWG·WPT inventory",
+      "인라인 텍스트·글꼴 shaping·줄바꿈·baseline",
+      "positioning·overflow·반응형·동적 상태",
+      "페인트·GPU 픽셀과 Android·iOS 실행 결과"
+    ]
+  },
+  "observations": {
+    "fixtureId": "C01-layout-units-flex-grid-v1",
+    "inventoryId": "C01-layout-units-flex-grid-v1",
+    "viewport": {
+      "width": 800,
+      "height": 600,
+      "deviceScaleFactor": 1
+    },
+    "environment": {
+      "locale": "en-US",
+      "intlLocale": "en-US",
+      "timeZone": "UTC",
+      "dark": false,
+      "reducedMotion": false,
+      "forcedColors": false
+    },
+    "contextFeatures": [
+      {
+        "id": "units.root.font-size.v1",
+        "selector": ":root",
+        "property": "font-size",
+        "value": "20px"
+      }
+    ],
+    "cases": [
+      {
+        "id": "relative-units",
+        "nodes": [
+          {
+            "id": "rem-target",
+            "features": [
+              {
+                "id": "units.rem.font-size.v1",
+                "property": "font-size",
+                "value": "25px"
+              },
+              {
+                "id": "units.rem.width.v1",
+                "property": "width",
+                "value": "200px"
+              },
+              {
+                "id": "units.rem.height.v1",
+                "property": "height",
+                "value": "40px"
+              }
+            ],
+            "rect": {
+              "x": 20,
+              "y": 20,
+              "width": 200,
+              "height": 40
+            }
+          },
+          {
+            "id": "em-target",
+            "features": [
+              {
+                "id": "units.em.font-size.v1",
+                "property": "font-size",
+                "value": "10px"
+              },
+              {
+                "id": "units.em.width.v1",
+                "property": "width",
+                "value": "100px"
+              },
+              {
+                "id": "units.em.height.v1",
+                "property": "height",
+                "value": "20px"
+              }
+            ],
+            "rect": {
+              "x": 260,
+              "y": 20,
+              "width": 100,
+              "height": 20
+            }
+          }
+        ]
+      },
+      {
+        "id": "percentage-content-box",
+        "nodes": [
+          {
+            "id": "percent-parent",
+            "features": [
+              {
+                "id": "percentage.parent.width.v1",
+                "property": "width",
+                "value": "240px"
+              },
+              {
+                "id": "percentage.parent.height.v1",
+                "property": "height",
+                "value": "40px"
+              },
+              {
+                "id": "percentage.parent.box-sizing.v1",
+                "property": "box-sizing",
+                "value": "content-box"
+              }
+            ],
+            "rect": {
+              "x": 20,
+              "y": 80,
+              "width": 264,
+              "height": 64
+            }
+          },
+          {
+            "id": "percent-child",
+            "features": [
+              {
+                "id": "percentage.child.width.v1",
+                "property": "width",
+                "value": "120px"
+              },
+              {
+                "id": "percentage.child.height.v1",
+                "property": "height",
+                "value": "20px"
+              }
+            ],
+            "rect": {
+              "x": 32,
+              "y": 92,
+              "width": 120,
+              "height": 20
+            }
+          }
+        ]
+      },
+      {
+        "id": "flex-fractional-growth",
+        "nodes": [
+          {
+            "id": "flex-parent",
+            "features": [
+              {
+                "id": "flex.grow.display.v1",
+                "property": "display",
+                "value": "flex"
+              },
+              {
+                "id": "flex.grow.gap.v1",
+                "property": "column-gap",
+                "value": "5px"
+              },
+              {
+                "id": "flex.grow.width.v1",
+                "property": "width",
+                "value": "301px"
+              }
+            ],
+            "rect": {
+              "x": 20,
+              "y": 180,
+              "width": 301,
+              "height": 40
+            }
+          },
+          {
+            "id": "flex-a",
+            "features": [
+              {
+                "id": "flex.grow.a.flex-grow.v1",
+                "property": "flex-grow",
+                "value": "1"
+              },
+              {
+                "id": "flex.grow.a.flex-basis.v1",
+                "property": "flex-basis",
+                "value": "0px"
+              },
+              {
+                "id": "flex.grow.a.width.v1",
+                "property": "width",
+                "value": "48.5px"
+              }
+            ],
+            "rect": {
+              "x": 20,
+              "y": 180,
+              "width": 48.5,
+              "height": 40
+            }
+          },
+          {
+            "id": "flex-b",
+            "features": [
+              {
+                "id": "flex.grow.b.flex-grow.v1",
+                "property": "flex-grow",
+                "value": "2"
+              },
+              {
+                "id": "flex.grow.b.flex-basis.v1",
+                "property": "flex-basis",
+                "value": "0px"
+              },
+              {
+                "id": "flex.grow.b.width.v1",
+                "property": "width",
+                "value": "97px"
+              }
+            ],
+            "rect": {
+              "x": 73.5,
+              "y": 180,
+              "width": 97,
+              "height": 40
+            }
+          },
+          {
+            "id": "flex-c",
+            "features": [
+              {
+                "id": "flex.grow.c.flex-grow.v1",
+                "property": "flex-grow",
+                "value": "3"
+              },
+              {
+                "id": "flex.grow.c.flex-basis.v1",
+                "property": "flex-basis",
+                "value": "0px"
+              },
+              {
+                "id": "flex.grow.c.width.v1",
+                "property": "width",
+                "value": "145.5px"
+              }
+            ],
+            "rect": {
+              "x": 175.5,
+              "y": 180,
+              "width": 145.5,
+              "height": 40
+            }
+          }
+        ]
+      },
+      {
+        "id": "flex-wrap-gap",
+        "nodes": [
+          {
+            "id": "wrap-parent",
+            "features": [
+              {
+                "id": "flex.wrap.display.v1",
+                "property": "display",
+                "value": "flex"
+              },
+              {
+                "id": "flex.wrap.flex-wrap.v1",
+                "property": "flex-wrap",
+                "value": "wrap"
+              },
+              {
+                "id": "flex.wrap.row-gap.v1",
+                "property": "row-gap",
+                "value": "3px"
+              },
+              {
+                "id": "flex.wrap.width.v1",
+                "property": "width",
+                "value": "145px"
+              }
+            ],
+            "rect": {
+              "x": 360,
+              "y": 180,
+              "width": 145,
+              "height": 23
+            }
+          },
+          {
+            "id": "wrap-a",
+            "features": [
+              {
+                "id": "flex.wrap.a.width.v1",
+                "property": "width",
+                "value": "70px"
+              },
+              {
+                "id": "flex.wrap.a.height.v1",
+                "property": "height",
+                "value": "10px"
+              }
+            ],
+            "rect": {
+              "x": 360,
+              "y": 180,
+              "width": 70,
+              "height": 10
+            }
+          },
+          {
+            "id": "wrap-b",
+            "features": [
+              {
+                "id": "flex.wrap.b.width.v1",
+                "property": "width",
+                "value": "70px"
+              },
+              {
+                "id": "flex.wrap.b.height.v1",
+                "property": "height",
+                "value": "10px"
+              }
+            ],
+            "rect": {
+              "x": 435,
+              "y": 180,
+              "width": 70,
+              "height": 10
+            }
+          },
+          {
+            "id": "wrap-c",
+            "features": [
+              {
+                "id": "flex.wrap.c.width.v1",
+                "property": "width",
+                "value": "70px"
+              },
+              {
+                "id": "flex.wrap.c.height.v1",
+                "property": "height",
+                "value": "10px"
+              }
+            ],
+            "rect": {
+              "x": 360,
+              "y": 193,
+              "width": 70,
+              "height": 10
+            }
+          }
+        ]
+      },
+      {
+        "id": "grid-fractional-tracks",
+        "nodes": [
+          {
+            "id": "grid-parent",
+            "features": [
+              {
+                "id": "grid.fractional.display.v1",
+                "property": "display",
+                "value": "grid"
+              },
+              {
+                "id": "grid.fractional.columns.v1",
+                "property": "grid-template-columns",
+                "value": "48.5px 97px 145.5px"
+              },
+              {
+                "id": "grid.fractional.column-gap.v1",
+                "property": "column-gap",
+                "value": "5px"
+              },
+              {
+                "id": "grid.fractional.width.v1",
+                "property": "width",
+                "value": "301px"
+              }
+            ],
+            "rect": {
+              "x": 20,
+              "y": 250,
+              "width": 301,
+              "height": 40
+            }
+          },
+          {
+            "id": "grid-a",
+            "features": [
+              {
+                "id": "grid.fractional.a.width.v1",
+                "property": "width",
+                "value": "48.5px"
+              }
+            ],
+            "rect": {
+              "x": 20,
+              "y": 250,
+              "width": 48.5,
+              "height": 40
+            }
+          },
+          {
+            "id": "grid-b",
+            "features": [
+              {
+                "id": "grid.fractional.b.width.v1",
+                "property": "width",
+                "value": "97px"
+              }
+            ],
+            "rect": {
+              "x": 73.5,
+              "y": 250,
+              "width": 97,
+              "height": 40
+            }
+          },
+          {
+            "id": "grid-c",
+            "features": [
+              {
+                "id": "grid.fractional.c.width.v1",
+                "property": "width",
+                "value": "145.5px"
+              }
+            ],
+            "rect": {
+              "x": 175.5,
+              "y": 250,
+              "width": 145.5,
+              "height": 40
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

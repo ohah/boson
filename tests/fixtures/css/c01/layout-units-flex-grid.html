@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=800, initial-scale=1">
+  <title>Spinon C01 layout oracle</title>
+  <style>
+    * { box-sizing: border-box; }
+    html { font-size: 20px; }
+    body { margin: 0; }
+    #rem-target { position: absolute; left: 20px; top: 20px; width: 10rem; height: 2rem; font-size: 1.25rem; }
+    #em-target { position: absolute; left: 260px; top: 20px; width: 10em; height: 2em; font-size: 10px; }
+    #percent-parent { position: absolute; left: 20px; top: 80px; box-sizing: content-box; width: 240px; height: 40px; padding: 10px; border: 2px solid black; }
+    #percent-child { width: 50%; height: 50%; }
+    #flex-parent { position: absolute; left: 20px; top: 180px; display: flex; width: 301px; height: 40px; column-gap: 5px; }
+    #flex-a { flex: 1 1 0; }
+    #flex-b { flex: 2 1 0; }
+    #flex-c { flex: 3 1 0; }
+    #wrap-parent { position: absolute; left: 360px; top: 180px; display: flex; flex-wrap: wrap; width: 145px; height: 23px; column-gap: 5px; row-gap: 3px; }
+    .wrap-item { flex: 0 0 70px; height: 10px; }
+    #grid-parent { position: absolute; left: 20px; top: 250px; display: grid; grid-template-columns: 1fr 2fr 3fr; column-gap: 5px; width: 301px; height: 40px; }
+    .grid-item { height: 40px; }
+    #reference-result { display: none; }
+  </style>
+</head>
+<body>
+  <div id="rem-target"></div>
+  <div id="em-target"></div>
+  <div id="percent-parent"><div id="percent-child"></div></div>
+  <div id="flex-parent"><div id="flex-a"></div><div id="flex-b"></div><div id="flex-c"></div></div>
+  <div id="wrap-parent"><div id="wrap-a" class="wrap-item"></div><div id="wrap-b" class="wrap-item"></div><div id="wrap-c" class="wrap-item"></div></div>
+  <div id="grid-parent"><div id="grid-a" class="grid-item"></div><div id="grid-b" class="grid-item"></div><div id="grid-c" class="grid-item"></div></div>
+  <pre id="reference-result"></pre>
+  <script>
+    (() => {
+      const inventory = window.__SPINON_C01_LAYOUT_INVENTORY__;
+      if (inventory?.schema !== "spinon-css-layout-inventory/v1"
+        || inventory.fixtureId !== "C01-layout-units-flex-grid-v1") {
+        throw new Error("C01 레이아웃 inventory가 주입되지 않았거나 fixture와 맞지 않습니다.");
+      }
+      const cases = inventory.cases.map((testCase) => ({
+        id: testCase.id,
+        nodes: testCase.nodes.map((node) => {
+          const element = document.getElementById(node.id);
+          if (!element) throw new Error(`fixture node를 찾지 못했습니다: ${node.id}`);
+          const style = getComputedStyle(element);
+          const rect = element.getBoundingClientRect();
+          return {
+            id: node.id,
+            features: node.features.map(({ id, property }) => ({
+              id,
+              property,
+              value: style.getPropertyValue(property).trim(),
+            })),
+            rect: {
+              x: rect.x,
+              y: rect.y,
+              width: rect.width,
+              height: rect.height,
+            },
+          };
+        }),
+      }));
+      const observation = {
+        fixtureId: inventory.fixtureId,
+        inventoryId: inventory.inventoryId,
+        viewport: {
+          width: window.innerWidth,
+          height: window.innerHeight,
+          deviceScaleFactor: window.devicePixelRatio,
+        },
+        environment: {
+          locale: navigator.language,
+          intlLocale: Intl.DateTimeFormat().resolvedOptions().locale,
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          dark: matchMedia("(prefers-color-scheme: dark)").matches,
+          reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
+          forcedColors: matchMedia("(forced-colors: active)").matches,
+        },
+        contextFeatures: inventory.contextFeatures.map(({ id, selector, property }) => ({
+          id,
+          selector,
+          property,
+          value: getComputedStyle(document.querySelector(selector)).getPropertyValue(property).trim(),
+        })),
+        cases,
+      };
+      const bytes = new TextEncoder().encode(JSON.stringify(observation));
+      let binary = "";
+      for (const byte of bytes) binary += String.fromCharCode(byte);
+      document.querySelector("#reference-result").textContent = btoa(binary);
+    })();
+  </script>
+</body>
+</html>
