@@ -8,7 +8,7 @@
 node tools/css-reference/capture.mjs
 ```
 
-표준 macOS·Linux 설치 경로를 검색합니다. 다른 실행 파일을 사용할 때는 `SPINON_CHROMIUM_BIN`에 절대 경로를 지정합니다. reference-id는 브라우저 전체 버전, 캡처 프로토콜 버전, inventory SHA-256 일부를 포함하고 기존 파일은 덮어쓰지 않습니다. inventory schema·안정 ID·중복 여부와 CSS 프로필 해시를 검증합니다. 결과에는 캡처 스크립트와 inventory validator 모듈의 SHA-256도 기록합니다. 같은 버전을 다시 수집하거나 프로필을 바꾸려면 결과를 직접 교체하지 말고 새 프로필·reference-id 정책을 먼저 정합니다.
+표준 macOS·Linux 설치 경로를 검색합니다. 다른 실행 파일을 사용할 때는 `SPINON_CHROMIUM_BIN`에 절대 경로를 지정합니다. reference-id는 브라우저 전체 버전, 캡처 프로토콜 버전, inventory SHA-256 일부를 포함하고 기존 파일은 덮어쓰지 않습니다. inventory schema·안정 ID·selector별 node ID 중복 여부와 CSS 프로필 해시를 검증합니다. 서로 다른 selector의 결과 집합은 같은 node ID를 포함할 수 있습니다. 결과에는 캡처 스크립트와 inventory validator 모듈의 SHA-256도 기록합니다. 같은 버전을 다시 수집하거나 프로필을 바꾸려면 결과를 직접 교체하지 말고 새 프로필·reference-id 정책을 먼저 정합니다.
 
 수집기는 Chromium 기본값을 먼저 저장한 뒤 서로 다른 값의 author baseline과 내장 프로필을 순서대로 적용합니다. baseline을 덮은 프로필의 computed CSS 값과 selector·예상 node ID는 machine-readable inventory에서 읽어 정확히 비교합니다. baseline을 덮지 못하는 선언은 불일치로 실패합니다. UA cascade origin, 레이아웃·글꼴 shaping·GPU 픽셀 비교와 모바일 적합성은 아직 수행하지 않습니다. 결과 추가는 [C01](../../spec/STATUS.md) 전체 완료가 아닙니다.
 

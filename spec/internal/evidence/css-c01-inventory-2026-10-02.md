@@ -7,8 +7,8 @@
 - 부분 inventory: [`inventory.v1.json`](../../../tests/fixtures/css/c01/inventory.v1.json)
 - schema / inventory ID: `spinon-css-feature-inventory/v1` / `C01-UAv0-supported-html-elements`
 - inventory SHA-256: `1293be438ca54d184c0f614d49fb0549bded5484806e73467a73898e6dc4fc6c`
-- 캡처기 SHA-256: `tools/css-reference/capture.mjs` · `27526139d45e99263befa637b809fccb5ffe8f06982c80243344e0a3834b199c`
-- inventory validator SHA-256: `tools/css-reference/inventory.mjs` · `0dbedb10e3b3d0a21681b07888def12ffebbc768e927879901da60cbfe15c6cc`
+- 캡처기 SHA-256: `tools/css-reference/capture.mjs` · `879f9f19a429657f4c09fef03a55faaa609973a2c0660ae0eadf0d946b12b0af`
+- inventory validator SHA-256: `tools/css-reference/inventory.mjs` · `19fe7982efc211fc55596fb6fefcf8eb319dcf98410a8249b9e07da268831c84`
 - 현재 범위: HTML 요소 selector 9개, computed CSS feature 19개
 - 미포함: 전체 HTML·SVG inventory, CSSWG/WPT 기준 및 feature 값 조합, cascade·레이아웃·텍스트·페인트 기준, Android·iOS 행렬
 
@@ -23,10 +23,10 @@
 - 호스트: macOS `26.5.1` (`25F80`), `arm64`
 - Node.js: `24.20.0`
 - 고정 환경: viewport `800×600` CSS px, scale `1`, `en-US`, `UTC`, light/no-preference/forced-colors none
-- 결과: [Chromium JSON snapshot](../../../tests/fixtures/css/references/chromium-macos-arm64-154.0.8037.93-ua-profile-override-v3-inventory-1293be438ca5/ua-supported-elements.json)
+- 결과: [Chromium JSON snapshot](../../../tests/fixtures/css/references/chromium-macos-arm64-154.0.8037.93-ua-profile-override-v4-inventory-1293be438ca5/ua-supported-elements.json)
 - 판정: 요소 9개와 computed CSS 값 19개 일치, 비교 실패 0개
 
-기존 Chrome `154.0.8037.92` 스냅샷은 보존했다. 이전·신규 스냅샷의 Chromium 기본 관찰, selector coverage, baseline, 프로필 결과와 feature 비교 배열을 기계적으로 비교해 모두 동일함을 확인했다. 새 브라우저 버전은 새 reference-id를 사용한다.
+기존 Chrome `154.0.8037.92` 스냅샷은 보존했다. 이전·신규 스냅샷의 Chromium 요소 관찰, selector·기대 ID·node ID, baseline, 프로필 결과와 computed feature 비교를 기계적으로 비교해 동일함을 확인했다. 신규 결과에는 HTML 태그·namespace 일치 검증도 9/9로 기록된다. 새 브라우저 버전은 새 reference-id를 사용한다.
 
 inventory validator의 단위 테스트 3개가 통과했다. 테스트는 현재 9개 요소·19개 feature 수, 중복 node/feature ID 거부, 전체 inventory로 잘못 표기한 입력 거부를 확인한다.
 

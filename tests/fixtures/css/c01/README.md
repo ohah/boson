@@ -9,6 +9,6 @@
 - 의도적으로 제외: 레이아웃 좌표·텍스트 metrics·폼 컨트롤 모양·GPU 픽셀. 각각의 비교 경로가 구현되기 전에는 기준 결과라고 가장하지 않습니다.
 - author stylesheet와 원격 자원은 fixture에 없습니다.
 
-수집기는 JSON inventory를 검증한 뒤 새 문서가 열리기 전에 fixture에 주입합니다. fixture selector·feature 목록과 Chromium의 실제 node ID가 inventory와 정확히 맞는지 검사합니다. 캡처 JSON에는 inventory SHA-256·부분 범위·요소 수·feature 수가 기록되고 reference-id에도 inventory 해시가 포함됩니다. 브라우저 버전이나 inventory가 바뀌면 기존 결과를 덮어쓰지 않고 새 디렉터리를 만듭니다.
+수집기는 JSON inventory를 검증한 뒤 새 문서가 열리기 전에 깊게 동결해 fixture에 주입합니다. fixture selector·feature 목록, Chromium의 실제 node ID·HTML 태그·namespace가 inventory와 정확히 맞는지 검사합니다. 캡처 JSON에는 inventory SHA-256·부분 범위·요소 수·feature 수가 기록되고 reference-id에도 inventory 해시가 포함됩니다. v1 입력의 SHA-256은 단위 테스트에 고정해 실수로 입력 내용을 바꾸면 감지합니다. 브라우저 버전이나 inventory가 바뀌면 기존 결과를 덮어쓰지 않고 새 디렉터리를 만듭니다.
 
 현재 seed inventory는 9개 요소와 19개 값을 다룹니다. 전체 HTML/SVG·CSSWG/WPT 기준·모든 feature 값 조합·레이아웃/텍스트/페인트·모바일 비교는 포함하지 않으므로 `C01` 전체는 미완료로 유지합니다.

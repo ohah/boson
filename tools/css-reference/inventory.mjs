@@ -29,7 +29,6 @@ export function validateC01Inventory(inventory) {
   }
 
   const selectors = new Set();
-  const nodeIds = new Set();
   const featureIds = new Set();
   for (const [elementIndex, element] of inventory.elements.entries()) {
     if (!element || typeof element !== 'object' || Array.isArray(element)) {
@@ -44,11 +43,12 @@ export function validateC01Inventory(inventory) {
     if (!Array.isArray(element.nodeIds) || element.nodeIds.length === 0) {
       invalid(`${element.selector}에 기대 nodeIds가 없습니다.`);
     }
+    const nodeIds = new Set();
     for (const nodeId of element.nodeIds) {
       if (typeof nodeId !== 'string' || !stableIdPattern.test(nodeId)) {
         invalid(`${element.selector}의 node ID 형식이 잘못됐습니다: ${String(nodeId)}`);
       }
-      if (nodeIds.has(nodeId)) invalid(`중복 node ID: ${nodeId}`);
+      if (nodeIds.has(nodeId)) invalid(`${element.selector} 안에 중복 node ID가 있습니다: ${nodeId}`);
       nodeIds.add(nodeId);
     }
 
