@@ -35,7 +35,7 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 - [ ] **R12 JS 라이브러리 호환 표** — V8의 ECMAScript 기능과 별도 호스트 API를 구분하고, 첫 React·Vite 조합의 전이 의존 API를 조사한다. Fetch를 선택하면 `NetworkHost`·전송 계층의 요청·응답·오류·취소·출처 경계와 Promise 완료를 Isolate 소유 실행 경로에 전달하는 규칙을 정한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · 세부 작업: [JS API 구현 체크리스트](#javascript-api-구현-체크리스트) · 산출물: 미완료 · 근거: 없음
 - [x] **R13 플랫폼 생명주기·GPU 복구 실험** — Android 표면 재생성·백그라운드 복귀·에뮬레이터 분할 화면 크기 변경과 두 플랫폼의 복구 오류 `-3/-4/-5`, 비복구 오류 `-2`, 복구 재그리기 실패 종료 및 GPU 도형 입력을 확인했다. 작은 분할 패널에서는 데모 콘텐츠가 겹친다. iOS 창 분리·재부착은 개발용 진단 인자로 확인했고, iPad Stage Manager는 부동 창 진입과 표면 크기 로그 한 건만 확인했다. 손실 상태는 주입이며 실제 드라이버 손실은 미검증이다. 내부 계약: [R13 실험 ABI](internal/r13-platform-gpu-recovery.md) · 실행 근거: [R13 검증 기록](internal/evidence/r13-platform-gpu-recovery-2026-09-29.md) · 범위: Android API 36 에뮬레이터·iOS 26.2 시뮬레이터만.
 - [ ] **R14 Tailwind 생성 CSS 실험** — 작은 유틸리티 묶음을 빌드해 생성 CSS의 선택자·변수·계층·Preflight를 모바일 변환기로 판정한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
-- [ ] **R15 청크 OTA 호환 모델 초안** — 바이너리 런타임 ID, 기능별 진입점과 청크 의존성, JS·CSS·에셋 해시, 서명·롤백·기능 변경 경계를 OTA 구현 전에 정의한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
+- [x] **R15 청크 OTA 호환 모델 초안** — `runtimeId` 정확 일치, 완전한 기능·청크·자원 그래프, SHA-256 객체, 그래프 diff로 계산하는 영향 기능 closure, 서명 경계와 원자 snapshot 활성화·rollback 범위를 내부 설계로 정의했다. 로컬 manifest·서명 릴리스 envelope·실제 loader·server·전송·복구 구현은 X01/D02~D04에 남는다. API 해당 없음(설계 산출물). [R15 내부 모델](internal/0013-r15-ota-chunk-compatibility.md) · [문서 정합 근거와 한계](internal/evidence/r15-ota-chunk-model-2026-10-02.md).
 - [ ] **R16 스피논 명세 초안** — UI 트리·이벤트·HTML/CSS/JS API·빌드·도구의 버전별 계약과 미정 항목을 공개하고 첫 적합성 시나리오를 정한다. 관련 계약: [0001-conformance.md](0001-conformance.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 
 ## 2. 세 플랫폼 수직 구현
@@ -79,7 +79,7 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 - [ ] **E08 시작 시간 최적화 실험** — 번들 사전 변환·V8 코드 캐시·스냅샷의 효과와 버전 호환성을 따로 측정한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
 
 ## 5. 프레임워크·도구
-- [ ] **X01 ESM·청크 로더** — R15의 호환 모델과 S06의 단일 번들 패키징 경로를 바탕으로 최소 로컬 매니페스트를 먼저 정의하고, 모듈·동적 import·기능별 청크 의존성·에셋 URL의 모바일 로딩을 구현한다. 활성 스냅샷 밖의 청크는 실행하지 않는다. D02는 이 형식을 서명·배포용 릴리스 매니페스트로 확장한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API 명세: 미작성 · 근거: 없음
+- [ ] **X01 ESM·청크 로더** — R15의 버전 있는 그래프 본문과 S06의 단일 번들 패키징 경로를 로컬 매니페스트로 읽고 모듈·동적 import·기능별 청크 의존성·에셋 URL의 모바일 로딩을 구현한다. 활성 스냅샷 밖의 청크는 실행하지 않는다. D02는 같은 graph schema를 참조하는 서명 릴리스 envelope를 확정한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · [R15 그래프 모델](internal/0013-r15-ota-chunk-compatibility.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **X02 Vite 플러그인** — 웹·모바일 프로덕션 출력과 개발 서버·소스맵을 제공한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **X03 Rspack 플러그인** — Vite와 같은 산출물 계약을 Rspack에서도 검증한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **X04 Vue 어댑터** — Vue 반응성 결과를 스피논 호스트 명령에 연결한다. 관련 계약: [0002-ui-tree-events.md](0002-ui-tree-events.md) · API 명세: 미작성 · 근거: 없음
@@ -102,7 +102,7 @@ Cargo·Bun 워크스페이스와 V8 Android/iOS 부팅 smoke는 저장소 개발
 
 ## 6. 배포·출시
 - [ ] **D01 네이티브 컴포넌트·WebView** — 지도·미디어·카메라·WebView 삽입과 화면 수명주기를 제공한다. 관련 계약: [0003-web-surface.md](0003-web-surface.md) · API 명세: 미작성 · 근거: 없음
-- [ ] **D02 릴리스 스냅샷 매니페스트** — 기능별 진입점·청크 의존성, JS·CSS·폰트·이미지 해시, 엔진·네이티브 API 호환 버전과 서명을 기록한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API 명세: 미작성 · 근거: 없음
+- [ ] **D02 릴리스 스냅샷 매니페스트** — R15 그래프 본문을 참조해 기능별 진입점·청크 의존성, JS·CSS·폰트·이미지 객체 해시, 앱·플랫폼·ABI·`runtimeId`와 서명 envelope를 기록한다. key rotation, strict parsing, sequence/anti-replay과 release schema를 확정한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · [R15 그래프 모델](internal/0013-r15-ota-chunk-compatibility.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **D03 CLI 배포 명령과 패키징** — 앱 바이너리와 정책상 허용되는 OTA 릴리스를 생성·검증·서명한다. 변경된 청크·에셋만 업로드하고 기능별 채널·대상 집단을 지정한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **D04 청크 OTA 설치와 롤백** — 없는 해시의 파일만 다운로드하고 검증된 릴리스 스냅샷을 원자적으로 활성화한다. 기능별 단계적 배포, 실패 감지·자동 중지와 이전 또는 내장 버전 복원을 구현한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API 명세: 미작성 · 근거: 없음
 - [ ] **D05 OTA 정책·보안 재검토** — 초기 정책 검토 이후 바뀐 기능과 원격 코드·권한 변경 범위를 출시 시점에 다시 확인한다. 관련 계약: [0004-runtime-build.md](0004-runtime-build.md) · API: 해당 없음 · 산출물: 미완료 · 근거: 없음
