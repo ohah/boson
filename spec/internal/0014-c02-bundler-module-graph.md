@@ -70,6 +70,24 @@ Vite·Rspack production build에서 입력 모듈 의존성과 최종 출력 청
   "outputGraph": {
     "status": "complete",
     "moduleFormat": "esm",
+    "resources": [
+      {
+        "id": "resource:assets/main.js",
+        "kind": "javascript",
+        "outputPath": "assets/main.js",
+        "mediaType": "text/javascript",
+        "bytes": 420,
+        "sha256": "<emitted-main-js-sha256>"
+      },
+      {
+        "id": "resource:assets/lazy-ab12.js",
+        "kind": "javascript",
+        "outputPath": "assets/lazy-ab12.js",
+        "mediaType": "text/javascript",
+        "bytes": 180,
+        "sha256": "<emitted-lazy-js-sha256>"
+      }
+    ],
     "chunks": [
       {
         "id": "chunk:build-entry",
@@ -116,7 +134,7 @@ adapter는 다음 조건을 안정된 코드로 보고한다. 각 진단은 `sev
 | `C02_GRAPH_OUTPUT_NOT_ESM` | 출력 profile이 실제 ESM static/dynamic module 관계를 생성하지 않음 |
 | `C02_GRAPH_TARGET_AMBIGUOUS` | 입력 module 또는 emitted specifier가 0개/복수 출력 chunk에 대응 |
 | `C02_GRAPH_TARGET_CONFLICT` | 같은 referrer/specifier가 static·dynamic 종류에 따라 다른 target을 가리킴 |
-| `C02_GRAPH_RESOURCE_MISSING` | emitted JS resource 또는 결합할 CSS/asset resource ID가 snapshot에 없음 |
+| `C02_GRAPH_RESOURCE_MISSING` | emitted JS resource가 없거나 chunk의 자원 참조가 snapshot에 없음 |
 | `C02_GRAPH_PROVENANCE_MISSING` | fixture/config/capture digest 또는 관찰 수치를 기록하지 못함 |
 
 실패 snapshot은 debugging용 부분 정보를 가질 수 있으나 R15 변환기는 `build.status !== "success"` 또는 graph status 불완전이면 거부한다. adapter가 아닌 공통 validator가 중복 제거, ID 참조, specifier 충돌, 순환 안전성을 재검증한다.
@@ -139,7 +157,7 @@ adapter는 다음 조건을 안정된 코드로 보고한다. 각 진단은 `sev
 
 ## 비교 fixture와 수락 기준
 
-기준 비교 모델은 [C02 production 비교](0008-css-bundler-c02.md), [R15 그래프 계약](0013-r15-ota-chunk-compatibility.md), 고정된 동일 source fixture를 사용한다. 각 번들러의 버전·lockfile digest·정규화한 실제 build profile digest·fixture digest·산출물 digest를 기록한다. profile에 반영하지 못한 resolver·transform/plugin 설정이 있으면 graph 완전성을 선언하지 않는다. fixture에는 다음 동작을 서로 독립적으로 검증하는 case가 들어간다.
+기준 비교 모델은 [C02 production 비교](0008-css-bundler-c02.md), [R15 그래프 계약](0013-r15-ota-chunk-compatibility.md), 고정된 동일 source fixture를 사용한다. 각 번들러의 버전·lockfile digest·정규화한 실제 build profile digest·fixture digest·산출물 digest를 기록한다. profile에 반영하지 못한 resolver·transform/plugin 설정이 있으면 graph 완전성을 선언하지 않는다. 이 하위 계약은 JavaScript module/chunk graph와 JavaScript 출력 자원의 digest만 다룬다. CSS·폰트·이미지 자원과 그 edge는 0011 및 C02 나머지 작업에서 계속 검증한다. fixture에는 다음 동작을 서로 독립적으로 검증하는 case가 들어간다.
 
 - entry, static import, literal dynamic import, shared chunk와 명시 feature entry
 - 한 importer에서 같은 specifier를 static·dynamic 양쪽으로 요청하는 경우와 target 충돌 주입
