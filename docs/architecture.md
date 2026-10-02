@@ -13,7 +13,7 @@ React / Vue / Svelte 어댑터 · DOM façade · Fetch API
                     ↕ 엔진 내부 C ABI
                  native/v8
                     ↓ Rust API
-       spinon-core → spinon-style(Stylo) → spinon-layout(Taffy + 확장) → 장면 → GPU 프레임
+       spinon-core → spinon-style(Stylo) → spinon-style-layout → spinon-layout(Taffy + 확장) → 장면 → GPU 프레임
 
 Android / iOS 호스트 → spinon-ffi (플랫폼 C ABI) → spinon-runtime
 Fetch 요청 → NetworkHost → 네트워크 전송 계층 → Android / iOS 호스트
@@ -32,8 +32,9 @@ Fetch 요청 → NetworkHost → 네트워크 전송 계층 → Android / iOS �
 | JavaScript 네트워크 호스트 | 제안된 `fetch`·`Request`·`Response` 표면을 네트워크 호스트 계약에 연결 | Rust UI 트리와 GPU 렌더링 |
 | 네트워크 전송 계층 | URLSession·Android 네트워크 구현 또는 공통 전송 구현을 같은 계약 뒤에서 검증 | DOM 노드와 UI 장면 |
 | Rust 코어 (`crates/spinon-core`) | 안정적인 노드 ID, 문서·UI 트리, 자식 순서, 구조 revision, 원자 변경 묶음, 공통 우선순위 선택기 | 계산 스타일·CSS cascade, 레이아웃 프레임, JS 객체와 플랫폼 객체, V8 세션 수명 |
-| `spinon-style` | 내장 UA CSS 자원, C03 Stylo DOM adapter, 이후 stylesheet·cascade·계산 스타일 | 레이아웃 계산과 GPU 표시 |
-| 레이아웃 (`crates/spinon-layout`) | S01 `Tree` 또는 `HostDocumentSnapshot` 요소 하위 트리의 입력 projection, 호출자가 제공하는 레이아웃 스타일, `LayoutEngine` 경계, Taffy Flex 계산·프레임 결과 | CSS 파싱·cascade 변환, 텍스트 측정, 장면·GPU 자원 |
+| `spinon-style` | 내장 UA CSS 자원, C03 Stylo DOM adapter, C04 fixture cascade·computed-style snapshot | 레이아웃 계산과 GPU 표시 |
+| CSS·레이아웃 연결 (`crates/spinon-style-layout`) | C04.2 제한 computed-style profile 검증, CSS 값에서 `LayoutStyle` 변환, HostDocument revision 일치 확인 | CSS cascade 소유권, 공개 CSS API, 일반 Flexbox 적합성, 텍스트·GPU |
+| 레이아웃 (`crates/spinon-layout`) | S01 `Tree` 또는 `HostDocumentSnapshot` 요소 하위 트리의 입력 projection, `LayoutStyle`, `LayoutEngine` 경계, Taffy 계산·프레임 결과 | CSS 파싱·cascade·computed-style 변환, 텍스트 측정, 장면·GPU 자원 |
 | GPU 렌더러 | 그리기 명령, 텍스트·이미지·클리핑·합성, 프레임 제출 | 컴포넌트 상태와 JS 객체 |
 | 플랫폼 호스트 | GPU 표면·입력·IME·접근성 연결, 폰트/이미지 자원과 표시 완료 신호 | 프레임워크의 컴포넌트 상태 |
 
@@ -51,9 +52,9 @@ V8은 JavaScript 언어 엔진이며 브라우저의 `fetch`, 타이머, DOM 등
 
 JSI는 React Native가 채택한 JavaScript↔C++ 인터페이스다. 스피논은 V8을 선택했으므로 엔진 API에 붙는 내부 어댑터가 필요하지만 RN의 JSI를 그대로 넣을 이유는 없다. 앱 작성자가 자체 Kotlin·Swift·Rust·C++ 기능을 JS에서 부르도록 하려면, V8별 API를 노출하는 대신 빌드 시 생성·등록되는 버전 있는 플랫폼 모듈 계약을 별도로 제공한다. 웹 빌드의 대체 구현 또는 명시적 미지원 동작도 모듈 계약에 포함한다. 일반 값 전달과 비동기 호출을 기본으로 하고, 고용량 zero-copy 데이터는 별도 수명·소유권 계약을 갖는 후속 경로로 둔다. 이 확장 경계의 공개 범위는 [JS API 구현 체크리스트의 J15](../spec/STATUS.md#javascript-api-구현-체크리스트)에서 X08 하위 작업으로 정한다.
 
-`crates/spinon-layout`은 S01 `Tree` 또는 지정한 HostRoot 직속 요소의 `HostDocumentSnapshot`에서 순서가 보존된 입력을 만든 뒤 호출자가 준 `LayoutStyle`과 함께 Taffy를 호출한다. HostDocument 입력은 node ID·자식 순서·문서/표시 revision을 보존하며, 현재 측정기가 없는 텍스트 노드는 명시적으로 거부한다. 이 연결만으로 계산 스타일 snapshot이나 CSS cascade가 레이아웃에 반영되는 것은 아니다. workspace는 Taffy `0.14.0`을 고정하며 현재 `std`, `flexbox`, `taffy_tree` 기능만 연결한다. 구현 범위는 고정/auto 크기, row/column, LTR/RTL, padding, gap, flex-grow의 작은 Flex subset이다. CSS 파싱·cascade 변환, flex-shrink, wrap, Grid·Block, 실제 폰트·이미지 측정과 CSS px↔dp/point 변환은 이 경계의 책임이 아니며 아직 지원하지 않는다. 기존 작은 행·열 엔진과 같은 입력 fixture를 비교 기준으로 보존한다. 매 계산마다 Taffy 트리를 새로 만들므로 부분 갱신 비용, 모바일 바이너리 크기와 성능은 이후 검증 과제다. 전체 동작·오류 계약은 [내부 레이아웃 인터페이스](../spec/internal/0009-layout-engine.md)에 둔다.
+`crates/spinon-layout`은 S01 `Tree` 또는 지정한 HostRoot 직속 요소의 `HostDocumentSnapshot`에서 순서가 보존된 입력을 만들고 Taffy를 호출한다. 직접 호출할 때 스타일은 호출자가 전달한다. C04.2에서는 `crates/spinon-style-layout`이 Stylo computed-style snapshot의 profile·revision을 확인하고 제한 값만 `LayoutStyle`로 변환해 이 경계를 연결한다. HostDocument 입력은 node ID·자식 순서·문서/표시 revision을 보존하며, 현재 측정기가 없는 텍스트 노드는 명시적으로 거부한다. workspace는 Taffy `0.14.0`을 고정하고 `std`, `flexbox`, `block_layout`, `taffy_tree` 기능을 연결한다. C04.2가 Chromium과 비교하는 것은 fixture의 분수 Flex grow·gap이다. `display:block/none`, `content-box`, shrink 등 나머지 표현 필드는 내부 변환 가능성과 별도 레이아웃 테스트 범위일 뿐, 이번 C04.2의 Chromium 동등성 판정이 아니다. CSS 파싱·cascade는 `spinon-style`, 값의 검증·변환은 `spinon-style-layout`의 책임이다. Grid, 일반 Block formatting, 실제 폰트·이미지 측정과 CSS px↔dp/point 변환은 아직 지원하지 않는다. 매 계산마다 Taffy 트리를 새로 만들므로 부분 갱신 비용, 모바일 바이너리 크기와 성능은 이후 검증 과제다. 전체 동작·오류 계약은 [내부 레이아웃 인터페이스](../spec/internal/0009-layout-engine.md)에 둔다.
 
-CSS 계산은 모바일에서 Stylo를 사용하고 레이아웃과 GPU 페인트는 별도 모듈이 소유한다. `spinon-style`은 지원 요소의 기본 스타일 자원을 컴파일 시 포함하고 내부 FFI에서 읽기 전용으로 제공한다. C03은 `HostDocumentSnapshot`을 Stylo DOM·selector 인터페이스에 연결했고, C04.1은 고정 fixture에서만 UA·author·inline cascade를 계산해 Chromium 기준과 비교한다. `spinon-layout`은 HostDocument 요소 입력을 받을 수 있지만 스타일은 여전히 호출자가 만든 `LayoutStyle`로 주며 제품 cascade·Taffy·GPU 경로는 연결하지 않았다. Blitz DOM은 런타임 의존성으로 넣지 않는다. Taffy는 검증된 Block·Flexbox·Grid 경로에 적용하되 전체 CSS 목표에 필요한 알고리즘을 추가할 수 있도록 `spinon-layout` 경계를 유지한다.
+CSS 계산은 모바일에서 Stylo를 사용하고 레이아웃과 GPU 페인트는 별도 모듈이 소유한다. `spinon-style`은 기본 스타일 자원을 포함한다. C03은 `HostDocumentSnapshot`을 Stylo DOM·selector 인터페이스에 연결했고, C04.1은 고정 fixture cascade를 Chromium 기준과 비교한다. C04.2는 제한 fixture에서 `spinon-style-layout`을 통해 computed-style 결과를 Taffy 입력으로 연결하지만 제품 runtime·GPU 경로는 연결하지 않는다. 이 adapter는 CSS 진단이나 지원 profile 밖 값이 있으면 전체 요청을 실패시킨다. Blitz DOM은 런타임 의존성으로 넣지 않는다. Taffy 경계는 전체 CSS 목표에 필요한 알고리즘으로 확장할 수 있도록 유지한다.
 
 Vite·Rspack은 CSS import·모듈·로컬 에셋·청크 관계를 보존한다. 웹은 브라우저 CSS를 사용하고 모바일은 번들 CSS를 Stylo에 전달해 선택자·cascade·상속·computed style을 계산한다. 외부 네트워크 CSS `@import`·`url()` 로더는 미구현이며 모바일에서 요청하지 않는다. Lightning CSS 변환은 Chromium 결과와 의미가 같은지 검증한 범위에서만 사용한다. 전체 CSS 목표, UA 규칙, 기능 범위와 비교 기준은 [CSS 호환 명세](../spec/0008-css-compatibility.md), 작업 순서는 [CSS 구현 계획](plans/css-rendering.md)에 둔다.
 

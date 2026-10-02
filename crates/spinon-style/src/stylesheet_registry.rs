@@ -4,6 +4,7 @@ use std::{
     fmt,
     sync::{Mutex, PoisonError},
 };
+mod css_profile;
 
 use cssparser::SourceLocation;
 use style::{
@@ -228,6 +229,13 @@ impl StylesheetRegistry {
     /// 등록된 stylesheet가 없는지 반환합니다.
     pub fn is_empty(&self) -> bool {
         self.stylesheets.is_empty()
+    }
+
+    pub(crate) fn first_unsupported_author_feature(
+        &self,
+        allowed_properties: &[&str],
+    ) -> Option<(String, String)> {
+        css_profile::first_unsupported_author_feature(self, allowed_properties)
     }
 
     pub(crate) fn iter_stylo_sheets(

@@ -1,6 +1,6 @@
 # 내부 인터페이스 0009 · 레이아웃 엔진
 
-**버전:** `0.2.0-draft` · **상태:** 구현 초안 · **구현:** `crates/spinon-layout` · **대상:** Rust 코어 내부
+**버전:** `0.3.0-draft` · **상태:** 구현 초안 · **구현:** `crates/spinon-layout` · **대상:** Rust 코어 내부
 
 이 문서는 코어 트리와 레이아웃 계산기 사이의 입력·출력 계약을 정합니다. 앱 작성자용 CSS 지원이나 공개 API를 선언하지 않습니다.
 
@@ -13,6 +13,7 @@
 - HostDocument 입력의 선택 하위 트리에 텍스트 노드가 있으면 입력 전체를 `UnsupportedTextNode`로 거부합니다. 텍스트를 무시하거나 요소의 자식 순서를 바꾸지 않습니다. 스타일 누락과 선택한 하위 트리 밖 스타일은 각각 `MissingStyle`, `UnknownStyleNode`로 반환합니다.
 - `LayoutSourceRevision`은 입력 출처를 구분합니다. `Tree` 입력은 구조 `Revision`을, HostDocument 입력은 `DocumentGeneration`·`DocumentRevision`·`RenderTreeRevision`을 함께 보존하고 `LayoutOutput`이 같은 값을 돌려줍니다. viewport·계산 스타일의 독립 revision은 아직 없으므로 호출자는 최신 입력에 오래된 결과를 적용하지 않도록 관리해야 합니다.
 - `LayoutEngine`은 엔진과 무관한 내부 경계이며 현재 구현은 `TaffyLayoutEngine`입니다. Taffy 타입은 이 크레이트 밖으로 노출하지 않습니다.
+- C04.2 `spinon-style-layout`은 `spinon-style` computed-style profile을 검증하고 `LayoutStyle`로 변환한 뒤 이 크레이트에 전달합니다. `spinon-layout`은 CSS 문법·cascade를 참조하지 않습니다.
 
 ```rust
 let input = LayoutInput::from_tree(&tree, viewport, &computed_styles)?;
@@ -31,7 +32,7 @@ assert_eq!(output.source_revision, input.source_revision());
 
 예시의 `root`는 `snapshot`에서 유효한 HostRoot 직속 요소 handle이며 선택한 subtree에는 텍스트 노드가 없습니다.
 
-## 입력 계약 `0.2.0-draft`
+## 입력 계약 `0.3.0-draft`
 
 한 계산 입력은 루트 ID, 양수·유한 viewport, 출처 revision, 모든 요소 노드의 스타일을 포함합니다. 루트의 고정 너비·높이는 viewport와 정확히 같아야 합니다. viewport와 스타일 값은 같은 좌표 단위를 사용합니다. 이 계약은 CSS px을 Android dp나 iOS point로 변환하지 않습니다.
 
@@ -39,13 +40,15 @@ assert_eq!(output.source_revision, input.source_revision());
 
 | 필드 | 현재 동작 |
 | --- | --- |
-| `width`, `height` | `Auto` 또는 음수가 아닌 유한 고정 길이. 백분율은 없음 |
+| `display` | `flex`, `block`, `none`. `block`은 기본 block formatting 동등성을 뜻하지 않음 |
+| `box_sizing` | `border-box`, `content-box` |
+| `width`, `height`, `flex_basis` | `Auto` 또는 음수가 아닌 유한 고정 길이. 백분율은 없음 |
 | `flex_direction` | `row`, `column` |
 | `direction` | `ltr`, `rtl` |
 | `padding` | 네 방향의 음수가 아닌 유한 길이 |
 | `gap` | `row`, `column` gap. 음수가 아닌 유한 길이 |
-| `flex_grow` | 0 이상 유한 값 |
-| 표시·정렬 기본값 | 모든 노드는 Flex 컨테이너, `align-items: stretch`, `flex-wrap: nowrap`, `flex-shrink: 0`, border-box |
+| `flex_grow`, `flex_shrink` | 0 이상 유한 값 |
+| 기본값 | `display:flex`, `align-items:stretch`, `flex-wrap:nowrap`, `flex-shrink:0`, `box-sizing:border-box` |
 
 입력에는 중복 ID, 없는 자식, 중복 자식, 복수 부모, 루트의 부모, 고립 노드와 순환을 허용하지 않습니다. `LayoutInput` 필드는 외부에서 바꿀 수 없고 `from_tree` 또는 `from_host_document`가 코어 snapshot을 투영합니다. 엔진은 Taffy에 전달하기 전에 연결 그래프와 계산 스타일을 검증합니다.
 
@@ -75,10 +78,10 @@ assert_eq!(output.source_revision, input.source_revision());
 
 ## 현재 미지원
 
-이 인터페이스는 CSS parser/cascade 결과를 직접 받거나 변환하지 않습니다. CSS parser/cascade, selector, 상속, CSS 변수·단위, percentage, margin, border, min/max constraints, flex shrink, wrapping, 정렬 선택, position, overflow·scroll, Grid, Block, 글꼴 shaping, 텍스트/이미지 intrinsic measurement를 제공하지 않습니다. HostDocument의 텍스트 노드를 레이아웃 입력으로 받지 않으며 `Auto` leaf의 콘텐츠 기반 측정도 없습니다. 그러므로 일반 웹 Flexbox 동등성, 완성된 CSS 엔진 또는 사용자 UI 지원으로 해석하면 안 됩니다.
+이 인터페이스는 CSS parser/cascade 결과를 직접 받거나 변환하지 않습니다. CSS parser/cascade, selector, 상속, CSS 변수·단위 변환, percentage, margin, border, min/max constraints, flex wrapping, 일반 정렬, position, overflow·scroll, Grid, 완전한 Block formatting, 글꼴 shaping, 텍스트/이미지 intrinsic measurement를 제공하지 않습니다. HostDocument의 텍스트 노드를 레이아웃 입력으로 받지 않으며 `Auto` leaf의 콘텐츠 기반 측정도 없습니다. 그러므로 일반 웹 Flexbox 동등성, 완성된 CSS 엔진 또는 사용자 UI 지원으로 해석하면 안 됩니다.
 
 ## 의존성과 비교 기준
 
-제품 workspace는 `taffy = 0.14.0`을 정확히 고정하고 기본 기능을 끈 뒤 `std`, `flexbox`, `taffy_tree`만 켭니다. Lightning CSS 파서나 웹뷰는 런타임 의존성에 포함되지 않습니다. 이전 행·열 PoC는 `spikes/dynamic-tree/rust/tree.rs`에 보존하며, 공유된 정수 LTR fixture에서 Taffy 결과와 비교합니다. 별도의 151.5 CSS px 너비에 flex-grow 자식 셋을 둔 소수 분배 fixture는 Chromium과 Taffy만 비교합니다. 기존 엔진은 정수 크기와 제한된 행·열만 처리하므로 이 비교는 작은 fixture의 회귀 확인이지 브라우저/CSS 전체 적합성이나 속도 비교가 아닙니다.
+제품 workspace는 `taffy = 0.14.0`을 정확히 고정하고 기본 기능을 끈 뒤 `std`, `flexbox`, `block_layout`, `taffy_tree`를 켭니다. `block_layout`은 Taffy 입력 변환과 제한 fixture에 필요하지만 일반 Block formatting 지원 판정은 별도입니다. Lightning CSS 파서나 웹뷰는 런타임 의존성에 포함되지 않습니다. 이전 행·열 PoC는 `spikes/dynamic-tree/rust/tree.rs`에 보존하며, 공유된 정수 LTR fixture에서 Taffy 결과와 비교합니다. 별도의 151.5 CSS px 너비에 flex-grow 자식 셋을 둔 소수 분배 fixture는 Chromium과 Taffy만 비교합니다. 기존 엔진은 정수 크기와 제한된 행·열만 처리하므로 이 비교는 작은 fixture의 회귀 확인이지 브라우저/CSS 전체 적합성이나 속도 비교가 아닙니다.
 
-기존 Tree 입력과 HostDocument 입력의 projection·revision 보존·Taffy 출력 동등성은 [HostDocument 입력 비교 모델](evidence/s02-host-document-layout-input-2026-10-03.md)에 기록합니다. 브라우저 좌표 비교는 [기존 S02 근거](evidence/s02-taffy-layout-2026-09-30.md)에 둡니다. 이 구현은 `spec/STATUS.md`의 S02 완료 표시, C04 runtime cascade 연결 또는 공개 Flex/CSS API 지원을 뜻하지 않습니다.
+기존 Tree 입력과 HostDocument 입력의 projection·revision 보존·Taffy 출력 동등성은 [HostDocument 입력 비교 모델](evidence/s02-host-document-layout-input-2026-10-03.md)에 기록합니다. 브라우저 좌표 비교는 [기존 S02 근거](evidence/s02-taffy-layout-2026-09-30.md)와 [C04.2 computed style layout adapter 근거](evidence/css-c04-style-layout-bridge-2026-10-03.md)에 둡니다. 이 구현은 S02 전체 완료, C04 전체 cascade runtime 연결 또는 공개 Flex/CSS API 지원을 뜻하지 않습니다.

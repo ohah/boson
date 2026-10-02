@@ -9,7 +9,11 @@ pub use stylesheet_registry::{
     CssOrigin, CssParseDiagnostic, RegisteredStylesheet, StylesheetRegistry,
     StylesheetRegistryError, StylesheetSource,
 };
-pub use stylo_dom::{StyloDocument, StyloDocumentView, StyloDomError, StyloElement, StyloNode};
+pub use stylo_dom::{
+    CascadeDiagnostic, ComputedElementStyle, ComputedStyleProfile, ComputedStyleSnapshot,
+    CssCascadeError, CssViewport, StyloDocument, StyloDocumentView, StyloDomError, StyloElement,
+    StyloNode, compute_flex_layout_cascade,
+};
 
 /// 지원 HTML 요소 기본 스타일 프로필의 초안 식별자입니다.
 pub const UA_STYLESHEET_PROFILE_ID: &CStr = c"spinon-html-ua/0.1.0-draft";

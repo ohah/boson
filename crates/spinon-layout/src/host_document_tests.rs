@@ -207,6 +207,107 @@ fn host_document_projection_matches_legacy_tree_and_taffy_frames() {
 }
 
 #[test]
+fn display_box_sizing_and_flex_shrink_reach_taffy() {
+    let (document, root, first) = host_document_fixture(false);
+    let snapshot = document.snapshot();
+    let children = snapshot.children(root).unwrap().collect::<Vec<_>>();
+    let second = children[1];
+    let mut styles = styles();
+    let first_style = styles.get_mut(&first.id()).unwrap();
+    first_style.display = crate::LayoutDisplay::Block;
+    first_style.box_sizing = crate::LayoutBoxSizing::ContentBox;
+    first_style.width = crate::LayoutDimension::Fixed(20.0);
+    first_style.height = crate::LayoutDimension::Fixed(20.0);
+    first_style.padding.left = 5.0;
+    let second_style = styles.get_mut(&second.id()).unwrap();
+    second_style.display = crate::LayoutDisplay::None;
+
+    let input = LayoutInput::from_host_document(&snapshot, root, viewport(), &styles).unwrap();
+    let output = TaffyLayoutEngine.compute(&input).unwrap();
+    assert_eq!(output.frames[&first.id()].width, 25.0);
+    assert_eq!(output.frames[&first.id()].height, 20.0);
+    assert_eq!(output.frames[&second.id()].width, 0.0);
+    assert_eq!(output.frames[&second.id()].height, 0.0);
+
+    let root = node_id(1);
+    let first = node_id(2);
+    let second = node_id(3);
+    let tree = Tree::new();
+    let mut batch = ChangeBatch::new(tree.revision());
+    batch
+        .push(Operation::Create {
+            id: root,
+            tag: "div".to_owned(),
+        })
+        .push(Operation::Insert {
+            id: root,
+            parent: None,
+            index: 0,
+        })
+        .push(Operation::Create {
+            id: first,
+            tag: "div".to_owned(),
+        })
+        .push(Operation::Insert {
+            id: first,
+            parent: Some(root),
+            index: 0,
+        })
+        .push(Operation::Create {
+            id: second,
+            tag: "div".to_owned(),
+        })
+        .push(Operation::Insert {
+            id: second,
+            parent: Some(root),
+            index: 1,
+        });
+    let mut tree = tree;
+    tree.commit(batch).unwrap();
+    let shrink_styles = BTreeMap::from([
+        (
+            root,
+            LayoutStyle {
+                width: LayoutDimension::Fixed(100.0),
+                height: LayoutDimension::Fixed(80.0),
+                flex_direction: FlexDirection::Row,
+                ..LayoutStyle::default()
+            },
+        ),
+        (
+            first,
+            LayoutStyle {
+                width: LayoutDimension::Fixed(70.0),
+                height: LayoutDimension::Fixed(20.0),
+                flex_shrink: 1.0,
+                ..LayoutStyle::default()
+            },
+        ),
+        (
+            second,
+            LayoutStyle {
+                width: LayoutDimension::Fixed(70.0),
+                height: LayoutDimension::Fixed(20.0),
+                flex_shrink: 1.0,
+                ..LayoutStyle::default()
+            },
+        ),
+    ]);
+    let input = LayoutInput::from_tree(
+        &tree,
+        Viewport {
+            width: 100.0,
+            height: 80.0,
+        },
+        &shrink_styles,
+    )
+    .unwrap();
+    let output = TaffyLayoutEngine.compute(&input).unwrap();
+    assert_eq!(output.frames[&first].width, 50.0);
+    assert_eq!(output.frames[&second].width, 50.0);
+}
+
+#[test]
 fn host_document_input_preserves_distinct_document_and_render_revisions() {
     let (mut document, root, _) = host_document_fixture(false);
     let owner = OwnerId::new(1).unwrap();

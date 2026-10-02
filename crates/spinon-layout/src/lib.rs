@@ -1,15 +1,13 @@
 mod error;
 mod host_document;
+mod taffy_style;
 mod tree_input;
 
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use spinon_core::{DocumentGeneration, DocumentRevision, NodeId, RenderTreeRevision, Revision};
-use taffy::prelude::{
-    AlignItems, AvailableSpace, Dimension, Display, FlexDirection as TaffyFlexDirection, FlexWrap,
-    LengthPercentage, Rect, Size, Style, TaffyTree,
-};
-use taffy::style::{BoxSizing, Direction as TaffyDirection};
+use taffy::prelude::{AvailableSpace, Size, TaffyTree};
+use taffy_style::to_taffy_style;
 
 pub use error::LayoutError;
 
@@ -32,6 +30,21 @@ pub enum LayoutDimension {
 pub enum FlexDirection {
     Row,
     Column,
+}
+
+/// Taffy가 계산하는 제한 CSS display 값입니다.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum LayoutDisplay {
+    Flex,
+    Block,
+    None,
+}
+
+/// CSS 상자의 너비·높이를 해석하는 기준입니다.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum LayoutBoxSizing {
+    BorderBox,
+    ContentBox,
 }
 
 /// 가로 방향의 순서와 시작점을 정합니다.
@@ -60,25 +73,33 @@ pub struct LayoutGap {
 /// 이 초기 내부 계약이 표현하는 제한된 Flex 스타일입니다.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct LayoutStyle {
+    pub display: LayoutDisplay,
+    pub box_sizing: LayoutBoxSizing,
     pub width: LayoutDimension,
     pub height: LayoutDimension,
+    pub flex_basis: LayoutDimension,
     pub flex_direction: FlexDirection,
     pub direction: TextDirection,
     pub padding: LayoutEdges,
     pub gap: LayoutGap,
     pub flex_grow: f32,
+    pub flex_shrink: f32,
 }
 
 impl Default for LayoutStyle {
     fn default() -> Self {
         Self {
+            display: LayoutDisplay::Flex,
+            box_sizing: LayoutBoxSizing::BorderBox,
             width: LayoutDimension::Auto,
             height: LayoutDimension::Auto,
+            flex_basis: LayoutDimension::Auto,
             flex_direction: FlexDirection::Column,
             direction: TextDirection::Ltr,
             padding: LayoutEdges::default(),
             gap: LayoutGap::default(),
             flex_grow: 0.0,
+            flex_shrink: 0.0,
         }
     }
 }
@@ -301,6 +322,12 @@ fn validate_style(node: &LayoutNode) -> Result<(), LayoutError> {
             field: "height",
         });
     }
+    if !valid_dimension(node.style.flex_basis) {
+        return Err(LayoutError::InvalidStyle {
+            node: node.id,
+            field: "flex_basis",
+        });
+    }
     for (field, value) in [
         ("padding.top", node.style.padding.top),
         ("padding.right", node.style.padding.right),
@@ -309,6 +336,7 @@ fn validate_style(node: &LayoutNode) -> Result<(), LayoutError> {
         ("gap.row", node.style.gap.row),
         ("gap.column", node.style.gap.column),
         ("flex_grow", node.style.flex_grow),
+        ("flex_shrink", node.style.flex_shrink),
     ] {
         if !value.is_finite() || value < 0.0 {
             return Err(LayoutError::InvalidStyle {
@@ -384,47 +412,6 @@ fn postorder(
         ));
     }
     Ok(output)
-}
-
-fn to_taffy_style(style: LayoutStyle) -> Style {
-    Style {
-        display: Display::Flex,
-        box_sizing: BoxSizing::BorderBox,
-        direction: match style.direction {
-            TextDirection::Ltr => TaffyDirection::Ltr,
-            TextDirection::Rtl => TaffyDirection::Rtl,
-        },
-        size: Size {
-            width: to_taffy_dimension(style.width),
-            height: to_taffy_dimension(style.height),
-        },
-        padding: Rect {
-            top: LengthPercentage::length(style.padding.top),
-            right: LengthPercentage::length(style.padding.right),
-            bottom: LengthPercentage::length(style.padding.bottom),
-            left: LengthPercentage::length(style.padding.left),
-        },
-        gap: Size {
-            width: LengthPercentage::length(style.gap.column),
-            height: LengthPercentage::length(style.gap.row),
-        },
-        align_items: Some(AlignItems::STRETCH),
-        flex_direction: match style.flex_direction {
-            FlexDirection::Row => TaffyFlexDirection::Row,
-            FlexDirection::Column => TaffyFlexDirection::Column,
-        },
-        flex_wrap: FlexWrap::NoWrap,
-        flex_grow: style.flex_grow,
-        flex_shrink: 0.0,
-        ..Default::default()
-    }
-}
-
-fn to_taffy_dimension(dimension: LayoutDimension) -> Dimension {
-    match dimension {
-        LayoutDimension::Auto => Dimension::auto(),
-        LayoutDimension::Fixed(value) => Dimension::length(value),
-    }
 }
 
 fn collect_frames(

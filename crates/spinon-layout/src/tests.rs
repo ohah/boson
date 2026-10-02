@@ -144,6 +144,7 @@ fn to_input(fixture: &Fixture) -> LayoutInput {
                         column: node.style.column_gap,
                     },
                     flex_grow: node.style.flex_grow,
+                    ..LayoutStyle::default()
                 },
             })
             .collect(),
