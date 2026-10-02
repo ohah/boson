@@ -1,0 +1,8 @@
+{
+  "modules": [
+    {
+      "path": "src/virtual-entry.js",
+      "source": "export const virtualValue = 'virtual-source';\n"
+    }
+  ]
+}
