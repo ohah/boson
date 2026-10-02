@@ -168,6 +168,11 @@ impl StyloDocumentView {
         self.snapshot.document_revision()
     }
 
+    /// 이 view가 고정한 문서 generation입니다.
+    pub const fn generation(&self) -> spinon_core::DocumentGeneration {
+        self.snapshot.generation()
+    }
+
     /// view가 고정한 연결 표시 트리 revision입니다.
     pub const fn render_tree_revision(&self) -> spinon_core::RenderTreeRevision {
         self.snapshot.render_tree_revision()

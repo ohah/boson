@@ -1,0 +1,22 @@
+* {
+  box-sizing: border-box;
+}
+
+#flex-parent {
+  display: flex;
+  width: 301px;
+  height: 40px;
+  column-gap: 5px;
+}
+
+#flex-a {
+  flex: 1 1 0;
+}
+
+#flex-b {
+  flex: 2 1 0;
+}
+
+#flex-c {
+  flex: 3 1 0;
+}

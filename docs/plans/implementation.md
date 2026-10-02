@@ -15,6 +15,8 @@ spinon/
 ├── crates/
 │   ├── spinon-core/           # 문서·UI 트리, ID, 변경, 오류 계약
 │   ├── spinon-runtime/        # V8 세션, Isolate 소유 스레드, 작업 스케줄러
+│   ├── spinon-style/          # Stylo DOM, stylesheet·cascade·computed style
+│   ├── spinon-style-layout/   # 제한 computed style에서 layout 입력으로 변환
 │   ├── spinon-layout/         # LayoutEngine 경계와 Taffy 어댑터
 │   ├── spinon-render/         # 플랫폼에 무관한 장면·그리기 명령
 │   └── spinon-ffi/            # 좁은 C ABI: Rust와 호스트 연결
@@ -54,7 +56,9 @@ spinon/
 | --- | --- | --- |
 | 공통 런타임 코어 | `crates/spinon-core` | 안정적 노드 ID, 문서·UI 트리, 혼합 요소/텍스트 자식 순서, 논리 문서·연결 표시 트리 revision, 변경, 오류·복구 의미 |
 | JavaScript 실행기 | `crates/spinon-runtime` | V8 세션·Isolate 소유 스레드·작업 큐·실행/취소 수명주기. 공통 우선순위 선택기는 `spinon-core`를 사용 |
-| 레이아웃 | `crates/spinon-layout` | 코어 노드와 레이아웃 엔진 사이 어댑터, Taffy 적용·검증 |
+| 스타일 | `crates/spinon-style` | Stylo DOM, stylesheet·cascade와 computed-style snapshot |
+| 스타일·레이아웃 연결 | `crates/spinon-style-layout` | revision/profile 검증, computed CSS 값의 layout 입력 변환 |
+| 레이아웃 | `crates/spinon-layout` | 코어 노드와 레이아웃 엔진 사이 입력·출력 경계, Taffy 적용·검증 |
 | 렌더 명령 | `crates/spinon-render` | 장면 변경, 그리기 명령, hit-test 입력·결과 모델 |
 | 언어 경계 | `crates/spinon-ffi`, `native/v8` | FFI는 플랫폼용 C ABI를 검사·변환하고 런타임 API에 위임. V8 C++ 어댑터는 엔진 호출·호스트 콜백을 제공 |
 | Android | `platforms/android` | Gradle 빌드, 앱 수명주기, 표면·입력·IME·접근성·JNI 연결 |

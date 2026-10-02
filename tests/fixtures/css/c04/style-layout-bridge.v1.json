@@ -1,0 +1,51 @@
+{
+  "schema": "spinon-css-c04-style-layout-fixture/v1",
+  "fixtureId": "C04-style-layout-bridge-v1",
+  "sourceReferenceId": "chromium-macos-arm64-macos-26.5.1-25f80-154.0.8037.95-layout-v1-778a2065ac58-inventory-ef6d0b87a506-capture-85a34bd9a1a2-bin-affc6715a14a",
+  "documentBaseUrl": "https://spinon.invalid/c04/style-layout-bridge.html",
+  "stylesheet": {
+    "id": "c04-style-layout-bridge",
+    "baseUrl": "https://spinon.invalid/c04/style-layout-bridge.css",
+    "source": "style-layout-bridge.css"
+  },
+  "viewport": {
+    "widthCssPx": 301,
+    "heightCssPx": 40,
+    "deviceScaleFactor": 1
+  },
+  "tree": {
+    "id": "flex-parent",
+    "children": ["flex-a", "flex-b", "flex-c"]
+  },
+  "chromiumComputedValues": {
+    "flex-parent": {
+      "display": "flex",
+      "width": "301px",
+      "column-gap": "5px"
+    },
+    "flex-a": {
+      "flex-grow": "1",
+      "flex-basis": "0px"
+    },
+    "flex-b": {
+      "flex-grow": "2",
+      "flex-basis": "0px"
+    },
+    "flex-c": {
+      "flex-grow": "3",
+      "flex-basis": "0px"
+    }
+  },
+  "chromiumFramesRelativeToRoot": {
+    "flex-parent": { "x": 0, "y": 0, "width": 301, "height": 40 },
+    "flex-a": { "x": 0, "y": 0, "width": 48.5, "height": 40 },
+    "flex-b": { "x": 53.5, "y": 0, "width": 97, "height": 40 },
+    "flex-c": { "x": 155.5, "y": 0, "width": 145.5, "height": 40 }
+  },
+  "comparison": {
+    "computedValues": "문자열 정확 일치",
+    "frameUnit": "CSS px",
+    "perCoordinateMaximumAbsoluteError": 0.5,
+    "aggregateAveragesAllowed": false
+  }
+}

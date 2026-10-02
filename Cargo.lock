@@ -904,6 +904,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "spinon-style-layout"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "spinon-core",
+ "spinon-layout",
+ "spinon-style",
+ "stylo",
+]
+
+[[package]]
 name = "spinon-style-layout-spike"
 version = "0.1.0"
 dependencies = [
