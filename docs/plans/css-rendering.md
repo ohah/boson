@@ -20,6 +20,10 @@
 
 Node.js 내장 WebSocket과 Chromium DevTools Protocol로 HTML fixture를 확인한다. 현재 초기 범위인 9개 요소·19개 feature의 selector·예상 node ID·property·안정 ID는 버전 있는 부분 inventory JSON으로 관리한다. 캡처기는 이를 검증해 문서 생성 전에 fixture에 주입하고 inventory 해시를 새 reference-id와 결과에 기록한다. 초기 Chromium 계산값과 다른 값으로 시작하는 author baseline을 먼저 적용한 뒤 `supported-elements-v0.css`를 추가해 inventory의 computed CSS 값이 baseline을 덮고 기준값과 일치하는지 비교한다. 2026-10-02 수집에서 19개 값이 모두 일치했고 9개 요소 ID도 통과했다. `.92`와 `.93` 스냅샷의 관찰·비교 배열은 동일했다. 예전 `ua-v0`의 selector 집합만 보던 탐색 결과는 규칙 적용 여부를 증명하지 못해 현재 비교 자료에서 철회했다. 이 비교는 UA cascade origin, Rust FFI, Stylo, 레이아웃, 글꼴, GPU 픽셀 또는 Android·iOS 동작을 검증하지 않는다. SVG와 전체 CSS inventory도 아직 확정하지 않았으므로 C01은 미완료다.
 
+### C01.2 단위·Flexbox·Grid oracle seed
+
+`layout-inventory.v1.json`과 `layout-units-flex-grid.html`은 `rem`·`em`, content-box 퍼센트, 분수 Flexbox grow와 wrap/gap, 분수 Grid track의 5개 case를 정의한다. Chrome `154.0.8037.95` / revision `@05d469856e75794131cc2e5d9b2f6b6f10a70388`에서 16개 요소의 41개 computed 값과 CSS px 좌표를 수집했다. 계산값은 앞뒤 공백 제거 후 정확 비교하고 각 노드의 좌표·크기별 최대 절대 오차를 `0.5 CSS px`로 고정했다. [C01.2 근거](../../spec/internal/evidence/css-c01-layout-2026-10-02.md)와 [JSON 결과](../../tests/fixtures/css/references/chromium-macos-arm64-macos-26.5.1-25f80-154.0.8037.95-layout-v1-778a2065ac58-inventory-ef6d0b87a506-capture-f7221694922b-bin-affc6715a14a/core-layout.json)는 해당 결과가 Chromium 기준 데이터일 뿐 Spinon/Taffy 동작이나 CSS 지원 완료가 아님을 구분한다. 같은 `.95` revision에서 C01.1 UA fixture도 다시 수집했고 `.93` 결과와 관찰 배열이 같았다. 전체 목록, 텍스트·페인트, CSSWG/WPT coverage, Android·iOS는 남아 있어 C01 전체는 미완료다.
+
 ## 소유 모듈과 데이터 흐름
 
 ```mermaid

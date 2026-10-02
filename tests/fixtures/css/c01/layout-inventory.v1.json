@@ -1,0 +1,171 @@
+{
+  "schema": "spinon-css-layout-inventory/v1",
+  "inventoryId": "C01-layout-units-flex-grid-v1",
+  "fixtureId": "C01-layout-units-flex-grid-v1",
+  "completeness": "partial",
+  "comparison": {
+    "computedValues": "계산 CSSStyleDeclaration 값의 앞뒤 공백 제거 후 문자열 정확 일치",
+    "nodeGeometry": {
+      "unit": "CSS px",
+      "coordinates": ["x", "y", "width", "height"],
+      "perCoordinateMaximumAbsoluteError": 0.5,
+      "aggregateAveragesAllowed": false
+    }
+  },
+  "uncovered": [
+    "전체 HTML·SVG 및 CSSWG·WPT inventory",
+    "인라인 텍스트·글꼴 shaping·줄바꿈·baseline",
+    "positioning·overflow·반응형·동적 상태",
+    "페인트·GPU 픽셀과 Android·iOS 실행 결과"
+  ],
+  "contextFeatures": [
+    { "id": "units.root.font-size.v1", "selector": ":root", "property": "font-size" }
+  ],
+  "cases": [
+    {
+      "id": "relative-units",
+      "nodes": [
+        {
+          "id": "rem-target",
+          "features": [
+            { "id": "units.rem.font-size.v1", "property": "font-size" },
+            { "id": "units.rem.width.v1", "property": "width" },
+            { "id": "units.rem.height.v1", "property": "height" }
+          ]
+        },
+        {
+          "id": "em-target",
+          "features": [
+            { "id": "units.em.font-size.v1", "property": "font-size" },
+            { "id": "units.em.width.v1", "property": "width" },
+            { "id": "units.em.height.v1", "property": "height" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "percentage-content-box",
+      "nodes": [
+        {
+          "id": "percent-parent",
+          "features": [
+            { "id": "percentage.parent.width.v1", "property": "width" },
+            { "id": "percentage.parent.height.v1", "property": "height" },
+            { "id": "percentage.parent.box-sizing.v1", "property": "box-sizing" }
+          ]
+        },
+        {
+          "id": "percent-child",
+          "features": [
+            { "id": "percentage.child.width.v1", "property": "width" },
+            { "id": "percentage.child.height.v1", "property": "height" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flex-fractional-growth",
+      "nodes": [
+        {
+          "id": "flex-parent",
+          "features": [
+            { "id": "flex.grow.display.v1", "property": "display" },
+            { "id": "flex.grow.gap.v1", "property": "column-gap" },
+            { "id": "flex.grow.width.v1", "property": "width" }
+          ]
+        },
+        {
+          "id": "flex-a",
+          "features": [
+            { "id": "flex.grow.a.flex-grow.v1", "property": "flex-grow" },
+            { "id": "flex.grow.a.flex-basis.v1", "property": "flex-basis" },
+            { "id": "flex.grow.a.width.v1", "property": "width" }
+          ]
+        },
+        {
+          "id": "flex-b",
+          "features": [
+            { "id": "flex.grow.b.flex-grow.v1", "property": "flex-grow" },
+            { "id": "flex.grow.b.flex-basis.v1", "property": "flex-basis" },
+            { "id": "flex.grow.b.width.v1", "property": "width" }
+          ]
+        },
+        {
+          "id": "flex-c",
+          "features": [
+            { "id": "flex.grow.c.flex-grow.v1", "property": "flex-grow" },
+            { "id": "flex.grow.c.flex-basis.v1", "property": "flex-basis" },
+            { "id": "flex.grow.c.width.v1", "property": "width" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "flex-wrap-gap",
+      "nodes": [
+        {
+          "id": "wrap-parent",
+          "features": [
+            { "id": "flex.wrap.display.v1", "property": "display" },
+            { "id": "flex.wrap.flex-wrap.v1", "property": "flex-wrap" },
+            { "id": "flex.wrap.row-gap.v1", "property": "row-gap" },
+            { "id": "flex.wrap.width.v1", "property": "width" }
+          ]
+        },
+        {
+          "id": "wrap-a",
+          "features": [
+            { "id": "flex.wrap.a.width.v1", "property": "width" },
+            { "id": "flex.wrap.a.height.v1", "property": "height" }
+          ]
+        },
+        {
+          "id": "wrap-b",
+          "features": [
+            { "id": "flex.wrap.b.width.v1", "property": "width" },
+            { "id": "flex.wrap.b.height.v1", "property": "height" }
+          ]
+        },
+        {
+          "id": "wrap-c",
+          "features": [
+            { "id": "flex.wrap.c.width.v1", "property": "width" },
+            { "id": "flex.wrap.c.height.v1", "property": "height" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grid-fractional-tracks",
+      "nodes": [
+        {
+          "id": "grid-parent",
+          "features": [
+            { "id": "grid.fractional.display.v1", "property": "display" },
+            { "id": "grid.fractional.columns.v1", "property": "grid-template-columns" },
+            { "id": "grid.fractional.column-gap.v1", "property": "column-gap" },
+            { "id": "grid.fractional.width.v1", "property": "width" }
+          ]
+        },
+        {
+          "id": "grid-a",
+          "features": [
+            { "id": "grid.fractional.a.width.v1", "property": "width" }
+          ]
+        },
+        {
+          "id": "grid-b",
+          "features": [
+            { "id": "grid.fractional.b.width.v1", "property": "width" }
+          ]
+        },
+        {
+          "id": "grid-c",
+          "features": [
+            { "id": "grid.fractional.c.width.v1", "property": "width" }
+          ]
+        }
+      ]
+    }
+  ]
+}

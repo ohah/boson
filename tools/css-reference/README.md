@@ -13,3 +13,13 @@ node tools/css-reference/capture.mjs
 수집기는 Chromium 기본값을 먼저 저장한 뒤 서로 다른 값의 author baseline과 내장 프로필을 순서대로 적용합니다. baseline을 덮은 프로필의 computed CSS 값과 selector·예상 node ID는 machine-readable inventory에서 읽어 정확히 비교합니다. baseline을 덮지 못하는 선언은 불일치로 실패합니다. UA cascade origin, 레이아웃·글꼴 shaping·GPU 픽셀 비교와 모바일 적합성은 아직 수행하지 않습니다. 결과 추가는 [C01](../../spec/STATUS.md) 전체 완료가 아닙니다.
 
 inventory 단위 검증은 `mise exec -- bun run test:css-reference`로 실행합니다. 전체 기본 테스트 명령 `bun run test`에도 포함됩니다.
+
+## C01 레이아웃 기준 수집
+
+`layout-units-flex-grid.html`과 [`layout-inventory.v1.json`](../../tests/fixtures/css/c01/layout-inventory.v1.json)은 `rem`·`em`, content-box 기준 퍼센트 크기, 분수 Flexbox 성장·줄바꿈, 분수 Grid track의 Chromium 기준을 정의합니다. computed CSS 값은 앞뒤 공백 제거 후 문자열 정확 일치로 비교하고, 각 노드의 `x`·`y`·`width`·`height` 최대 절대 오차는 각각 `0.5 CSS px`로 제한합니다. 평균값으로 개별 노드의 실패를 상쇄하지 않습니다.
+
+```sh
+node tools/css-reference/capture-layout.mjs
+```
+
+이 수집기는 Chromium revision·바이너리 해시·OS·viewport·locale·미디어 상태와 fixture/inventory 해시를 JSON 스냅샷에 기록합니다. 기존 스냅샷은 덮어쓰지 않습니다. 현재 결과는 기준 데이터이며 Spinon 레이아웃 구현과의 비교나 CSS 기능 지원 판정이 아닙니다. 텍스트 shaping, GPU 픽셀, Android·iOS 측정은 포함하지 않습니다.

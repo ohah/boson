@@ -22,6 +22,7 @@
 ## 검증 기록
 
 - [C01 · Chromium HTML UA 스타일 초기 비교](./evidence/css-c01-chromium-ua-2026-10-01.md) — macOS Chromium oracle와 고정 author baseline을 덮는 19개 computed value 비교 및 한계.
+- [C01.2 · Chromium 단위·Flexbox·Grid 기준](./evidence/css-c01-layout-2026-10-02.md) — Chrome 154.0.8037.95의 `rem`·`em`·퍼센트·분수 Flexbox/Grid 기준값 41개와 CSS px 좌표 오차 계약. Spinon/Taffy 비교는 포함하지 않음.
 - [C02 · Vite·Rspack CSS 산출 비교](./evidence/css-c02-bundler-2026-10-01.md) — production fixture의 CSS Modules·자원·청크, 기본 진단 차이와 공통 snapshot 원본 위치 근거.
 - [C02.1 · Vite·Rspack CSS resolver 비교](./evidence/css-c02-resolver-2026-10-02.md) — fixture alias·package `exports`로 선택한 CSS 및 내부 `@import`의 production graph·snapshot 연결 근거.
 - [C03 · HostDocument Stylo DOM adapter](./evidence/css-c03-stylo-dom-adapter-2026-10-01.md) — Stylo DOM/selector trait 구현, 고정 snapshot fixture, 실제 selector matcher 결과와 대상별 컴파일 결과.
