@@ -2,8 +2,8 @@ use std::{collections::BTreeMap, fs, path::PathBuf};
 
 use serde_json::Value;
 use spinon_core::{
-    AttributeName, DocumentChangeBatch, DocumentOperation, HostDocument, HostNodeHandle,
-    HostParent, OwnerId,
+    AttributeName, DocumentChangeBatch, DocumentOperation, EnvironmentRevision, HostDocument,
+    HostNodeHandle, HostParent, OwnerId, StyleRevision,
 };
 use spinon_layout::LayoutSourceRevision;
 use spinon_style::{CssCascadeError, CssOrigin, CssViewport, StylesheetSource, StyloDocumentView};
@@ -113,6 +113,7 @@ impl DocumentFixture {
             width_css_px: fixture["viewport"]["widthCssPx"].as_f64().unwrap() as f32,
             height_css_px: fixture["viewport"]["heightCssPx"].as_f64().unwrap() as f32,
             device_scale_factor: fixture["viewport"]["deviceScaleFactor"].as_f64().unwrap() as f32,
+            environment_revision: Default::default(),
         }
     }
 
@@ -136,6 +137,7 @@ impl DocumentFixture {
             self.root,
             &stylesheets,
             self.viewport(),
+            StyleRevision::default(),
         )
     }
 }
@@ -236,7 +238,7 @@ fn c04_computed_flex_style_projects_to_chromium_fractional_taffy_frames() {
         snapshot.render_tree_revision()
     );
     assert_eq!(
-        output.layout.source_revision,
+        output.layout.revision.source(),
         LayoutSourceRevision::HostDocument {
             generation: snapshot.generation(),
             document: snapshot.document_revision(),
@@ -290,6 +292,31 @@ fn c04_computed_flex_style_projects_to_chromium_fractional_taffy_frames() {
             );
         }
     }
+}
+
+#[test]
+fn style_and_environment_revisions_survive_the_cascade_to_layout_projection() {
+    let fixture = DocumentFixture::new(false);
+    let style_revision = StyleRevision::default().checked_next().unwrap();
+    let environment_revision = EnvironmentRevision::default().checked_next().unwrap();
+    let viewport = CssViewport {
+        environment_revision,
+        ..fixture.viewport()
+    };
+    let output = compute_style_layout(
+        &fixture.document.snapshot(),
+        &fixture.view(),
+        fixture.root,
+        &[fixture.stylesheet()],
+        viewport,
+        style_revision,
+    )
+    .unwrap();
+
+    assert_eq!(output.computed_styles.style_revision, style_revision);
+    assert_eq!(output.computed_styles.viewport, viewport);
+    assert_eq!(output.layout.revision.style(), style_revision);
+    assert_eq!(output.layout.revision.environment(), environment_revision);
 }
 
 #[test]
@@ -372,7 +399,8 @@ fn a_snapshot_from_another_document_generation_is_rejected_before_cascade() {
             &view,
             second.root,
             &stylesheets,
-            first.viewport()
+            first.viewport(),
+            StyleRevision::default()
         ),
         Err(StyleLayoutError::SnapshotMismatch {
             field: "DocumentGeneration"
@@ -399,7 +427,8 @@ fn stale_document_revision_is_rejected_before_cascade_or_layout() {
             &view,
             fixture.root,
             &[fixture.stylesheet()],
-            fixture.viewport()
+            fixture.viewport(),
+            StyleRevision::default()
         ),
         Err(StyleLayoutError::SnapshotMismatch {
             field: "DocumentRevision"

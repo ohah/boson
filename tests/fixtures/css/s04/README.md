@@ -4,6 +4,8 @@
 
 이 fixture는 부모 1개와 자식 3개의 분수 Flex 배치에 불투명 CSS `background-color`를 연결합니다. 기존 C04.2 v1 fixture와 reference를 수정하지 않습니다. 태그별 네이티브 View, 일반 CSS 지원, 텍스트, 입력 이벤트, 제품 앱 runtime 또는 GPU 표시 완료를 뜻하지 않습니다.
 
+`layout-revision-gate.v1.json`은 이 화면 fixture와 별개인 snapshot admission 입력입니다. 기준 revision tuple을 허용하고 style revision 변경, environment revision 변경, environment revision을 재사용한 viewport 변경을 전체 거부해야 합니다. [비교 기준](../../../../spec/internal/evidence/s02-layout-revision-precomparison-2026-10-04.md)과 [실행 근거](../../../../spec/internal/evidence/s02-layout-revision-gate-2026-10-04.md)를 확인합니다. 이 검증은 제품 runtime 경합이나 GPU queue 폐기를 대신하지 않습니다.
+
 ```sh
 mise exec -- bun run css:reference:s04
 ```

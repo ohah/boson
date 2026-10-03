@@ -84,6 +84,7 @@ impl Fixture {
             width_css_px: viewport["widthCssPx"].as_f64().unwrap() as f32,
             height_css_px: viewport["heightCssPx"].as_f64().unwrap() as f32,
             device_scale_factor: viewport["deviceScaleFactor"].as_f64().unwrap() as f32,
+            environment_revision: Default::default(),
         };
         compute_basic_cascade(&self.view, &self.author_stylesheets, dimensions).unwrap()
     }

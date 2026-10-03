@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 
 use spinon_core::{
-    ChangeBatch, DocumentChangeBatch, DocumentOperation, HostDocument, HostNodeHandle, HostParent,
-    NodeId, Operation, OwnerId, Tree,
+    ChangeBatch, DocumentChangeBatch, DocumentOperation, EnvironmentRevision, HostDocument,
+    HostNodeHandle, HostParent, NodeId, Operation, OwnerId, StyleRevision, Tree,
 };
 
 use crate::{
@@ -157,10 +157,24 @@ fn viewport() -> Viewport {
 fn host_document_projection_matches_legacy_tree_and_taffy_frames() {
     let (document, root, _) = host_document_fixture(false);
     let styles = styles();
-    let host_input =
-        LayoutInput::from_host_document(&document.snapshot(), root, viewport(), &styles).unwrap();
+    let host_input = LayoutInput::from_host_document(
+        &document.snapshot(),
+        root,
+        viewport(),
+        &styles,
+        StyleRevision::default(),
+        EnvironmentRevision::default(),
+    )
+    .unwrap();
     let tree = legacy_tree_fixture();
-    let tree_input = LayoutInput::from_tree(&tree, viewport(), &styles).unwrap();
+    let tree_input = LayoutInput::from_tree(
+        &tree,
+        viewport(),
+        &styles,
+        StyleRevision::default(),
+        EnvironmentRevision::default(),
+    )
+    .unwrap();
 
     assert_eq!(host_input.root(), tree_input.root());
     assert_eq!(host_input.nodes(), tree_input.nodes());
@@ -176,7 +190,7 @@ fn host_document_projection_matches_legacy_tree_and_taffy_frames() {
     let host_output = TaffyLayoutEngine.compute(&host_input).unwrap();
     let tree_output = TaffyLayoutEngine.compute(&tree_input).unwrap();
     assert_eq!(host_output.frames, tree_output.frames);
-    assert_eq!(host_output.source_revision, host_input.source_revision());
+    assert_eq!(host_output.revision.source(), host_input.source_revision());
     assert_eq!(
         host_output.frames[&node_id(1)],
         LayoutFrame {
@@ -222,7 +236,15 @@ fn display_box_sizing_and_flex_shrink_reach_taffy() {
     let second_style = styles.get_mut(&second.id()).unwrap();
     second_style.display = crate::LayoutDisplay::None;
 
-    let input = LayoutInput::from_host_document(&snapshot, root, viewport(), &styles).unwrap();
+    let input = LayoutInput::from_host_document(
+        &snapshot,
+        root,
+        viewport(),
+        &styles,
+        StyleRevision::default(),
+        EnvironmentRevision::default(),
+    )
+    .unwrap();
     let output = TaffyLayoutEngine.compute(&input).unwrap();
     assert_eq!(output.frames[&first.id()].width, 25.0);
     assert_eq!(output.frames[&first.id()].height, 20.0);
@@ -300,6 +322,8 @@ fn display_box_sizing_and_flex_shrink_reach_taffy() {
             height: 80.0,
         },
         &shrink_styles,
+        StyleRevision::default(),
+        EnvironmentRevision::default(),
     )
     .unwrap();
     let output = TaffyLayoutEngine.compute(&input).unwrap();
@@ -325,8 +349,15 @@ fn host_document_input_preserves_distinct_document_and_render_revisions() {
         document.render_tree_revision().get()
     );
     let mut styles = styles();
-    let input =
-        LayoutInput::from_host_document(&document.snapshot(), root, viewport(), &styles).unwrap();
+    let input = LayoutInput::from_host_document(
+        &document.snapshot(),
+        root,
+        viewport(),
+        &styles,
+        StyleRevision::default(),
+        EnvironmentRevision::default(),
+    )
+    .unwrap();
     assert_eq!(
         input.source_revision(),
         LayoutSourceRevision::HostDocument {
@@ -338,7 +369,14 @@ fn host_document_input_preserves_distinct_document_and_render_revisions() {
 
     styles.insert(detached.id(), LayoutStyle::default());
     assert_eq!(
-        LayoutInput::from_host_document(&document.snapshot(), root, viewport(), &styles),
+        LayoutInput::from_host_document(
+            &document.snapshot(),
+            root,
+            viewport(),
+            &styles,
+            StyleRevision::default(),
+            EnvironmentRevision::default(),
+        ),
         Err(LayoutError::UnknownStyleNode(detached.id()))
     );
 }
@@ -349,22 +387,45 @@ fn host_document_input_rejects_missing_styles_text_and_non_root_elements() {
     let mut incomplete = styles();
     incomplete.remove(&child.id());
     assert_eq!(
-        LayoutInput::from_host_document(&document.snapshot(), root, viewport(), &incomplete),
+        LayoutInput::from_host_document(
+            &document.snapshot(),
+            root,
+            viewport(),
+            &incomplete,
+            StyleRevision::default(),
+            EnvironmentRevision::default(),
+        ),
         Err(LayoutError::MissingStyle(child.id()))
     );
     assert_eq!(
-        LayoutInput::from_host_document(&document.snapshot(), child, viewport(), &styles()),
+        LayoutInput::from_host_document(
+            &document.snapshot(),
+            child,
+            viewport(),
+            &styles(),
+            StyleRevision::default(),
+            EnvironmentRevision::default(),
+        ),
         Err(LayoutError::InvalidHostDocumentRoot(child.id()))
     );
 
     let (foreign_document, foreign_root, _) = host_document_fixture(false);
-    let current_input =
-        LayoutInput::from_host_document(&document.snapshot(), root, viewport(), &styles()).unwrap();
+    let current_input = LayoutInput::from_host_document(
+        &document.snapshot(),
+        root,
+        viewport(),
+        &styles(),
+        StyleRevision::default(),
+        EnvironmentRevision::default(),
+    )
+    .unwrap();
     let foreign_input = LayoutInput::from_host_document(
         &foreign_document.snapshot(),
         foreign_root,
         viewport(),
         &styles(),
+        StyleRevision::default(),
+        EnvironmentRevision::default(),
     )
     .unwrap();
     assert_ne!(
@@ -372,7 +433,14 @@ fn host_document_input_rejects_missing_styles_text_and_non_root_elements() {
         foreign_input.source_revision()
     );
     assert_eq!(
-        LayoutInput::from_host_document(&document.snapshot(), foreign_root, viewport(), &styles()),
+        LayoutInput::from_host_document(
+            &document.snapshot(),
+            foreign_root,
+            viewport(),
+            &styles(),
+            StyleRevision::default(),
+            EnvironmentRevision::default(),
+        ),
         Err(LayoutError::InvalidHostDocumentRoot(root.id()))
     );
 
@@ -392,6 +460,8 @@ fn host_document_input_rejects_missing_styles_text_and_non_root_elements() {
             detached,
             viewport(),
             &BTreeMap::from([(detached.id(), LayoutStyle::default())]),
+            StyleRevision::default(),
+            EnvironmentRevision::default(),
         ),
         Err(LayoutError::InvalidHostDocumentRoot(detached.id()))
     );
@@ -399,7 +469,14 @@ fn host_document_input_rejects_missing_styles_text_and_non_root_elements() {
     let (document, root, _) = host_document_fixture(true);
     let text_id = NodeId::new(4).unwrap();
     assert_eq!(
-        LayoutInput::from_host_document(&document.snapshot(), root, viewport(), &styles()),
+        LayoutInput::from_host_document(
+            &document.snapshot(),
+            root,
+            viewport(),
+            &styles(),
+            StyleRevision::default(),
+            EnvironmentRevision::default(),
+        ),
         Err(LayoutError::UnsupportedTextNode(text_id))
     );
 }

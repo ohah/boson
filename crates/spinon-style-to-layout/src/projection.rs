@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use spinon_core::{HostDocumentSnapshot, HostNodeHandle, HostNodeKind, NodeId};
+use spinon_core::{HostDocumentSnapshot, HostNodeHandle, HostNodeKind, NodeId, StyleRevision};
 use spinon_layout::{
     FlexDirection, LayoutBoxSizing, LayoutDimension, LayoutDisplay, LayoutEngine, LayoutGap,
     LayoutInput, LayoutOutput, LayoutStyle, TaffyLayoutEngine, TextDirection, Viewport,
@@ -26,6 +26,7 @@ pub fn compute_style_layout(
     root: HostNodeHandle,
     author_stylesheets: &[StylesheetSource],
     viewport: CssViewport,
+    style_revision: StyleRevision,
 ) -> Result<StyleLayoutOutput, StyleLayoutError> {
     compute_profile_layout(
         snapshot,
@@ -33,6 +34,7 @@ pub fn compute_style_layout(
         root,
         author_stylesheets,
         viewport,
+        style_revision,
         ComputedStyleProfile::FlexLayoutV1,
     )
 }
@@ -44,6 +46,7 @@ pub fn compute_s04_style_layout(
     root: HostNodeHandle,
     author_stylesheets: &[StylesheetSource],
     viewport: CssViewport,
+    style_revision: StyleRevision,
 ) -> Result<StyleLayoutOutput, StyleLayoutError> {
     compute_profile_layout(
         snapshot,
@@ -51,6 +54,7 @@ pub fn compute_s04_style_layout(
         root,
         author_stylesheets,
         viewport,
+        style_revision,
         ComputedStyleProfile::S04FlexPaintV1,
     )
 }
@@ -61,16 +65,17 @@ fn compute_profile_layout(
     root: HostNodeHandle,
     author_stylesheets: &[StylesheetSource],
     viewport: CssViewport,
+    style_revision: StyleRevision,
     profile: ComputedStyleProfile,
 ) -> Result<StyleLayoutOutput, StyleLayoutError> {
     assert_view_matches_snapshot(snapshot, view)?;
     assert_no_inline_style(snapshot, root)?;
     let computed_styles = match profile {
         ComputedStyleProfile::FlexLayoutV1 => {
-            compute_flex_layout_cascade(view, author_stylesheets, viewport)?
+            compute_flex_layout_cascade(view, author_stylesheets, viewport, style_revision)?
         }
         ComputedStyleProfile::S04FlexPaintV1 => {
-            compute_s04_flex_paint_cascade(view, author_stylesheets, viewport)?
+            compute_s04_flex_paint_cascade(view, author_stylesheets, viewport, style_revision)?
         }
         ComputedStyleProfile::BasicCascadeV1 => {
             return Err(StyleLayoutError::UnsupportedProfile {
@@ -87,7 +92,14 @@ fn compute_profile_layout(
         width: viewport.width_css_px,
         height: viewport.height_css_px,
     };
-    let input = LayoutInput::from_host_document(snapshot, root, layout_viewport, &styles)?;
+    let input = LayoutInput::from_host_document(
+        snapshot,
+        root,
+        layout_viewport,
+        &styles,
+        computed_styles.style_revision,
+        viewport.environment_revision,
+    )?;
     let layout = TaffyLayoutEngine.compute(&input)?;
     Ok(StyleLayoutOutput {
         computed_styles,

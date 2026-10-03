@@ -15,7 +15,7 @@
 - `StyloDocumentView::new_with_base_url(snapshot, root, is_html_document, quirks_mode, document_url)`는 절대 URL이 아니면 `InvalidDocumentBaseUrl`로 view 생성을 거부한다. 기존 `new`는 C03 호출 호환을 위해 `https://spinon.invalid/document.html` 기준 URL을 사용한다.
 - `compute_basic_cascade(view, author_stylesheets, viewport)`는 fixture 전용의 제한된 계산 entrypoint다. 입력 author stylesheet의 origin이 `Author`가 아니거나 viewport의 폭·높이·배율이 유한한 양수가 아니면 계산하지 않는다.
 - 이 계산은 view의 shared lock으로 `StylesheetRegistry`를 만들어 `Origin::UserAgent`의 내장 UA stylesheet를 먼저 넣고 author sheets를 전달 순서대로 추가한다. HTML inline declaration도 view를 만들 때 같은 lock으로 파싱되어 Stylo `TElement::style_attribute()`에서 제공된다.
-- 모든 대상 요소를 root-first preorder로 계산하며 부모 `ComputedValues`를 다음 요소에 전달한다. 반환 snapshot에는 입력 `DocumentRevision`·`RenderTreeRevision`, 고정 whitelist의 computed serialization, stylesheet ID 또는 HostNode ID를 포함한 parse 진단을 보존한다.
+- 모든 대상 요소를 root-first preorder로 계산하며 부모 `ComputedValues`를 다음 요소에 전달한다. 반환 snapshot에는 입력 `DocumentRevision`·`RenderTreeRevision`, 호출자가 전달한 `StyleRevision`, viewport의 `EnvironmentRevision`, 고정 whitelist의 computed serialization, stylesheet ID 또는 HostNode ID를 포함한 parse 진단을 보존한다. C04.1 고정 fixture entrypoint는 동적 style 입력 관리자가 없어 `StyleRevision(0)`을 사용한다. revision 소유와 갱신 규칙은 [0009](0009-layout-engine.md)를 따른다.
 - 내부 함수는 아직 `pub(crate)`이고 layout·FFI·JS API 소비자가 연결되지 않았다. 이 함수와 결과 자료형은 사용자 DOM API나 구현 완료 범위가 아니다.
 
 ## Stylo cascade 입력 순서

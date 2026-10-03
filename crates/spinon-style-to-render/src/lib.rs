@@ -6,5 +6,8 @@ mod error;
 #[cfg(test)]
 mod tests;
 
-pub use adapter::{FixtureNodeMapping, RenderFixtureProvenance, build_s04_static_render_snapshot};
+pub use adapter::{
+    CurrentLayoutInputs, FixtureNodeMapping, RenderFixtureProvenance,
+    build_s04_static_render_snapshot,
+};
 pub use error::StyleRenderError;

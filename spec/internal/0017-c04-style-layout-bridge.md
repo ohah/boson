@@ -10,9 +10,9 @@
 
 ## 입력·revision 계약
 
-입력은 같은 문서에서 얻은 `HostDocumentSnapshot`과 `StyloDocumentView`, HostRoot 직속 요소 handle, Author stylesheet 목록, CSS viewport다. view와 layout snapshot의 `DocumentGeneration`, `DocumentRevision`, `RenderTreeRevision`이 모두 같지 않으면 계산을 시작하지 않는다. 결과는 해당 세 값을 그대로 반환한다.
+입력은 같은 문서에서 얻은 `HostDocumentSnapshot`과 `StyloDocumentView`, HostRoot 직속 요소 handle, Author stylesheet 목록, CSS viewport, 스타일 입력 소유자가 준 `StyleRevision`이다. `CssViewport`에는 환경 소유자가 준 `EnvironmentRevision`이 포함된다. view와 layout snapshot의 `DocumentGeneration`, `DocumentRevision`, `RenderTreeRevision`이 모두 같지 않으면 계산을 시작하지 않는다. computed-style 결과와 `LayoutInputRevision`은 source·style·environment 세 축을 그대로 보존한다.
 
-레이아웃 좌표 단위는 CSS px이다. `CssViewport.width_css_px`와 `height_css_px`를 Taffy viewport로 전달하며 device scale factor를 좌표에 곱하지 않는다. 선택한 subtree에 텍스트 노드가 있으면 `spinon-layout`의 `UnsupportedTextNode` 오류로 전체 요청을 거부한다.
+레이아웃 좌표 단위는 CSS px이다. `CssViewport.width_css_px`와 `height_css_px`를 Taffy viewport로 전달하며 device scale factor를 좌표에 곱하지 않는다. 선택한 subtree에 텍스트 노드가 있으면 `spinon-layout`의 `UnsupportedTextNode` 오류로 전체 요청을 거부한다. fixture 입력 소유자는 현재 초기값 `StyleRevision(0)`과 `EnvironmentRevision(0)`을 전달한다. 제품 stylesheet/environment revision 관리자와 OTA 갱신 연결은 아직 없다.
 
 ## computed-style projection profile
 
@@ -39,6 +39,7 @@ author stylesheet는 아래 computed property에 대응하는 선언만 사용�
 - CSS computed 값이 profile 밖이거나 파싱할 수 없으면 node ID·property·원본 값을 포함한 오류로 전체 변환을 거부한다.
 - author stylesheet의 미지원 선언·at-rule·중첩 규칙 또는 요소의 `style` 속성이 있으면 전체 변환을 거부한다. 예를 들어 `padding: 8px`은 Taffy 입력으로 조용히 버리지 않는다.
 - 계산 snapshot의 generation 또는 revision이 다르면 layout을 실행하지 않는다.
+- 계산 후 revision이 바뀐 결과를 막는 최종 current-input 비교는 S04 `StaticRenderSnapshot` fixture admission에서 별도 수행한다. 해당 비교는 [0009](0009-layout-engine.md)의 `CurrentLayoutInputs` 계약을 따른다. 이 고정 C04.2 adapter 테스트 자체가 비동기 runtime 무효화나 GPU frame queue 검증은 아니다.
 - 텍스트 노드, 누락 style, 중복/누락 node frame은 부분 성공으로 숨기지 않는다.
 
 ## 비교 모델

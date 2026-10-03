@@ -4,15 +4,16 @@
 
 이 문서는 GPU 렌더러 작업의 선후 관계와 통과 조건을 정리합니다. 구현 상태는 [`spec/STATUS.md`](https://github.com/ohah/spinon/blob/main/spec/STATUS.md), 공개 동작 계약은 저장소의 버전 있는 `spec/` 문서가 기준입니다. 첫 공식 릴리스 범위는 이 문서에서 정하지 않습니다.
 
-첫 CSS→GPU 연결은 전체 S04 구현에 앞서 새 고정 `S04FlexPaintV1` fixture를 Android·iOS GPU까지 전달하는 내부 수직 슬라이스입니다. S04.1에서 불투명 CSS `background-color`, 1 CSS px=1 Android dp/iOS point, GPU 경계의 backing scale 단회 적용, `spinon-style-to-render`와 `spinon-render` 경계를 정했습니다. S04.2·S04.3 Chromium fixture와 CPU `StaticRenderSnapshot`, S04.4 Android·S04.5 iOS surface, S04.6 시뮬레이터 캡처 대조의 최대 좌표 차이 0.167 CSS px를 기록했습니다. S04.7 작업 연결은 [0019 작업 표](../../spec/internal/0019-s04-css-layout-gpu-slice.md#s04-후속-작업-소유-경계)에서 끝났습니다. 이어지는 CSS·revision·좌표·이벤트·프레임 대기열 구현은 표의 기존 상태 ID를 따릅니다. 정적 화면을 그리는 네이티브 프레임 구동기와 공개 JS `requestAnimationFrame`, JavaScript 작업 우선순위 대기열은 서로 다른 계약입니다. 이 fixture는 전체 CSS나 앱 runtime 지원이 아닙니다.
+첫 CSS→GPU 연결은 전체 S04 구현에 앞서 새 고정 `S04FlexPaintV1` fixture를 Android·iOS GPU까지 전달하는 내부 수직 슬라이스입니다. S04.1에서 불투명 CSS `background-color`, 1 CSS px=1 Android dp/iOS point, GPU 경계의 backing scale 단회 적용, `spinon-style-to-render`와 `spinon-render` 경계를 정했습니다. S04.2·S04.3 Chromium fixture와 CPU `StaticRenderSnapshot`, S04.4 Android·S04.5 iOS surface, S04.6 시뮬레이터 캡처 대조의 최대 좌표 차이 0.167 CSS px를 기록했습니다. S04.7 작업 연결은 [0019 작업 표](../../spec/internal/0019-s04-css-layout-gpu-slice.md#s04-후속-작업-소유-경계)에서 끝났고, S02.2는 스타일·환경 revision을 fixture layout·snapshot까지 보존해 stale snapshot admission을 거부합니다. 제품 소유자·원자 입력 수집·GPU queue 검사는 남아 있습니다. 이어지는 CSS·좌표·이벤트·프레임 대기열 구현은 상태 대장을 따릅니다. 정적 화면을 그리는 네이티브 프레임 구동기와 공개 JS `requestAnimationFrame`, JavaScript 작업 우선순위 대기열은 서로 다른 계약입니다. 이 fixture는 전체 CSS나 앱 runtime 지원이 아닙니다.
 
 ## 1. 책임 경계
 
 | 계층 | 책임 |
 | --- | --- |
 | 프레임워크 어댑터·제한된 DOM façade | 프레임워크별 갱신과 웹 문법을 공통 호스트 작업으로 변환 |
-| Rust 문서·UI 코어 | 안정 노드 ID, 논리 문서 revision, 연결 표시 트리 revision, 스타일과 레이아웃 결과의 revision 소유 |
-| `spinon-render` | 일관된 커밋 snapshot을 플랫폼 중립 표시 명령·자원 참조·hit-test 데이터로 변환 |
+| `spinon-core::HostDocument` | 안정 노드 ID, 논리 문서 revision, 연결 표시 트리 revision 소유 |
+| 스타일·환경 입력 소유자 | DOM 바깥 스타일 입력의 `StyleRevision`, 플랫폼 환경 snapshot의 `EnvironmentRevision` 공급. 제품 runtime 소유자는 아직 없음 |
+| `spinon-layout`·`spinon-render` | 세 입력 출처를 보존하고 현재 입력과 대조한 뒤 플랫폼 중립 표시 snapshot 생성. revision 번호 발급은 하지 않음 |
 | Android·iOS 호스트 | GPU 표면과 제출 수명, 플랫폼 입력·IME·접근성 연결, 프레임 결과 보고 |
 | 웹 호스트 | 브라우저 DOM과 브라우저 CSS 사용. 모바일 GPU 렌더러를 재사용한다고 가정하지 않음 |
 

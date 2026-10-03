@@ -1,12 +1,16 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use spinon_core::{HostDocumentSnapshot, HostNodeHandle, HostNodeKind, HostParent, NodeId};
-use spinon_layout::LayoutSourceRevision;
+use spinon_core::{
+    HostDocumentSnapshot, HostNodeHandle, HostNodeKind, HostParent, NodeId, StyleRevision,
+};
+use spinon_layout::{LayoutInputRevision, LayoutSourceRevision};
 use spinon_render::{
     ComputedStyleProfileId, CssRect, CssSize, LayoutProjectionId, OpaqueCssSrgb, PaintProfileId,
     StaticRenderBox, StaticRenderSnapshot, StaticRenderSource,
 };
-use spinon_style::{ComputedStyleProfile, ComputedStyleSnapshot, OpaqueCssSrgb as ComputedCssSrgb};
+use spinon_style::{
+    ComputedStyleProfile, ComputedStyleSnapshot, CssViewport, OpaqueCssSrgb as ComputedCssSrgb,
+};
 use spinon_style_to_layout::StyleLayoutOutput;
 
 use crate::StyleRenderError;
@@ -28,22 +32,58 @@ pub struct RenderFixtureProvenance {
     pub chromium_reference_sha256: [u8; 32],
 }
 
+/// snapshot admission 시점의 스타일 revision과 환경 viewport입니다.
+///
+/// 호출자는 두 값을 같은 현재 입력 snapshot에서 읽어 전달해야 합니다.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct CurrentLayoutInputs {
+    /// 문서·스타일·환경의 현재 revision 전체입니다.
+    pub revision: LayoutInputRevision,
+    /// 현재 style/layout 계산에 넘긴 viewport snapshot입니다.
+    pub viewport: CssViewport,
+}
+
+impl CurrentLayoutInputs {
+    /// HostDocument source revision을 현재 기대값에 포함합니다.
+    pub fn for_host_document(
+        document: &HostDocumentSnapshot,
+        style_revision: StyleRevision,
+        viewport: CssViewport,
+    ) -> Self {
+        Self {
+            revision: LayoutInputRevision::new(
+                LayoutSourceRevision::HostDocument {
+                    generation: document.generation(),
+                    document: document.document_revision(),
+                    render_tree: document.render_tree_revision(),
+                },
+                style_revision,
+                viewport.environment_revision,
+            ),
+            viewport,
+        }
+    }
+}
+
 /// 같은 HostDocument revision에서 계산한 Flex layout과 typed paint를 결합합니다.
 pub fn build_s04_static_render_snapshot(
     document: &HostDocumentSnapshot,
     root: HostNodeHandle,
     output: &StyleLayoutOutput,
+    current: CurrentLayoutInputs,
     fixture_nodes: &[FixtureNodeMapping<'_>],
     provenance: RenderFixtureProvenance,
 ) -> Result<StaticRenderSnapshot, StyleRenderError> {
     validate_profile(&output.computed_styles)?;
+    validate_viewport(output.computed_styles.viewport)?;
+    validate_viewport(current.viewport)?;
     validate_revisions(
         document,
         &output.computed_styles,
-        output.layout.source_revision,
+        output.layout.revision,
+        current,
     )?;
     validate_provenance(&provenance)?;
-    validate_viewport(output.computed_styles.viewport)?;
 
     let preorder = document_preorder(document, root)?;
     validate_fixture_mapping(&preorder, fixture_nodes)?;
@@ -82,6 +122,8 @@ pub fn build_s04_static_render_snapshot(
         document_generation: styles.generation,
         document_revision: styles.document_revision,
         render_tree_revision: styles.render_tree_revision,
+        style_revision: styles.style_revision,
+        environment_revision: styles.viewport.environment_revision,
         computed_style_profile: ComputedStyleProfileId::S04FlexPaintV1,
         layout_projection: LayoutProjectionId::TaffyFlexSubsetV1,
         paint_profile: PaintProfileId::OpaqueBackgroundColorV1,
@@ -107,8 +149,19 @@ fn validate_profile(styles: &ComputedStyleSnapshot) -> Result<(), StyleRenderErr
 fn validate_revisions(
     document: &HostDocumentSnapshot,
     styles: &ComputedStyleSnapshot,
-    layout_revision: LayoutSourceRevision,
+    layout_revision: LayoutInputRevision,
+    current: CurrentLayoutInputs,
 ) -> Result<(), StyleRenderError> {
+    let expected = LayoutSourceRevision::HostDocument {
+        generation: document.generation(),
+        document: document.document_revision(),
+        render_tree: document.render_tree_revision(),
+    };
+    if current.revision.source() != expected {
+        return Err(StyleRenderError::SnapshotMismatch {
+            field: "CurrentLayoutSourceRevision",
+        });
+    }
     if document.generation() != styles.generation {
         return Err(StyleRenderError::SnapshotMismatch {
             field: "DocumentGeneration",
@@ -124,14 +177,36 @@ fn validate_revisions(
             field: "RenderTreeRevision",
         });
     }
-    let expected = LayoutSourceRevision::HostDocument {
-        generation: document.generation(),
-        document: document.document_revision(),
-        render_tree: document.render_tree_revision(),
-    };
-    if layout_revision != expected {
+    if styles.style_revision != current.revision.style() {
+        return Err(StyleRenderError::SnapshotMismatch {
+            field: "StyleRevision",
+        });
+    }
+    if styles.viewport.environment_revision != current.revision.environment()
+        || current.viewport.environment_revision != current.revision.environment()
+    {
+        return Err(StyleRenderError::SnapshotMismatch {
+            field: "EnvironmentRevision",
+        });
+    }
+    if styles.viewport != current.viewport {
+        return Err(StyleRenderError::SnapshotMismatch {
+            field: "CssViewport",
+        });
+    }
+    if layout_revision.source() != expected {
         return Err(StyleRenderError::SnapshotMismatch {
             field: "LayoutSourceRevision",
+        });
+    }
+    if layout_revision.style() != current.revision.style() {
+        return Err(StyleRenderError::SnapshotMismatch {
+            field: "LayoutStyleRevision",
+        });
+    }
+    if layout_revision.environment() != current.revision.environment() {
+        return Err(StyleRenderError::SnapshotMismatch {
+            field: "LayoutEnvironmentRevision",
         });
     }
     Ok(())

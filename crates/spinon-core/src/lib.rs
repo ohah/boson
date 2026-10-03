@@ -13,6 +13,6 @@ pub use document::{
     RenderTreeRevision,
 };
 pub use error::{CommitError, CommitErrorKind};
-pub use id::{NodeId, Revision};
+pub use id::{EnvironmentRevision, NodeId, Revision, StyleRevision};
 pub use scheduler::{PriorityQueue, TaskPriority};
 pub use tree::{Node, Tree};

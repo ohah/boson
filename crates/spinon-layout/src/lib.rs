@@ -1,15 +1,17 @@
 mod error;
 mod host_document;
+mod revision;
 mod taffy_style;
 mod tree_input;
 
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
-use spinon_core::{DocumentGeneration, DocumentRevision, NodeId, RenderTreeRevision, Revision};
+use spinon_core::NodeId;
 use taffy::prelude::{AvailableSpace, Size, TaffyTree};
 use taffy_style::to_taffy_style;
 
 pub use error::LayoutError;
+pub use revision::{LayoutInputRevision, LayoutSourceRevision};
 
 /// 루트 기준으로 계산할 고정 화면 크기입니다.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -116,7 +118,7 @@ pub struct LayoutNode {
 #[derive(Clone, Debug, PartialEq)]
 pub struct LayoutInput {
     root: NodeId,
-    source_revision: LayoutSourceRevision,
+    revision: LayoutInputRevision,
     viewport: Viewport,
     nodes: Vec<LayoutNode>,
 }
@@ -127,7 +129,11 @@ impl LayoutInput {
     }
 
     pub const fn source_revision(&self) -> LayoutSourceRevision {
-        self.source_revision
+        self.revision.source()
+    }
+
+    pub const fn revision(&self) -> LayoutInputRevision {
+        self.revision
     }
 
     pub const fn viewport(&self) -> Viewport {
@@ -136,25 +142,6 @@ impl LayoutInput {
 
     pub fn nodes(&self) -> &[LayoutNode] {
         &self.nodes
-    }
-}
-
-/// 레이아웃 입력을 만든 코어 snapshot의 revision 출처입니다.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum LayoutSourceRevision {
-    /// S01의 단순 트리 snapshot입니다.
-    Tree(Revision),
-    /// 혼합 노드를 지원하는 HostDocument snapshot입니다.
-    HostDocument {
-        generation: DocumentGeneration,
-        document: DocumentRevision,
-        render_tree: RenderTreeRevision,
-    },
-}
-
-impl Default for LayoutSourceRevision {
-    fn default() -> Self {
-        Self::Tree(Revision::default())
     }
 }
 
@@ -170,7 +157,7 @@ pub struct LayoutFrame {
 /// 성공한 한 번의 계산에서 반환한 모든 노드의 프레임입니다.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct LayoutOutput {
-    pub source_revision: LayoutSourceRevision,
+    pub revision: LayoutInputRevision,
     pub frames: BTreeMap<NodeId, LayoutFrame>,
 }
 
@@ -446,7 +433,7 @@ fn collect_frames(
         }
     }
     Ok(LayoutOutput {
-        source_revision: input.source_revision,
+        revision: input.revision,
         frames,
     })
 }
