@@ -94,7 +94,7 @@ final class R08GpuDemo {
         root.addView(instruction, instructionParams);
 
         TextView status = new TextView(activity);
-        status.setText(s04 ? "화면은 GPU surface · RGBA readback은 비동기 검증"
+        status.setText(s04 ? "S04 색상 readback 확인 대기"
                 : "GPU 도형을 탭해 색을 바꾸세요 · 입력은 네이티브 IME 실험");
         status.setTextColor(Color.rgb(200, 211, 228));
         status.setTextSize(13);
@@ -106,6 +106,9 @@ final class R08GpuDemo {
                 Gravity.BOTTOM);
         statusParams.bottomMargin = dp(78, density);
         root.addView(status, statusParams);
+        if (s04 && useWgpu) {
+            ((R08WgpuSurface) surfaceView).setS04ReadbackStatusView(status);
+        }
 
         EditText input = new EditText(activity);
         input.setVisibility(s04 ? View.GONE : View.VISIBLE);
@@ -360,6 +363,7 @@ final class R08WgpuSurface extends SurfaceView
     private final boolean s04;
     private final Handler s04PollHandler = new Handler(Looper.getMainLooper());
     private final Runnable s04PollTask = this::pollS04Readback;
+    private TextView s04ReadbackStatusView;
     private volatile long rendererHandle;
     private volatile int activationCount;
     private int configuredWidth;
@@ -451,6 +455,7 @@ final class R08WgpuSurface extends SurfaceView
         surfaceAvailable = false;
         s04ReadbackPending = false;
         s04ReadbackFinished = false;
+        if (s04) updateS04ReadbackStatus("S04 GPU surface 재생성 대기");
         s04PollHandler.removeCallbacks(s04PollTask);
         destroyRenderer();
         configuredWidth = 0;
@@ -482,6 +487,14 @@ final class R08WgpuSurface extends SurfaceView
         } else if (r13) {
             Log.i(TAG, "SPINON_R13_RESUME=waiting_for_surface");
         }
+    }
+
+    void setS04ReadbackStatusView(TextView statusView) {
+        if (s04) s04ReadbackStatusView = statusView;
+    }
+
+    private void updateS04ReadbackStatus(String message) {
+        if (s04ReadbackStatusView != null) s04ReadbackStatusView.setText(message);
     }
 
     private boolean ensureRenderer(String reason) {
@@ -585,6 +598,7 @@ final class R08WgpuSurface extends SurfaceView
             if (!s04ReadbackPending && !s04ReadbackFinished) {
                 s04ReadbackPending = true;
                 s04ReadbackStartedAt = SystemClock.uptimeMillis();
+                updateS04ReadbackStatus("S04 색상 readback 진행 중");
                 s04PollHandler.postDelayed(s04PollTask, 16);
             }
             return true;
@@ -606,6 +620,7 @@ final class R08WgpuSurface extends SurfaceView
             s04ReadbackPending = false;
             s04ReadbackFinished = true;
             Log.e(TAG, "SPINON_S04_READBACK=failed reason=timeout limit_ms=5000");
+            updateS04ReadbackStatus("S04 색상 readback 시간 초과 · 5초");
             return;
         }
         byte[] reportBytes = nativePollS04Readback(rendererHandle);
@@ -617,10 +632,12 @@ final class R08WgpuSurface extends SurfaceView
             s04ReadbackPending = false;
             s04ReadbackFinished = true;
             Log.i(TAG, "SPINON_S04_READBACK=passed " + report);
+            updateS04ReadbackStatus("S04 색상 readback 통과 · 42개 sRGB 표본");
         } else {
             s04ReadbackPending = false;
             s04ReadbackFinished = true;
             Log.e(TAG, "SPINON_S04_READBACK=failed " + report);
+            updateS04ReadbackStatus("S04 색상 readback 실패 · 로그 확인");
         }
     }
 
