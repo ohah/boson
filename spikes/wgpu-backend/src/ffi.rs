@@ -7,11 +7,11 @@ use raw_window_handle::{
     UiKitDisplayHandle, UiKitWindowHandle,
 };
 
+#[cfg(feature = "s04-fixture")]
+use super::S04Init;
 use super::{
     create_renderer, is_supported_failure_kind, write_message, Renderer, RendererCreateInfo,
 };
-#[cfg(feature = "s04-android-fixture")]
-use super::S04Init;
 
 #[no_mangle]
 /// # Safety
@@ -38,7 +38,7 @@ pub unsafe extern "C" fn spinon_wgpu_create_android(
                 width,
                 height,
                 backend,
-                #[cfg(feature = "s04-android-fixture")]
+                #[cfg(feature = "s04-fixture")]
                 s04_init: None,
             },
             output,
@@ -111,8 +111,47 @@ pub unsafe extern "C" fn spinon_wgpu_create_uikit(
                 width,
                 height,
                 backend,
-                #[cfg(feature = "s04-android-fixture")]
+                #[cfg(feature = "s04-fixture")]
                 s04_init: None,
+            },
+            output,
+            output_capacity,
+        )
+    }
+}
+
+#[cfg(feature = "s04-ios-fixture")]
+#[no_mangle]
+/// # Safety
+/// `ui_view`는 renderer destroy까지 유효한 UIKit view여야 합니다. 출력 버퍼는
+/// `output_capacity` bytes만큼 쓸 수 있어야 하며 renderer별 함수 호출은 직렬화해야 합니다.
+pub unsafe extern "C" fn spinon_wgpu_create_uikit_s04(
+    ui_view: *mut c_void,
+    width: u32,
+    height: u32,
+    backend: u32,
+    density: f32,
+    surface_generation: u64,
+    output: *mut c_char,
+    output_capacity: usize,
+) -> *mut c_void {
+    let Some(ui_view) = std::ptr::NonNull::new(ui_view) else {
+        unsafe { write_message(output, output_capacity, "null UIView") };
+        return ptr::null_mut();
+    };
+    // SAFETY: 이 FFI 함수의 호출 계약이 view 수명과 출력 버퍼 쓰기 범위를 보장한다.
+    unsafe {
+        create_renderer(
+            RendererCreateInfo {
+                display: RawDisplayHandle::UiKit(UiKitDisplayHandle::new()),
+                window: RawWindowHandle::UiKit(UiKitWindowHandle::new(ui_view)),
+                width,
+                height,
+                backend,
+                s04_init: Some(S04Init {
+                    density,
+                    surface_generation,
+                }),
             },
             output,
             output_capacity,
@@ -143,7 +182,7 @@ pub unsafe extern "C" fn spinon_wgpu_draw(
     }
 }
 
-#[cfg(feature = "s04-android-fixture")]
+#[cfg(feature = "s04-fixture")]
 #[no_mangle]
 /// # Safety
 /// `renderer`는 S04 생성 함수가 반환한 live 핸들이어야 합니다. 출력 버퍼는
@@ -169,7 +208,7 @@ pub unsafe extern "C" fn spinon_wgpu_s04_draw(
     }
 }
 
-#[cfg(feature = "s04-android-fixture")]
+#[cfg(feature = "s04-fixture")]
 #[no_mangle]
 /// # Safety
 /// `renderer`는 S04 생성 함수가 반환한 live 핸들이어야 합니다. 출력 버퍼는
@@ -199,7 +238,7 @@ pub unsafe extern "C" fn spinon_wgpu_s04_poll_readback(
     }
 }
 
-#[cfg(feature = "s04-android-fixture")]
+#[cfg(feature = "s04-fixture")]
 #[no_mangle]
 /// # Safety
 /// `renderer`는 S04 생성 함수가 반환한 live 핸들이어야 하며 호출은 draw·poll·destroy와

@@ -1,5 +1,6 @@
 use super::geometry::{build_vertices, srgb_to_linear, FIXTURE_HEIGHT, FIXTURE_WIDTH};
 use super::readback::{sample_columns, validate_samples, READBACK_BYTES_PER_ROW, READBACK_SIZE};
+use super::validate_surface_generation;
 use crate::s04_snapshot;
 
 #[test]
@@ -49,4 +50,12 @@ fn sample_column_table_contains_fourteen_distinct_positions() {
     let columns: Vec<_> = sample_columns().collect();
     assert_eq!(columns.len(), 14);
     assert!(columns.windows(2).all(|pair| pair[0] < pair[1]));
+}
+
+#[test]
+fn surface_generation_must_advance_strictly() {
+    assert!(validate_surface_generation(1, 2).is_ok());
+    assert!(validate_surface_generation(1, 1).is_err());
+    assert!(validate_surface_generation(2, 1).is_err());
+    assert!(validate_surface_generation(u64::MAX, u64::MAX).is_err());
 }

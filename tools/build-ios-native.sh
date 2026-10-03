@@ -14,6 +14,14 @@ case "${SPINON_ENABLE_R10_EXPERIMENT:-0}" in
     ;;
 esac
 
+case "${SPINON_ENABLE_S04_IOS_FIXTURE:-0}" in
+  0|1) ;;
+  *)
+    echo "SPINON_ENABLE_S04_IOS_FIXTURE은 0 또는 1이어야 합니다." >&2
+    exit 2
+    ;;
+esac
+
 case "$platform_name" in
   iphonesimulator)
     v8_out="out/boson-ios-sim"
@@ -54,7 +62,11 @@ if command -v mise >/dev/null 2>&1; then
   else
     mise exec -- env CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target "$rust_target" -p spinon-ffi
   fi
-  mise exec -- cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target "$rust_target"
+  if [[ "${SPINON_ENABLE_S04_IOS_FIXTURE:-0}" == "1" ]]; then
+    mise exec -- cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target "$rust_target" --features s04-ios-fixture
+  else
+    mise exec -- cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target "$rust_target"
+  fi
 else
   bun run bundle:bootstrap
   rustup target add "$rustup_target"
@@ -63,7 +75,11 @@ else
   else
     CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target "$rust_target" -p spinon-ffi
   fi
-  cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target "$rust_target"
+  if [[ "${SPINON_ENABLE_S04_IOS_FIXTURE:-0}" == "1" ]]; then
+    cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target "$rust_target" --features s04-ios-fixture
+  else
+    cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target "$rust_target"
+  fi
 fi
 
 output_dir="$repo_root/build/spinon/$platform_name"

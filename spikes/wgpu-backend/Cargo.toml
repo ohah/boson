@@ -8,7 +8,7 @@ publish = false
 
 [features]
 default = []
-s04-android-fixture = [
+s04-fixture = [
   "dep:serde_json",
   "dep:sha2",
   "dep:spinon-core",
@@ -19,6 +19,8 @@ s04-android-fixture = [
   "dep:spinon-style-to-render",
   "dep:stylo",
 ]
+s04-android-fixture = ["s04-fixture"]
+s04-ios-fixture = ["s04-fixture"]
 
 [lib]
 crate-type = ["staticlib"]

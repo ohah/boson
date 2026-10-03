@@ -3,13 +3,11 @@ use std::ptr;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
-use raw_window_handle::{
-    RawDisplayHandle, RawWindowHandle,
-};
+use raw_window_handle::{RawDisplayHandle, RawWindowHandle};
 
-#[cfg(feature = "s04-android-fixture")]
+#[cfg(feature = "s04-fixture")]
 mod s04_gpu;
-#[cfg(feature = "s04-android-fixture")]
+#[cfg(feature = "s04-fixture")]
 mod s04_snapshot;
 
 mod ffi;
@@ -53,11 +51,11 @@ struct Renderer {
     device_lost: Arc<AtomicBool>,
     injected_failure: Option<u32>,
     info: String,
-    #[cfg(feature = "s04-android-fixture")]
+    #[cfg(feature = "s04-fixture")]
     s04_scene: Option<s04_gpu::S04Scene>,
 }
 
-#[cfg(feature = "s04-android-fixture")]
+#[cfg(feature = "s04-fixture")]
 #[derive(Clone, Copy)]
 struct S04Init {
     density: f32,
@@ -119,7 +117,7 @@ impl Renderer {
         width: u32,
         height: u32,
         backend: wgpu::Backends,
-        #[cfg(feature = "s04-android-fixture")] s04_init: Option<S04Init>,
+        #[cfg(feature = "s04-fixture")] s04_init: Option<S04Init>,
     ) -> Result<Self, String> {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: backend,
@@ -148,9 +146,9 @@ impl Renderer {
             ..Default::default()
         }))
         .map_err(|error| format!("device request failed: {error}"))?;
-        #[cfg(feature = "s04-android-fixture")]
+        #[cfg(feature = "s04-fixture")]
         let diagnostics = Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
-        #[cfg(feature = "s04-android-fixture")]
+        #[cfg(feature = "s04-fixture")]
         {
             let uncaptured = Arc::clone(&diagnostics);
             device.on_uncaptured_error(Arc::new(move |error| {
@@ -162,12 +160,12 @@ impl Renderer {
         }
         let device_lost = Arc::new(AtomicBool::new(false));
         let device_lost_callback = Arc::clone(&device_lost);
-        #[cfg(feature = "s04-android-fixture")]
+        #[cfg(feature = "s04-fixture")]
         let lost_diagnostics = Arc::clone(&diagnostics);
         device.set_device_lost_callback(move |reason, message| {
             eprintln!("SPINON_R13_DEVICE_LOST reason={reason:?} message={message}");
             device_lost_callback.store(true, Ordering::Release);
-            #[cfg(feature = "s04-android-fixture")]
+            #[cfg(feature = "s04-fixture")]
             lost_diagnostics
                 .lock()
                 .unwrap_or_else(std::sync::PoisonError::into_inner)
@@ -178,7 +176,7 @@ impl Renderer {
         let mut config = surface
             .get_default_config(&adapter, width.max(1), height.max(1))
             .ok_or_else(|| "adapter cannot present to this surface".to_owned())?;
-        #[cfg(feature = "s04-android-fixture")]
+        #[cfg(feature = "s04-fixture")]
         if s04_init.is_some() {
             config.format = choose_s04_surface_format(&capabilities)?;
             config.color_space = wgpu::SurfaceColorSpace::Srgb;
@@ -190,7 +188,7 @@ impl Renderer {
         }) {
             config.format = format;
         }
-        #[cfg(not(feature = "s04-android-fixture"))]
+        #[cfg(not(feature = "s04-fixture"))]
         if let Some(format) = capabilities.formats.iter().copied().find(|format| {
             matches!(
                 format,
@@ -203,7 +201,7 @@ impl Renderer {
         surface.configure(&device, &config);
         let target_format = config.format;
         let target_color_space = config.color_space;
-        #[cfg(feature = "s04-android-fixture")]
+        #[cfg(feature = "s04-fixture")]
         let s04_scene = s04_init
             .map(|init| {
                 s04_gpu::S04Scene::new(
@@ -280,7 +278,7 @@ impl Renderer {
             bind_group,
             device_lost,
             injected_failure: None,
-            #[cfg(feature = "s04-android-fixture")]
+            #[cfg(feature = "s04-fixture")]
             s04_scene,
             info: format!(
                 "backend={:?} device={:?} name={} format={:?} color_space={:?} supported_formats={:?}",
@@ -294,7 +292,7 @@ impl Renderer {
         })
     }
 
-    #[cfg(feature = "s04-android-fixture")]
+    #[cfg(feature = "s04-fixture")]
     fn draw_s04(&mut self) -> Result<String, s04_gpu::S04Failure> {
         if self.device_lost.load(Ordering::Acquire) {
             return Err(s04_gpu::S04Failure {
@@ -311,7 +309,7 @@ impl Renderer {
             .draw(&self.surface, &self.device, &self.queue)
     }
 
-    #[cfg(feature = "s04-android-fixture")]
+    #[cfg(feature = "s04-fixture")]
     fn poll_s04_readback(&mut self) -> Result<Option<String>, String> {
         let scene = self
             .s04_scene
@@ -398,7 +396,7 @@ impl Renderer {
     }
 }
 
-#[cfg(feature = "s04-android-fixture")]
+#[cfg(feature = "s04-fixture")]
 fn choose_s04_surface_format(
     capabilities: &wgpu::SurfaceCapabilities,
 ) -> Result<wgpu::TextureFormat, String> {
@@ -442,7 +440,7 @@ struct RendererCreateInfo {
     width: u32,
     height: u32,
     backend: u32,
-    #[cfg(feature = "s04-android-fixture")]
+    #[cfg(feature = "s04-fixture")]
     s04_init: Option<S04Init>,
 }
 
@@ -459,7 +457,7 @@ unsafe fn create_renderer(
             info.width,
             info.height,
             backend,
-            #[cfg(feature = "s04-android-fixture")]
+            #[cfg(feature = "s04-fixture")]
             info.s04_init,
         )
     });

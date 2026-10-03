@@ -47,7 +47,7 @@ mise exec -- cargo test --manifest-path spikes/wgpu-backend/Cargo.toml --locked 
 mise exec -- cargo fmt --manifest-path spikes/wgpu-backend/Cargo.toml -- --check
 ```
 
-feature 활성 테스트 7개, 기본 feature 비활성 테스트 2개와 Clippy·rustfmt를 통과했습니다. feature 활성 Android ARM64 debug APK 빌드와 API 36 에뮬레이터 surface 실행도 통과했습니다. `SPINON_ENABLE_S04_ANDROID_FIXTURE=0` 기본 Android 빌드도 통과했고, 같은 APK에서 S04 진단 Intent를 호출해 JNI가 `SPINON_S04_FIXTURE=disabled`로 응답하는 것까지 확인했습니다. 이 feature는 `#[cfg(test)]` 단위 테스트 전용이 아니라, 내부 S04 fixture 경로를 Android 앱에 선택적으로 포함하는 빌드 기능입니다.
+현재 공통 Rust 코드에서 Android·iOS alias 각각의 feature 활성 테스트 8개, 기본 feature 비활성 테스트 2개와 Clippy·rustfmt를 통과했습니다. 세대가 같거나 낮은 resize를 거부하는 단위 테스트도 포함합니다. feature 활성 Android ARM64 debug APK를 새 코드로 다시 빌드해 API 36 에뮬레이터에서 generation 1→2→3 표면 제출과 generation별 42개 readback을 확인했습니다. `SPINON_ENABLE_S04_ANDROID_FIXTURE=0` 기본 Android 빌드 및 비활성 JNI 응답도 별도 실행에서 확인했습니다. 이 feature는 `#[cfg(test)]` 단위 테스트 전용이 아니라, 내부 S04 fixture 경로를 Android 앱에 선택적으로 포함하는 빌드 기능입니다.
 
 ## 미검증 범위
 

@@ -24,6 +24,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             return true
         }
 
+        if arguments.contains("--spinon-s04-ios") {
+            let window = UIWindow(frame: UIScreen.main.bounds)
+            window.rootViewController = S04GpuDemoViewController()
+            window.makeKeyAndVisible()
+            self.window = window
+            return true
+        }
+
         let isR13 = arguments.contains("--spinon-r13")
         let isR08 = arguments.contains("--spinon-r08")
             || arguments.contains("--spinon-r08-wgpu")
