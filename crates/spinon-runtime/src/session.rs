@@ -1,4 +1,4 @@
-use crate::host_document::{HostDocumentBridge, commit_callback};
+use crate::host::{HostDocumentBridge, commit_callback};
 #[cfg(test)]
 use crate::v8::{NodeCallback, TextCallback};
 use crate::v8::{
@@ -845,7 +845,7 @@ mod tests {
         CallbackState, Command, ERR_CANCELLED, ERR_QUEUE_FULL, EnqueueError, OK, OperationReport,
         QUEUE_CAPACITY, RuntimeSession, TaskPriority, TaskScheduler, operation_report,
     };
-    use crate::host_document::{DocumentCommitCallback, HostDocumentBridge};
+    use crate::host::{DocumentCommitCallback, HostDocumentBridge};
     use std::ffi::{CStr, c_char, c_void};
     use std::hash::{Hash, Hasher};
     use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
