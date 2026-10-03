@@ -13,6 +13,8 @@ sdkmanager "platforms;android-36" "build-tools;35.0.0" "ndk;$(cat tools/android-
 
 루트에서 `mise exec -- bun run build:android`로 APK를 빌드합니다. Gradle Wrapper의 `preBuild`가 Bun 번들 생성, Rust ARM64 정적 라이브러리 빌드, V8·JNI 공유 라이브러리 링크를 먼저 수행합니다. APK는 `platforms/android/app/build/outputs/apk/debug/app-debug.apk`에 생성됩니다.
 
+S04 고정 CSS·GPU fixture는 내부 검증용 선택 기능이며 기본 Android 빌드에는 포함되지 않습니다. Cargo의 `#[cfg(feature = "s04-android-fixture")]`는 이 통합 fixture 경로를 조건부 컴파일하며, `#[cfg(test)]` 단위 테스트 전용 표시는 아닙니다. 기본 빌드에서는 JNI 진입점이 남아 `SPINON_S04_FIXTURE=disabled`를 반환하고 Rust fixture 구현은 포함하지 않습니다. 기본 빌드를 명시하려면 `mise exec -- env SPINON_ENABLE_S04_ANDROID_FIXTURE=0 bun run build:android`, 에뮬레이터에서 fixture 화면을 확인하려면 `mise exec -- env SPINON_ENABLE_S04_ANDROID_FIXTURE=1 bun run build:android`로 빌드한 뒤 `adb shell am start -n dev.spinon.bootstrap/.MainActivity --ez spinon_s04 true`를 실행합니다. Cargo feature `s04-android-fixture`와 JNI compile flag는 이 환경 변수로 함께 켜집니다.
+
 기본 시작 smoke 로그는 `adb logcat -s SpinonBootstrap`에서 `SPINON_BOOTSTRAP_RESULT=nodes=2 last_node=8 tag=text text=이벤트:7`을 확인합니다. 기본 smoke 범위는 ARM64 단일 ABI이며 GPU·제품 입력·UI 트리·접근성·JIT 없는 기기 빌드는 포함하지 않습니다. 별도 R06 화면에서만 개발용 터치 버튼을 실행합니다. 구현 완료 표시는 [공식 상태 대장](../../spec/STATUS.md)과 [내부 V8 실행 인터페이스](../../spec/internal/0001-v8-bootstrap.md) 기준을 따릅니다.
 
 ## V8 실행 스레드 실험

@@ -1,6 +1,6 @@
 # 0019 · S04 첫 CSS·레이아웃·GPU 연결 슬라이스
 
-**계약 버전:** `0.1.0-draft` · **상태:** S04.1 정책 확정, S04.2·S04.3 CPU fixture 경로 검증 · **공개 API:** 아님
+**계약 버전:** `0.1.0-draft` · **상태:** S04.1~S04.3 fixture 검증, S04.4 Android API 36 emulator 부분 검증 · **공개 API:** 아님
 
 ## 목적과 완료 범위
 
@@ -19,6 +19,8 @@ flowchart LR
 ```
 
 이것은 **픽스처 전용 내부 실험**입니다. 사용자 UI 런타임, 일반 CSS 지원, 공개 DOM, 프레임워크 어댑터, 지속적인 프레임 처리, 실제 입력 이벤트 경로를 구현하거나 완료 처리하지 않습니다. 완료해도 S04 전체 완료나 C04/C08/C19 CSS 지원 완료를 뜻하지 않습니다.
+
+현재 Android 연결은 `spikes/wgpu-backend`의 `s04-android-fixture` Cargo feature로 컴파일을 분리합니다. `SPINON_ENABLE_S04_ANDROID_FIXTURE=1`을 지정한 검증 빌드에서만 feature와 JNI 경로를 켜며 기본 Android 빌드에는 이 fixture 경로를 넣지 않습니다. 이는 `#[cfg(test)]` 전용 단위 테스트가 아니라, 기기 surface와 GPU readback을 실행하는 내부 통합 fixture입니다. 제품 renderer나 공개 호출 계약으로 취급하지 않습니다.
 
 기하 기준은 기존 [C04.2 fixture](../../tests/fixtures/css/c04/style-layout-bridge.v1.json)와 새 [S04 fixture](../../tests/fixtures/css/s04/flex-paint.v1.json), [CSS 원본](../../tests/fixtures/css/s04/flex-paint.v1.css), [고정 Chromium reference](../../tests/fixtures/css/references/s04-flex-paint-v1-chromium-154.0.8037.95-a4abee019ac5-827b7e12ddf3-affc6715a14a.json)입니다. 기준은 301×40 CSS px, 부모 1개와 자식 3개이며 각 좌표·크기의 Chromium 대비 최대 절대 오차는 0.5 CSS px입니다. 기존 C04.2 v1 fixture/reference는 변경하지 않았습니다.
 
@@ -110,12 +112,12 @@ enum PaintProfileId { OpaqueBackgroundColorV1 }
 - `Surface::get_current_texture` 결과는 `Success`, `Suboptimal`, `Timeout`, `Occluded`, `Outdated`, `Lost`, `Validation`으로 분류합니다. 각 variant는 같은 성공 코드로 합치지 않습니다. `Suboptimal`도 texture는 획득하지만 surface 설정 갱신이 권고되므로 이번 fixture의 통과 조건인 `Success`에는 포함하지 않습니다. 이 경우 획득 texture를 present하거나 drop한 뒤 직렬 sequence에서 재구성하며, 다른 variant도 상세 로그를 남겨도 성공 출력으로 세지 않습니다. surface 재생성·복구 검증은 R13에 남깁니다.
 - `Queue::submit`은 `Result`가 아니라 `SubmissionIndex`를 반환합니다. 이를 제출 식별자로 기록하고 GPU validation·device loss는 error scope, uncaptured-error, device-lost 경로로 수집합니다. 캡처 시점까지 error scope 결과가 비어 있고 uncaptured validation·device-lost 오류가 없어야 플랫폼 run을 통과 처리합니다.
 - 표면 텍스처 표시 요청은 `Queue::present(surface_texture)`입니다. 이는 실제 화면 표시 시각이나 표시 성공 callback을 제공하지 않습니다. `Queue::on_submitted_work_done`도 GPU queue 작업 완료일 뿐 화면 표시 확인이 아닙니다.
-- 오프스크린 readback은 surface 표시 확인과 별도 경로입니다. `301 × 4 = 1204` bytes 행을 256 정렬 `bytes_per_row=1280`으로 복사하며 `COPY_DST | MAP_READ` staging buffer는 `1280 × 40 = 51200` bytes로 둡니다. 픽셀 채널 byte offset은 `y × 1280 + x × 4 + channel`입니다. map callback이 성공한 뒤에만 읽고 모든 view를 drop한 다음 unmap합니다. callback/poll을 기다리는 검증 절차는 fixture 전용이며 UI 프레임을 동기 대기시키지 않습니다. map 실패나 제한 시간 초과는 성공 출력이 아니라 readback 실패입니다.
-- Android와 iOS 실행은 서로 독립입니다. 한 플랫폼의 성공만으로 교차 플랫폼 슬라이스를 통과 처리하지 않으며, 플랫폼별 화면 증거는 simulator surface capture로 남깁니다. `commit-to-present`나 실제 표시 완료 지연은 이 fixture 작업의 통과 기준이 아닙니다.
+- 오프스크린 readback은 surface 표시 확인과 별도 경로입니다. `301 × 4 = 1204` bytes 행을 256 정렬 `bytes_per_row=1280`으로 복사하며 `COPY_DST | MAP_READ` staging buffer는 `1280 × 40 = 51200` bytes로 둡니다. 픽셀 채널 byte offset은 `y × 1280 + x × 4 + channel`입니다. map callback이 성공한 뒤에만 읽고 모든 view를 drop한 다음 unmap합니다. Android fixture host는 UI 스레드에서 `device.poll(PollType::Poll)`을 16 ms 간격으로 호출하고 최대 5000 ms 뒤 완료가 오지 않으면 실패로 끝냅니다. 이는 GPU 완료를 기다리며 UI 스레드를 동기 대기시키지 않습니다. 이번 Android 검증은 전체 화면 bytes가 아니라 고정 x 위치 14개와 y 위치 3개, 총 42개 sample만 정확 대조합니다. map 실패·5초 제한 초과는 성공 출력이 아니라 readback 실패입니다.
+- Android와 iOS 실행은 서로 독립입니다. 한 플랫폼의 성공만으로 교차 플랫폼 슬라이스를 통과 처리하지 않으며, Android emulator와 iOS simulator의 대상별 surface capture를 각각 남깁니다. `commit-to-present`나 실제 표시 완료 지연은 이 fixture 작업의 통과 기준이 아닙니다.
 
 ### CSS 색상 readback의 고정 지점
 
-이 기준은 CSS 배경색 경로에만 적용합니다. 1× `301×40` `Rgba8UnormSrgb` offscreen target에서 `(x,y)`는 픽셀 index이며 읽는 위치는 픽셀 중심 `(x+0.5,y+0.5)` CSS px입니다. 각 지점의 `[R,G,B,A]` bytes를 해당 fixture 색의 `#RRGGBB` bytes와 `255` alpha에 정확히 대조합니다. offscreen 출력은 Android/iOS surface renderer와 같은 scene·pipeline·색상 변환 함수를 사용하고 target만 readback 가능한 texture로 바꿉니다.
+이 기준은 CSS 배경색 경로에만 적용합니다. 1× `301×40` `Rgba8UnormSrgb` offscreen target에서 `(x,y)`는 픽셀 index이며 읽는 위치는 픽셀 중심 `(x+0.5,y+0.5)` CSS px입니다. 각 지점의 `[R,G,B,A]` bytes를 해당 fixture 색의 `#RRGGBB` bytes와 `255` alpha에 정확히 대조합니다. offscreen 출력은 같은 `StaticRenderSnapshot`의 paint box 순서와 색상 변환식을 사용합니다. 301×40 CSS px 좌표에 맞춘 별도 vertex buffer와 readback target format에 맞춘 pipeline을 만들며, 화면 크기·density에 맞춘 surface vertex buffer를 readback에 재사용하지 않습니다.
 
 | y=0, 20, 39에서 검사할 x index | 기대 영역 | 이유 |
 | --- | --- | --- |
@@ -166,7 +168,7 @@ S04.1 정책 확정 뒤 이어갈 내부 fixture 작업입니다. 아래 단계�
 - [x] **S04.1 계약 확정** — CSS background paint, 1 CSS px↔1 Android dp/iOS point, backing scale 1회 적용, `spinon-style-to-render` adapter, R13 UI-thread fixture sequence, fixture-only revision과 error/readback boundary를 확정했습니다. 제품 CSS/API 지원 완료는 뜻하지 않습니다.
 - [x] **S04.2 CSS fixture·oracle 추가** — 기존 C04.2 v1을 보존하고 새 `S04FlexPaintV1` profile·fixture·CSS·Chromium reference를 고정했습니다. author property allowlist, fixture ID→`NodeId` 순서, 선택 computed property 문자열, 좌표별 0.5 CSS px 오차, y=0/20/39와 RGBA8 기대값을 fixture·계약에 기록했습니다. GPU readback 실행은 S04.4·S04.5에서 검증합니다. [fixture](../../tests/fixtures/css/s04/README.md) · [실행 근거](evidence/s04-css-layout-render-snapshot-2026-10-03.md).
 - [x] **S04.3 Rust snapshot 변환** — `spinon-style-to-render`가 고정 입력에서 결정적인 `StaticRenderSnapshot`을 만들고 generation·document/render revision, style/layout/node 집합, fixture mapping과 누락·중복·비유한 frame 실패를 확인했습니다. [실행 근거](evidence/s04-css-layout-render-snapshot-2026-10-03.md).
-- [ ] **S04.4 Android GPU 연결** — 동일 snapshot을 R08 `wgpu` Android surface에 제출하고 backend·surface generation·획득 variant·submission index·wgpu 진단·present 요청과 상관관계를 로그·화면 캡처에 남깁니다. validation/device-lost 진단이 없고 `Success` 획득이어야 통과합니다.
+- [x] **S04.4 Android GPU 연결** — 동일 snapshot을 R08 `wgpu` Android surface에 제출하고 backend·surface generation·획득 variant·submission index·wgpu 진단·present 요청과 상관관계를 로그·화면 캡처에 남겼습니다. Android API 36 ARM64 emulator의 Vulkan `llvmpipe` CPU adapter에서 세로→가로→세로 generation 1→2→3 모두 `Success`를 얻고, generation별 42개 RGBA sample readback과 화면 캡처를 확인했습니다. 경로는 `spikes/wgpu-backend`의 `s04-android-fixture` opt-in Cargo feature로 포함하는 내부 통합 fixture이며 `#[cfg(test)]` 전용 코드나 제품 renderer/API가 아닙니다. 기본 Android APK에서는 제외되고, JNI 비활성 응답도 확인했습니다. 하드웨어 GPU·실기기는 검증하지 않았습니다. [실행 근거](evidence/s04-android-gpu-surface-2026-10-03.md).
 - [ ] **S04.5 iOS GPU 연결** — 동일 snapshot을 R08 `wgpu` iOS surface에 제출하고 backend·surface generation·획득 variant·submission index·wgpu 진단·present 요청과 상관관계를 로그·화면 캡처에 남깁니다. validation/device-lost 진단이 없고 `Success` 획득이어야 통과합니다.
 - [ ] **S04.6 교차 플랫폼 대조** — 두 플랫폼 캡처를 Chromium geometry oracle 및 RenderSnapshot과 대조하고 시뮬레이터 한계를 실행 근거에 기록합니다.
 - [ ] **S04.7 후속 계약 분리** — 전체 CSS paint(C08/C19), 동적 style/environment revision, JS hit-test/event, 일반 좌표계 검증용 비대칭 y fixture, 연속 frame/queue/thread 정책을 각 소유 명세와 상태 ID에 연결합니다. 이번 fixture로 일반 세로 좌표 대응을 완료 처리하거나 제품 S04 완료로 바꾸지 않습니다.
@@ -174,6 +176,7 @@ S04.1 정책 확정 뒤 이어갈 내부 fixture 작업입니다. 아래 단계�
 ## 관련 계약과 근거
 
 - [S02 레이아웃 엔진 `0.3.0-draft`](0009-layout-engine.md)
+- [S04.4 Android GPU surface 실행 근거](evidence/s04-android-gpu-surface-2026-10-03.md)
 - [C04.1 stylesheet cascade](0016-c04-basic-cascade.md)
 - [C04.2 computed style→Taffy adapter `0.1.0`](0017-c04-style-layout-bridge.md)
 - [S03.1 V8 HostDocument 변경 묶음 `0.1.0`](0018-s03-v8-hostdocument-bridge.md)
