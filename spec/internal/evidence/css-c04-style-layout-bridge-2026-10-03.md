@@ -6,7 +6,7 @@
 
 ## 목적
 
-[내부 계약 0017](../0017-c04-style-layout-bridge.md)의 제한된 `spinon-style` computed-style profile을 별도 `spinon-style-layout` crate에서 `spinon-layout` 입력으로 변환하고, Taffy 결과를 고정 Chromium reference와 비교한다. 이 검증은 하나의 분수 Flex fixture만 대상으로 하며 C04 전체, 일반 Flexbox 또는 CSS 지원을 판정하지 않는다.
+[내부 계약 0017](../0017-c04-style-layout-bridge.md)의 제한된 `spinon-style` computed-style profile을 별도 `spinon-style-to-layout` crate에서 `spinon-layout` 입력으로 변환하고, Taffy 결과를 고정 Chromium reference와 비교한다. 이 검증은 하나의 분수 Flex fixture만 대상으로 하며 C04 전체, 일반 Flexbox 또는 CSS 지원을 판정하지 않는다.
 
 ## 고정 비교 자료
 
@@ -38,9 +38,9 @@ macOS `26.5.1` (`25F80`), arm64, Rust `1.96.1`, Bun `1.4.2`, Stylo `0.22.0`, Taf
 | `mise exec -- bun run test` | Bun 예제 1/1, CSS reference Node 검사 3/3, Rust workspace 86/86 통과 |
 | `mise exec -- cargo clippy --locked --workspace --all-targets -- -D warnings` | 통과, 경고 없음 |
 | `mise exec -- cargo fmt --all -- --check` | 통과 |
-| `mise exec -- cargo check --locked -p spinon-style-layout --target aarch64-apple-ios-sim` | 통과 |
-| `mise exec -- cargo check --locked -p spinon-style-layout --target aarch64-apple-ios` | 통과 |
-| `mise exec -- cargo check --locked -p spinon-style-layout --target aarch64-linux-android` | 통과 |
+| `mise exec -- cargo check --locked -p spinon-style-to-layout --target aarch64-apple-ios-sim` | 통과 |
+| `mise exec -- cargo check --locked -p spinon-style-to-layout --target aarch64-apple-ios` | 통과 |
+| `mise exec -- cargo check --locked -p spinon-style-to-layout --target aarch64-linux-android` | 통과 |
 | `git diff --check` | 통과 |
 
 플랫폼 target 검사는 Rust crate 교차 컴파일만 확인했다. iOS Simulator 앱 실행, Android 앱 빌드·에뮬레이터 또는 실기기 화면 검증은 하지 않았다.

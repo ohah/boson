@@ -1,4 +1,4 @@
 [workspace]
-members = ["crates/spinon-core", "crates/spinon-layout", "crates/spinon-runtime", "crates/spinon-style", "crates/spinon-style-layout", "crates/spinon-ffi"]
+members = ["crates/spinon-core", "crates/spinon-layout", "crates/spinon-runtime", "crates/spinon-style", "crates/spinon-style-to-layout", "crates/spinon-ffi"]
 exclude = ["spikes/*"]
 resolver = "2"

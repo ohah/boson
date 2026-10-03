@@ -13,7 +13,7 @@
 - HostDocument 입력의 선택 하위 트리에 텍스트 노드가 있으면 입력 전체를 `UnsupportedTextNode`로 거부합니다. 텍스트를 무시하거나 요소의 자식 순서를 바꾸지 않습니다. 스타일 누락과 선택한 하위 트리 밖 스타일은 각각 `MissingStyle`, `UnknownStyleNode`로 반환합니다.
 - `LayoutSourceRevision`은 입력 출처를 구분합니다. `Tree` 입력은 구조 `Revision`을, HostDocument 입력은 `DocumentGeneration`·`DocumentRevision`·`RenderTreeRevision`을 함께 보존하고 `LayoutOutput`이 같은 값을 돌려줍니다. viewport·계산 스타일의 독립 revision은 아직 없으므로 호출자는 최신 입력에 오래된 결과를 적용하지 않도록 관리해야 합니다.
 - `LayoutEngine`은 엔진과 무관한 내부 경계이며 현재 구현은 `TaffyLayoutEngine`입니다. Taffy 타입은 이 크레이트 밖으로 노출하지 않습니다.
-- C04.2 `spinon-style-layout`은 `spinon-style` computed-style profile을 검증하고 `LayoutStyle`로 변환한 뒤 이 크레이트에 전달합니다. `spinon-layout`은 CSS 문법·cascade를 참조하지 않습니다.
+- C04.2 `spinon-style-to-layout`은 `spinon-style` computed-style profile을 검증하고 `LayoutStyle`로 변환한 뒤 이 크레이트에 전달합니다. `spinon-layout`은 CSS 문법·cascade를 참조하지 않습니다.
 
 ```rust
 let input = LayoutInput::from_tree(&tree, viewport, &computed_styles)?;

@@ -7,7 +7,7 @@
 ## 현재 근거와 공백
 
 - 현재 checkout에는 `spikes/stylo-style`과 `spikes/blitz-stylo-layout` 경로가 없다. `spikes/style-layout`은 Lightning CSS AST와 Taffy `0.14.0`을 시험하며 Stylo DOM/cascade 연결은 하지 않는다.
-- 제품 workspace는 Stylo [`0.22.0`](https://crates.io/crates/stylo/0.22.0), `stylo_dom 0.22.0`, `selectors 0.41.0`을 고정했다. C03 Selector DOM adapter와 C04.1 fixture cascade 경로가 있으며, C04.2는 별도 `spinon-style-layout` crate에서 제한 computed-style profile을 Taffy 입력으로 투영해 C01.2 분수 Flex fixture와 비교한다. 제품 runtime과 GPU 표시는 연결되지 않았다.
+- 제품 workspace는 Stylo [`0.22.0`](https://crates.io/crates/stylo/0.22.0), `stylo_dom 0.22.0`, `selectors 0.41.0`을 고정했다. C03 Selector DOM adapter와 C04.1 fixture cascade 경로가 있으며, C04.2는 별도 `spinon-style-to-layout` crate에서 제한 computed-style profile을 Taffy 입력으로 투영해 C01.2 분수 Flex fixture와 비교한다. 제품 runtime과 GPU 표시는 연결되지 않았다.
 - `spinon-style::StylesheetRegistry`는 UTF-8 stylesheet 입력, Stylo origin, 등록 순서와 parser 진단을 보존하고, 내부 C04.1 경로가 이를 Stylo `Stylist`에 연결해 UA·author·inline 선언과 제한 속성의 계산값을 만든다. 외부 `@import` 로더는 제공하지 않는다. 정확한 scope와 미완료 범위는 [0016 내부 계약](../../spec/internal/0016-c04-basic-cascade.md), 실행 결과는 [C04.1 근거](../../spec/internal/evidence/css-c04-basic-cascade-2026-10-03.md)에 둔다.
 - R10은 Taffy의 트리 갱신·좌표·합성 텍스트 측정을 비교했다. 실제 글꼴 shaping·줄바꿈·GPU 화면을 검증하지 않았다.
 - C02 production 추출과 fixture 전용 adapter prototype은 [Vite `8.3.1`·Rspack `2.2.7` 기록](../../spec/internal/evidence/css-c02-bundler-2026-10-01.md)에 있다. 양쪽 production build에서 CSS Module named import, 조건 suffix가 있는 로컬·외부 `@import`, SVG·WOFF2 자원, entry/dynamic/shared chunk를 확인했다. Vite 기본 CSS Module 객체 import는 통과하고 Rspack은 `namedExports: false` 설정으로 맞출 수 있다. Rspack stats는 CSS source/module graph와 원본 위치를 주고 Vite manifest는 chunk·CSS·asset 연결을 준다. 번들러별 collector가 [내부 계약 후보](../../spec/internal/0011-css-resource-adapter-c02.md)의 공통 snapshot으로 정규화한다. Vite 기본 경고에는 원본 CSS 위치가 없지만 fixture adapter가 입력 CSS parser 위치를 보존해 Rspack의 `2:24` raw column과 정규화된 1-based `2:25`를 맞췄다. 후속 [C02.1 비교](../../spec/internal/evidence/css-c02-resolver-2026-10-02.md)는 fixture alias, package `exports`, package 내부 상대 `@import`가 실제 두 번들러의 production graph에서 snapshot과 entry CSS로 이어짐을 확인했다. 이 prototype은 fixture에 한정되며 symlink·plugin 가상 모듈·조건별 exports, 최종 graph 직렬화, 제품 패키지/API, 모바일/OTA 연결은 구현하지 않았으므로 C02는 미완료다.
@@ -47,7 +47,7 @@ flowchart TD
 | --- | --- |
 | `crates/spinon-core` | R03 `HostDocument` 내부 트리·안정 핸들·속성·요소 상태·문서/표시 revision snapshot. 기존 S01 `Tree`와 레이아웃 모듈은 아직 분리됨 |
 | `crates/spinon-style` | Stylo [`0.22.0`](https://crates.io/crates/stylo/0.22.0) DOM trait adapter, stylesheet 파싱·출처·등록 순서, fixture cascade 및 computed-style snapshot. runtime 연결·cache·무효화는 후속 작업 |
-| `crates/spinon-style-layout` | C04.2 제한 computed-style profile의 검증·변환과 CSS 값의 전체 요청 실패 진단. 일반 CSS 지원 또는 runtime 연결은 아님 |
+| `crates/spinon-style-to-layout` | C04.2 제한 computed-style profile의 검증·변환과 CSS 값의 전체 요청 실패 진단. 일반 CSS 지원 또는 runtime 연결은 아님 |
 | `crates/spinon-layout` | Taffy 입력·노드 ID 대응, Flex subset 계산, 텍스트·이미지 measure callback, dirty subtree 갱신, 좌표 정책 |
 | `crates/spinon-render` | 페인트 속성 변환, GPU 장면, stacking·clip·composite·hit-test |
 | Vite·Rspack 패키지 | CSS import·CSS Modules·에셋 참조·원본 위치·JS 청크별 CSS 의존성을 웹·모바일 산출물에 연결 |
@@ -84,7 +84,7 @@ Taffy `0.14.0`에는 Block·Flexbox·Grid 구현이 있지만 현재 workspace�
 
 1. Vite·Rspack은 CSS 입력과 모듈·에셋·원본 위치·JS 청크별 CSS 의존성을 추적한다. CSS 노드는 번들 내 `@import`와 stylesheet 기준 URL로 해석된 로컬 `url()` 폰트·이미지에 타입 있는 그래프 edge를 갖는다. `data:` 자원은 포함된 CSS 콘텐츠 해시에 속하고, JS 런타임이 생성하는 inline style·CSS 규칙은 그 JS 청크에 포함한다. 외부 네트워크 CSS `@import`·`url()` 로더는 미구현이며 현재 모바일은 요청하지 않고 미지원으로 진단한다. 웹 산출물은 브라우저의 CSS 엔진을 사용한다. 모바일은 해당 릴리스 snapshot의 번들 CSS 자원을 Stylo에 전달하며, 문서 트리와 CSS 자원은 `spinon-style`에서 합쳐진다. 릴리스 산출물은 [빌드·OTA 계약](../../spec/0004-runtime-build.md)과 세부 그래프 정책 [OTA 설계](../ota-design.md)를 따른다.
 2. Stylo는 스타일 문법 해석과 선택자·cascade·상속·computed style의 기준이다. C03은 `spinon-style`에서 R03 snapshot을 DOM·selector trait으로 제공한다. C04.1·C04.2는 고정 fixture 내부 경로이며 제품 runtime의 계산·레이아웃·GPU 연결을 하지 않는다. DOM adapter나 자원이 존재한다는 사실만으로 제품 스타일 지원을 완료 처리하지 않는다.
-3. `spinon-style-layout`은 computed-style profile과 문서 revision을 검증하고 지원하는 값만 layout 입력으로 바꾼다. `spinon-layout`은 CSS 문법을 해석하지 않고 Taffy 또는 확장 알고리즘을 호출한다. layout algorithm이 처리하지 못하는 속성을 CSS 엔진에서 계산됐다는 이유로 지원 처리하지 않는다.
+3. `spinon-style-to-layout`은 computed-style profile과 문서 revision을 검증하고 지원하는 값만 layout 입력으로 바꾼다. `spinon-layout`은 CSS 문법을 해석하지 않고 Taffy 또는 확장 알고리즘을 호출한다. layout algorithm이 처리하지 못하는 속성을 CSS 엔진에서 계산됐다는 이유로 지원 처리하지 않는다.
 4. layout은 텍스트·이미지 자원에 측정을 요청하고 결과를 받아 geometry와 줄 배치를 계산한다. 배치된 glyph와 geometry는 GPU 장면으로 전달한다. 합성 측정 결과와 실제 플랫폼 글꼴 결과를 분리해 검증한다.
 5. `spinon-render`는 layout이 아닌 페인트 속성과 합성 규칙도 GPU 장면으로 변환한다. box-shadow 등 페인트 결과를 Taffy style에 넣지 않는다.
 6. Lightning CSS는 CSS import·CSS Modules·최적화 및 의미 변환 후보로만 평가한다. 모바일의 CSS 파싱·selector·cascade·computed style 소유자는 Stylo다. 의미를 바꾸는 prefix 변환·속성 제거·색상 축약은 Stylo와 Chromium 비교를 통과하기 전까지 모바일 산출 경로에 포함하지 않는다.

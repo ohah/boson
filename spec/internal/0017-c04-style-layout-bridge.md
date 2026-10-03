@@ -58,4 +58,4 @@ author stylesheet는 아래 computed property에 대응하는 선언만 사용�
 
 ## 구현 연결
 
-`spinon-style`은 profile별 computed-style snapshot을 만든다. `spinon-style-layout`은 snapshot을 검증·변환하고 `spinon-layout`의 `LayoutInput::from_host_document` 및 `TaffyLayoutEngine`을 호출한다. 세 crate는 서로의 내부 Stylo·Taffy 타입을 경계 밖에 노출하지 않는다. 이 adapter는 Rust workspace 내부 API이며 JavaScript/CSSOM API가 아니다.
+`spinon-style`은 profile별 computed-style snapshot을 만든다. `spinon-style-to-layout`은 snapshot을 검증·변환하고 `spinon-layout`의 `LayoutInput::from_host_document` 및 `TaffyLayoutEngine`을 호출한다. 세 crate는 서로의 내부 Stylo·Taffy 타입을 경계 밖에 노출하지 않는다. 이 adapter는 Rust workspace 내부 API이며 JavaScript/CSSOM API가 아니다.
