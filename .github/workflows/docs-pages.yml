@@ -1,15 +1,6 @@
 name: 스피논 문서 배포
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'spec/**'
-      - 'theme/**'
-      - 'packages/docs/**'
-      - 'package.json'
-      - 'bun.lock'
-      - '.github/workflows/docs-pages.yml'
   workflow_dispatch:
 
 permissions:

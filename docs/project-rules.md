@@ -37,5 +37,5 @@
 - 기본적으로 작업 브랜치와 PR에서 변경을 검토합니다. PR 본문에는 [양식](../.github/pull_request_template.md)에 따라 변경한 상태 ID, 명세, 동작 근거와 남은 범위를 기록합니다.
 - `main`에는 직접 푸시하지 않고 PR을 거칩니다. GitHub 보호 설정에서 관리자에게도 PR 경유와 선형 이력을 요구합니다.
 - PR은 `Rebase and merge`로 병합합니다. 개별 커밋을 `main`에 남기고 머지 커밋을 만들지 않습니다. `Squash and merge`와 `Create a merge commit`은 사용하지 않습니다. GitHub의 리베이스 머지는 커밋 SHA를 새로 만들므로, 원래 SHA를 보존해야 하는 참조는 병합 후 확인합니다.
-- 작업 브랜치의 문서 변경을 이유로 `gh-pages`에 수동으로 동기화하지 않습니다. `main`의 `spec/`, `theme/`, `packages/docs/` 등 워크플로가 감시하는 경로의 변경은 [Pages 워크플로](../.github/workflows/docs-pages.yml)가 처리합니다. 사용자가 별도 배포를 요청하면 그 요청을 따릅니다.
+- 첫 공식 릴리스 전까지 문서 사이트는 자동 배포하지 않습니다. [Pages 워크플로](../.github/workflows/docs-pages.yml)는 수동 실행만 허용하며, 사용자가 명시적으로 요청하지 않으면 실행하거나 `gh-pages`를 갱신하지 않습니다. 개발 중 미리보기는 사용자가 정한 별도 경로를 따릅니다.
 - 스피논의 첫 공식 릴리스가 나오기 전까지 RSPress(`@rspress/core`) 버전 `2.0.22`를 업데이트하지 않습니다. 문서 작업에서도 `packages/docs/package.json`과 `bun.lock`의 RSPress 버전을 유지합니다.
