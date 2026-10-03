@@ -40,7 +40,7 @@ flowchart LR
 | cascade → layout | 진단색 경로는 C04.2 `FlexLayoutV1`; CSS 배경색 경로는 새 `S04FlexPaintV1` | 선택한 computed-style profile을 명시적으로 검증하고 레이아웃 필드만 같은 `TaffyFlexSubsetV1` projection으로 보냅니다. 기존 C04.2 입력·adapter 동작은 유지합니다. | Stylo 진단, profile 밖 선언·값, 텍스트 노드가 있으면 전체 요청을 거부합니다. 새 computed-style profile을 기존 adapter에 묵시적으로 전달하지 않습니다. |
 | cascade → paint | CSS 배경색 경로에서만 새 `S04FlexPaintV1`의 computed color | `background-color`를 Stylo computed color에서 불투명 sRGB 중립 값으로 변환합니다. Taffy에는 전달하지 않습니다. 진단색 경로에서는 이 경계가 없습니다. | 누락 색·alpha가 1이 아닌 값·`#RRGGBB` 이외의 author 문법·계산 진단은 전체 요청을 실패시킵니다. paint adapter의 crate 소유는 결정 전입니다. |
 | layout·paint → RenderSnapshot | 같은 입력의 전체 `LayoutOutput`과 선택된 paint projection | 부모와 자식 3개를 `NodeId`, root-relative `LayoutFrame`, paint 값으로 모두 보존합니다. `DocumentGeneration`, `DocumentRevision`, `RenderTreeRevision` 세 값이 layout·paint projection에서 모두 같아야 합니다. 좌표는 CSS px 실수값입니다. | 노드 누락·중복·비유한 좌표·세 revision 중 하나라도 불일치하면 부분 snapshot 대신 오류입니다. |
-| RenderSnapshot → 플랫폼 호스트 | 불변 snapshot과 host submission envelope의 frame ID·대상 surface generation | 플랫폼별 Rust 호스트가 같은 노드·좌표·색 순서로 사각형 장면을 제출합니다. `get_current_texture` 상태, `Queue::submit`의 `SubmissionIndex`, `Queue::present` 요청과 화면 캡처를 별도 기록합니다. 표면 수명 변경·generation 확인·획득·제출·표시 요청은 한 host sequence에서 직렬화합니다. | 플랫폼 객체나 `wgpu` handle은 Rust 공용 snapshot에 넣지 않습니다. 대기 중 surface generation이 바뀌었거나 viewport 목표와 현재 surface가 다르면 획득 전에 해당 제출을 폐기합니다. 획득한 `SurfaceTexture`가 남아 있는 동안에는 재구성하지 않습니다. 직렬화 주체는 S04.1에서 정합니다. present 요청·GPU 작업 완료 callback은 화면 표시 완료를 증명하지 않습니다. |
+| RenderSnapshot → 플랫폼 호스트 | 불변 snapshot과 host submission envelope의 frame ID·대상 surface generation | 플랫폼별 Rust 호스트가 같은 노드·좌표·색 순서로 사각형 장면을 제출합니다. `get_current_texture` 상태, `Queue::submit`의 `SubmissionIndex`, `Queue::present` 요청과 화면 캡처를 별도 기록합니다. 표면 수명 변경·generation 확인·획득·제출·표시 요청은 한 host sequence에서 직렬화합니다. | 플랫폼 객체나 `wgpu` handle은 Rust 공용 snapshot에 넣지 않습니다. 대기 중 대상 surface generation이 바뀌면 획득 전에 해당 제출을 폐기합니다. surface generation은 대상 extent와 backing scale 변경도 반영하며, CSS viewport와 물리 surface 전체 크기를 직접 비교하지 않습니다. 획득한 `SurfaceTexture`가 남아 있는 동안에는 재구성하지 않습니다. 직렬화 주체는 S04.1에서 정합니다. present 요청·GPU 작업 완료 callback은 화면 표시 완료를 증명하지 않습니다. |
 | 플랫폼 호스트 → JS 입력 | 이번 슬라이스에서는 연결하지 않음 | 터치 hit-test나 JS 이벤트 callback을 성공 기준에 넣지 않습니다. | R08 데모의 표면 탭은 DOM 노드 이벤트가 아닙니다. S03 이벤트 계약이 정해지기 전에는 노드 callback으로 보고하지 않습니다. |
 
 ### 픽스처 RenderSnapshot 제안
@@ -201,7 +201,7 @@ Chromium computed style·geometry는 CSS/layout oracle입니다. GPU screenshot�
 
 ## 확정 후 실행할 체크리스트 초안
 
-아래 체크박스는 후보 작업이며, 위의 색상 및 좌표 결정을 검토하기 전에는 구현 착수·완료 표시하지 않습니다.
+아래 체크박스는 후보 작업입니다. 색상·좌표·projection 소유·표면 직렬화 정책을 정하고 S04.1 계약을 버전 올려 확정하기 전에는 S04.2–S04.7 구현에 착수하거나 완료 표시하지 않습니다.
 
 - [ ] **S04.1 계약 확정** — CSS paint 포함 여부, computed-style profile과 Taffy projection의 구분, 좌표·sRGB 변환, projection 책임, 표면 직렬화 주체·generation 전달, readback 대기·실패 판정, wgpu 오류·표시 의미, versioned fixture/snapshot shape를 확정하고 이 문서의 초안을 버전 올려 고정합니다.
 - [ ] **S04.2 CSS fixture·oracle 추가** — 배경색 경로를 선택하면 기존 C04.2 v1을 수정하지 않고 새 `S04FlexPaintV1` profile과 S04 v1 fixture/CSS를 만들며 author property allowlist, fixture 문자열 ID→NodeId mapping, `#RRGGBB` computed-style 기대값, y=0/20/39 readback samples, Chromium reference ID/hash를 고정합니다. 진단색 경로에서는 새 CSS profile을 만들지 않고 geometry-only 범위를 명시합니다.
