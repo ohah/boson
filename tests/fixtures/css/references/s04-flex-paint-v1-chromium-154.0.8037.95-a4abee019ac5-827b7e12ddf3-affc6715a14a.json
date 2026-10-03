@@ -1,0 +1,142 @@
+{
+  "schema": "spinon-css-s04-flex-paint-reference/v1",
+  "referenceId": "s04-flex-paint-v1-chromium-154.0.8037.95-a4abee019ac5-827b7e12ddf3-affc6715a14a",
+  "fixture": {
+    "path": "tests/fixtures/css/s04/flex-paint.v1.json",
+    "sha256": "a4abee019ac584a9be64862d59ae4255e0d5fa23e3ac50ff2f91be12c8a53de9",
+    "fixtureId": "S04-flex-paint-v1"
+  },
+  "stylesheet": {
+    "path": "tests/fixtures/css/s04/flex-paint.v1.css",
+    "sha256": "827b7e12ddf39af8adee483bc223a4ed025fd1e9a8536780736dc838097aeb90",
+    "id": "s04-flex-paint"
+  },
+  "capture": {
+    "path": "tools/css-reference/capture-s04-flex-paint.mjs",
+    "nodeVersion": "v24.20.0",
+    "operatingSystem": {
+      "platform": "darwin",
+      "arch": "arm64",
+      "release": "25.5.0"
+    },
+    "networkMode": "offline",
+    "locale": "en-US",
+    "timeZone": "UTC",
+    "colorScheme": "light"
+  },
+  "browser": {
+    "path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "version": "Chrome/154.0.8037.95",
+    "revision": "@05d469856e75794131cc2e5d9b2f6b6f10a70388",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "javascriptVersion": "15.4.80.19",
+    "sha256": "affc6715a14a423f5207014ae4b86ddad028e70b04b13572d60d35d8ac728f91"
+  },
+  "viewport": {
+    "widthCssPx": 301,
+    "heightCssPx": 40,
+    "deviceScaleFactor": 1,
+    "screenMedia": true,
+    "lightColorScheme": true,
+    "locale": "en-US",
+    "timeZone": "UTC"
+  },
+  "computedProperties": [
+    "display",
+    "box-sizing",
+    "flex-direction",
+    "flex-grow",
+    "flex-shrink",
+    "flex-basis",
+    "direction",
+    "row-gap",
+    "column-gap",
+    "background-color"
+  ],
+  "observations": [
+    {
+      "fixtureId": "flex-parent",
+      "computedValues": {
+        "display": "flex",
+        "box-sizing": "border-box",
+        "flex-direction": "row",
+        "flex-grow": "0",
+        "flex-shrink": "1",
+        "flex-basis": "auto",
+        "direction": "ltr",
+        "row-gap": "normal",
+        "column-gap": "5px",
+        "background-color": "rgb(17, 24, 39)"
+      },
+      "frameRelativeToRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 301,
+        "height": 40
+      }
+    },
+    {
+      "fixtureId": "flex-a",
+      "computedValues": {
+        "display": "block",
+        "box-sizing": "border-box",
+        "flex-direction": "row",
+        "flex-grow": "1",
+        "flex-shrink": "1",
+        "flex-basis": "0px",
+        "direction": "ltr",
+        "row-gap": "normal",
+        "column-gap": "normal",
+        "background-color": "rgb(225, 29, 72)"
+      },
+      "frameRelativeToRoot": {
+        "x": 0,
+        "y": 0,
+        "width": 48.5,
+        "height": 40
+      }
+    },
+    {
+      "fixtureId": "flex-b",
+      "computedValues": {
+        "display": "block",
+        "box-sizing": "border-box",
+        "flex-direction": "row",
+        "flex-grow": "2",
+        "flex-shrink": "1",
+        "flex-basis": "0px",
+        "direction": "ltr",
+        "row-gap": "normal",
+        "column-gap": "normal",
+        "background-color": "rgb(37, 99, 235)"
+      },
+      "frameRelativeToRoot": {
+        "x": 53.5,
+        "y": 0,
+        "width": 97,
+        "height": 40
+      }
+    },
+    {
+      "fixtureId": "flex-c",
+      "computedValues": {
+        "display": "block",
+        "box-sizing": "border-box",
+        "flex-direction": "row",
+        "flex-grow": "3",
+        "flex-shrink": "1",
+        "flex-basis": "0px",
+        "direction": "ltr",
+        "row-gap": "normal",
+        "column-gap": "normal",
+        "background-color": "rgb(22, 163, 74)"
+      },
+      "frameRelativeToRoot": {
+        "x": 155.5,
+        "y": 0,
+        "width": 145.5,
+        "height": 40
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+[package]
+name = "spinon-style-to-render"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+spinon-core = { path = "../spinon-core" }
+spinon-layout = { path = "../spinon-layout" }
+spinon-render = { path = "../spinon-render" }
+spinon-style = { path = "../spinon-style" }
+spinon-style-to-layout = { path = "../spinon-style-to-layout" }
+
+[dev-dependencies]
+serde_json = "=1.0.151"
+stylo = "=0.22.0"
+
+[lints.rust]
+unsafe_code = "deny"

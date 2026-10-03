@@ -28,11 +28,12 @@ use style::{
 use url::Url;
 
 use crate::{
-    CssOrigin, CssParseDiagnostic, StylesheetRegistry, StylesheetRegistryError, StylesheetSource,
-    UA_STYLESHEET,
+    CssOrigin, CssParseDiagnostic, OpaqueCssSrgb, StylesheetRegistry, StylesheetRegistryError,
+    StylesheetSource, UA_STYLESHEET, s04_color_syntax::first_invalid_background_color,
 };
 
 use super::{StyloDocumentView, StyloElement};
+mod s04;
 
 const UA_STYLESHEET_ID: &str = "spinon-ua-supported-elements-v0";
 const UA_STYLESHEET_URL: &str = "https://spinon.invalid/ua/supported-elements-v0.css";
@@ -108,6 +109,8 @@ impl CssViewport {
 pub struct ComputedElementStyle {
     pub node_id: NodeId,
     pub properties: BTreeMap<String, String>,
+    /// S04 paint profile에서만 설정하는 Stylo 계산 배경색입니다.
+    pub background_color: Option<OpaqueCssSrgb>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -117,9 +120,10 @@ pub struct CascadeDiagnostic {
     pub diagnostic: CssParseDiagnostic,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ComputedStyleSnapshot {
     pub profile: ComputedStyleProfile,
+    pub viewport: CssViewport,
     pub generation: DocumentGeneration,
     pub document_revision: DocumentRevision,
     pub render_tree_revision: RenderTreeRevision,
@@ -134,6 +138,8 @@ pub enum ComputedStyleProfile {
     BasicCascadeV1,
     /// C04.2의 제한 Taffy Flex 입력 속성입니다.
     FlexLayoutV1,
+    /// S04의 Flex layout 속성과 불투명 `#RRGGBB` 배경 페인트입니다.
+    S04FlexPaintV1,
 }
 
 #[derive(Debug)]
@@ -145,6 +151,10 @@ pub enum CssCascadeError {
     UnsupportedAuthorCss {
         stylesheet_id: String,
         feature: String,
+    },
+    UnsupportedComputedBackgroundColor {
+        node: NodeId,
+        reason: String,
     },
     StylesheetRegistry(StylesheetRegistryError),
 }
@@ -167,6 +177,10 @@ impl fmt::Display for CssCascadeError {
             } => write!(
                 formatter,
                 "stylesheet {stylesheet_id}가 C04.2 CSS 입력 profile 밖 기능을 사용합니다: {feature}"
+            ),
+            Self::UnsupportedComputedBackgroundColor { node, reason } => write!(
+                formatter,
+                "노드 {node}의 계산 background-color를 S04 불투명 sRGB로 변환할 수 없습니다: {reason}"
             ),
             Self::StylesheetRegistry(error) => error.fmt(formatter),
         }
@@ -213,6 +227,21 @@ pub fn compute_flex_layout_cascade(
     )
 }
 
+/// S04 고정 fixture용 Flex layout 및 불투명 배경색 계산 style을 계산합니다.
+pub fn compute_s04_flex_paint_cascade(
+    view: &StyloDocumentView,
+    author_stylesheets: &[StylesheetSource],
+    viewport: CssViewport,
+) -> Result<ComputedStyleSnapshot, CssCascadeError> {
+    compute_cascade(
+        view,
+        author_stylesheets,
+        viewport,
+        s04::S04_FLEX_PAINT_PROPERTIES,
+        ComputedStyleProfile::S04FlexPaintV1,
+    )
+}
+
 fn compute_cascade(
     view: &StyloDocumentView,
     author_stylesheets: &[StylesheetSource],
@@ -241,14 +270,28 @@ fn compute_cascade(
         }
         registry.append(source.clone())?;
     }
-    if profile == ComputedStyleProfile::FlexLayoutV1
-        && let Some((stylesheet_id, feature)) =
-            registry.first_unsupported_author_feature(FLEX_LAYOUT_AUTHOR_PROPERTIES)
+    let allowed_author_properties = match profile {
+        ComputedStyleProfile::BasicCascadeV1 => None,
+        ComputedStyleProfile::FlexLayoutV1 => Some(FLEX_LAYOUT_AUTHOR_PROPERTIES),
+        ComputedStyleProfile::S04FlexPaintV1 => Some(s04::S04_FLEX_PAINT_AUTHOR_PROPERTIES),
+    };
+    if let Some(allowed) = allowed_author_properties
+        && let Some((stylesheet_id, feature)) = registry.first_unsupported_author_feature(allowed)
     {
         return Err(CssCascadeError::UnsupportedAuthorCss {
             stylesheet_id,
             feature,
         });
+    }
+    if profile == ComputedStyleProfile::S04FlexPaintV1 {
+        for source in author_stylesheets {
+            if let Some(feature) = first_invalid_background_color(&source.css) {
+                return Err(CssCascadeError::UnsupportedAuthorCss {
+                    stylesheet_id: source.id.clone(),
+                    feature,
+                });
+            }
+        }
     }
 
     let device = make_device(view.quirks_mode(), viewport);
@@ -285,6 +328,11 @@ fn compute_cascade(
             }
             let computed =
                 compute_element_style(&stylist, element, &guards, parent_style.as_deref());
+            let background_color = if profile == ComputedStyleProfile::S04FlexPaintV1 {
+                Some(s04::computed_background_color(&computed, handle.id())?)
+            } else {
+                None
+            };
             elements.push(ComputedElementStyle {
                 node_id: handle.id(),
                 properties: properties
@@ -296,6 +344,7 @@ fn compute_cascade(
                         )
                     })
                     .collect(),
+                background_color,
             });
             Some(computed)
         } else {
@@ -315,6 +364,7 @@ fn compute_cascade(
 
     Ok(ComputedStyleSnapshot {
         profile,
+        viewport,
         generation: view.snapshot().generation(),
         document_revision: view.document_revision(),
         render_tree_revision: view.render_tree_revision(),

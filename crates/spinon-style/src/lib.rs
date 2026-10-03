@@ -2,9 +2,12 @@
 
 use std::ffi::CStr;
 
+mod opaque_css_srgb;
+mod s04_color_syntax;
 mod stylesheet_registry;
 mod stylo_dom;
 
+pub use opaque_css_srgb::OpaqueCssSrgb;
 pub use stylesheet_registry::{
     CssOrigin, CssParseDiagnostic, RegisteredStylesheet, StylesheetRegistry,
     StylesheetRegistryError, StylesheetSource,
@@ -12,7 +15,7 @@ pub use stylesheet_registry::{
 pub use stylo_dom::{
     CascadeDiagnostic, ComputedElementStyle, ComputedStyleProfile, ComputedStyleSnapshot,
     CssCascadeError, CssViewport, StyloDocument, StyloDocumentView, StyloDomError, StyloElement,
-    StyloNode, compute_flex_layout_cascade,
+    StyloNode, compute_flex_layout_cascade, compute_s04_flex_paint_cascade,
 };
 
 /// 지원 HTML 요소 기본 스타일 프로필의 초안 식별자입니다.

@@ -1,0 +1,46 @@
+{
+  "schema": "spinon-css-s04-flex-paint-fixture/v1",
+  "fixtureId": "S04-flex-paint-v1",
+  "documentBaseUrl": "https://spinon.invalid/s04/flex-paint.html",
+  "stylesheet": {
+    "id": "s04-flex-paint",
+    "baseUrl": "https://spinon.invalid/s04/flex-paint.css",
+    "source": "flex-paint.v1.css"
+  },
+  "viewport": {
+    "widthCssPx": 301,
+    "heightCssPx": 40,
+    "deviceScaleFactor": 1
+  },
+  "tree": {
+    "root": "flex-parent",
+    "preorder": ["flex-parent", "flex-a", "flex-b", "flex-c"],
+    "children": ["flex-a", "flex-b", "flex-c"]
+  },
+  "authorBackgroundColors": {
+    "flex-parent": "#111827",
+    "flex-a": "#e11d48",
+    "flex-b": "#2563eb",
+    "flex-c": "#16a34a"
+  },
+  "sampleRows": [0, 20, 39],
+  "comparison": {
+    "computedProperties": [
+      "display",
+      "box-sizing",
+      "flex-direction",
+      "flex-grow",
+      "flex-shrink",
+      "flex-basis",
+      "direction",
+      "row-gap",
+      "column-gap",
+      "background-color"
+    ],
+    "computedValues": "선택한 cascade 값 문자열 정확 일치",
+    "frameUnit": "CSS px",
+    "perCoordinateMaximumAbsoluteError": 0.5,
+    "aggregateAveragesAllowed": false,
+    "readbackRgba8": "각 고정 sample에서 author #RRGGBB bytes와 alpha 255 정확 일치"
+  }
+}
