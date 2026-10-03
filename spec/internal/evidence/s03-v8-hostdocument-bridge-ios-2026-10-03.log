@@ -1,0 +1,2 @@
+2026-10-03 11:32:00.687 Df SpinonBootstrap[85669:19ba31e] [dev.spinon.bootstrap:runtime] SPINON_BOOTSTRAP_EXECUTION is_main_thread=false
+2026-10-03 11:32:00.715 Df SpinonBootstrap[85669:19ba31e] [dev.spinon.bootstrap:runtime] SPINON_BOOTSTRAP_RESULT=nodes=2 last_node=8 tag=text text=이벤트:7 · 문서 revision 3 document_revision=3 render_tree_revision=2 document_nodes=3

@@ -1,3 +1,4 @@
+use crate::host_document::{HostDocumentBridge, commit_callback};
 use crate::v8::{
     SpinonV8Runtime, spinon_v8_runtime_dispatch, spinon_v8_runtime_eval, spinon_v8_runtime_free,
     spinon_v8_runtime_last_error, spinon_v8_runtime_new,
@@ -10,19 +11,35 @@ pub enum BootstrapSmokeError {
     JavaScript(String),
 }
 
-#[derive(Default)]
 struct CallbackState {
     created_nodes: u32,
     last_node_id: i32,
     last_tag: String,
     last_text: String,
+    document: HostDocumentBridge,
 }
 
 impl CallbackState {
+    fn new() -> Result<Self, String> {
+        Ok(Self {
+            created_nodes: 0,
+            last_node_id: 0,
+            last_tag: String::new(),
+            last_text: String::new(),
+            document: HostDocumentBridge::new()?,
+        })
+    }
+
     fn report(&self) -> String {
         format!(
-            "nodes={} last_node={} tag={} text={}",
-            self.created_nodes, self.last_node_id, self.last_tag, self.last_text
+            "nodes={} last_node={} tag={} text={} document_revision={} render_tree_revision={} document_nodes={}",
+            self.created_nodes,
+            self.last_node_id,
+            self.last_tag,
+            self.last_text,
+            self.document.document_revision(),
+            self.document.render_tree_revision(),
+            self.document.node_count(),
         )
     }
 }
@@ -62,9 +79,12 @@ fn last_error(runtime: *mut SpinonV8Runtime) -> String {
 pub fn run_bootstrap_smoke(source: &str) -> Result<String, BootstrapSmokeError> {
     let source =
         CString::new(source).map_err(|error| BootstrapSmokeError::JavaScript(error.to_string()))?;
-    let mut state = CallbackState::default();
+    let mut state = CallbackState::new().map_err(BootstrapSmokeError::JavaScript)?;
     let state_ptr = std::ptr::addr_of_mut!(state).cast::<c_void>();
-    let runtime = unsafe { spinon_v8_runtime_new(on_node, on_text, state_ptr) };
+    let document_ptr = std::ptr::addr_of_mut!(state.document).cast::<c_void>();
+    let runtime = unsafe {
+        spinon_v8_runtime_new(on_node, on_text, commit_callback, state_ptr, document_ptr)
+    };
     if runtime.is_null() {
         return Err(BootstrapSmokeError::RuntimeUnavailable);
     }

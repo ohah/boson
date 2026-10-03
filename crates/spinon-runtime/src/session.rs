@@ -1,3 +1,4 @@
+use crate::host_document::{HostDocumentBridge, commit_callback};
 #[cfg(test)]
 use crate::v8::{NodeCallback, TextCallback};
 use crate::v8::{
@@ -138,15 +139,25 @@ pub struct OperationResponse {
     pub report: String,
 }
 
-#[derive(Default)]
 struct CallbackState {
     callback_count: u64,
     created_nodes: u64,
     last_node_id: i32,
     callback_thread_id: u64,
+    document: HostDocumentBridge,
 }
 
 impl CallbackState {
+    fn new() -> Result<Self, String> {
+        Ok(Self {
+            callback_count: 0,
+            created_nodes: 0,
+            last_node_id: 0,
+            callback_thread_id: 0,
+            document: HostDocumentBridge::new()?,
+        })
+    }
+
     fn reset_operation(&mut self) {
         self.callback_count = 0;
         self.created_nodes = 0;
@@ -202,9 +213,24 @@ fn actor_loop(
     control: Arc<Mutex<RuntimeControl>>,
     ready: mpsc::Sender<Result<u64, String>>,
 ) {
-    let mut callbacks = CallbackState::default();
+    let mut callbacks = match CallbackState::new() {
+        Ok(callbacks) => callbacks,
+        Err(error) => {
+            let _ = ready.send(Err(format!("HostDocument를 만들지 못했습니다: {error}")));
+            return;
+        }
+    };
     let callback_data = ptr::addr_of_mut!(callbacks).cast::<c_void>();
-    let runtime = unsafe { spinon_v8_runtime_new(on_node, on_text, callback_data) };
+    let document_data = ptr::addr_of_mut!(callbacks.document).cast::<c_void>();
+    let runtime = unsafe {
+        spinon_v8_runtime_new(
+            on_node,
+            on_text,
+            commit_callback,
+            callback_data,
+            document_data,
+        )
+    };
     if runtime.is_null() {
         let _ = ready.send(Err("V8 Isolate를 만들지 못했습니다".to_owned()));
         return;
@@ -401,8 +427,13 @@ fn operation_report(report: OperationReport<'_>) -> String {
     } = report;
     let error = if error.is_empty() { "none" } else { error };
     format!(
-        "seq={sequence} op={operation} status={status} caller_tid={caller_thread_id} owner_tid={owner_thread_id} callback_tid={callback_thread_id} queue_wait_us={queue_wait_us} v8_call_us={v8_call_us} cancel_requested={cancel_requested} callback_count={} created_nodes={} last_node_id={} error={error}",
-        callbacks.callback_count, callbacks.created_nodes, callbacks.last_node_id,
+        "seq={sequence} op={operation} status={status} caller_tid={caller_thread_id} owner_tid={owner_thread_id} callback_tid={callback_thread_id} queue_wait_us={queue_wait_us} v8_call_us={v8_call_us} cancel_requested={cancel_requested} callback_count={} created_nodes={} last_node_id={} document_revision={} render_tree_revision={} document_nodes={} error={error}",
+        callbacks.callback_count,
+        callbacks.created_nodes,
+        callbacks.last_node_id,
+        callbacks.document.document_revision(),
+        callbacks.document.render_tree_revision(),
+        callbacks.document.node_count(),
     )
 }
 
@@ -814,6 +845,7 @@ mod tests {
         CallbackState, Command, ERR_CANCELLED, ERR_QUEUE_FULL, EnqueueError, OK, OperationReport,
         QUEUE_CAPACITY, RuntimeSession, TaskPriority, TaskScheduler, operation_report,
     };
+    use crate::host_document::{DocumentCommitCallback, HostDocumentBridge};
     use std::ffi::{CStr, c_char, c_void};
     use std::hash::{Hash, Hasher};
     use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
@@ -836,7 +868,9 @@ mod tests {
     pub extern "C" fn spinon_v8_runtime_new(
         node_callback: super::NodeCallback,
         text_callback: super::TextCallback,
+        _document_commit_callback: DocumentCommitCallback,
         user_data: *mut c_void,
+        _document_user_data: *mut c_void,
     ) -> *mut super::SpinonV8Runtime {
         Box::into_raw(Box::new(FakeV8Runtime {
             node_callback,
@@ -950,6 +984,7 @@ mod tests {
             created_nodes: 1,
             last_node_id: 7,
             callback_thread_id: 42,
+            document: HostDocumentBridge::new().unwrap(),
         };
         let report = operation_report(OperationReport {
             sequence: 3,
@@ -970,6 +1005,9 @@ mod tests {
         assert!(report.contains("queue_wait_us=11"));
         assert!(report.contains("v8_call_us=29"));
         assert!(report.contains("cancel_requested=false"));
+        assert!(report.contains("document_revision=0"));
+        assert!(report.contains("render_tree_revision=0"));
+        assert!(report.contains("document_nodes=0"));
         assert!(report.contains("callback_count=2"));
     }
 

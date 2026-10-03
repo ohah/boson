@@ -1,4 +1,5 @@
 mod bootstrap;
+mod host_document;
 mod session;
 mod v8;
 
