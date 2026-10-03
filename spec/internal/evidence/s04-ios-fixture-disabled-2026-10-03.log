@@ -1,0 +1,2 @@
+Timestamp               Ty Process[PID:TID]
+2026-10-03 21:56:09.550 Df SpinonBootstrap[82887:1d56f98] [dev.spinon.bootstrap:s04] SPINON_S04_FIXTURE=disabled rebuild with SPINON_ENABLE_S04_IOS_FIXTURE=1

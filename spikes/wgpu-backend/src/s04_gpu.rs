@@ -151,9 +151,10 @@ impl S04Scene {
         density: f32,
         surface_generation: u64,
     ) -> Result<(), String> {
-        if !density.is_finite() || density <= 0.0 || surface_generation == 0 {
-            return Err("S04 density·surface generation은 유한한 양수여야 합니다".to_owned());
+        if !density.is_finite() || density <= 0.0 {
+            return Err("S04 density는 유한한 양수여야 합니다".to_owned());
         }
+        validate_surface_generation(self.surface_generation, surface_generation)?;
         let vertices = build_vertices(&self.snapshot, width, height, density)?;
         queue.write_buffer(&self.vertex_buffer, 0, bytemuck::cast_slice(&vertices));
         self.vertex_count = u32::try_from(vertices.len() / 6)
@@ -356,6 +357,14 @@ impl S04Scene {
             "S04 wgpu 진단 오류: {}",
             diagnostics.drain(..).collect::<Vec<_>>().join(" | ")
         ))
+    }
+}
+
+fn validate_surface_generation(current: u64, next: u64) -> Result<(), String> {
+    if next > current {
+        Ok(())
+    } else {
+        Err("S04 surface generation은 현재 값보다 커야 합니다".to_owned())
     }
 }
 

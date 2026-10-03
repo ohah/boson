@@ -50,6 +50,114 @@
   return renderer;
 }
 
++ (BOOL)isS04IosFixtureEnabled {
+#if defined(SPINON_ENABLE_S04_IOS_FIXTURE) && SPINON_ENABLE_S04_IOS_FIXTURE
+  return YES;
+#else
+  return NO;
+#endif
+}
+
++ (void *)createS04WgpuWithUIKitView:(void *)view
+                               width:(uint32_t)width
+                              height:(uint32_t)height
+                             density:(float)density
+                   surfaceGeneration:(uint64_t)surfaceGeneration {
+#if defined(SPINON_ENABLE_S04_IOS_FIXTURE) && SPINON_ENABLE_S04_IOS_FIXTURE
+  std::array<char, 2048> output{};
+  void *renderer = spinon_wgpu_create_uikit_s04(
+      view, width, height, SPINON_WGPU_R08_METAL, density, surfaceGeneration,
+      output.data(), output.size());
+  if (renderer == nullptr) {
+    os_log_error(OS_LOG_DEFAULT,
+                 "SPINON_S04_RENDERER=failed surface_generation=%{public}llu detail=%{public}s",
+                 surfaceGeneration, output.data());
+    return nullptr;
+  }
+  os_log(OS_LOG_DEFAULT,
+         "SPINON_S04_RENDERER=ready surface_generation=%{public}llu size=%{public}ux%{public}u density=%{public}.4f %{public}s",
+         surfaceGeneration, width, height, density, output.data());
+  return renderer;
+#else
+  (void)view;
+  (void)width;
+  (void)height;
+  (void)density;
+  (void)surfaceGeneration;
+  os_log(OS_LOG_DEFAULT,
+         "SPINON_S04_FIXTURE=disabled rebuild with SPINON_ENABLE_S04_IOS_FIXTURE=1");
+  return nullptr;
+#endif
+}
+
++ (NSString *)drawS04Wgpu:(void *)renderer {
+#if defined(SPINON_ENABLE_S04_IOS_FIXTURE) && SPINON_ENABLE_S04_IOS_FIXTURE
+  std::array<char, 2048> output{};
+  const int32_t status =
+      spinon_wgpu_s04_draw(renderer, output.data(), output.size());
+  NSString *message = [NSString stringWithUTF8String:output.data()];
+  if (status == 0) {
+    os_log(OS_LOG_DEFAULT, "SPINON_S04_FRAME status=%{public}d %{public}@",
+           status, message ?: @"empty report");
+  } else {
+    os_log_error(OS_LOG_DEFAULT,
+                 "SPINON_S04_FRAME status=%{public}d detail=%{public}@",
+                 status, message ?: @"empty report");
+  }
+  return [NSString stringWithFormat:@"status=%d %@", status,
+                                    message ?: @"empty report"];
+#else
+  (void)renderer;
+  return @"status=-1 fixture-disabled";
+#endif
+}
+
++ (NSString *)pollS04Readback:(void *)renderer {
+#if defined(SPINON_ENABLE_S04_IOS_FIXTURE) && SPINON_ENABLE_S04_IOS_FIXTURE
+  std::array<char, 2048> output{};
+  const int32_t status = spinon_wgpu_s04_poll_readback(
+      renderer, output.data(), output.size());
+  NSString *message = [NSString stringWithUTF8String:output.data()];
+  if (status == 1) {
+    os_log(OS_LOG_DEFAULT, "SPINON_S04_READBACK status=%{public}d %{public}@",
+           status, message ?: @"empty report");
+  } else if (status < 0) {
+    os_log_error(OS_LOG_DEFAULT,
+                 "SPINON_S04_READBACK status=%{public}d detail=%{public}@",
+                 status, message ?: @"empty report");
+  }
+  return [NSString stringWithFormat:@"status=%d %@", status,
+                                    message ?: @"empty report"];
+#else
+  (void)renderer;
+  return @"status=-1 fixture-disabled";
+#endif
+}
+
++ (int32_t)resizeS04Wgpu:(void *)renderer
+                   width:(uint32_t)width
+                  height:(uint32_t)height
+                 density:(float)density
+       surfaceGeneration:(uint64_t)surfaceGeneration {
+#if defined(SPINON_ENABLE_S04_IOS_FIXTURE) && SPINON_ENABLE_S04_IOS_FIXTURE
+  const int32_t status = spinon_wgpu_s04_resize(
+      renderer, width, height, density, surfaceGeneration);
+  if (status != 0) {
+    os_log_error(OS_LOG_DEFAULT,
+                 "SPINON_S04_RESIZE status=%{public}d surface_generation=%{public}llu",
+                 status, surfaceGeneration);
+  }
+  return status;
+#else
+  (void)renderer;
+  (void)width;
+  (void)height;
+  (void)density;
+  (void)surfaceGeneration;
+  return -1;
+#endif
+}
+
 + (int32_t)drawR08Wgpu:(void *)renderer activationCount:(uint32_t)activationCount {
   char output[512] = {};
   const int32_t result = spinon_wgpu_draw(renderer, activationCount, output, sizeof(output));

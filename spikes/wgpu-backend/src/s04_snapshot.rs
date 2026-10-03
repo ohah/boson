@@ -213,7 +213,7 @@ mod tests {
     use spinon_render::ComputedStyleProfileId;
 
     #[test]
-    fn android_fixture_builds_the_same_validated_snapshot_contract() {
+    fn fixture_builds_the_same_validated_snapshot_contract() {
         let snapshot = build_snapshot().expect("고정 S04 snapshot 생성 성공");
         assert_eq!(
             snapshot.source().computed_style_profile,

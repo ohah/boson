@@ -1,6 +1,6 @@
 # 0019 · S04 첫 CSS·레이아웃·GPU 연결 슬라이스
 
-**계약 버전:** `0.1.0-draft` · **상태:** S04.1~S04.3 fixture 검증, S04.4 Android API 36 emulator 부분 검증 · **공개 API:** 아님
+**계약 버전:** `0.1.0-draft` · **상태:** S04.1~S04.5 simulator fixture 검증, S04.6 교차 플랫폼 대조 대기 · **공개 API:** 아님
 
 ## 목적과 완료 범위
 
@@ -20,7 +20,7 @@ flowchart LR
 
 이것은 **픽스처 전용 내부 실험**입니다. 사용자 UI 런타임, 일반 CSS 지원, 공개 DOM, 프레임워크 어댑터, 지속적인 프레임 처리, 실제 입력 이벤트 경로를 구현하거나 완료 처리하지 않습니다. 완료해도 S04 전체 완료나 C04/C08/C19 CSS 지원 완료를 뜻하지 않습니다.
 
-현재 Android 연결은 `spikes/wgpu-backend`의 `s04-android-fixture` Cargo feature로 컴파일을 분리합니다. `SPINON_ENABLE_S04_ANDROID_FIXTURE=1`을 지정한 검증 빌드에서만 feature와 JNI 경로를 켜며 기본 Android 빌드에는 이 fixture 경로를 넣지 않습니다. 이는 `#[cfg(test)]` 전용 단위 테스트가 아니라, 기기 surface와 GPU readback을 실행하는 내부 통합 fixture입니다. 제품 renderer나 공개 호출 계약으로 취급하지 않습니다.
+Android·iOS 연결은 `spikes/wgpu-backend`의 플랫폼별 Cargo feature로 컴파일을 분리합니다. `SPINON_ENABLE_S04_ANDROID_FIXTURE=1` 또는 `SPINON_ENABLE_S04_IOS_FIXTURE=1`인 검증 빌드에서만 해당 feature와 JNI·Objective-C++ 경로를 켜며 기본 빌드에는 fixture 경로를 넣지 않습니다. 이는 `#[cfg(test)]` 전용 단위 테스트가 아니라 플랫폼 surface와 GPU readback을 실행하는 내부 통합 fixture입니다. 제품 renderer나 공개 호출 계약으로 취급하지 않습니다.
 
 기하 기준은 기존 [C04.2 fixture](../../tests/fixtures/css/c04/style-layout-bridge.v1.json)와 새 [S04 fixture](../../tests/fixtures/css/s04/flex-paint.v1.json), [CSS 원본](../../tests/fixtures/css/s04/flex-paint.v1.css), [고정 Chromium reference](../../tests/fixtures/css/references/s04-flex-paint-v1-chromium-154.0.8037.95-a4abee019ac5-827b7e12ddf3-affc6715a14a.json)입니다. 기준은 301×40 CSS px, 부모 1개와 자식 3개이며 각 좌표·크기의 Chromium 대비 최대 절대 오차는 0.5 CSS px입니다. 기존 C04.2 v1 fixture/reference는 변경하지 않았습니다.
 
@@ -43,6 +43,20 @@ flowchart LR
 | layout·paint → RenderSnapshot | `StyleLayoutOutput`, HostDocument 하위 트리, 명시적 fixture ID→`NodeId` preorder mapping, fixture/reference 출처 | `spinon-style-to-render`는 부모와 자식 3개를 `NodeId`, root-relative CSS px frame, typed paint로 보존하고 `spinon-render`의 불변 `StaticRenderSnapshot`을 만듭니다. 세 revision, 전체 style/frame/node 집합, fixture mapping 순서가 같아야 합니다. | 누락·중복·범위 밖 노드, mapping 불일치, 비유한 frame, viewport 오류, 세 revision 불일치는 전체 실패입니다. |
 | RenderSnapshot → 플랫폼 호스트 | 불변 snapshot과 host submission envelope의 frame ID·대상 surface generation | 플랫폼별 Rust 호스트가 같은 노드·좌표·색 순서로 사각형 장면을 제출합니다. `get_current_texture` 상태, `Queue::submit`의 `SubmissionIndex`, `Queue::present` 요청과 화면 캡처를 별도 기록합니다. fixture의 surface 수명 변경·generation 확인·획득·제출·표시 요청은 R13 UI-thread host sequence에서 직렬화합니다. | 플랫폼 객체나 `wgpu` handle은 Rust 공용 snapshot에 넣지 않습니다. 대기 중 대상 surface generation이 바뀌면 획득 전에 해당 제출을 폐기합니다. surface generation은 대상 extent와 backing scale 변경도 반영하며, CSS viewport와 물리 surface 전체 크기를 직접 비교하지 않습니다. 획득한 `SurfaceTexture`가 남아 있는 동안에는 재구성하지 않습니다. 같은 device queue에는 이 sequence만 제출합니다. present 요청·GPU 작업 완료 callback은 화면 표시 완료를 증명하지 않습니다. 이 실험의 선택은 앱 전체 렌더 스레드 정책을 정하지 않습니다. |
 | 플랫폼 호스트 → JS 입력 | 이번 슬라이스에서는 연결하지 않음 | 터치 hit-test나 JS 이벤트 callback을 성공 기준에 넣지 않습니다. | R08 데모의 표면 탭은 DOM 노드 이벤트가 아닙니다. S03 이벤트 계약이 정해지기 전에는 노드 callback으로 보고하지 않습니다. |
+
+### 플랫폼별 opt-in 빌드와 내부 C ABI
+
+| 항목 | 계약 |
+| --- | --- |
+| 기본 빌드 | Android·iOS 빌드 스크립트의 S04 환경 변수 기본값은 `0`입니다. 기본 iOS 바이너리에는 S04 Rust 경로와 iOS create 선언이 없고, 개발 화면 인자만 실행하면 `SPINON_S04_FIXTURE=disabled`를 기록합니다. |
+| iOS 빌드 | `SPINON_ENABLE_S04_IOS_FIXTURE=1`은 Rust `s04-ios-fixture` alias와 Objective-C++ 전처리 정의를 함께 켭니다. 이 alias는 공통 Rust `s04-fixture`를 활성화합니다. 환경 변수는 `0` 또는 `1`만 허용합니다. |
+| 생성 | `spinon_wgpu_create_uikit_s04(view, width, height, backend, density, surface_generation, output, capacity)`는 비-null UIKit view를 빌려 Metal surface와 고정 snapshot scene을 만들고 성공 시 opaque renderer를 반환합니다. 생성 실패는 null과 출력 진단으로 보고합니다. `view`는 destroy 완료까지 유효해야 하고 `density`와 generation은 유한한 양수여야 합니다. iOS fixture는 backend `3`(Metal)을 요청합니다. |
+| 프레임 제출 | `spinon_wgpu_s04_draw(renderer, output, capacity)`는 renderer를 만든 UI-thread host sequence에서 직렬 호출합니다. `0`은 `Success` surface 획득, 제출 index 기록, present 요청까지 끝났다는 뜻입니다. `-1`은 S04 scene 부재, `-2`는 Timeout·Occluded·Validation, `-3`은 Lost, `-4`는 Outdated, `-5`는 device lost, `-6`은 Suboptimal 획득 결과입니다. 성공은 화면 표시 완료를 뜻하지 않습니다. |
+| 색상 표본 확인 | `spinon_wgpu_s04_poll_readback(renderer, output, capacity)`는 device poll을 한 번 수행하고 대기하지 않습니다. `1`은 고정 42개 RGBA 표본이 모두 맞음, `0`은 pending, 음수는 실패입니다. 호스트는 main/UI thread를 동기 대기시키지 않고 최대 5000 ms 동안 16 ms 간격으로 재호출합니다. |
+| 표면 크기 변경·해제 | `spinon_wgpu_s04_resize(renderer, width, height, density, surface_generation)`는 양수 크기·density와 현재 generation보다 큰 값을 전달해 snapshot 장면과 surface를 재구성합니다. generation이 같거나 더 낮으면 장면을 바꾸지 않고 실패합니다. 반환값 `0`은 성공, `-1`은 null renderer, `-2`는 0 크기, `-3`은 S04 scene 부재, `-4`는 잘못된 density/generation 또는 장면 갱신 실패입니다. `spinon_wgpu_destroy(renderer)`는 opaque handle을 정확히 한 번 해제하며 view는 호출이 끝날 때까지 유효해야 합니다. |
+| 공통 ABI 안전 경계 | 출력 진단은 capacity가 양수일 때 UTF-8 바이트를 최대 `capacity - 1`개 복사하고 NUL 종료합니다. 호출자는 출력 버퍼의 실제 크기를 전달하고, 같은 renderer의 create 이후 호출·resize·destroy를 한 UI-thread sequence에서 직렬화해야 합니다. 동시에 호출하거나 destroy 뒤 핸들을 재사용하면 안 됩니다. |
+
+이 표의 함수는 `spikes/wgpu-backend/include/spinon_wgpu_r08.h`에서 opt-in feature가 켜진 빌드에만 선언됩니다. iOS feature-off 상태에서는 Objective-C++ wrapper가 Rust S04 함수를 호출하지 않습니다. Android는 JNI 전용 화면과 `s04-android-fixture` alias를 사용합니다. 두 플랫폼의 표면 수명·화면 배치 코드는 서로 다르며 공통 snapshot·draw/readback 의미만 공유합니다.
 
 ### 픽스처 RenderSnapshot 자료형
 
@@ -112,7 +126,7 @@ enum PaintProfileId { OpaqueBackgroundColorV1 }
 - `Surface::get_current_texture` 결과는 `Success`, `Suboptimal`, `Timeout`, `Occluded`, `Outdated`, `Lost`, `Validation`으로 분류합니다. 각 variant는 같은 성공 코드로 합치지 않습니다. `Suboptimal`도 texture는 획득하지만 surface 설정 갱신이 권고되므로 이번 fixture의 통과 조건인 `Success`에는 포함하지 않습니다. 이 경우 획득 texture를 present하거나 drop한 뒤 직렬 sequence에서 재구성하며, 다른 variant도 상세 로그를 남겨도 성공 출력으로 세지 않습니다. surface 재생성·복구 검증은 R13에 남깁니다.
 - `Queue::submit`은 `Result`가 아니라 `SubmissionIndex`를 반환합니다. 이를 제출 식별자로 기록하고 GPU validation·device loss는 error scope, uncaptured-error, device-lost 경로로 수집합니다. 캡처 시점까지 error scope 결과가 비어 있고 uncaptured validation·device-lost 오류가 없어야 플랫폼 run을 통과 처리합니다.
 - 표면 텍스처 표시 요청은 `Queue::present(surface_texture)`입니다. 이는 실제 화면 표시 시각이나 표시 성공 callback을 제공하지 않습니다. `Queue::on_submitted_work_done`도 GPU queue 작업 완료일 뿐 화면 표시 확인이 아닙니다.
-- 오프스크린 readback은 surface 표시 확인과 별도 경로입니다. `301 × 4 = 1204` bytes 행을 256 정렬 `bytes_per_row=1280`으로 복사하며 `COPY_DST | MAP_READ` staging buffer는 `1280 × 40 = 51200` bytes로 둡니다. 픽셀 채널 byte offset은 `y × 1280 + x × 4 + channel`입니다. map callback이 성공한 뒤에만 읽고 모든 view를 drop한 다음 unmap합니다. Android fixture host는 UI 스레드에서 `device.poll(PollType::Poll)`을 16 ms 간격으로 호출하고 최대 5000 ms 뒤 완료가 오지 않으면 실패로 끝냅니다. 이는 GPU 완료를 기다리며 UI 스레드를 동기 대기시키지 않습니다. 이번 Android 검증은 전체 화면 bytes가 아니라 고정 x 위치 14개와 y 위치 3개, 총 42개 sample만 정확 대조합니다. map 실패·5초 제한 초과는 성공 출력이 아니라 readback 실패입니다.
+- 오프스크린 readback은 surface 표시 확인과 별도 경로입니다. `301 × 4 = 1204` bytes 행을 256 정렬 `bytes_per_row=1280`으로 복사하며 `COPY_DST | MAP_READ` staging buffer는 `1280 × 40 = 51200` bytes로 둡니다. 픽셀 채널 byte offset은 `y × 1280 + x × 4 + channel`입니다. map callback이 성공한 뒤에만 읽고 모든 view를 drop한 다음 unmap합니다. Android·iOS fixture host는 UI 스레드에서 `device.poll(PollType::Poll)`을 16 ms 간격으로 호출하고 최대 5000 ms 뒤 완료가 오지 않으면 실패로 끝냅니다. 이는 GPU 완료를 기다리며 UI 스레드를 동기 대기시키지 않습니다. 이번 검증은 전체 화면 bytes가 아니라 고정 x 위치 14개와 y 위치 3개, 총 42개 sample만 정확 대조합니다. map 실패·5초 제한 초과는 성공 출력이 아니라 readback 실패입니다.
 - Android와 iOS 실행은 서로 독립입니다. 한 플랫폼의 성공만으로 교차 플랫폼 슬라이스를 통과 처리하지 않으며, Android emulator와 iOS simulator의 대상별 surface capture를 각각 남깁니다. `commit-to-present`나 실제 표시 완료 지연은 이 fixture 작업의 통과 기준이 아닙니다.
 
 ### CSS 색상 readback의 고정 지점
@@ -169,7 +183,7 @@ S04.1 정책 확정 뒤 이어갈 내부 fixture 작업입니다. 아래 단계�
 - [x] **S04.2 CSS fixture·oracle 추가** — 기존 C04.2 v1을 보존하고 새 `S04FlexPaintV1` profile·fixture·CSS·Chromium reference를 고정했습니다. author property allowlist, fixture ID→`NodeId` 순서, 선택 computed property 문자열, 좌표별 0.5 CSS px 오차, y=0/20/39와 RGBA8 기대값을 fixture·계약에 기록했습니다. GPU readback 실행은 S04.4·S04.5에서 검증합니다. [fixture](../../tests/fixtures/css/s04/README.md) · [실행 근거](evidence/s04-css-layout-render-snapshot-2026-10-03.md).
 - [x] **S04.3 Rust snapshot 변환** — `spinon-style-to-render`가 고정 입력에서 결정적인 `StaticRenderSnapshot`을 만들고 generation·document/render revision, style/layout/node 집합, fixture mapping과 누락·중복·비유한 frame 실패를 확인했습니다. [실행 근거](evidence/s04-css-layout-render-snapshot-2026-10-03.md).
 - [x] **S04.4 Android GPU 연결** — 동일 snapshot을 R08 `wgpu` Android surface에 제출하고 backend·surface generation·획득 variant·submission index·wgpu 진단·present 요청과 상관관계를 로그·화면 캡처에 남겼습니다. Android API 36 ARM64 emulator의 Vulkan `llvmpipe` CPU adapter에서 세로→가로→세로 generation 1→2→3 모두 `Success`를 얻고, generation별 42개 RGBA sample readback과 화면 캡처를 확인했습니다. 경로는 `spikes/wgpu-backend`의 `s04-android-fixture` opt-in Cargo feature로 포함하는 내부 통합 fixture이며 `#[cfg(test)]` 전용 코드나 제품 renderer/API가 아닙니다. 기본 Android APK에서는 제외되고, JNI 비활성 응답도 확인했습니다. 하드웨어 GPU·실기기는 검증하지 않았습니다. [실행 근거](evidence/s04-android-gpu-surface-2026-10-03.md).
-- [ ] **S04.5 iOS GPU 연결** — 동일 snapshot을 R08 `wgpu` iOS surface에 제출하고 backend·surface generation·획득 variant·submission index·wgpu 진단·present 요청과 상관관계를 로그·화면 캡처에 남깁니다. validation/device-lost 진단이 없고 `Success` 획득이어야 통과합니다.
+- [x] **S04.5 iOS GPU 연결** — 동일 snapshot을 R08 `wgpu` iOS Metal surface에 제출하고 backend·surface generation·획득 variant·submission index·wgpu 진단·present 요청과 상관관계를 로그·화면 캡처에 남겼습니다. iPhone 17 Pro / iOS 26.2 시뮬레이터에서 generation 1 `Success`, `Bgra8UnormSrgb`·sRGB, 비동기 42개 표본 정확 readback을 확인했습니다. opt-in `s04-ios-fixture` Cargo feature로만 snapshot 경로를 포함하며 기본 iOS 빌드에서는 비활성 안내를 반환합니다. 실기기·회전별 재생성·성능은 검증하지 않았습니다. [실행 근거](evidence/s04-ios-gpu-surface-2026-10-03.md).
 - [ ] **S04.6 교차 플랫폼 대조** — 두 플랫폼 캡처를 Chromium geometry oracle 및 RenderSnapshot과 대조하고 시뮬레이터 한계를 실행 근거에 기록합니다.
 - [ ] **S04.7 후속 계약 분리** — 전체 CSS paint(C08/C19), 동적 style/environment revision, JS hit-test/event, 일반 좌표계 검증용 비대칭 y fixture, 연속 frame/queue/thread 정책을 각 소유 명세와 상태 ID에 연결합니다. 이번 fixture로 일반 세로 좌표 대응을 완료 처리하거나 제품 S04 완료로 바꾸지 않습니다.
 
@@ -177,6 +191,7 @@ S04.1 정책 확정 뒤 이어갈 내부 fixture 작업입니다. 아래 단계�
 
 - [S02 레이아웃 엔진 `0.3.0-draft`](0009-layout-engine.md)
 - [S04.4 Android GPU surface 실행 근거](evidence/s04-android-gpu-surface-2026-10-03.md)
+- [S04.5 iOS GPU surface 실행 근거](evidence/s04-ios-gpu-surface-2026-10-03.md)
 - [C04.1 stylesheet cascade](0016-c04-basic-cascade.md)
 - [C04.2 computed style→Taffy adapter `0.1.0`](0017-c04-style-layout-bridge.md)
 - [S03.1 V8 HostDocument 변경 묶음 `0.1.0`](0018-s03-v8-hostdocument-bridge.md)

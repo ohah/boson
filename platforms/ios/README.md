@@ -6,6 +6,20 @@
 
 루트에서 `mise exec -- bun run build:ios-sim`으로 시뮬레이터 앱을 빌드합니다. 기본 실행 로그의 `SPINON_BOOTSTRAP_EXECUTION is_main_thread=false`와 `SPINON_BOOTSTRAP_RESULT=nodes=2 last_node=8 tag=text text=이벤트:7`로 백그라운드 JS 부팅을 확인할 수 있습니다.
 
+## S04 iOS GPU fixture
+
+고정 CSS·Taffy snapshot을 iOS `CAMetalLayer`/wgpu 표면에 제출하는 내부 fixture입니다. 기본 빌드에서는 Rust S04 코드가 빠집니다. 시뮬레이터에서 opt-in 빌드와 실행을 하려면 다음 명령을 사용합니다.
+
+```sh
+SPINON_ENABLE_S04_IOS_FIXTURE=1 mise exec -- bun run build:ios-sim
+xcrun simctl install booted build/spinon/DerivedData/Build/Products/Debug-iphonesimulator/SpinonBootstrap.app
+xcrun simctl launch --terminate-running-process booted dev.spinon.bootstrap --spinon-s04-ios
+```
+
+기본 빌드에서 같은 인자를 실행하면 `SPINON_S04_FIXTURE=disabled`를 기록하고 Rust snapshot 경로를 호출하지 않습니다. Cargo의 `s04-ios-fixture`는 공통 내부 `s04-fixture`를 활성화하며 기본 feature는 비어 있습니다. Android는 별도 `s04-android-fixture` alias와 JNI compile flag를 사용합니다.
+
+iPhone 17 Pro / iOS 26.2 시뮬레이터에서 Metal surface generation 1의 `acquire=Success`, `present=requested`, `Bgra8UnormSrgb` 표면, 42개 sRGB RGBA 표본 readback과 화면 캡처를 확인했습니다. 표본은 `301×40 Rgba8UnormSrgb` offscreen target을 비동기로 읽으며 UI 스레드에서 GPU 완료를 기다리지 않습니다. 화면 캡처의 색상 막대는 wgpu 표면이고 제목·상태 문구는 개발용 UIKit label입니다. 시뮬레이터 결과는 실기기·하드웨어 성능·표면 회전 수명·제품 CSS/runtime 지원을 검증하지 않습니다. [실행 근거와 원본 로그·캡처](../../spec/internal/evidence/s04-ios-gpu-surface-2026-10-03.md).
+
 R06 개발 화면은 아래 실행 인자를 받습니다.
 
 ```sh

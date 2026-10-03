@@ -1,1 +1,3 @@
-10-03 20:54:36.202 20471 20471 E SpinonBootstrap: SPINON_S04_FIXTURE=disabled rebuild with SPINON_ENABLE_S04_ANDROID_FIXTURE=1
+10-03 21:51:11.359 21092 21092 I SpinonBootstrap: SPINON_R08_UI=ready text-input=EditText accessibility=button+EditText
+10-03 21:51:11.722 21092 21092 E SpinonBootstrap: SPINON_S04_FIXTURE=disabled rebuild with SPINON_ENABLE_S04_ANDROID_FIXTURE=1
+10-03 21:51:11.723 21092 21092 E SpinonBootstrap: SPINON_S04_WGPU_ERROR=renderer creation failed
