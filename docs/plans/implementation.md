@@ -73,6 +73,8 @@ Rust 코어, 런타임, C ABI는 분리합니다. 의존 방향은 `spinon-ffi �
 
 S01의 기존 `Tree`는 DOM 노드 모델이 아닙니다. R03에서 별도의 내부 `HostDocument` 코어를 추가해 요소·텍스트 혼합 순서, 동기 변경 묶음, 소유권과 문서/표시 revision을 구현했습니다. C03에서는 불변 `HostDocumentSnapshot`을 Stylo DOM·selector 인터페이스에 연결했지만, 공개 DOM façade·V8 래퍼·계산 스타일·레이아웃 연결은 아직 없습니다. DOM façade는 [DOM 호환 명세](../../spec/0007-dom-compatibility.md)에 남은 루트 연결, 문자열 변환, 오류·수명 계약과 S03 경계가 정해진 뒤 진행합니다.
 
+S03.1에서는 내부 진단용 `spinon.__internal.commitDocumentBatch`를 V8 C++ 어댑터에서 Rust `HostDocument`까지 연결했습니다. V8 입력 배열을 읽고 UTF-16을 복사한 뒤 Rust가 한 묶음으로 검증·커밋하며, 같은 호출에서 BigInt revision 영수증을 돌려줍니다. 작업 계약과 Android·iOS 시뮬레이터 근거는 [0018](../../spec/internal/0018-s03-v8-hostdocument-bridge.md), [실행 근거](../../spec/internal/evidence/s03-v8-hostdocument-bridge-2026-10-03.md)에 있습니다. 공개 DOM 래퍼, React/Vue/Svelte 어댑터, GPU 반영은 이 결과에 포함하지 않습니다. 공식 완료 여부는 [상태 대장 S03.1](../../spec/STATUS.md)에 둡니다.
+
 ## CLI 언어 결정 제안
 
 CLI는 **TypeScript로 작성하고 Node.js LTS에서 실행**하는 방식을 권합니다. Vite·Rspack·npm 패키지·소스맵·JS 개발 서버를 직접 연결하고, 같은 언어로 번들러 플러그인과 프로젝트 템플릿을 관리할 수 있기 때문입니다. Rust는 UI 런타임과 네이티브 코어를 맡고, CLI는 개발 도구 생태계를 조율합니다.
@@ -156,7 +158,7 @@ Xcode build phase가 Bun 번들 → Rust 정적 라이브러리 → V8 C++ 어�
 | 0. 워크스페이스와 빌드 부트스트랩 | Cargo·Bun 기초, 고정 V8 소스 입력, Rust 런타임·FFI·Android Gradle·iOS Xcode 빌드 smoke와 JS/Rust 단위 검사 | 루트 설정, `crates/spinon-runtime`, `crates/spinon-ffi`, `native/v8`, `platforms/`, `tools/` | V8 연결 앱이 각 플랫폼에서 실행되고 결과 문자열이 맞음. 제품 API 완료는 아님 |
 | 1. Rust 트리 코어 | 노드 ID·revision·create/insert/update/move/remove와 원자 커밋 의미를 고정하고, 동적 트리 PoC에서 트리 자료 모델만 분리 | `crates/spinon-core` | 실패 묶음이 상태를 바꾸지 않고 ID·순서·오류 규칙 단위 테스트 통과 |
 | 2. 레이아웃 모듈 | 코어 트리 스냅샷 입력, 버전 있는 내부 `LayoutEngine` 계약, Taffy Flex subset과 작은 PoC를 공통 정수 fixture에서 비교하고 소수 Flex 분배는 Chromium과 별도 비교 | `crates/spinon-layout`, `spec/internal/0009-layout-engine.md` | Chromium 기준 좌표와 기존 PoC가 공통 정수 fixture에서 허용 오차 안에 있고, 151.5 CSS px 소수 Flex fixture가 Chromium과 별도 허용 오차 안에 있으며 미지원 스타일·단위·측정 범위가 명세에 기록됨. 비용·모바일 크기 검증은 별도 후속 관문 |
-| 3. 제품 V8·FFI 경계 | smoke 경계를 제품 런타임으로 승격하고 격리·예외·콜백 수명·스레드 규칙을 정해 검증 | `crates/spinon-runtime`, `crates/spinon-ffi`, `native/v8` | 버전 있는 내부 계약·오류 복구·실기기 검증 |
+| 3. 제품 V8·FFI 경계 | 현재 S03.1은 내부 HostDocument 묶음 실험만 검증. 제품 단계는 smoke 경계를 앱 작성자 API로 승격하기 전에 격리·예외·콜백 수명·스레드 규칙과 공개 DOM/플랫폼 모듈 경계를 추가로 결정·검증 | `crates/spinon-runtime`, `crates/spinon-ffi`, `native/v8` | 공개 API 계약·오류 복구·실기기 검증과 전체 S03 적합성 통과. S03.1 통과만으로 다음 단계 완료 판정 안 함 |
 | 4. 모바일 호스트 골격 | 현재 부팅 앱을 GPU surface·입력·수명주기·복구 검증으로 확장 | `platforms/android`, `platforms/ios` | 같은 런타임이 두 앱에서 실행되고 앱 수명 복구 확인 |
 | 5. GPU 첫 수직 화면 | R08 실험 후 GPU 백엔드와 텍스트·버튼 hit-test·접근성 연결 | `crates/spinon-render`, 플랫폼 surface | Android·iOS에서 같은 카운터 시나리오가 표시·입력·복구됨 |
 | 6. JS workspace와 첫 개발 흐름 | Runtime 패키지, React 어댑터, Vite 우선 통합, 웹 호스트, 다시 로드·오류 위치 | `packages/runtime`, `packages/frameworks/react`, `packages/bundlers/vite`, `examples/counter` | 한 TSX 앱이 웹·Android·iOS에서 빌드되고 공통 fixture 통과 |

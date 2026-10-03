@@ -190,12 +190,30 @@ mod tests {
     // 이 스텁은 V8 동작을 검증하지 않으며, 해당 검증은 런타임 테스트에서 따로 합니다.
     type NodeCallback = extern "C" fn(*mut std::ffi::c_void, i32, *const std::ffi::c_char);
     type TextCallback = extern "C" fn(*mut std::ffi::c_void, *const std::ffi::c_char);
+    #[repr(C)]
+    struct TestDocumentOperation {
+        _private: [u8; 0],
+    }
+    #[repr(C)]
+    struct TestDocumentReceipt {
+        _private: [u8; 0],
+    }
+    type DocumentCommitCallback = unsafe extern "C" fn(
+        *mut std::ffi::c_void,
+        *const TestDocumentOperation,
+        usize,
+        *mut TestDocumentReceipt,
+        *mut std::ffi::c_char,
+        usize,
+    ) -> i32;
 
     #[unsafe(no_mangle)]
     extern "C" fn spinon_v8_runtime_new(
         _node_callback: NodeCallback,
         _text_callback: TextCallback,
+        _document_commit_callback: DocumentCommitCallback,
         _user_data: *mut std::ffi::c_void,
+        _document_user_data: *mut std::ffi::c_void,
     ) -> *mut TestV8Runtime {
         std::ptr::null_mut()
     }
