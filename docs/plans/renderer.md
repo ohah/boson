@@ -4,7 +4,7 @@
 
 이 문서는 GPU 렌더러 작업의 선후 관계와 통과 조건을 정리합니다. 구현 상태는 [`spec/STATUS.md`](https://github.com/ohah/spinon/blob/main/spec/STATUS.md), 공개 동작 계약은 저장소의 버전 있는 `spec/` 문서가 기준입니다. 첫 공식 릴리스 범위는 이 문서에서 정하지 않습니다.
 
-첫 CSS→GPU 연결은 전체 S04 구현에 앞서 새 고정 `S04FlexPaintV1` fixture를 Android·iOS GPU까지 전달하는 내부 수직 슬라이스입니다. S04.1에서 불투명 CSS `background-color`, 1 CSS px=1 Android dp/iOS point, GPU 경계의 backing scale 단회 적용, `spinon-style-to-render`와 `spinon-render` 경계, R13 UI-thread fixture sequence를 정했습니다. S04.2·S04.3에서는 Chromium 비교 fixture와 CPU `StaticRenderSnapshot` 경로를 구현·검증했고 S04.4 Android 및 S04.5 iOS 시뮬레이터 표면에 연결해 고정 색상 표본을 읽었습니다. 다음은 S04.6 교차 플랫폼 결과 대조입니다. [0019 S04 내부 계약](../../spec/internal/0019-s04-css-layout-gpu-slice.md)이 기준이며, 이 fixture는 CSS 전체나 앱 runtime 지원을 뜻하지 않습니다.
+첫 CSS→GPU 연결은 전체 S04 구현에 앞서 새 고정 `S04FlexPaintV1` fixture를 Android·iOS GPU까지 전달하는 내부 수직 슬라이스입니다. S04.1에서 불투명 CSS `background-color`, 1 CSS px=1 Android dp/iOS point, GPU 경계의 backing scale 단회 적용, `spinon-style-to-render`와 `spinon-render` 경계, R13 UI-thread fixture sequence를 정했습니다. S04.2·S04.3의 Chromium 비교 fixture와 CPU `StaticRenderSnapshot`, S04.4 Android·S04.5 iOS 표면 연결, S04.6 두 simulator 캡처의 geometry·색상 대조를 기록했습니다. 캡처의 최대 좌표 오차는 각 0.167 CSS px입니다. 다음은 S04.7에서 전체 CSS paint, 동적 revision, JS hit-test/event, 비대칭 y fixture와 연속 frame 정책을 각각 소유 명세로 나누는 일입니다. [0019 S04 내부 계약](../../spec/internal/0019-s04-css-layout-gpu-slice.md)과 [S04.6 실행 근거](../../spec/internal/evidence/s04-cross-platform-comparison-2026-10-03.md)가 기준이며, 이 fixture는 CSS 전체나 앱 runtime 지원을 뜻하지 않습니다.
 
 ## 1. 책임 경계
 
