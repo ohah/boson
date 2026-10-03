@@ -35,6 +35,18 @@ S05를 완료하기 전에는 오래된 revision의 이벤트를 받은 어댑�
 
 첫 수직 구현의 목표는 `<button>` 활성화와 클릭이다. `onClick`은 React 어댑터의 작성 문법이며 Vue·Svelte는 자체 문법을 사용한다. 이벤트 전파, 캡처, `stopPropagation()`, `preventDefault()`, 포인터 취소, 키보드 활성화 순서는 아직 확정하지 않았다. 해당 동작을 웹과 같다고 주장하기 전에 표준 이벤트 시나리오와 플랫폼 접근성 활성화 시나리오를 명세해야 한다.
 
+## 표시 프레임과 revision
+
+다음은 트리 변경·계산·화면 입력 사이의 일관성을 위한 제안 계약이다. 공개 JavaScript API나 구현 완료 선언은 아니다.
+
+- HostDocument 변경은 JavaScript 실행 경로에서 동기적으로 커밋할 수 있지만 스타일·레이아웃·표시 snapshot의 계산과 GPU 제출은 비동기 단계다. 성공한 논리 변경이 그 즉시 화면에 표시됐다고 간주하지 않는다.
+- 계산 결과와 표시 frame은 입력 출처를 식별해야 한다. 현재 HostDocument에서 제공하는 `DocumentGeneration`, `DocumentRevision`, `RenderTreeRevision`을 서로 합치지 않는다. 스타일·레이아웃·플랫폼 환경의 독립 revision과 `FrameId`, `SurfaceGeneration`도 결과가 실제로 의존한 값만 연결한다. 이 이름은 계약상 구분을 나타내며 현재 모든 값이 구현됐거나 공개 필드라는 뜻은 아니다.
+- viewport, device scale, safe area, 시스템 글꼴 크기, 색상 scheme처럼 계산 결과에 영향을 주는 환경 입력은 문서 revision과 별도로 추적한다. 환경 또는 스타일이 바뀌기 전에 시작한 계산 결과는 최신 입력과 일치하는지 확인하기 전까지 제출하지 않는다. 환경 변경만으로 `DocumentRevision`을 인위적으로 증가시키지 않는다.
+- 표시 단계는 계산 결과의 출처 revision이 그 frame에서 사용할 입력과 일치하는지 검사한다. 불일치 결과는 기존 결과 위에 부분 적용하지 않고 버린 뒤 필요한 계산을 다시 예약한다. 정확한 revision 소유 문서와 `LayoutInput` 전달 형식은 [레이아웃 엔진 계약](internal/0009-layout-engine.md), 스타일 무효화는 CSS 상태 항목에서 후속 확정한다.
+- 플랫폼 입력은 최신 커밋 문서가 아니라 입력 좌표를 해석할 때 화면에 반영된 frame의 식별자와 표시 트리를 사용해야 한다. 이벤트와 frame이 연결되지 않거나 대상 노드가 그 뒤 분리됐다면 새 문서의 다른 노드로 대상을 바꾸지 않는다. 플랫폼별 입력 sampling·표시 시점 연결은 S05·S07 검증 전까지 미정이다.
+- 네이티브 프레임 구동기는 문서 commit 뒤 GPU 화면을 예약하는 내부 경로다. JavaScript `requestAnimationFrame()`·`cancelAnimationFrame()`의 노출과 시간 의미는 [J04](STATUS.md#javascript-api-구현-체크리스트)에서 별도로 결정한다. JavaScript 작업 우선순위 대기열도 GPU 프레임 대기열과 별개이며 [내부 스케줄러 계약](internal/0006-js-task-scheduler.md)의 소유다.
+- GPU 제출 또는 `Queue::present()` 호출은 화면 표시 완료 증거가 아니다. 실제 표시 frame과 콜백의 연결 방법은 플랫폼 계약과 검증 근거가 준비될 때까지 완료로 주장하지 않는다.
+
 ## 스레드와 수명
 
 ### 결정된 실행 기본값
