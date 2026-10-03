@@ -4,7 +4,7 @@
 
 이 문서는 GPU 렌더러 작업의 선후 관계와 통과 조건을 정리합니다. 구현 상태는 [`spec/STATUS.md`](https://github.com/ohah/spinon/blob/main/spec/STATUS.md), 공개 동작 계약은 저장소의 버전 있는 `spec/` 문서가 기준입니다. 첫 공식 릴리스 범위는 이 문서에서 정하지 않습니다.
 
-첫 CSS→GPU 연결은 전체 S04 구현에 앞서 새 고정 `S04FlexPaintV1` fixture를 Android·iOS GPU까지 전달하는 내부 수직 슬라이스입니다. S04.1은 불투명 CSS `background-color`, 1 CSS px=1 Android dp/iOS point, GPU 경계의 backing scale 단회 적용, `spinon-style-to-render`와 `spinon-render` 경계, R13 UI-thread fixture sequence를 확정했습니다. [0019 S04 내부 계약](../../spec/internal/0019-s04-css-layout-gpu-slice.md)이 기준이며, 이 fixture는 CSS 전체나 앱 runtime 지원을 뜻하지 않습니다.
+첫 CSS→GPU 연결은 전체 S04 구현에 앞서 새 고정 `S04FlexPaintV1` fixture를 Android·iOS GPU까지 전달하는 내부 수직 슬라이스입니다. S04.1에서 불투명 CSS `background-color`, 1 CSS px=1 Android dp/iOS point, GPU 경계의 backing scale 단회 적용, `spinon-style-to-render`와 `spinon-render` 경계, R13 UI-thread fixture sequence를 정했습니다. S04.2·S04.3에서는 Chromium 비교 fixture와 CPU `StaticRenderSnapshot` 경로를 구현·검증했습니다. 다음은 Android GPU surface에 이 snapshot을 제출하는 S04.4입니다. [0019 S04 내부 계약](../../spec/internal/0019-s04-css-layout-gpu-slice.md)이 기준이며, 이 fixture는 CSS 전체나 앱 runtime 지원을 뜻하지 않습니다.
 
 ## 1. 책임 경계
 

@@ -882,6 +882,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "spinon-render"
+version = "0.1.0"
+dependencies = [
+ "spinon-core",
+]
+
+[[package]]
 name = "spinon-runtime"
 version = "0.1.0"
 dependencies = [
@@ -920,6 +927,19 @@ dependencies = [
  "spinon-core",
  "spinon-layout",
  "spinon-style",
+ "stylo",
+]
+
+[[package]]
+name = "spinon-style-to-render"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "spinon-core",
+ "spinon-layout",
+ "spinon-render",
+ "spinon-style",
+ "spinon-style-to-layout",
  "stylo",
 ]
 

@@ -7,7 +7,7 @@ use spinon_layout::{
 };
 use spinon_style::{
     ComputedStyleProfile, ComputedStyleSnapshot, CssViewport, StylesheetSource, StyloDocumentView,
-    compute_flex_layout_cascade,
+    compute_flex_layout_cascade, compute_s04_flex_paint_cascade,
 };
 
 use crate::StyleLayoutError;
@@ -27,10 +27,58 @@ pub fn compute_style_layout(
     author_stylesheets: &[StylesheetSource],
     viewport: CssViewport,
 ) -> Result<StyleLayoutOutput, StyleLayoutError> {
+    compute_profile_layout(
+        snapshot,
+        view,
+        root,
+        author_stylesheets,
+        viewport,
+        ComputedStyleProfile::FlexLayoutV1,
+    )
+}
+
+/// S04 새 paint profile만 대상으로 계산 style과 Taffy layout을 연결합니다.
+pub fn compute_s04_style_layout(
+    snapshot: &HostDocumentSnapshot,
+    view: &StyloDocumentView,
+    root: HostNodeHandle,
+    author_stylesheets: &[StylesheetSource],
+    viewport: CssViewport,
+) -> Result<StyleLayoutOutput, StyleLayoutError> {
+    compute_profile_layout(
+        snapshot,
+        view,
+        root,
+        author_stylesheets,
+        viewport,
+        ComputedStyleProfile::S04FlexPaintV1,
+    )
+}
+
+fn compute_profile_layout(
+    snapshot: &HostDocumentSnapshot,
+    view: &StyloDocumentView,
+    root: HostNodeHandle,
+    author_stylesheets: &[StylesheetSource],
+    viewport: CssViewport,
+    profile: ComputedStyleProfile,
+) -> Result<StyleLayoutOutput, StyleLayoutError> {
     assert_view_matches_snapshot(snapshot, view)?;
     assert_no_inline_style(snapshot, root)?;
-    let computed_styles = compute_flex_layout_cascade(view, author_stylesheets, viewport)?;
-    assert_matching_revision(snapshot, &computed_styles)?;
+    let computed_styles = match profile {
+        ComputedStyleProfile::FlexLayoutV1 => {
+            compute_flex_layout_cascade(view, author_stylesheets, viewport)?
+        }
+        ComputedStyleProfile::S04FlexPaintV1 => {
+            compute_s04_flex_paint_cascade(view, author_stylesheets, viewport)?
+        }
+        ComputedStyleProfile::BasicCascadeV1 => {
+            return Err(StyleLayoutError::UnsupportedProfile {
+                profile: format!("{profile:?}"),
+            });
+        }
+    };
+    assert_matching_revision(snapshot, &computed_styles, profile)?;
     if let Some(diagnostic) = computed_styles.diagnostics.first().cloned() {
         return Err(StyleLayoutError::CascadeDiagnostic(diagnostic));
     }
@@ -96,8 +144,9 @@ fn assert_view_matches_snapshot(
 fn assert_matching_revision(
     snapshot: &HostDocumentSnapshot,
     styles: &ComputedStyleSnapshot,
+    expected_profile: ComputedStyleProfile,
 ) -> Result<(), StyleLayoutError> {
-    if styles.profile != ComputedStyleProfile::FlexLayoutV1 {
+    if styles.profile != expected_profile {
         return Err(StyleLayoutError::UnsupportedProfile {
             profile: format!("{:?}", styles.profile),
         });

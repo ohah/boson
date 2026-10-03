@@ -7,4 +7,4 @@ mod projection;
 mod tests;
 
 pub use error::StyleLayoutError;
-pub use projection::{StyleLayoutOutput, compute_style_layout};
+pub use projection::{StyleLayoutOutput, compute_s04_style_layout, compute_style_layout};

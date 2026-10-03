@@ -10,7 +10,7 @@ mod tests;
 
 pub use cascade::{
     CascadeDiagnostic, ComputedElementStyle, ComputedStyleProfile, ComputedStyleSnapshot,
-    CssCascadeError, CssViewport, compute_flex_layout_cascade,
+    CssCascadeError, CssViewport, compute_flex_layout_cascade, compute_s04_flex_paint_cascade,
 };
 pub use document::{StyloDocument, StyloDocumentView, StyloDomError};
 pub use element::StyloElement;
