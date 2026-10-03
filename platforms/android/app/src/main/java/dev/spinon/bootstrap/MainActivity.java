@@ -54,8 +54,8 @@ public final class MainActivity extends Activity {
     private final ScheduledExecutorService delayedHost = Executors.newSingleThreadScheduledExecutor(
             runnable -> new Thread(runnable, "spinon-delayed-host"));
 
-    private R08WgpuSurface r13Surface;
-    private boolean r13WasPaused;
+    private R08WgpuSurface hostGpuSurface;
+    private boolean gpuWasPaused;
     private volatile long runtimeSession;
     private volatile boolean activityClosing;
     private TextView runtimeLog;
@@ -73,15 +73,17 @@ public final class MainActivity extends Activity {
             return;
         }
         boolean runR13 = getIntent().getBooleanExtra("spinon_r13", false);
-        if (runR13 || getIntent().getBooleanExtra("spinon_r08", false)) {
+        boolean runS04 = getIntent().getBooleanExtra("spinon_s04", false);
+        if (runS04 || runR13 || getIntent().getBooleanExtra("spinon_r08", false)) {
             int backend = getIntent().getIntExtra("spinon_r08_backend", 1);
-            boolean useWgpu = runR13 || !getIntent().getBooleanExtra("spinon_r08_native", false);
+            boolean useWgpu = runS04 || runR13
+                    || !getIntent().getBooleanExtra("spinon_r08_native", false);
             int failureInjection = getIntent().getIntExtra("spinon_r13_failure", 0);
             int recoveryFailureInjection = getIntent().getIntExtra("spinon_r13_recovery_failure", 0);
             R08WgpuSurface surface = R08GpuDemo.show(
-                    this, useWgpu, backend, runR13, failureInjection,
+                    this, useWgpu, backend, runR13, runS04, failureInjection,
                     recoveryFailureInjection);
-            r13Surface = runR13 ? surface : null;
+            hostGpuSurface = runS04 || runR13 ? surface : null;
             return;
         }
 
@@ -340,9 +342,9 @@ public final class MainActivity extends Activity {
 
     @Override
     protected void onPause() {
-        if (r13Surface != null) {
-            r13Surface.onHostPaused();
-            r13WasPaused = true;
+        if (hostGpuSurface != null) {
+            hostGpuSurface.onHostPaused();
+            gpuWasPaused = true;
         }
         super.onPause();
     }
@@ -350,9 +352,9 @@ public final class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (r13Surface != null && r13WasPaused) {
-            r13WasPaused = false;
-            r13Surface.onHostResumed();
+        if (hostGpuSurface != null && gpuWasPaused) {
+            gpuWasPaused = false;
+            hostGpuSurface.onHostResumed();
         }
     }
 

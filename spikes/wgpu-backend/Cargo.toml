@@ -6,6 +6,20 @@ publish = false
 
 [workspace]
 
+[features]
+default = []
+s04-android-fixture = [
+  "dep:serde_json",
+  "dep:sha2",
+  "dep:spinon-core",
+  "dep:spinon-layout",
+  "dep:spinon-render",
+  "dep:spinon-style",
+  "dep:spinon-style-to-layout",
+  "dep:spinon-style-to-render",
+  "dep:stylo",
+]
+
 [lib]
 crate-type = ["staticlib"]
 
@@ -14,3 +28,12 @@ bytemuck = "1.23"
 pollster = "0.4"
 raw-window-handle = "0.6.2"
 wgpu = { version = "30.0.1", default-features = false, features = ["std", "parking_lot", "metal", "vulkan", "gles", "wgsl"] }
+serde_json = { version = "=1.0.151", optional = true }
+sha2 = { version = "0.11.0", optional = true }
+spinon-core = { path = "../../crates/spinon-core", optional = true }
+spinon-layout = { path = "../../crates/spinon-layout", optional = true }
+spinon-render = { path = "../../crates/spinon-render", optional = true }
+spinon-style = { path = "../../crates/spinon-style", optional = true }
+spinon-style-to-layout = { path = "../../crates/spinon-style-to-layout", optional = true }
+spinon-style-to-render = { path = "../../crates/spinon-style-to-render", optional = true }
+stylo = { version = "=0.22.0", optional = true }

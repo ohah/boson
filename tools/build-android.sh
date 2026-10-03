@@ -18,6 +18,17 @@ case "${SPINON_ENABLE_R10_EXPERIMENT:-0}" in
     exit 2
     ;;
 esac
+case "${SPINON_ENABLE_S04_ANDROID_FIXTURE:-0}" in
+  0|1) ;;
+  *)
+    echo "SPINON_ENABLE_S04_ANDROID_FIXTURE은 0 또는 1이어야 합니다." >&2
+    exit 2
+    ;;
+esac
+s04_android_cpp_flags=()
+if [[ "${SPINON_ENABLE_S04_ANDROID_FIXTURE:-0}" == "1" ]]; then
+  s04_android_cpp_flags=(-DSPINON_ENABLE_S04_ANDROID_FIXTURE=1)
+fi
 
 if [[ ! -d "$v8_dir" ]] || [[ "$(git -C "$v8_dir" rev-parse HEAD 2>/dev/null || true)" != "$v8_revision" ]]; then
   echo "V8 소스가 고정 커밋과 다릅니다. 먼저 bash tools/v8/checkout.sh를 실행하세요." >&2
@@ -45,7 +56,11 @@ if command -v mise >/dev/null 2>&1; then
   else
     mise exec -- env CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target aarch64-linux-android -p spinon-ffi
   fi
-  mise exec -- cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target aarch64-linux-android
+  if [[ "${SPINON_ENABLE_S04_ANDROID_FIXTURE:-0}" == "1" ]]; then
+    mise exec -- cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target aarch64-linux-android --features s04-android-fixture
+  else
+    mise exec -- cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target aarch64-linux-android
+  fi
 else
   bun run bundle:bootstrap
   if [[ "${SPINON_ENABLE_R10_EXPERIMENT:-0}" == "1" ]]; then
@@ -53,7 +68,11 @@ else
   else
     CARGO_PROFILE_RELEASE_PANIC=abort cargo build --locked --release --target aarch64-linux-android -p spinon-ffi
   fi
-  cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target aarch64-linux-android
+  if [[ "${SPINON_ENABLE_S04_ANDROID_FIXTURE:-0}" == "1" ]]; then
+    cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target aarch64-linux-android --features s04-android-fixture
+  else
+    cargo build --manifest-path "$repo_root/spikes/wgpu-backend/Cargo.toml" --locked --release --target aarch64-linux-android
+  fi
 fi
 
 output_dir="$repo_root/build/spinon/android"
@@ -73,9 +92,16 @@ common=("$target" "$sysroot" -std=c++20 -O2 -fPIC
 
 "$v8_cxx" "${common[@]}" -c "$repo_root/native/v8/src/spinon_v8.cc" \
   -o "$output_dir/obj/spinon_v8.o"
-"$v8_cxx" "${common[@]}" -I"$repo_root/platforms/android/app/src/main/cpp" \
-  -c "$repo_root/platforms/android/app/src/main/cpp/spinon_jni.cc" \
-  -o "$output_dir/obj/spinon_jni.o"
+if [[ "${SPINON_ENABLE_S04_ANDROID_FIXTURE:-0}" == "1" ]]; then
+  "$v8_cxx" "${common[@]}" -I"$repo_root/platforms/android/app/src/main/cpp" \
+    "${s04_android_cpp_flags[@]}" \
+    -c "$repo_root/platforms/android/app/src/main/cpp/spinon_jni.cc" \
+    -o "$output_dir/obj/spinon_jni.o"
+else
+  "$v8_cxx" "${common[@]}" -I"$repo_root/platforms/android/app/src/main/cpp" \
+    -c "$repo_root/platforms/android/app/src/main/cpp/spinon_jni.cc" \
+    -o "$output_dir/obj/spinon_jni.o"
+fi
 
 "$v8_cxx" "${common[@]}" -shared \
   "$output_dir/obj/spinon_jni.o" \

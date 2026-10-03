@@ -4,9 +4,18 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use raw_window_handle::{
-    AndroidDisplayHandle, AndroidNdkWindowHandle, RawDisplayHandle, RawWindowHandle,
-    UiKitDisplayHandle, UiKitWindowHandle,
+    RawDisplayHandle, RawWindowHandle,
 };
+
+#[cfg(feature = "s04-android-fixture")]
+mod s04_gpu;
+#[cfg(feature = "s04-android-fixture")]
+mod s04_snapshot;
+
+mod ffi;
+pub use ffi::*;
+#[cfg(test)]
+mod r13_tests;
 
 const SHADER: &str = r#"
 struct ColorUniform {
@@ -44,6 +53,15 @@ struct Renderer {
     device_lost: Arc<AtomicBool>,
     injected_failure: Option<u32>,
     info: String,
+    #[cfg(feature = "s04-android-fixture")]
+    s04_scene: Option<s04_gpu::S04Scene>,
+}
+
+#[cfg(feature = "s04-android-fixture")]
+#[derive(Clone, Copy)]
+struct S04Init {
+    density: f32,
+    surface_generation: u64,
 }
 
 #[derive(Debug)]
@@ -101,6 +119,7 @@ impl Renderer {
         width: u32,
         height: u32,
         backend: wgpu::Backends,
+        #[cfg(feature = "s04-android-fixture")] s04_init: Option<S04Init>,
     ) -> Result<Self, String> {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: backend,
@@ -129,17 +148,49 @@ impl Renderer {
             ..Default::default()
         }))
         .map_err(|error| format!("device request failed: {error}"))?;
+        #[cfg(feature = "s04-android-fixture")]
+        let diagnostics = Arc::new(std::sync::Mutex::new(Vec::<String>::new()));
+        #[cfg(feature = "s04-android-fixture")]
+        {
+            let uncaptured = Arc::clone(&diagnostics);
+            device.on_uncaptured_error(Arc::new(move |error| {
+                uncaptured
+                    .lock()
+                    .unwrap_or_else(std::sync::PoisonError::into_inner)
+                    .push(error.to_string());
+            }));
+        }
         let device_lost = Arc::new(AtomicBool::new(false));
         let device_lost_callback = Arc::clone(&device_lost);
+        #[cfg(feature = "s04-android-fixture")]
+        let lost_diagnostics = Arc::clone(&diagnostics);
         device.set_device_lost_callback(move |reason, message| {
             eprintln!("SPINON_R13_DEVICE_LOST reason={reason:?} message={message}");
             device_lost_callback.store(true, Ordering::Release);
+            #[cfg(feature = "s04-android-fixture")]
+            lost_diagnostics
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .push(format!("device-lost reason={reason:?} message={message}"));
         });
 
         let capabilities = surface.get_capabilities(&adapter);
         let mut config = surface
             .get_default_config(&adapter, width.max(1), height.max(1))
             .ok_or_else(|| "adapter cannot present to this surface".to_owned())?;
+        #[cfg(feature = "s04-android-fixture")]
+        if s04_init.is_some() {
+            config.format = choose_s04_surface_format(&capabilities)?;
+            config.color_space = wgpu::SurfaceColorSpace::Srgb;
+        } else if let Some(format) = capabilities.formats.iter().copied().find(|format| {
+            matches!(
+                format,
+                wgpu::TextureFormat::Rgba8Unorm | wgpu::TextureFormat::Bgra8Unorm
+            )
+        }) {
+            config.format = format;
+        }
+        #[cfg(not(feature = "s04-android-fixture"))]
         if let Some(format) = capabilities.formats.iter().copied().find(|format| {
             matches!(
                 format,
@@ -151,6 +202,24 @@ impl Renderer {
         config.present_mode = wgpu::PresentMode::Fifo;
         surface.configure(&device, &config);
         let target_format = config.format;
+        let target_color_space = config.color_space;
+        #[cfg(feature = "s04-android-fixture")]
+        let s04_scene = s04_init
+            .map(|init| {
+                s04_gpu::S04Scene::new(
+                    &device,
+                    &queue,
+                    s04_gpu::S04SceneConfig {
+                        surface_format: config.format,
+                        surface_width: config.width,
+                        surface_height: config.height,
+                        density: init.density,
+                        surface_generation: init.surface_generation,
+                    },
+                    Arc::clone(&diagnostics),
+                )
+            })
+            .transpose()?;
 
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("spinon-wgpu-r08-shader"),
@@ -211,11 +280,44 @@ impl Renderer {
             bind_group,
             device_lost,
             injected_failure: None,
+            #[cfg(feature = "s04-android-fixture")]
+            s04_scene,
             info: format!(
-                "backend={:?} device={:?} name={} format={:?} supported_formats={:?}",
-                info.backend, info.device_type, info.name, target_format, capabilities.formats
+                "backend={:?} device={:?} name={} format={:?} color_space={:?} supported_formats={:?}",
+                info.backend,
+                info.device_type,
+                info.name,
+                target_format,
+                target_color_space,
+                capabilities.formats
             ),
         })
+    }
+
+    #[cfg(feature = "s04-android-fixture")]
+    fn draw_s04(&mut self) -> Result<String, s04_gpu::S04Failure> {
+        if self.device_lost.load(Ordering::Acquire) {
+            return Err(s04_gpu::S04Failure {
+                code: -5,
+                message: "acquire=DeviceLost wgpu device가 손실됐습니다".to_owned(),
+            });
+        }
+        self.s04_scene
+            .as_mut()
+            .ok_or_else(|| s04_gpu::S04Failure {
+                code: -1,
+                message: "S04 snapshot scene 없이 호출했습니다".to_owned(),
+            })?
+            .draw(&self.surface, &self.device, &self.queue)
+    }
+
+    #[cfg(feature = "s04-android-fixture")]
+    fn poll_s04_readback(&mut self) -> Result<Option<String>, String> {
+        let scene = self
+            .s04_scene
+            .as_mut()
+            .ok_or_else(|| "S04 snapshot scene 없이 readback을 조회했습니다".to_owned())?;
+        scene.poll_readback(&self.device)
     }
 
     fn draw(&mut self, activation_count: u32) -> Result<(), DrawFailure> {
@@ -296,6 +398,23 @@ impl Renderer {
     }
 }
 
+#[cfg(feature = "s04-android-fixture")]
+fn choose_s04_surface_format(
+    capabilities: &wgpu::SurfaceCapabilities,
+) -> Result<wgpu::TextureFormat, String> {
+    [
+        wgpu::TextureFormat::Rgba8UnormSrgb,
+        wgpu::TextureFormat::Bgra8UnormSrgb,
+    ]
+    .into_iter()
+    .find(|format| {
+        capabilities.format_capabilities.iter().any(|item| {
+            item.format == *format && item.color_spaces.contains(wgpu::SurfaceColorSpaces::SRGB)
+        })
+    })
+    .ok_or_else(|| "S04 surface에 sRGB 색공간·8-bit sRGB attachment 조합이 없습니다".to_owned())
+}
+
 fn choose_backend(backend: u32) -> Result<wgpu::Backends, String> {
     match backend {
         1 => Ok(wgpu::Backends::VULKAN),
@@ -317,17 +436,33 @@ unsafe fn write_message(output: *mut c_char, capacity: usize, message: &str) {
     }
 }
 
-unsafe fn create_renderer(
+struct RendererCreateInfo {
     display: RawDisplayHandle,
     window: RawWindowHandle,
     width: u32,
     height: u32,
     backend: u32,
+    #[cfg(feature = "s04-android-fixture")]
+    s04_init: Option<S04Init>,
+}
+
+unsafe fn create_renderer(
+    info: RendererCreateInfo,
     output: *mut c_char,
     output_capacity: usize,
 ) -> *mut c_void {
-    let result = choose_backend(backend)
-        .and_then(|backend| unsafe { Renderer::new(display, window, width, height, backend) });
+    let result = choose_backend(info.backend).and_then(|backend| unsafe {
+        // SAFETY: 호출하는 FFI 함수의 계약이 원시 표면 handle의 유효 기간을 보장한다.
+        Renderer::new(
+            info.display,
+            info.window,
+            info.width,
+            info.height,
+            backend,
+            #[cfg(feature = "s04-android-fixture")]
+            info.s04_init,
+        )
+    });
     match result {
         Ok(renderer) => {
             unsafe { write_message(output, output_capacity, &renderer.info) };
@@ -337,145 +472,5 @@ unsafe fn create_renderer(
             unsafe { write_message(output, output_capacity, &error) };
             ptr::null_mut()
         }
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn spinon_wgpu_create_android(
-    native_window: *mut c_void,
-    width: u32,
-    height: u32,
-    backend: u32,
-    output: *mut c_char,
-    output_capacity: usize,
-) -> *mut c_void {
-    let Some(native_window) = std::ptr::NonNull::new(native_window) else {
-        unsafe { write_message(output, output_capacity, "null ANativeWindow") };
-        return ptr::null_mut();
-    };
-    unsafe {
-        create_renderer(
-            RawDisplayHandle::Android(AndroidDisplayHandle::new()),
-            RawWindowHandle::AndroidNdk(AndroidNdkWindowHandle::new(native_window)),
-            width,
-            height,
-            backend,
-            output,
-            output_capacity,
-        )
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn spinon_wgpu_create_uikit(
-    ui_view: *mut c_void,
-    width: u32,
-    height: u32,
-    backend: u32,
-    output: *mut c_char,
-    output_capacity: usize,
-) -> *mut c_void {
-    let Some(ui_view) = std::ptr::NonNull::new(ui_view) else {
-        unsafe { write_message(output, output_capacity, "null UIView") };
-        return ptr::null_mut();
-    };
-    unsafe {
-        create_renderer(
-            RawDisplayHandle::UiKit(UiKitDisplayHandle::new()),
-            RawWindowHandle::UiKit(UiKitWindowHandle::new(ui_view)),
-            width,
-            height,
-            backend,
-            output,
-            output_capacity,
-        )
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn spinon_wgpu_draw(
-    renderer: *mut c_void,
-    activation_count: u32,
-    output: *mut c_char,
-    output_capacity: usize,
-) -> i32 {
-    let Some(renderer) = (unsafe { renderer.cast::<Renderer>().as_mut() }) else {
-        unsafe { write_message(output, output_capacity, "null renderer") };
-        return -1;
-    };
-    match renderer.draw(activation_count) {
-        Ok(()) => 0,
-        Err(failure) => {
-            unsafe { write_message(output, output_capacity, &failure.message()) };
-            failure.code()
-        }
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn spinon_wgpu_r13_inject_failure(
-    renderer: *mut c_void,
-    failure_kind: u32,
-) -> i32 {
-    let Some(renderer) = (unsafe { renderer.cast::<Renderer>().as_mut() }) else {
-        return -1;
-    };
-    if !is_supported_failure_kind(failure_kind) {
-        return -2;
-    }
-    match failure_kind {
-        1 | 3 | 4 => renderer.injected_failure = Some(failure_kind),
-        2 => renderer.device_lost.store(true, Ordering::Release),
-        _ => unreachable!("failure kind was validated above"),
-    }
-    0
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn spinon_wgpu_resize(renderer: *mut c_void, width: u32, height: u32) -> i32 {
-    let Some(renderer) = (unsafe { renderer.cast::<Renderer>().as_mut() }) else {
-        return -1;
-    };
-    if width == 0 || height == 0 {
-        return -2;
-    }
-    renderer.config.width = width;
-    renderer.config.height = height;
-    renderer
-        .surface
-        .configure(&renderer.device, &renderer.config);
-    0
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn spinon_wgpu_destroy(renderer: *mut c_void) {
-    if !renderer.is_null() {
-        drop(unsafe { Box::from_raw(renderer.cast::<Renderer>()) });
-    }
-}
-
-#[cfg(test)]
-mod r13_tests {
-    use super::{injected_failure, is_supported_failure_kind, DrawFailure};
-
-    #[test]
-    fn recovery_failures_have_stable_host_codes() {
-        assert_eq!(DrawFailure::SurfaceLost.code(), -3);
-        assert_eq!(DrawFailure::SurfaceOutdated.code(), -4);
-        assert_eq!(DrawFailure::DeviceLost.code(), -5);
-        assert_eq!(DrawFailure::Temporary("timeout".to_owned()).code(), -2);
-    }
-
-    #[test]
-    fn injected_failure_kinds_cover_recovery_and_non_recovery_paths() {
-        for (kind, expected_code) in [(1, -3), (2, -5), (3, -4), (4, -2)] {
-            assert_eq!(
-                injected_failure(kind).map(|failure| failure.code()),
-                Some(expected_code)
-            );
-            assert!(is_supported_failure_kind(kind));
-        }
-        assert!(!is_supported_failure_kind(0));
-        assert!(!is_supported_failure_kind(5));
     }
 }
