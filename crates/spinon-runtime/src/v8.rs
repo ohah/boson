@@ -1,4 +1,4 @@
-use crate::host_document::DocumentCommitCallback;
+use crate::host::DocumentCommitCallback;
 use std::ffi::{c_char, c_void};
 
 #[repr(C)]

@@ -1,4 +1,4 @@
-use crate::host_document::{HostDocumentBridge, commit_callback};
+use crate::host::{HostDocumentBridge, commit_callback};
 use crate::v8::{
     SpinonV8Runtime, spinon_v8_runtime_dispatch, spinon_v8_runtime_eval, spinon_v8_runtime_free,
     spinon_v8_runtime_last_error, spinon_v8_runtime_new,

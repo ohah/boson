@@ -12,7 +12,6 @@ const MAX_NAME_UNITS: usize = 1024;
 const MAX_VALUE_UNITS: usize = 1_048_576;
 const MAX_BATCH_STRING_UNITS: usize = 1_048_576;
 
-#[path = "host_document_callback.rs"]
 mod callback;
 pub(crate) use callback::{DocumentCommitCallback, SpinonDocumentReceipt, commit_callback};
 #[cfg(test)]
@@ -348,11 +347,8 @@ fn core_parent(
 }
 
 #[cfg(test)]
-#[path = "host_document_callback_tests.rs"]
 mod callback_tests;
 #[cfg(test)]
-#[path = "host_document_limit_tests.rs"]
 mod limit_tests;
 #[cfg(test)]
-#[path = "host_document_tests.rs"]
 mod tests;
