@@ -51,14 +51,15 @@ xcrun simctl launch --terminate-running-process booted dev.spinon.bootstrap --sp
 
 동일 변경의 Rust 검증에서 `s04-ios-fixture`와 `s04-android-fixture` 각각 8개 테스트, 기본 feature 비활성 조합 2개, 세 조합의 Clippy와 `rustfmt`가 통과했습니다. 추가 generation 검사로 resize는 현재 surface generation보다 큰 값만 수락하고, 같거나 낮은 값은 거부합니다. Android의 현재 빌드에서 generation 1→2→3 회전 재생성도 다시 확인했습니다.
 
-- 화면 캡처: [S04 iOS GPU surface](s04-ios-gpu-surface-2026-10-03.png)
-- 원본 Log: [S04 iOS GPU surface log](s04-ios-gpu-surface-2026-10-03.log)
-- 기본 빌드 비활성 로그: [iOS fixture disabled](s04-ios-fixture-disabled-2026-10-03.log)
+- 화면 캡처: [S04 iOS GPU surface](https://github.com/ohah/spinon/blob/main/spec/internal/evidence/s04-ios-gpu-surface-2026-10-03.png)
+- 원본 Log: [S04 iOS GPU surface log](https://github.com/ohah/spinon/blob/main/spec/internal/evidence/s04-ios-gpu-surface-2026-10-03.log)
+- 기본 빌드 비활성 로그: [iOS fixture disabled](https://github.com/ohah/spinon/blob/main/spec/internal/evidence/s04-ios-fixture-disabled-2026-10-03.log)
 
 ## 미검증 범위
 
 - iOS 실기기와 실제 기기 GPU 드라이버
 - 표면 회전·재부착별 generation 증가와 재-readback
-- Android·iOS·Chromium 간 S04.6 geometry 및 캡처 대조
 - 전체 프레임 byte 일치, 표시 완료 callback과 commit-to-present 지연
 - VoiceOver·접근성·IME·입력, 일반 CSS와 앱 runtime 연결
+
+Android·iOS 시뮬레이터 캡처의 Chromium geometry 및 `StaticRenderSnapshot` 대조는 [S04.6 실행 근거](s04-cross-platform-comparison-2026-10-03.md)를 참조합니다.

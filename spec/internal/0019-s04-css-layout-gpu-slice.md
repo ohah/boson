@@ -1,6 +1,6 @@
 # 0019 · S04 첫 CSS·레이아웃·GPU 연결 슬라이스
 
-**계약 버전:** `0.1.0-draft` · **상태:** S04.1~S04.5 simulator fixture 검증, S04.6 교차 플랫폼 대조 대기 · **공개 API:** 아님
+**계약 버전:** `0.1.0-draft` · **상태:** S04.1~S04.6 simulator fixture 검증, S04.7 후속 계약 분리 대기 · **공개 API:** 아님
 
 ## 목적과 완료 범위
 
@@ -184,7 +184,7 @@ S04.1 정책 확정 뒤 이어갈 내부 fixture 작업입니다. 아래 단계�
 - [x] **S04.3 Rust snapshot 변환** — `spinon-style-to-render`가 고정 입력에서 결정적인 `StaticRenderSnapshot`을 만들고 generation·document/render revision, style/layout/node 집합, fixture mapping과 누락·중복·비유한 frame 실패를 확인했습니다. [실행 근거](evidence/s04-css-layout-render-snapshot-2026-10-03.md).
 - [x] **S04.4 Android GPU 연결** — 동일 snapshot을 R08 `wgpu` Android surface에 제출하고 backend·surface generation·획득 variant·submission index·wgpu 진단·present 요청과 상관관계를 로그·화면 캡처에 남겼습니다. Android API 36 ARM64 emulator의 Vulkan `llvmpipe` CPU adapter에서 세로→가로→세로 generation 1→2→3 모두 `Success`를 얻고, generation별 42개 RGBA sample readback과 화면 캡처를 확인했습니다. 경로는 `spikes/wgpu-backend`의 `s04-android-fixture` opt-in Cargo feature로 포함하는 내부 통합 fixture이며 `#[cfg(test)]` 전용 코드나 제품 renderer/API가 아닙니다. 기본 Android APK에서는 제외되고, JNI 비활성 응답도 확인했습니다. 하드웨어 GPU·실기기는 검증하지 않았습니다. [실행 근거](evidence/s04-android-gpu-surface-2026-10-03.md).
 - [x] **S04.5 iOS GPU 연결** — 동일 snapshot을 R08 `wgpu` iOS Metal surface에 제출하고 backend·surface generation·획득 variant·submission index·wgpu 진단·present 요청과 상관관계를 로그·화면 캡처에 남겼습니다. iPhone 17 Pro / iOS 26.2 시뮬레이터에서 generation 1 `Success`, `Bgra8UnormSrgb`·sRGB, 비동기 42개 표본 정확 readback을 확인했습니다. opt-in `s04-ios-fixture` Cargo feature로만 snapshot 경로를 포함하며 기본 iOS 빌드에서는 비활성 안내를 반환합니다. 실기기·회전별 재생성·성능은 검증하지 않았습니다. [실행 근거](evidence/s04-ios-gpu-surface-2026-10-03.md).
-- [ ] **S04.6 교차 플랫폼 대조** — 두 플랫폼 캡처를 Chromium geometry oracle 및 RenderSnapshot과 대조하고 시뮬레이터 한계를 실행 근거에 기록합니다.
+- [x] **S04.6 교차 플랫폼 대조** — Android API 36 emulator와 iPhone 17 Pro / iOS 26.2 simulator의 surface 캡처 색상 경계를 density로 CSS px에 환산해 Chromium geometry oracle과 `StaticRenderSnapshot`의 고정 frame 값에 대조했습니다. 두 결과의 최대 좌표 오차는 각각 0.167 CSS px이고 색상 픽셀은 fixture sRGB 값과 정확히 일치합니다. 로그의 fixture ID·revision·frame·surface generation, 42개 readback과 simulator 한계를 [실행 근거](evidence/s04-cross-platform-comparison-2026-10-03.md)에 기록했습니다. snapshot digest는 로그에 없어 캡처와 snapshot의 바이트 정체성을 증명하지 않습니다. 전체 화면 픽셀 동등, 실기기 GPU와 표시 완료 callback도 증명하지 않습니다.
 - [ ] **S04.7 후속 계약 분리** — 전체 CSS paint(C08/C19), 동적 style/environment revision, JS hit-test/event, 일반 좌표계 검증용 비대칭 y fixture, 연속 frame/queue/thread 정책을 각 소유 명세와 상태 ID에 연결합니다. 이번 fixture로 일반 세로 좌표 대응을 완료 처리하거나 제품 S04 완료로 바꾸지 않습니다.
 
 ## 관련 계약과 근거
