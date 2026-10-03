@@ -4,6 +4,8 @@
 
 이 문서는 GPU 렌더러 작업의 선후 관계와 통과 조건을 정리합니다. 구현 상태는 [`spec/STATUS.md`](https://github.com/ohah/spinon/blob/main/spec/STATUS.md), 공개 동작 계약은 저장소의 버전 있는 `spec/` 문서가 기준입니다. 첫 공식 릴리스 범위는 이 문서에서 정하지 않습니다.
 
+첫 CSS→GPU 연결은 전체 S04 구현에 앞서 기존 C04.2 분수 Flex fixture만 사용하는 내부 수직 슬라이스로 제안합니다. 입력·revision·좌표·오류·비교 기준과 아직 결정하지 않은 페인트/단위 정책은 [S04 연결 계약 초안](../../spec/internal/0019-s04-css-layout-gpu-slice.md)에 적습니다. 이 초안의 후보 체크리스트는 정책 검토 전 구현 티켓이 아니며, GPU 표시가 CSS 전반이나 앱 런타임 지원을 뜻하지 않습니다.
+
 ## 1. 책임 경계
 
 | 계층 | 책임 |
