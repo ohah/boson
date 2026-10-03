@@ -1,6 +1,6 @@
 # 0019 · S04 첫 CSS·레이아웃·GPU 연결 슬라이스
 
-**계약 버전:** `0.1.0-draft` · **상태:** S04.1~S04.6 simulator fixture 검증, S04.7 후속 계약 분리 대기 · **공개 API:** 아님
+**계약 버전:** `0.1.0-draft` · **상태:** S04.1~S04.6 simulator fixture 검증, S04.7 후속 작업 소유 경계 연결 완료 · **공개 API:** 아님
 
 ## 목적과 완료 범위
 
@@ -185,7 +185,25 @@ S04.1 정책 확정 뒤 이어갈 내부 fixture 작업입니다. 아래 단계�
 - [x] **S04.4 Android GPU 연결** — 동일 snapshot을 R08 `wgpu` Android surface에 제출하고 backend·surface generation·획득 variant·submission index·wgpu 진단·present 요청과 상관관계를 로그·화면 캡처에 남겼습니다. Android API 36 ARM64 emulator의 Vulkan `llvmpipe` CPU adapter에서 세로→가로→세로 generation 1→2→3 모두 `Success`를 얻고, generation별 42개 RGBA sample readback과 화면 캡처를 확인했습니다. 경로는 `spikes/wgpu-backend`의 `s04-android-fixture` opt-in Cargo feature로 포함하는 내부 통합 fixture이며 `#[cfg(test)]` 전용 코드나 제품 renderer/API가 아닙니다. 기본 Android APK에서는 제외되고, JNI 비활성 응답도 확인했습니다. 하드웨어 GPU·실기기는 검증하지 않았습니다. [실행 근거](evidence/s04-android-gpu-surface-2026-10-03.md).
 - [x] **S04.5 iOS GPU 연결** — 동일 snapshot을 R08 `wgpu` iOS Metal surface에 제출하고 backend·surface generation·획득 variant·submission index·wgpu 진단·present 요청과 상관관계를 로그·화면 캡처에 남겼습니다. iPhone 17 Pro / iOS 26.2 시뮬레이터에서 generation 1 `Success`, `Bgra8UnormSrgb`·sRGB, 비동기 42개 표본 정확 readback을 확인했습니다. opt-in `s04-ios-fixture` Cargo feature로만 snapshot 경로를 포함하며 기본 iOS 빌드에서는 비활성 안내를 반환합니다. 실기기·회전별 재생성·성능은 검증하지 않았습니다. [실행 근거](evidence/s04-ios-gpu-surface-2026-10-03.md).
 - [x] **S04.6 교차 플랫폼 대조** — Android API 36 emulator와 iPhone 17 Pro / iOS 26.2 simulator의 surface 캡처 색상 경계를 density로 CSS px에 환산해 Chromium geometry oracle과 `StaticRenderSnapshot`의 고정 frame 값에 대조했습니다. 두 결과의 최대 좌표 오차는 각각 0.167 CSS px이고 색상 픽셀은 fixture sRGB 값과 정확히 일치합니다. 로그의 fixture ID·revision·frame·surface generation, 42개 readback과 simulator 한계를 [실행 근거](evidence/s04-cross-platform-comparison-2026-10-03.md)에 기록했습니다. snapshot digest는 로그에 없어 캡처와 snapshot의 바이트 정체성을 증명하지 않습니다. 전체 화면 픽셀 동등, 실기기 GPU와 표시 완료 callback도 증명하지 않습니다.
-- [ ] **S04.7 후속 계약 분리** — 전체 CSS paint(C08/C19), 동적 style/environment revision, JS hit-test/event, 일반 좌표계 검증용 비대칭 y fixture, 연속 frame/queue/thread 정책을 각 소유 명세와 상태 ID에 연결합니다. 이번 fixture로 일반 세로 좌표 대응을 완료 처리하거나 제품 S04 완료로 바꾸지 않습니다.
+- [x] **S04.7 후속 작업 소유 경계 연결** — 각 후속 작업의 기준 명세와 기존 상태 ID를 아래 표에 연결했습니다. 이 체크는 계획 추적 정리만 완료했다는 뜻이며 CSS·DOM·이벤트·제품 frame 기능의 구현이나 S04 전체 완료를 뜻하지 않습니다.
+
+### S04 후속 작업 소유 경계
+
+상태와 완료 판정은 [공식 상태 대장](../STATUS.md)에만 둡니다. 이 표는 그 상태 ID가 가리키는 책임 문서를 연결하며 별도 체크리스트나 API 범위를 만들지 않습니다.
+
+| 작업 범위 | 계약 소유 문서 | 기존 상태 ID | 다음 구현의 통과 기준과 경계 |
+| --- | --- | --- | --- |
+| 기본 화면과 CSS paint | [CSS 호환 범위](../0008-css-compatibility.md) | `S04`, `C08`, `C19`, `E02`; 고급 장식·합성은 `C22`, `C23` | 속성·값마다 Chromium 비교 입력과 GPU fixture를 둡니다. S04의 단색 배경 fixture를 전체 paint 지원으로 확대하지 않습니다. |
+| cascade와 변경된 스타일 재계산 | [CSS 호환 범위](../0008-css-compatibility.md), [C03 DOM 어댑터](0010-stylo-dom-adapter-c03.md), [C04 cascade](0016-c04-basic-cascade.md), [스타일→레이아웃 어댑터](0017-c04-style-layout-bridge.md), [레이아웃 입력](0009-layout-engine.md) | `C03`, `C04`, `C05`, `S02`; 앱이 DOM CSSOM을 직접 쓰는 경우에만 `C29` 추가 | 변경된 선언·선택자 상태가 해당 표시 트리의 계산 스타일과 다음 프레임에 반영되는지 확인합니다. 프레임워크가 내부 style 입력을 전달하는 것과 공개 `Element.style` 지원을 같은 항목으로 취급하지 않습니다. |
+| viewport·플랫폼 환경과 계산 revision | [UI 트리·이벤트 의미](../0002-ui-tree-events.md), [레이아웃 입력 계약](0009-layout-engine.md) | `S02`, `S04`, `C06`, `C07`, `C16`, `C21`, `U09` | 문서·표시 트리·스타일·레이아웃·환경 입력을 구분하고 오래된 계산 결과를 버리는 규칙을 고정합니다. 현재 `LayoutInput`에는 독립 스타일·viewport revision이 없으므로 이를 구현된 계약으로 취급하지 않습니다. |
+| CSS 좌표에서 GPU surface 좌표로의 변환 | [레이아웃 엔진 계약](0009-layout-engine.md), 이 문서의 좌표·surface 정책 | `S02`, `S04`, `C17` | 비대칭 y fixture에 0이 아닌 세로 위치와 서로 다른 높이·간격을 두고 Chromium geometry, snapshot, Android·iOS 출력을 비교합니다. 이번 y 변환 확인을 `C17`의 RTL·writing-mode 지원 근거로 확대하지 않습니다. 각 좌표·크기의 최대 오차 기준은 fixture에서 고정하고 y=0 전용 검증으로 일반 방향 변환을 주장하지 않습니다. |
+| hit-test와 JavaScript·접근성 이벤트 | [UI 트리·이벤트 의미](../0002-ui-tree-events.md), [DOM 호환 범위](../0007-dom-compatibility.md) | `S03`, `S05`, `S07`, `E03`, `J12`, `X06` | 화면 frame과 입력 대상 revision을 연결하고 겹침 순서, 오래된 frame, 분리 노드, 이벤트 전파·취소와 콜백 수명을 고정 fixture로 검증합니다. R13 도형 탭은 DOM 이벤트 근거가 아닙니다. |
+| 네이티브 프레임 구동기와 GPU 프레임 대기열 | [UI 트리·이벤트 의미](../0002-ui-tree-events.md) | `S04`, `E04`, `E06` | 표시 주기 예약, 대기 frame 수, 변경 snapshot 병합·폐기, 역압력과 surface 획득 실패 뒤 재시도 규칙을 정하고 연속 frame에서 확인합니다. 공개 rAF가 없어도 정적 GPU 화면을 갱신할 수 있어야 합니다. |
+| JavaScript 작업 대기열과 우선순위 | [내부 JavaScript 작업 스케줄러](0006-js-task-scheduler.md) | `R06`, `E05` | 작업 출처·우선순위·FIFO·취소·포화·기아 및 공정성을 별도 검증합니다. 논리 작업 우선순위는 OS thread QoS나 GPU 프레임 예약을 의미하지 않습니다. |
+| 공개 rAF·취소 의미 | [웹 표면 API](../0003-web-surface.md) | `J04` | 콜백 시각·취소·화면 비활성·백그라운드 중단·재개 의미를 결정하고 웹·Android·iOS 사례를 검증합니다. 네이티브 프레임 구동기의 존재만으로 공개 rAF 지원을 표시하지 않습니다. |
+| surface 생명주기·표시 증거 | [R13 surface 생명주기 실험](r13-platform-gpu-recovery.md) | `R13` 실험 근거, 제품 동작은 `S04`, `S11`, `E07` | 표면 재생성·세대 변경·대기 제출 폐기·자원과 callback 수명 및 실제 표시 확인을 검증합니다. R13의 에뮬레이터·시뮬레이터 실험은 제품 수명 보장이나 present 완료 callback을 뜻하지 않습니다. |
+
+각 후속 구현은 위에서 지정한 소유 문서와 기존 상태 ID를 갱신합니다. 해당 명세에 이미 있는 요구사항을 S04나 계획 문서에 복제하지 않으며, 새 독립 작업 ID가 실제로 필요해질 때에만 상태 대장 규칙에 따라 추가합니다.
 
 ## 관련 계약과 근거
 
