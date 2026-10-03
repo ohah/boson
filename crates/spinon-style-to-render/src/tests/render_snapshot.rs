@@ -2,6 +2,7 @@ use super::fixture::{
     Fixture, assert_style_layout_matches_reference, expected_to_rgb_css, parse_opaque_hex,
     parse_render_hex,
 };
+use spinon_core::StyleRevision;
 use spinon_layout::LayoutSourceRevision;
 use spinon_render::PaintProfileId;
 use spinon_style::CssCascadeError;
@@ -46,7 +47,7 @@ fn fixed_s04_fixture_matches_chromium_and_builds_a_complete_static_snapshot() {
     let output = fixture.compute().unwrap();
     assert_style_layout_matches_reference(&fixture, &output);
     assert_eq!(
-        output.layout.source_revision,
+        output.layout.revision.source(),
         LayoutSourceRevision::HostDocument {
             generation: fixture.document.generation(),
             document: fixture.document.document_revision(),
@@ -124,6 +125,7 @@ fn c04_flex_path_stays_separate_from_the_s04_profile() {
         fixture.root,
         std::slice::from_ref(&fixture.stylesheet),
         fixture.viewport(),
+        StyleRevision::default(),
     )
     .unwrap_err();
     assert!(matches!(

@@ -1,4 +1,4 @@
-use spinon_core::HostDocument;
+use spinon_core::{EnvironmentRevision, HostDocument, StyleRevision};
 
 use super::{
     ComputedStyleProfileId, CssRect, CssSize, LayoutProjectionId, OpaqueCssSrgb, PaintProfileId,
@@ -12,6 +12,8 @@ fn source() -> StaticRenderSource {
         document_generation: snapshot.generation(),
         document_revision: snapshot.document_revision(),
         render_tree_revision: snapshot.render_tree_revision(),
+        style_revision: StyleRevision::default(),
+        environment_revision: EnvironmentRevision::default(),
         computed_style_profile: ComputedStyleProfileId::S04FlexPaintV1,
         layout_projection: LayoutProjectionId::TaffyFlexSubsetV1,
         paint_profile: PaintProfileId::OpaqueBackgroundColorV1,

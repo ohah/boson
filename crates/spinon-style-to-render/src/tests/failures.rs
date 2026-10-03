@@ -1,5 +1,8 @@
-use spinon_core::{DocumentChangeBatch, DocumentOperation, HostDocument, HostParent, OwnerId};
-use spinon_layout::LayoutSourceRevision;
+use spinon_core::{
+    DocumentChangeBatch, DocumentOperation, EnvironmentRevision, HostDocument, HostParent, OwnerId,
+    StyleRevision,
+};
+use spinon_layout::{LayoutInputRevision, LayoutSourceRevision};
 use spinon_style::{
     CascadeDiagnostic, ComputedStyleProfile, CssCascadeError, CssOrigin, CssParseDiagnostic,
     StylesheetSource, StyloDocumentView,
@@ -23,6 +26,7 @@ fn revision_mismatch_and_incomplete_node_sets_fail_atomically() {
             &other.document.snapshot(),
             other.root,
             &output,
+            other.current_layout_inputs(),
             &fixture.mappings(),
             fixture.provenance(),
         ),
@@ -50,11 +54,44 @@ fn revision_mismatch_and_incomplete_node_sets_fail_atomically() {
     ));
 
     let mut stale_layout_revision = output.clone();
-    stale_layout_revision.layout.source_revision = LayoutSourceRevision::Tree(Default::default());
+    let previous = stale_layout_revision.layout.revision;
+    stale_layout_revision.layout.revision = LayoutInputRevision::new(
+        LayoutSourceRevision::Tree(Default::default()),
+        previous.style(),
+        previous.environment(),
+    );
     assert!(matches!(
         fixture.build(&stale_layout_revision),
         Err(StyleRenderError::SnapshotMismatch {
             field: "LayoutSourceRevision"
+        })
+    ));
+
+    let mut stale_layout_style = output.clone();
+    let previous = stale_layout_style.layout.revision;
+    stale_layout_style.layout.revision = LayoutInputRevision::new(
+        previous.source(),
+        StyleRevision::default().checked_next().unwrap(),
+        previous.environment(),
+    );
+    assert!(matches!(
+        fixture.build(&stale_layout_style),
+        Err(StyleRenderError::SnapshotMismatch {
+            field: "LayoutStyleRevision"
+        })
+    ));
+
+    let mut stale_layout_environment = output.clone();
+    let previous = stale_layout_environment.layout.revision;
+    stale_layout_environment.layout.revision = LayoutInputRevision::new(
+        previous.source(),
+        previous.style(),
+        EnvironmentRevision::default().checked_next().unwrap(),
+    );
+    assert!(matches!(
+        fixture.build(&stale_layout_environment),
+        Err(StyleRenderError::SnapshotMismatch {
+            field: "LayoutEnvironmentRevision"
         })
     ));
 
@@ -105,6 +142,7 @@ fn duplicate_nodes_bad_mapping_and_non_finite_frames_fail_closed() {
             &fixture.document.snapshot(),
             fixture.root,
             &output,
+            fixture.current_layout_inputs(),
             &mapping,
             fixture.provenance(),
         ),
@@ -118,6 +156,7 @@ fn duplicate_nodes_bad_mapping_and_non_finite_frames_fail_closed() {
             &fixture.document.snapshot(),
             fixture.root,
             &output,
+            fixture.current_layout_inputs(),
             &reordered_mapping,
             fixture.provenance(),
         ),
@@ -148,6 +187,7 @@ fn rgb_color_syntax_and_text_nodes_are_rejected() {
         fixture.root,
         &[rgb_stylesheet],
         fixture.viewport(),
+        StyleRevision::default(),
     )
     .unwrap_err();
     assert!(matches!(
@@ -204,6 +244,7 @@ fn rgb_color_syntax_and_text_nodes_are_rejected() {
         root,
         &[text_stylesheet],
         fixture.viewport(),
+        StyleRevision::default(),
     )
     .unwrap_err();
     assert!(matches!(
@@ -257,6 +298,7 @@ fn invalid_profile_diagnostics_root_and_viewport_are_rejected() {
             &fixture.document.snapshot(),
             detached_root,
             &output,
+            fixture.current_layout_inputs(),
             &fixture.mappings(),
             fixture.provenance(),
         ),
@@ -270,6 +312,7 @@ fn invalid_profile_diagnostics_root_and_viewport_are_rejected() {
             &fixture.document.snapshot(),
             fixture.root,
             &output,
+            fixture.current_layout_inputs(),
             &fixture.mappings(),
             invalid_provenance,
         ),
@@ -289,6 +332,7 @@ fn mapping_and_node_sets_reject_missing_extra_and_duplicate_entries() {
             &fixture.document.snapshot(),
             fixture.root,
             &output,
+            fixture.current_layout_inputs(),
             &short_mapping,
             fixture.provenance(),
         ),
@@ -305,6 +349,7 @@ fn mapping_and_node_sets_reject_missing_extra_and_duplicate_entries() {
             &fixture.document.snapshot(),
             fixture.root,
             &output,
+            fixture.current_layout_inputs(),
             &empty_id_mapping,
             fixture.provenance(),
         ),
@@ -318,6 +363,7 @@ fn mapping_and_node_sets_reject_missing_extra_and_duplicate_entries() {
             &fixture.document.snapshot(),
             fixture.root,
             &output,
+            fixture.current_layout_inputs(),
             &duplicate_id_mapping,
             fixture.provenance(),
         ),

@@ -1,8 +1,14 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use spinon_core::{HostDocumentSnapshot, HostNodeHandle, HostNodeKind, HostParent, NodeId};
+use spinon_core::{
+    EnvironmentRevision, HostDocumentSnapshot, HostNodeHandle, HostNodeKind, HostParent, NodeId,
+    StyleRevision,
+};
 
-use crate::{LayoutError, LayoutInput, LayoutNode, LayoutSourceRevision, LayoutStyle, Viewport};
+use crate::{
+    LayoutError, LayoutInput, LayoutInputRevision, LayoutNode, LayoutSourceRevision, LayoutStyle,
+    Viewport,
+};
 
 impl LayoutInput {
     /// HostDocument의 요소 하위 트리를 순서 보존 레이아웃 snapshot으로 만듭니다.
@@ -14,6 +20,8 @@ impl LayoutInput {
         root: HostNodeHandle,
         viewport: Viewport,
         styles: &BTreeMap<NodeId, LayoutStyle>,
+        style_revision: StyleRevision,
+        environment_revision: EnvironmentRevision,
     ) -> Result<Self, LayoutError> {
         let root_node = snapshot
             .node(root)
@@ -76,11 +84,15 @@ impl LayoutInput {
 
         Ok(Self {
             root: root.id(),
-            source_revision: LayoutSourceRevision::HostDocument {
-                generation: snapshot.generation(),
-                document: snapshot.document_revision(),
-                render_tree: snapshot.render_tree_revision(),
-            },
+            revision: LayoutInputRevision::new(
+                LayoutSourceRevision::HostDocument {
+                    generation: snapshot.generation(),
+                    document: snapshot.document_revision(),
+                    render_tree: snapshot.render_tree_revision(),
+                },
+                style_revision,
+                environment_revision,
+            ),
             viewport,
             nodes,
         })

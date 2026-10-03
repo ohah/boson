@@ -59,6 +59,7 @@ pub(crate) fn build_snapshot() -> Result<StaticRenderSnapshot, String> {
             &fixture["viewport"]["deviceScaleFactor"],
             "viewport.deviceScaleFactor",
         )?,
+        environment_revision: Default::default(),
     };
     let nodes = create_fixture_document(&preorder, &root_id)?;
     let root = *nodes
@@ -82,8 +83,15 @@ pub(crate) fn build_snapshot() -> Result<StaticRenderSnapshot, String> {
         origin: CssOrigin::Author,
         css: FIXTURE_CSS.to_owned(),
     };
-    let output = compute_s04_style_layout(&document_snapshot, &view, root, &[stylesheet], viewport)
-        .map_err(|error| format!("S04 CSS·레이아웃 fixture 계산 실패: {error}"))?;
+    let output = compute_s04_style_layout(
+        &document_snapshot,
+        &view,
+        root,
+        &[stylesheet],
+        viewport,
+        Default::default(),
+    )
+    .map_err(|error| format!("S04 CSS·레이아웃 fixture 계산 실패: {error}"))?;
     let mappings = preorder
         .iter()
         .map(|fixture_id| {
@@ -104,8 +112,20 @@ pub(crate) fn build_snapshot() -> Result<StaticRenderSnapshot, String> {
         chromium_reference_id: string_value(&reference["referenceId"], "referenceId")?,
         chromium_reference_sha256: reference_sha256,
     };
-    build_s04_static_render_snapshot(&document.snapshot(), root, &output, &mappings, provenance)
-        .map_err(|error| format!("S04 정적 RenderSnapshot 생성 실패: {error}"))
+    let current_layout_inputs = spinon_style_to_render::CurrentLayoutInputs::for_host_document(
+        &document.snapshot(),
+        Default::default(),
+        viewport,
+    );
+    build_s04_static_render_snapshot(
+        &document.snapshot(),
+        root,
+        &output,
+        current_layout_inputs,
+        &mappings,
+        provenance,
+    )
+    .map_err(|error| format!("S04 정적 RenderSnapshot 생성 실패: {error}"))
 }
 
 struct FixtureDocument {

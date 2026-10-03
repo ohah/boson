@@ -2,7 +2,10 @@
 
 use std::{collections::BTreeSet, error::Error, fmt};
 
-use spinon_core::{DocumentGeneration, DocumentRevision, NodeId, RenderTreeRevision};
+use spinon_core::{
+    DocumentGeneration, DocumentRevision, EnvironmentRevision, NodeId, RenderTreeRevision,
+    StyleRevision,
+};
 
 /// CSS px 좌표계의 양수 viewport 크기입니다.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -127,6 +130,8 @@ pub struct StaticRenderSource {
     pub document_generation: DocumentGeneration,
     pub document_revision: DocumentRevision,
     pub render_tree_revision: RenderTreeRevision,
+    pub style_revision: StyleRevision,
+    pub environment_revision: EnvironmentRevision,
     pub computed_style_profile: ComputedStyleProfileId,
     pub layout_projection: LayoutProjectionId,
     pub paint_profile: PaintProfileId,

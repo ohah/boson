@@ -3,14 +3,15 @@ use std::{collections::BTreeMap, fs, path::PathBuf};
 use serde_json::Value;
 use spinon_core::{
     AttributeName, DocumentChangeBatch, DocumentOperation, HostDocument, HostNodeHandle,
-    HostParent, OwnerId,
+    HostParent, OwnerId, StyleRevision,
 };
 use spinon_style::{CssOrigin, CssViewport, StylesheetSource, StyloDocumentView};
 use spinon_style_to_layout::{StyleLayoutOutput, compute_s04_style_layout};
 use style::context::QuirksMode;
 
 use crate::{
-    FixtureNodeMapping, RenderFixtureProvenance, StyleRenderError, build_s04_static_render_snapshot,
+    CurrentLayoutInputs, FixtureNodeMapping, RenderFixtureProvenance, StyleRenderError,
+    build_s04_static_render_snapshot,
 };
 
 const HTML: &str = "http://www.w3.org/1999/xhtml";
@@ -103,6 +104,7 @@ impl Fixture {
             device_scale_factor: self.input["viewport"]["deviceScaleFactor"]
                 .as_f64()
                 .unwrap() as f32,
+            environment_revision: Default::default(),
         }
     }
 
@@ -126,6 +128,7 @@ impl Fixture {
             self.root,
             std::slice::from_ref(&self.stylesheet),
             self.viewport(),
+            StyleRevision::default(),
         )
     }
 
@@ -164,9 +167,15 @@ impl Fixture {
             &self.document.snapshot(),
             self.root,
             output,
+            self.current_layout_inputs(),
             &self.mappings(),
             self.provenance(),
         )
+    }
+
+    pub(super) fn current_layout_inputs(&self) -> CurrentLayoutInputs {
+        let document = self.document.snapshot();
+        CurrentLayoutInputs::for_host_document(&document, StyleRevision::default(), self.viewport())
     }
 }
 

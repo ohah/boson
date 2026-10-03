@@ -12,7 +12,7 @@
 | [0006 · JavaScript 작업 스케줄러](0006-js-task-scheduler.md) | Chromium 참고 우선순위 선택과 앱 작업 출처·프레임·취소 경계 | 시뮬레이터 실제 V8 단일 배치와 등급별 FIFO 통과 · 지속 유입 기아 미검증 |
 | [0007 · 내장 UA stylesheet 자원](0007-ua-stylesheet-resource.md) | 지원 HTML 기본 CSS 자원과 읽기 전용 FFI 인터페이스 | 내부 초안 · fixture cascade 연결됨 · 제품 runtime은 미연결 |
 | [0008 · C02 Vite·Rspack CSS 비교 모델](0008-css-bundler-c02.md) | CSS 산출·자원·청크·오류 위치·resolver 비교 조건 | 내부 실험 계약 · C02 미완료 |
-| [0009 · 레이아웃 엔진](0009-layout-engine.md) | S01 Tree 및 HostDocument 요소 snapshot·계산 스타일 입력, revision 출처, Taffy 프레임·오류 경계 | 구현 초안 `0.3.0-draft` · 제한된 Flex subset · HostDocument 입력은 텍스트 제외 |
+| [0009 · 레이아웃 엔진](0009-layout-engine.md) | S01 Tree 및 HostDocument 요소 snapshot, source·style·environment revision stamp, Taffy 프레임과 fixture stale-admission 경계 | 구현 초안 `0.3.0-draft` · 제한된 Flex subset · 제품 revision 관리자와 GPU queue stale 검사는 미구현 |
 | [0010 · C03 Stylo DOM adapter](0010-stylo-dom-adapter-c03.md) | HostDocument snapshot에서 Stylo 문서·노드·요소·선택자 DOM으로의 변환 계약 | 내부 구현 계약 초안 `0.1.0-draft` · C03 구현 완료, 계산 스타일 제외 |
 | [0011 · C02 CSS 자원 어댑터](0011-css-resource-adapter-c02.md) | Vite·Rspack 산출을 빌드 단위 공통 CSS 자원 snapshot으로 정규화 | 내부 계약 후보 `0.1.0-draft` · fixture 스파이크 전용 · 제품 API 아님 |
 | [0012 · C04 stylesheet 입력 목록](0012-stylesheet-registry-c04.md) | Stylo stylesheet 파싱, CSS 출처·등록 순서와 parser 진단 보존 | 내부 구현 계약 초안 `0.1.0-draft` · cascade 계산 미연결 |
@@ -57,6 +57,8 @@
 - [S04 iOS feature-off 확인](./evidence/s04-ios-fixture-disabled-2026-10-03.log) — 기본 iOS 시뮬레이터 빌드에서 fixture 인자에 비활성 안내를 반환한 원본 로그.
 - [S04 Android feature-off 확인](./evidence/s04-android-fixture-disabled-2026-10-03.log) — 기본 APK에서 fixture 전용 JNI 경로가 비활성 안내를 반환한 원본 Logcat.
 - [S02.1 · HostDocument 레이아웃 입력](./evidence/s02-host-document-layout-input-2026-10-03.md) — 기존 Tree 입력과 HostDocument 요소 투영의 ID·순서·revision·Taffy 출력 비교와 실행 결과.
+- [S02.2 · 레이아웃 revision 사전 고정 비교 기준](./evidence/s02-layout-revision-precomparison-2026-10-04.md) — source·style·environment 입력 변화와 stale snapshot admission에 대한 구현 전 기대 결과.
+- [S02.2 · 레이아웃 revision gate 실행 근거](./evidence/s02-layout-revision-gate-2026-10-04.md) — 고정 S04 revision fixture, layout echo와 snapshot admission 검증 및 제품 runtime 한계.
 - [S03.1 · V8 HostDocument 변경 묶음](./evidence/s03-v8-hostdocument-bridge-2026-10-03.md) — Rust 직접 기준 실행, 30개 적대 검증 관점, Android 16 에뮬레이터와 iOS 26.2 시뮬레이터 실제 V8 빌드·실행 결과.
 - `evidence/s03-v8-hostdocument-bridge-android-2026-10-03.log` · `evidence/s03-v8-hostdocument-bridge-ios-2026-10-03.log` — 해당 시뮬레이터 실행의 원본 부팅 결과 로그.
 - `evidence/s02-basic-flex-chrome-2026-09-30.png` — 같은 fixture의 Headless Chrome 캡처.

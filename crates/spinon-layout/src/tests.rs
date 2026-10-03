@@ -2,11 +2,12 @@ use std::collections::{BTreeMap, HashMap};
 use std::ffi::CString;
 
 use serde::Deserialize;
-use spinon_core::{ChangeBatch, NodeId, Revision, Tree};
+use spinon_core::{ChangeBatch, EnvironmentRevision, NodeId, Revision, StyleRevision, Tree};
 
 use crate::{
     FlexDirection, LayoutDimension, LayoutEdges, LayoutEngine, LayoutError, LayoutGap, LayoutInput,
-    LayoutNode, LayoutSourceRevision, LayoutStyle, TaffyLayoutEngine, TextDirection, Viewport,
+    LayoutInputRevision, LayoutNode, LayoutSourceRevision, LayoutStyle, TaffyLayoutEngine,
+    TextDirection, Viewport,
 };
 
 #[derive(Debug, Deserialize)]
@@ -109,7 +110,11 @@ fn parse_fixture(marker: &str) -> Fixture {
 fn to_input(fixture: &Fixture) -> LayoutInput {
     LayoutInput {
         root: node_id(fixture.root),
-        source_revision: LayoutSourceRevision::Tree(Revision::default()),
+        revision: LayoutInputRevision::new(
+            LayoutSourceRevision::Tree(Revision::default()),
+            StyleRevision::default(),
+            EnvironmentRevision::default(),
+        ),
         viewport: Viewport {
             width: fixture.viewport.width,
             height: fixture.viewport.height,
@@ -263,7 +268,11 @@ fn fractional_dimensions_are_not_rounded_by_the_layout_engine() {
     child_node.style.width = LayoutDimension::Fixed(50.25);
     let input = LayoutInput {
         root,
-        source_revision: LayoutSourceRevision::Tree(Revision::default()),
+        revision: LayoutInputRevision::new(
+            LayoutSourceRevision::Tree(Revision::default()),
+            StyleRevision::default(),
+            EnvironmentRevision::default(),
+        ),
         viewport: Viewport {
             width: 100.5,
             height: 80.5,
@@ -466,7 +475,14 @@ fn input_snapshot_reads_the_core_tree_and_keeps_child_order() {
         width: 100.0,
         height: 80.0,
     };
-    let input = LayoutInput::from_tree(&tree, viewport, &styles).unwrap();
+    let input = LayoutInput::from_tree(
+        &tree,
+        viewport,
+        &styles,
+        StyleRevision::default(),
+        EnvironmentRevision::default(),
+    )
+    .unwrap();
     assert_eq!(input.nodes[0].id, root);
     assert_eq!(input.nodes[1].id, second_child);
     assert_eq!(input.nodes[0].children, vec![first_child, second_child]);
@@ -475,25 +491,43 @@ fn input_snapshot_reads_the_core_tree_and_keeps_child_order() {
         input.source_revision(),
         LayoutSourceRevision::Tree(revision) if revision.get() == 1
     ));
-    assert_eq!(output.source_revision, input.source_revision());
+    assert_eq!(output.revision.source(), input.source_revision());
     assert_eq!(output.frames[&first_child].x, 0.0);
     assert_eq!(output.frames[&second_child].x, 20.0);
 
     styles.remove(&first_child);
     assert_eq!(
-        LayoutInput::from_tree(&tree, viewport, &styles),
+        LayoutInput::from_tree(
+            &tree,
+            viewport,
+            &styles,
+            StyleRevision::default(),
+            EnvironmentRevision::default(),
+        ),
         Err(LayoutError::MissingStyle(first_child))
     );
 
     styles.insert(first_child, LayoutStyle::default());
     styles.insert(node_id(99), LayoutStyle::default());
     assert_eq!(
-        LayoutInput::from_tree(&tree, viewport, &styles),
+        LayoutInput::from_tree(
+            &tree,
+            viewport,
+            &styles,
+            StyleRevision::default(),
+            EnvironmentRevision::default(),
+        ),
         Err(LayoutError::UnknownStyleNode(node_id(99)))
     );
 
     assert_eq!(
-        LayoutInput::from_tree(&Tree::new(), viewport, &BTreeMap::new()),
+        LayoutInput::from_tree(
+            &Tree::new(),
+            viewport,
+            &BTreeMap::new(),
+            StyleRevision::default(),
+            EnvironmentRevision::default(),
+        ),
         Err(LayoutError::EmptyTree)
     );
 }

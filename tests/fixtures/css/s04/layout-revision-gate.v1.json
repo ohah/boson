@@ -1,0 +1,59 @@
+{
+  "schema": "spinon-s04-layout-revision-gate/v1",
+  "baseline": {
+    "styleRevision": 0,
+    "environmentRevision": 0,
+    "viewport": {
+      "widthCssPx": 301,
+      "heightCssPx": 40,
+      "deviceScaleFactor": 1
+    }
+  },
+  "staleCases": [
+    {
+      "id": "style-revision-advanced",
+      "currentStyleRevision": 1,
+      "currentEnvironmentRevision": 0,
+      "expectedErrorField": "StyleRevision"
+    },
+    {
+      "id": "environment-revision-advanced",
+      "currentStyleRevision": 0,
+      "currentEnvironmentRevision": 1,
+      "expectedErrorField": "EnvironmentRevision"
+    },
+    {
+      "id": "viewport-changed-with-reused-revision",
+      "currentStyleRevision": 0,
+      "currentEnvironmentRevision": 0,
+      "currentViewport": {
+        "widthCssPx": 302,
+        "heightCssPx": 40,
+        "deviceScaleFactor": 1
+      },
+      "expectedErrorField": "CssViewport"
+    },
+    {
+      "id": "viewport-height-changed-with-reused-revision",
+      "currentStyleRevision": 0,
+      "currentEnvironmentRevision": 0,
+      "currentViewport": {
+        "widthCssPx": 301,
+        "heightCssPx": 41,
+        "deviceScaleFactor": 1
+      },
+      "expectedErrorField": "CssViewport"
+    },
+    {
+      "id": "device-scale-changed-with-reused-revision",
+      "currentStyleRevision": 0,
+      "currentEnvironmentRevision": 0,
+      "currentViewport": {
+        "widthCssPx": 301,
+        "heightCssPx": 40,
+        "deviceScaleFactor": 2
+      },
+      "expectedErrorField": "CssViewport"
+    }
+  ]
+}
